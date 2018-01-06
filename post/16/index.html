@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="//cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="//secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="http://blog.howie6879.cnimages/favicon.png">
+    <link rel="apple-touch-icon" href="http://blog.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        Mastering Python 01 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="//cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="http://blog.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="http://blog.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="http://blog.howie6879.cn/post/">Archives</a>  
+            
+                <a href="http://blog.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="http://blog.howie6879.cn/about">About</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="http://blog.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="http://blog.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="http://blog.howie6879.cn/about">About</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                Mastering Python 01
+            </h1>
+            <div class="post-data">
+                Published on Jan 27, 2017 ,4 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="http://blog.howie6879.cn/tags/mastering-python">Mastering-Python</a>
+	
+</p>
+
+ 
+
+<h1 id="1-准备">1.准备</h1>
+
+<blockquote>
+<p>1.说明：《Mastering Python》读书笔记</p>
+
+<p>2.要求：首先，希望你是处在<code>python3</code>版本，然后拥有一个干净的虚拟环境更是必要。</p>
+
+<p>3.virtualenv或者anaconda都是不错的选择</p>
+</blockquote>
+
+<!-- more-->
+
+<h1 id="2-pythonic-syntax-common-pitfalls-and-style-guide">2.Pythonic Syntax, Common Pitfalls, and Style Guide</h1>
+
+<h2 id="2-1-pythonic-code">2.1.Pythonic code</h2>
+
+<p>对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：</p>
+
+<pre><code>- Clean
+- Simple
+- Beautiful
+- Explicit
+- Readable
+</code></pre>
+
+<p>具体的话请打开你的python解释器：</p>
+
+<pre><code>import this
+</code></pre>
+
+<p>细细感受吧。</p>
+
+<h3 id="2-1-2-differences-between-value-and-identity-comparisons">2.1.2.Differences between value and identity comparisons</h3>
+
+<p>对于下面这个例子：</p>
+
+<pre><code class="language-python">a1 = 200 + 56
+a2 = 256
+b1 = -4 - 1
+b2 = -5
+c1 = 200 + 57
+c2 = 257
+d1 = -4 - 2
+d2 = -6
+print('%r == %r: %r' % (a1, a2, a1 == a2))
+print('%r is %r: %r' % (a1, a2, a1 is a2))
+print('%r == %r: %r' % (b1, b2, b1 == b2))
+print('%r is %r: %r' % (b1, b2, b1 is b2))
+print('%r == %r: %r' % (c1, c2, c1 == c2))
+print('%r is %r: %r' % (c1, c2, c1 is c2))
+print('%r == %r: %r' % (d1, d2, d1 == d2))
+print('%r is %r: %r' % (d1, d2, d1 is d2))
+</code></pre>
+
+<pre><code>256 == 256: True
+256 is 256: True
+-5 == -5: True
+-5 is -5: True
+257 == 257: True
+257 is 257: False
+-6 == -6: True
+-6 is -6: False
+</code></pre>
+
+<p>可以看到，在值相同的情况下，使用<code>==</code>比较都返回<code>True</code>自不必说，为何有的<code>id</code>相同有的<code>id</code>却不同？</p>
+
+<p>这是因为，在<code>pyhton</code>中，会提前为一小部分整数提前分配空间，这个整数的范围是[-5,256]，当整数范围大于256或者小于-5时，<code>python</code>便会为该整数创建对象，于是造成id不同。如果想深入了解，可阅读<a href="http://python.jobbole.com/82632/">深入 Python 整数对象的实现</a></p>
+
+<h3 id="2-1-3-loops">2.1.3.Loops</h3>
+
+<p>对于一个列表，比如：</p>
+
+<pre><code class="language-python">my_list = [1, 2, 3, 4]
+</code></pre>
+
+<p>想将其输出为<code>[index:value]</code>这种列表格式，请看以下几种实现方法：</p>
+
+<pre><code class="language-python">index = 0
+my_list = [1, 2, 3, 4]
+new_list = []
+for value in my_list:
+    value = &quot;{0}:{1}&quot;.format(index, value)
+    new_list.append(value)
+    index += 1
+print(new_list)
+</code></pre>
+
+<p>不得不说，实在很繁琐，我们可以利用<code>python</code>提供的<code>enumerate</code>类：</p>
+
+<pre><code class="language-python">new_list = []
+for index, value in enumerate(my_list):
+    value = &quot;{0}:{1}&quot;.format(index, value)
+    new_list.append(value)
+print(new_list)
+</code></pre>
+
+<p>第二种方法确实精简了不少，但是，优雅的<code>pythonic</code>不是浪得虚名，请看这种：</p>
+
+<pre><code class="language-python">my_list = [1, 2, 3, 4]
+[&quot;{0}:{1}&quot;.format(index, value) for index, value in enumerate(my_list)]
+</code></pre>
+
+<pre><code>['0:1', '1:2', '2:3', '3:4']
+</code></pre>
+
+<h2 id="2-2-common-pitfalls">2.2.Common pitfalls</h2>
+
+<p>虽说<code>python</code>自诩是一种清晰易读无歧义的优雅语言，但是这个伟大的目标并不是那么容易实现。</p>
+
+<h3 id="2-2-1-function-arguments">2.2.1.Function arguments</h3>
+
+<p>需要知道的是，<strong>千万不要使用可变参数作为函数默认参数</strong>，看下面这样一个例子：</p>
+
+<pre><code class="language-python">def spam(key, value, list_=[], dict_={}):
+    list_.append(value)
+    dict_[key] = value
+    print('List: %r' % list_)
+    print('Dict: %r' % dict_)
+
+
+spam('key 1', 'value 1')
+spam('key 2', 'value 2')
+</code></pre>
+
+<pre><code>List: ['value 1']
+Dict: {'key 1': 'value 1'}
+List: ['value 1', 'value 2']
+Dict: {'key 2': 'value 2', 'key 1': 'value 1'}
+</code></pre>
+
+<p>按照代码的思路，输出的结果应该是下面这样才对：</p>
+
+<pre><code class="language-python">List: ['value 1']
+Dict: {'key 1': 'value 1'}
+List: ['value 2']
+Dict: {'key 2': 'value 2'}
+</code></pre>
+
+<p>实际上并非如此，首先，<code>list</code>以及<code>dict</code>都是可变对象，当<code>spam</code>函数被定义，<code>list_</code>和<code>dict_</code>就会被创建（<strong>但是它们只被创建一次</strong>），随后调用函数的时候，<code>list_</code>和<code>dict_</code>并没有被重新创建，于是，这个陷阱便出现了。</p>
+
+<p>正确的做法：</p>
+
+<pre><code class="language-python">def spam(key, value, list_=None, dict_=None):
+    if list_ is None:
+        list_ = []
+    if dict_ is None:
+        dict_ = {}
+    list_.append(value)
+    dict_[key] = value
+    print('List: %r' % list_)
+    print('Dict: %r' % dict_)
+
+
+spam('key 1', 'value 1')
+spam('key 2', 'value 2')
+</code></pre>
+
+<pre><code>List: ['value 1']
+Dict: {'key 1': 'value 1'}
+List: ['value 2']
+Dict: {'key 2': 'value 2'}
+</code></pre>
+
+<h3 id="2-2-2-class-properties">2.2.2.Class properties</h3>
+
+<p>在类的定义中，也存在这样的问题。</p>
+
+<pre><code class="language-python">class Spam(object):
+
+    list_ = []
+    dict_ = {}
+
+    def __init__(self, key, value):
+        self.list_.append(value)
+        self.dict_[key] = value
+        print('List: %r' % self.list_)
+        print('Dict: %r' % self.dict_)
+
+
+Spam('key 1', 'value 1')
+Spam('key 2', 'value 2')
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>List: ['value 1']
+Dict: {'key 1': 'value 1'}
+List: ['value 1', 'value 2']
+Dict: {'key 1': 'value 1', 'key 2': 'value 2'}
+</code></pre>
+
+<p>替代方案：</p>
+
+<pre><code class="language-python">class Spam(object):
+    def __init__(self, key, value):
+        self.list_ = [key]
+        self.dict_ = {key: value}
+        print('List: %r' % self.list_)
+        print('Dict: %r' % self.dict_)
+
+
+Spam('key 1', 'value 1')
+Spam('key 2', 'value 2')
+</code></pre>
+
+<pre><code>List: ['key 1']
+Dict: {'key 1': 'value 1'}
+List: ['key 2']
+Dict: {'key 2': 'value 2'}
+</code></pre>
+
+<pre><code>&lt;__main__.Spam at 0x10498a2b0&gt;
+</code></pre>
+
+<h3 id="2-2-3-modifying-variables-in-the-global-scope">2.2.3.Modifying variables in the global scope</h3>
+
+<p>在函数内对变量进行操作也有需要注意的地方。</p>
+
+<pre><code class="language-python">spam = 1
+
+
+def eggs():
+    spam += 1
+    print(spam)
+
+
+eggs()
+</code></pre>
+
+<pre><code>---------------------------------------------------------------------------
+</code></pre>
+
+<pre><code>UnboundLocalError                         Traceback (most recent call last)
+</code></pre>
+
+<pre><code>&lt;ipython-input-8-52c0d52ad689&gt; in &lt;module&gt;()
+      7 
+      8 
+----&gt; 9 eggs()
+</code></pre>
+
+<pre><code>&lt;ipython-input-8-52c0d52ad689&gt; in eggs()
+      3 
+      4 def eggs():
+----&gt; 5     spam += 1
+      6     print(spam)
+      7 
+</code></pre>
+
+<pre><code>UnboundLocalError: local variable 'spam' referenced before assignment
+</code></pre>
+
+<p>在<code>eggs</code>函数内，如果某个变量有被赋值，那么该变量就是局部变量，如果没有赋值，那么便会被解释为全局变量，所以对局部变量<code>spam</code>进行操作的时候，在函数内并没有进行赋值，<code>spam</code>被解释成全局变量，自然会出现错误。</p>
+
+<h3 id="2-2-4-modifying-while-iterating">2.2.4.Modifying while iterating</h3>
+
+<p>当对某个字典进行迭代的时候：</p>
+
+<pre><code class="language-python">dict_ = {'spam': 'eggs'}
+
+for key in dict_:
+    del dict_[key]
+</code></pre>
+
+<pre><code>---------------------------------------------------------------------------
+</code></pre>
+
+<pre><code>RuntimeError                              Traceback (most recent call last)
+</code></pre>
+
+<pre><code>&lt;ipython-input-9-b88de85f5f0b&gt; in &lt;module&gt;()
+      1 dict_ = {'spam': 'eggs'}
+      2 
+----&gt; 3 for key in dict_:
+      4     del dict_[key]
+</code></pre>
+
+<pre><code>RuntimeError: dictionary changed size during iteration
+</code></pre>
+
+<p>改正方法如下：</p>
+
+<pre><code>dict_ = {'spam': 'eggs'}
+
+for key in list(dict_):
+    del dict_[key]
+</code></pre>
+
+<h3 id="2-2-5-late-binding">2.2.5.Late binding</h3>
+
+<p>这个问题就是所谓的后期绑定，什么是后期绑定？请看下面的例子：</p>
+
+<pre><code class="language-python">eggs = [lambda a: i * a for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+# 理想结果
+# 0
+# 5
+# 10
+</code></pre>
+
+<pre><code>10
+10
+10
+</code></pre>
+
+<p>果然现实和理想是有差别的，为什么会造成这样的结果呢，是因为在匿名函数中<code>i</code>的值是2，可是明明分别循环了<code>0、1、2</code>。
+你需要知道，定义一个函数后，函数内的变量并不是立刻就把值绑定了，而是在被调用的时候才会去查找变量，所以等<code>egg(5)</code>去查找i这个变量的时候，<code>i=5</code>，于是就造成了后期绑定这个陷阱。
+要解决这个问题很简单，只需要在出现后期绑定前提前对变量进行*赋值*操作即可</p>
+
+<pre><code class="language-python"># 粗暴点可以直接这么来
+eggs = [lambda a, i=i: i * a for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+</code></pre>
+
+<pre><code>0
+5
+10
+</code></pre>
+
+<pre><code class="language-python"># 优雅点
+eggs = (lambda a: i * a for i in range(3))
+for egg in eggs:
+    print(egg(5))
+</code></pre>
+
+<pre><code>0
+5
+10
+</code></pre>
+
+<pre><code class="language-python"># 高级语法这么来
+import functools
+eggs = [functools.partial(lambda i, a: i * a, i) for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+</code></pre>
+
+<pre><code>0
+5
+10
+</code></pre>
+
+<p>总之，以上作为参考，能解决就好。</p>
+
+<h1 id="3-总结">3.总结</h1>
+
+<p>本节笔记主要记录<code>python</code>一些优雅的写法以及陷阱。</p>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="http://blog.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！<br>
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.howie6879.cn%2fpost%2f16%2f" target="_blank" title="Mastering Python 01" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f16%2f&text=Mastering%20Python%2001" target="_blank" title="Mastering Python 01" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f16%2f&amp;title=Mastering%20Python%2001" target="_blank" title="Mastering Python 01" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f16%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/17/" title="如今的生活—2017">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/15/" title="ITBooks—简单的书籍下载小工具">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="http://blog.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="http://blog.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="http://blog.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/linux">Linux</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/ml">Ml</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/python">Python</a>(19)</li>
+                <li><a href="http://blog.howie6879.cn/categories/sanic">Sanic</a>(7)</li>
+                <li><a href="http://blog.howie6879.cn/categories/web">Web</a>(3)</li>
+                <li><a href="http://blog.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="http://blog.howie6879.cn/post/32/">Sanic 使用教程 - 4.展示一个页面</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/31/">Sanic 源码阅读 - 基于0.1.2</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/30/">Sanic 使用教程 - 3.项目结构</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/29/">Sanic 使用教程 - 2.配置</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/28/">Sanic 使用教程 - 1.初使用</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/27/">2.Docker - 实例演示 - owllook</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/26/">1.Docker - 初使用</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/25/">gRPC使用初试</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="http://blog.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+</body>
+
+</html>

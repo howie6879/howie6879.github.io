@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="//cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="//secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="http://blog.howie6879.cnimages/favicon.png">
+    <link rel="apple-touch-icon" href="http://blog.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        Sanic 使用教程 - 1.初使用 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="//cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="http://blog.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="http://blog.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="http://blog.howie6879.cn/post/">Archives</a>  
+            
+                <a href="http://blog.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="http://blog.howie6879.cn/about">About</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="http://blog.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="http://blog.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="http://blog.howie6879.cn/about">About</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                Sanic 使用教程 - 1.初使用
+            </h1>
+            <div class="post-data">
+                Published on Oct 6, 2017 ,1 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="http://blog.howie6879.cn/tags/python">python</a>
+	
+	<a href="http://blog.howie6879.cn/tags/sanic">sanic</a>
+	
+</p>
+
+ 
+
+<blockquote>
+<p>系统：mac or linux，不要问我win为什么不可以</p>
+
+<p>版本：python3.5+</p>
+</blockquote>
+
+<p><code>Sanic</code>是一个支持async/await 语法编写项目的异步非阻塞框架，那么很显然，我们需要一个<code>python3.5+</code>的环境，那么就以运行一个<code>sanic</code>基础服务为目的来开始。</p>
+
+<h3 id="1-1-干净的环境">1.1.干净的环境</h3>
+
+<p>暂且先回忆一下你家的房间，你会在厨房做饭、卧室睡觉、浴室洗澡、书房看书，一切是那么有条不紊、井然有序，在不同的环境惬意地做着不同的事，相信这个观点我们应该可以达成共识吧？</p>
+
+<!-- more -->
+
+<p>如若不然，那么再想象下，若在同一间房煮饭、洗澡、睡觉甚至上厕所，这样的环境你可以忍受么，不出意外，相信此时你的脑海中浮现的应该是 <strong>脏、乱、差</strong> 这三个字。</p>
+
+<p>好，那么得出核心观点：<strong>应该在不同的环境下做不同的事</strong> ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的、干净的环境，那是不是可以这样说：</p>
+
+<blockquote>
+<p>不同的项目，需要为其构建不同的虚拟环境，以免互相干扰</p>
+</blockquote>
+
+<p>构建虚拟环境的工具很多，如下：</p>
+
+<ul>
+<li><a href="https://virtualenv.pypa.io/en/stable/">virtualenv</a></li>
+<li><a href="https://github.com/pyenv/pyenv">pyenv</a></li>
+<li><a href="https://www.continuum.io/downloads">anaconda</a></li>
+</ul>
+
+<p>…&hellip;</p>
+
+<p>不论你使用哪一种方式，反正我们最终目的是针对一个新项目构建一个新的环境，如果你之前没有使用过，可直接点开超链接访问，上手很简单，我本机使用<code>anaconda</code> ：</p>
+
+<pre><code class="language-shell"># 新建一个python3.6环境
+conda create --name python36 python=3.6
+# 安装好之后 输入下面命令进入名为python36的环境
+source activate python36
+</code></pre>
+
+<h3 id="1-2-hello-world">1.2.Hello World</h3>
+
+<p>让我们来构建一个基于 <code>Sanic</code> 的Hello World服务，上一步我们新建了一个新的 <code>python3.6</code> 环境，接下来乃至以后的项目都默认处于此环境下。</p>
+
+<pre><code class="language-python"># 安装Sanic
+pip install sanic
+</code></pre>
+
+<p>若安装速度比较慢，可以考虑换国内源，比如 <a href="https://mirrors.tuna.tsinghua.edu.cn/help/pypi/">国内镜像</a> 。</p>
+
+<p>下面新建一个文件名为 <code>run.py</code> :</p>
+
+<pre><code class="language-python">#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+
+@app.route(&quot;/&quot;)
+async def test(request):
+    return text('Hello World!')
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=8000)
+</code></pre>
+
+<p>运行此文件，在浏览器输入 <code>http://0.0.0.0:8000</code> ，出现的字符会让你回想起当年学c的恐惧^_^</p>
+
+<h3 id="1-3-说明">1.3.说明</h3>
+
+<ul>
+<li><code>Sanic</code> github地址：<a href="https://github.com/channelcat/sanic">https://github.com/channelcat/sanic</a></li>
+<li>官方文档且读完：<a href="http://sanic.readthedocs.io/en/latest/">http://sanic.readthedocs.io/en/latest/</a></li>
+<li>demo地址：<a href="https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo01/run.py">demo01</a></li>
+</ul>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="http://blog.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！<br>
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.howie6879.cn%2fpost%2f28%2f" target="_blank" title="Sanic 使用教程 - 1.初使用" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f28%2f&text=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%201.%e5%88%9d%e4%bd%bf%e7%94%a8" target="_blank" title="Sanic 使用教程 - 1.初使用" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f28%2f&amp;title=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%201.%e5%88%9d%e4%bd%bf%e7%94%a8" target="_blank" title="Sanic 使用教程 - 1.初使用" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f28%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/29/" title="Sanic 使用教程 - 2.配置">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/27/" title="2.Docker - 实例演示 - owllook">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="http://blog.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="http://blog.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="http://blog.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/linux">Linux</a>(2)</li>
+                <li><a href="http://blog.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/ml">Ml</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="http://blog.howie6879.cn/categories/python">Python</a>(19)</li>
+                <li><a href="http://blog.howie6879.cn/categories/sanic">Sanic</a>(7)</li>
+                <li><a href="http://blog.howie6879.cn/categories/web">Web</a>(3)</li>
+                <li><a href="http://blog.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="http://blog.howie6879.cn/post/32/">Sanic 使用教程 - 4.展示一个页面</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/31/">Sanic 源码阅读 - 基于0.1.2</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/30/">Sanic 使用教程 - 3.项目结构</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/29/">Sanic 使用教程 - 2.配置</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/28/">Sanic 使用教程 - 1.初使用</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/27/">2.Docker - 实例演示 - owllook</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/26/">1.Docker - 初使用</a></li>
+                  
+                <li><a href="http://blog.howie6879.cn/post/25/">gRPC使用初试</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="http://blog.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+</body>
+
+</html>

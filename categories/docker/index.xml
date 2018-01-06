@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>http://blog.howie6879.cn/categories/docker/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://blog.howie6879.cn/categories/docker/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>2.Docker - 实例演示 - owllook</title>
+      <link>http://blog.howie6879.cn/post/27/</link>
+      <pubDate>Tue, 22 Aug 2017 20:18:06 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/27/</guid>
+      <description>
+
+&lt;p&gt;上一篇笔记&lt;a href=&#34;http://blog.howie6879.cn/2017/08/15/26/&#34;&gt;1.Docker - 初使用&lt;/a&gt; 主要介绍了&lt;code&gt;Docker&lt;/code&gt;的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些&lt;code&gt;Docker&lt;/code&gt;镜像以及容器的基本操作&lt;/p&gt;
+
+&lt;h3 id=&#34;1-目标&#34;&gt;1.目标&lt;/h3&gt;
+
+&lt;p&gt;之前的毕设&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;是用&lt;code&gt;python&lt;/code&gt;编写的，我将它开源在&lt;code&gt;github&lt;/code&gt;上，正借此机会，将其制作成&lt;code&gt;Docker&lt;/code&gt;镜像，以便部署&lt;/p&gt;
+
+&lt;p&gt;本次笔记就以此项目为中心，目标是将该项目制作成&lt;code&gt;Docker&lt;/code&gt;镜像，并从过程中一步步熟悉&lt;code&gt;Docker&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-定制镜像&#34;&gt;2.定制镜像&lt;/h3&gt;
+
+&lt;p&gt;上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如&lt;code&gt;owllook&lt;/code&gt;基于&lt;code&gt;python3.6&lt;/code&gt;，那么我第一步便是从镜像仓库获取&lt;code&gt;python&lt;/code&gt;镜像&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;运行命令：&lt;code&gt;docker pull python:3.6&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;稍等片刻，就会拉取一个&lt;code&gt;python3.6&lt;/code&gt;的镜像下来，让我们以这个镜像为基础来启动一个容器：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 具体可参考 dcker run --help 来了解详细命令
+docker run -it --rm python:3.6 python
+
+# 终端会有如下输出 此时进入了容器中的3.6环境
+Python 3.6.2 (default, Jul 24 2017, 19:47:39) 
+[GCC 4.9.2] on linux
+Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information.
+&amp;gt;&amp;gt;&amp;gt; 
+
+#　也可以直接进入容器
+docker run -it --rm python:3.6 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;有了基础镜像，下面我们有两种方案构建&lt;code&gt;owllook&lt;/code&gt;镜像：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;使用&lt;code&gt;docker commit&lt;/code&gt; 命令&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Dockerfile&lt;/code&gt;(使用此方案)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Dockerfile内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;# 基于python3.6镜像来构建owllook镜像
+FROM python:3.6
+MAINTAINER howie6879 &amp;lt;howie6879@gmail.com&amp;gt;
+RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools
+# 设置环境变量
+ENV APP_ROOT /opt
+WORKDIR ${APP_ROOT}/
+COPY requirements.txt ${APP_ROOT}/
+# 安装依赖
+RUN pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+COPY . ${APP_ROOT}
+WORKDIR ${APP_ROOT}/owllook/
+RUN find . -name &amp;quot;*.pyc&amp;quot; -delete
+# 启动
+CMD [&amp;quot;gunicorn&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;config/dev_gunicorn.py&amp;quot;,&amp;quot;--worker-class&amp;quot;,&amp;quot;sanic.worker.GunicornWorker&amp;quot;,&amp;quot;server:app&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;构建镜像：&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;docker build -t owllook:0.1 .&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;构建成功后，可直接运行，不过针对&lt;code&gt;owllook&lt;/code&gt;这个项目，我设置了几个环境变量，可运行如下命令运行：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 运行并将docker的8001端口映射到主机的8001
+# 在dev_owllook.env里面填上数据库配置 数据库ip需要注意 不得填localhost
+docker run --env-file ./dev_owllook.env -d -p 8001:8001 owllook:0.1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;仅仅是达到使用&lt;code&gt;Docker&lt;/code&gt;的程度，所花费时间真的不多，所以说&lt;code&gt;Docker&lt;/code&gt;还是很简单方便的，下一步就是上传到镜像仓库。&lt;/p&gt;
+
+&lt;h3 id=&#34;3-上传镜像&#34;&gt;3.上传镜像&lt;/h3&gt;
+
+&lt;p&gt;首先请注册&lt;a href=&#34;https://hub.docker.com/&#34;&gt;&lt;em&gt;Docker Hub&lt;/em&gt;&lt;/a&gt;账号，然后创建自己的仓库之后，比如这里创建好&lt;code&gt;howie6879/owllook&lt;/code&gt;，随即在终端输入：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重新打包下 或者改下tag也没问题
+docker build -t howie6879/owllook:0.1 .
+# 根据提示登录
+docker login
+docker push howie6879/owllook:0.1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;稍等即大功告成&lt;/p&gt;
+
+&lt;h3 id=&#34;4-最后&#34;&gt;4.最后&lt;/h3&gt;
+
+&lt;p&gt;现在可以根据&lt;code&gt;Dockerfile&lt;/code&gt;自己构建&lt;code&gt;owllook&lt;/code&gt;镜像或者直接&lt;code&gt;docker pull owllook&lt;/code&gt;镜像，确实十分方便&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>1.Docker - 初使用</title>
+      <link>http://blog.howie6879.cn/post/26/</link>
+      <pubDate>Tue, 15 Aug 2017 20:13:30 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/26/</guid>
+      <description>
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-08-15-docker.png-blog.howie&#34; alt=&#34;docker&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;自己很少使用&lt;code&gt;Docker&lt;/code&gt;，也没有机会使用，毕业开始工作后，进的公司使用&lt;code&gt;Docker&lt;/code&gt;进行部署，这是我的一些笔记，以便翻阅。&lt;/p&gt;
+
+&lt;h3 id=&#34;1-准备&#34;&gt;1.准备&lt;/h3&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;系统：ubuntu16.04 or centos &amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&#34;1-1-安装&#34;&gt;1.1.安装&lt;/h4&gt;
+
+&lt;h5 id=&#34;1-1-1-ubuntu16-04&#34;&gt;1.1.1.ubuntu16.04&lt;/h5&gt;
+
+&lt;p&gt;首先安装依赖包，在终端输入：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;安装&lt;code&gt;Docker&lt;/code&gt;，自动安装脚本提供了非常简洁的安装方式：&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 官方下载方式
+curl -sSL https://get.docker.com/ | sh
+
+# 镜像站会提升下载速度
+# 阿里云的安装脚本
+curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh -
+
+# DaoCloud 的安装脚本
+curl -sSL https://get.daocloud.io/docker | sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;安装完成后，输入&lt;code&gt;sudo service docker status&lt;/code&gt; 可见&lt;code&gt;Docker&lt;/code&gt;已经启动:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;● docker.service - Docker Application Container Engine
+   Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since 二 2017-08-15 15:34:46 CST; 26min ago
+     Docs: https://docs.docker.com
+ Main PID: 16890 (dockerd)
+    Tasks: 25
+   Memory: 60.1M
+      CPU: 1.980s
+   CGroup: /system.slice/docker.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;1-1-2-centos7&#34;&gt;1.1.2.centos7&lt;/h5&gt;
+
+&lt;p&gt;完全可以参照上面的自动安装&lt;/p&gt;
+
+&lt;h4 id=&#34;1-2-镜像加速器&#34;&gt;1.2.镜像加速器&lt;/h4&gt;
+
+&lt;p&gt;配置镜像加速器的目的是为了在使用&lt;code&gt;Docker&lt;/code&gt;的过程中能提升速度，比如使用&lt;a href=&#34;https://www.daocloud.io/mirror#accelerator-doc&#34;&gt;DaoCloud 加速器&lt;/a&gt;，输入网址，点击立即使用，按照官网的教程，一行命令搞定:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://{修改分配给你的id}.m.daocloud.io
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-使用&#34;&gt;2.使用&lt;/h3&gt;
+
+&lt;p&gt;下面将简单的获取一个镜像并输出一个&lt;code&gt;Hello World&lt;/code&gt;来简单演示下&lt;code&gt;Docker&lt;/code&gt;的使用，首先介绍下&lt;code&gt;Docker&lt;/code&gt;的三个基本概念，掌握了这三个基本概念，也就理解了&lt;code&gt;Docker&lt;/code&gt;的生命周期&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;什么是镜像(Image)？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;引用《第一本Docker书》&lt;/p&gt;
+
+&lt;p&gt;镜像是构建&lt;code&gt;Docker&lt;/code&gt;世界的基石，用户基于镜像来运行自己的容器，镜像是基于联合（Union）文件系统的一种层式，由一系列指令一步一步构建出来&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;什么是容器(Container)？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;容器基于镜像启动，里面可以运行一个或者多个进程&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;什么是仓库(Repository)？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;想象下&lt;code&gt;github&lt;/code&gt;就很容易理解，托管你自己创建的镜像，默认使用&lt;a href=&#34;https://hub.docker.com/&#34;&gt;Docker Hub&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;2-1-hello-world&#34;&gt;2.1.Hello World&lt;/h4&gt;
+
+&lt;p&gt;运行一条命令 &lt;code&gt;docker run hello-world&lt;/code&gt;，会发现并没有运行成功，因为我是在非&lt;code&gt;root&lt;/code&gt;的情况下运行的，会报如下错误：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;docker: Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock/v1.30/containers/create: dial unix /var/run/docker.sock: connect: permission denied.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;至于为什么有这个错误，具体可以看&lt;a href=&#34;https://yeasy.gitbooks.io/docker_practice/content/install/ubuntu.html&#34;&gt;这里&lt;/a&gt;，介绍得非常清楚，下面说下解决办法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 一定要重新登录才会生效
+sudo usermod -aG docker $USER
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;用户重新登陆过后，就能成功运行了!&lt;/p&gt;
+
+&lt;h4 id=&#34;2-2-简单例子&#34;&gt;2.2.简单例子&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;获取镜像&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;docker pull howie6879/cn_ubuntu&lt;/code&gt;，这条命令就是从&lt;code&gt;Docker Hub&lt;/code&gt;拉取一个镜像到本地，下面就可以使用这个镜像了,&lt;strong&gt;运行&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;docker run howie6879/cn_ubuntu:latest /bin/echo &amp;quot;Hello World&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;终端就会输出&lt;code&gt;Hello World&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;3-最后&#34;&gt;3.最后&lt;/h3&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;参考1：&lt;a href=&#34;https://yeasy.gitbooks.io/docker_practice/content/index.html&#34;&gt;《Docker-从入门到实践》&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;参考2：《第一本Docker书》&lt;/p&gt;
+
+&lt;p&gt;gist看&lt;a href=&#34;https://gist.github.com/83685e04e191079c56d36900e0839a3d&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;图片来自网络&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

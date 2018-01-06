@@ -1,0 +1,1448 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>http://blog.howie6879.cn/categories/sanic/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://blog.howie6879.cn/categories/sanic/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Sanic 使用教程 - 4.展示一个页面</title>
+      <link>http://blog.howie6879.cn/post/32/</link>
+      <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/32/</guid>
+      <description>
+
+&lt;p&gt;前面一节介绍&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。&lt;/p&gt;
+
+&lt;p&gt;相信你应该已经了解清楚，&lt;code&gt;sanic&lt;/code&gt;是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+- 接收请求
+- 找到对应的路由并执行路由对应的视图函数
+- &lt;a href=&#34;http://jinja.pocoo.org/docs/2.10/&#34;&gt;Jinja2&lt;/a&gt;模板渲染返回视图&lt;/p&gt;
+
+&lt;!--- more ---&gt;
+
+&lt;h3 id=&#34;路由和视图函数&#34;&gt;路由和视图函数&lt;/h3&gt;
+
+&lt;p&gt;在此我假设你理解 &lt;code&gt;python&lt;/code&gt; 中的装饰器，如果你并不清楚，可以看我另写的关于&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;的介绍，回归正题，还记得第一节中的代码实例么？&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+# 此处将路由 / 与视图函数 test 关联起来
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在前言介绍里，出现这几个名词 &lt;strong&gt;路由 视图函数 视图&lt;/strong&gt; ,在上面那段代码中，&lt;code&gt;test&lt;/code&gt; 就是视图函数。&lt;/p&gt;
+
+&lt;p&gt;这是一段执行逻辑，比如客户端请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt; 此时返回的内容就是由&lt;code&gt;test&lt;/code&gt; 这个视图函数提供的。&lt;/p&gt;
+
+&lt;p&gt;在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/docs/part2/1.Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2.md&#34;&gt;sanic0.1.2源码&lt;/a&gt;)来分析下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这个路由装饰器的作用很简单，就是将 &lt;code&gt;/&lt;/code&gt; 这个 &lt;code&gt;uri&lt;/code&gt; 与视图函数&lt;code&gt;test&lt;/code&gt;关联起来，或许你可以将路由想象成一个 &lt;code&gt;dict&lt;/code&gt;，当客户端若请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt;，路由就会&lt;code&gt;get&lt;/code&gt; &lt;code&gt;/&lt;/code&gt; 对应的视图函数&lt;code&gt;test&lt;/code&gt;，然后执行。&lt;/p&gt;
+
+&lt;p&gt;其实真实情况和我们想象的差不多，请看 &lt;code&gt;sanic.py&lt;/code&gt; 中的第三十行:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+# Decorator
+def route(self, uri, methods=None):
+
+    def response(handler):
+        # 路由类的add 方法将视图函数handler 与uri 关联起来
+        # 然后整个路由列表会新增一个 namedtuple 如下：
+        # Route(handler=handler, methods=methods_dict, pattern=pattern, parameters=parameters)
+        self.router.add(uri=uri, methods=methods, handler=handler)
+        return handler
+
+    return response
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此时，路由就和 &lt;code&gt;uri&lt;/code&gt; 对应的视图函数关联起来了，这就是承上，路由和视图函数就是这样对应的关系。
+103行有个&lt;code&gt;handle_request&lt;/code&gt;函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+async def handle_request(self, request, response_callback):
+    &amp;quot;&amp;quot;&amp;quot;
+    Takes a request from the HTTP Server and returns a response object to be sent back
+    The HTTP Server only expects a response object, so exception handling must be done here
+    :param request: HTTP Request object
+    :param response_callback: Response function to be called with the response as the only argument
+    :return: Nothing
+    &amp;quot;&amp;quot;&amp;quot;
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;当服务器监听到某个请求的时候，&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt; 来找到视图函数并且执行，随即生成视图返回，这便是所谓的启下。&lt;/p&gt;
+
+&lt;p&gt;其实浏览器显示的内容就是我们所谓的视图，视图是视图函数生成的，其中Jinja2起到模板渲染的作用。&lt;/p&gt;
+
+&lt;h3 id=&#34;蓝图&#34;&gt;蓝图&lt;/h3&gt;
+
+&lt;p&gt;到这里，你一定已经很明白sanic框架是怎么处理一个请求并将视图返回给客户端，然后也掌握了如何编写自己定义的模板(html)以及样式(css)，通过前面一节&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的介绍，我们可以总结出如下经验：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;对于css、js等静态文件，常规操作是将其放在自己建立的statics下面&lt;/li&gt;
+&lt;li&gt;对于html模板，常规操作是将其放在自己建立的templates下面&lt;/li&gt;
+&lt;li&gt;视图函数(即服务的逻辑实现)放在自己建立的views下面&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;是时候考虑以下这种情况了，你需要编写一个比较复杂的http服务，你需要定义几百个路由，在编写过程中你会发现有许多不顺心的地方：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;各种不同类型的路由互相交杂在一起，命名困难，管理困难&lt;/li&gt;
+&lt;li&gt;不同页面的css文件同样堆积在一起，html也是如此&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;实在是令人烦恼，可能你想要一个模块化的编写方式，一个文件编写后台，url统一是&lt;code&gt;/admin/***&lt;/code&gt;，一个文件编写发帖，&lt;code&gt;/post/***&lt;/code&gt; 等等，各个文件下面url自动会带上自定义的前缀，不用考虑命名问题，不用重复写url前缀，多么美好&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Blueprint&lt;/strong&gt;，就是sanic为你提供的解决方案，依然是上节rss的例子，让我们利用Blueprint来简单实现一下我们的需求，比如我们要构建的网站分为两个部分：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/json/index&lt;/code&gt; 返回json格式的数据&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/html/index&lt;/code&gt; 返回html视图&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们在上节代码的基础上添加Blueprint，先看看定好的项目结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
+.
+├── __init__.py
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+├── run.py
+├── statics
+│   ├── rss_html # rss_html蓝图的 css js 文件存放目录
+│   │   ├── css
+│   │   │   └── main.css
+│   │   └── js
+│   └── rss_json # rss_json蓝图的 css js 文件存放目录
+├── templates
+│   ├── rss_html # rss_html蓝图的 html 文件存放目录
+│   │   ├── index.html
+│   │   └── rss.html
+│   └── rss_json # rss_json蓝图的 html 文件存放目录
+│       └── index.html
+└── views
+    ├── __init__.py
+    ├── rss_html.py # rss_html 蓝图
+    └── rss_json.py # rss_json 蓝图
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;蓝图的目的就是让我们构建的项目灵活，可扩展，容易阅读，方便管理，一个个小的蓝图就构建了一个大型的项目，run.py里面可以随意组合注册蓝图，可抽插式的构建我们的服务，&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/sample01&#34;&gt;sample01&lt;/a&gt;里是本次示例的代码，建议先读一遍，十分简单，主要就是讲路由根据你自己定义的特性分割成一个个蓝图，比如这里的&lt;code&gt;rss_html&lt;/code&gt;和&lt;code&gt;rss_json&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+#!/usr/bin/env python
+# 部分代码
+# rss_html.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
+html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
+
+@html_bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return await template(&#39;index.html&#39;)
+
+#!/usr/bin/env python
+# 部分代码
+# rss_json.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+json_bp = Blueprint(&#39;rss_json&#39;, url_prefix=&#39;json&#39;)
+json_bp.static(&#39;/statics/rss_json&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_json&#39;)
+
+@json_bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return await template(&#39;index.html&#39;)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;不知你是否感受到这样编写服务的好处，让我们列举下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;每个蓝图都有其自己定义的前缀，如 /html/ /json/&lt;/li&gt;
+&lt;li&gt;不同蓝图下面route可相同&lt;/li&gt;
+&lt;li&gt;html以及css等 根据蓝图名称目录引用&lt;/li&gt;
+&lt;li&gt;模块化&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不多说，看运行效果：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
+cd /Sanic-For-Pythoneer/examples/demo04/sample01/src
+python run.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;现在，请访问：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/&#34;&gt;http://0.0.0.0:8000/html/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/&#34;&gt;http://0.0.0.0:8000/json/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/index&#34;&gt;http://0.0.0.0:8000/html/index&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/index&#34;&gt;http://0.0.0.0:8000/json/index&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;感觉这个设计方便了全世界^_^&lt;/p&gt;
+
+&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
+
+&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/&#34;&gt;demo04&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 源码阅读 - 基于0.1.2</title>
+      <link>http://blog.howie6879.cn/post/31/</link>
+      <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/31/</guid>
+      <description>
+
+&lt;p&gt;&lt;code&gt;Sanic&lt;/code&gt;是一个可以使用&lt;code&gt;async/await&lt;/code&gt;语法编写项目的异步非阻塞框架，它写法类似于&lt;code&gt;Flask&lt;/code&gt;，但使用了异步特性，而且还使用&lt;code&gt;uvloop&lt;/code&gt;作为事件循环，其底层使用的是&lt;code&gt;libuv&lt;/code&gt;，从而使 &lt;code&gt;Sanic&lt;/code&gt;的速度优势更加明显。&lt;/p&gt;
+
+&lt;p&gt;如果你：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;想深入了解Sanic，迫切想知道它的运行机制&lt;/li&gt;
+&lt;li&gt;直接阅读源码，做一些定制&lt;/li&gt;
+&lt;li&gt;学习&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;理解&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;理解协程&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--- more ---&gt;
+
+&lt;p&gt;Sanic-0.1.2 的核心文件如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;.
+├── __init__.py
+├── blueprints.py
+├── config.py
+├── exceptions.py
+├── log.py
+├── request.py
+├── response.py
+├── router.py
+├── sanic.py
+├── server.py
+└── utils.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。&lt;/p&gt;
+
+&lt;h3 id=&#34;simple-server-py&#34;&gt;simple_server.py&lt;/h3&gt;
+
+&lt;p&gt;让我们从&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/examples/simple_server.py&#34;&gt;simple_server&lt;/a&gt;开始吧，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+from sanic_0_1_2.src import Sanic
+from sanic_0_1_2.src.response import json
+
+app = Sanic(__name__)
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;test&amp;quot;: True})
+
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;或许你直接把&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;项目直接clone到本地比较方便调试+理解：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/howie6879/sanic_annotation
+cd sanic_annotation/sanic_0_1_2/examples/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;那么，现在一切准备就绪，开始阅读吧。&lt;/p&gt;
+
+&lt;p&gt;前两行代码导入包：
+- &lt;code&gt;Sanic&lt;/code&gt;：构建一个 Sanic 服务必须要实例化的类
+- &lt;code&gt;json&lt;/code&gt;：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：
+    - &lt;code&gt;text&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/plain; charset=utf-8&amp;quot;&lt;/code&gt;
+    - &lt;code&gt;html&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/html; charset=utf-8&amp;quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;实例化一个&lt;code&gt;Sanic&lt;/code&gt;对象，&lt;code&gt;app = Sanic(__name__)&lt;/code&gt;，可见&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;，我已经在这个文件里面做了一些注释，这里也详细说下&lt;code&gt;Sanic&lt;/code&gt;类：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;route()：装饰器，构建uri和视图函数的映射关系，调用Router().add()方法&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;exception()：装饰器，和上面差不多，不过针对的是错误处理类Handler&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;middleware()：装饰器，针对中间件&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;register_blueprint()：注册视图的函数，接受第一个参数是视图类&lt;code&gt;blueprint&lt;/code&gt;，再调用该类下的&lt;code&gt;register&lt;/code&gt;方法实现将此蓝图下的&lt;code&gt;route、exception、middleware&lt;/code&gt;统一注册到&lt;code&gt;app.route、app.exception、app.exception&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;handle_request()：这是一个很重要的异步函数，当服务启动后，如果客户端发来一个有效的请求，会自动执行 &lt;code&gt;on_message_complete&lt;/code&gt;函数，该函数的目的是异步调用 &lt;code&gt;handle_request&lt;/code&gt;函数，&lt;code&gt;handle_request&lt;/code&gt;函数会回调&lt;code&gt;write_response&lt;/code&gt;函数，&lt;code&gt;write_response&lt;/code&gt;接受的参数是此uri请求对应的视图函数，比如上面demo中，如果客户端请求&amp;rsquo;/&amp;lsquo;，那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;，然后进一步处理，再返回给客户端&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;run()：Sanic服务的启动函数，必须执行，实际上会继续调用&lt;code&gt;server.serve&lt;/code&gt;函数，详情下面会详细讲&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;stop()：终止服务&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;其实上面这部分介绍已经讲了Sanic基本的运行逻辑，如果你理解了，那下面的讲解对你来说是轻轻松松，如果不怎么明白，也不要紧，这是只是一个大体的介绍，跟着步骤来，也很容易理解，继续看代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 此处将路由 / 与视图函数 test 关联起来
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;test&amp;quot;: True})
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;app.route&lt;/code&gt;，上面介绍过，随着Sanic服务的启动而启动，可定义参数&lt;code&gt;uri, methods&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;目的是为&lt;code&gt;url&lt;/code&gt;的&lt;code&gt;path&lt;/code&gt;和视图函数对应起来，构建一对映射关系，本例中&lt;code&gt;Sanic.router&lt;/code&gt;类下的&lt;code&gt;Router.routes = []&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;会增加一个名为&lt;code&gt;Route&lt;/code&gt;的&lt;code&gt;namedtuple&lt;/code&gt;，如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;[Route(handler=&amp;lt;function test at 0x10a0f6488&amp;gt;, methods=None, pattern=re.compile(&#39;^/$&#39;), parameters=[])]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;看到没，&lt;code&gt;uri &#39;/&#39;&lt;/code&gt; 和视图函数&lt;code&gt;test&lt;/code&gt;对应起来了，如果客户端请求&lt;code&gt;&#39;/&#39;&lt;/code&gt;，当服务器监听到这个请求的时候,&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt;来找到视图函数&lt;code&gt;test&lt;/code&gt;并且执行，随即生成视图返回&lt;/p&gt;
+
+&lt;p&gt;那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受视图函数test返回的&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;说下&lt;code&gt;Router&lt;/code&gt;类，这个类的目的就是添加和获取路由对应的视图函数，把它想象成&lt;code&gt;dict&lt;/code&gt;或许更容易理解：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;add(self, uri, methods, handler)：添加一个映射关系到self.routes&lt;/li&gt;
+&lt;li&gt;get(self, request)：获取request.url对应的视图函数&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最后一行，&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)&lt;/code&gt;，Sanic 下的&lt;code&gt;run&lt;/code&gt;函数，启动一个&lt;code&gt;http server&lt;/code&gt;，主要是启动&lt;code&gt;run&lt;/code&gt;里面的&lt;code&gt;serve&lt;/code&gt;函数，参数如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+try:
+    serve(
+        host=host,
+        port=port,
+        debug=debug,
+        # 服务开始后启动的函数
+        after_start=after_start,
+        # 在服务关闭前启动的函数
+        before_stop=before_stop,
+        # Sanic(__name__).handle_request()
+        request_handler=self.handle_request,
+        # 默认读取Config
+        request_timeout=self.config.REQUEST_TIMEOUT,
+        request_max_size=self.config.REQUEST_MAX_SIZE,
+    )
+except:
+    pass
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;让我们将目光投向&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;，这也是Sanic框架的核心代码：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;serve()：里面会创建一个TCP服务的协程，然后通过&lt;code&gt;loop.run_forever()&lt;/code&gt;运行这个事件循环，以便接收客户端请求以及处理相关事件，每当一个新的客户端建立连接服务就会创建一个新的&lt;code&gt;Protocol&lt;/code&gt;实例，接受请求与返回响应离不开其中的&lt;code&gt;HttpProtocol&lt;/code&gt;，里面的函数支持接受数据、处理数据、执行视图函数、构建响应数据并返回给客户端&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;HttpProtocol：&lt;code&gt;asyncio.Protocol&lt;/code&gt;的子类，用来处理与客户端的通信，我在&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;里写了对应的注释&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;至此，Sanic 服务启动了&lt;/p&gt;
+
+&lt;p&gt;不要小看这一个小小的demo，执行一下，竟然涉及到下面这么多个文件，让我们总结一下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/router.py&#34;&gt;router.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/request.py&#34;&gt;request.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/response.py&#34;&gt;response.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/exceptions.py&#34;&gt;exceptions.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/config.py&#34;&gt;config.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/log.py&#34;&gt;log.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;除去&lt;code&gt;__init__.py&lt;/code&gt;，&lt;code&gt;Sanic&lt;/code&gt;项目一共就10个文件，这个小demo不显山不露水地竟然用到了8个，虽然其中几个没有怎么用到，但也足够说明，你如果理解了这个demo，&lt;code&gt;Sanic&lt;/code&gt;的运行逻辑以及框架代码你已经了解地很深入了&lt;/p&gt;
+
+&lt;h3 id=&#34;blueprints-py&#34;&gt;blueprints.py&lt;/h3&gt;
+
+&lt;p&gt;这个例子看完，我们就能轻易地明白什么是&lt;code&gt;blueprints&lt;/code&gt;，以及&lt;code&gt;blueprints&lt;/code&gt;的运行方式，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+from sanic_0_1_2.src import Sanic
+# 引入Blueprint
+from sanic_0_1_2.src import Blueprint
+from sanic_0_1_2.src.response import json, text
+
+app = Sanic(__name__)
+blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
+blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
+
+
+@blueprint.route(&#39;/foo&#39;)
+async def foo(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
+
+
+@blueprint2.route(&#39;/foo&#39;)
+async def foo2(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
+
+
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;让我们从这两行开始：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
+blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;显然，&lt;code&gt;blueprint&lt;/code&gt;以及&lt;code&gt;blueprint2&lt;/code&gt;是&lt;code&gt;Blueprint&lt;/code&gt;根据不同的参数生成的不同的实例对象，接下来要干嘛？没错，分析&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/blueprints.py&#34;&gt;blueprints.py&lt;/a&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;BlueprintSetup：蓝图注册类
+
+&lt;ul&gt;
+&lt;li&gt;add_route：添加路由到app&lt;/li&gt;
+&lt;li&gt;add_exception：添加对应抛出的错误到app&lt;/li&gt;
+&lt;li&gt;add_middleware：添加中间件到app&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Blueprint：蓝图类，接收两个参数：name(蓝图名称) url_prefix 该蓝图的url前缀
+
+&lt;ul&gt;
+&lt;li&gt;route：路由装饰器，将会生成一个匿名函数到self.deferred_functions列表里稍后一起处理注册到app里&lt;/li&gt;
+&lt;li&gt;middleware：同上&lt;/li&gt;
+&lt;li&gt;exception：同上&lt;/li&gt;
+&lt;li&gt;record：注册一个回调函数到self.deferred_functions列表里面，&lt;/li&gt;
+&lt;li&gt;make_setup_state：实例化BlueprintSetup&lt;/li&gt;
+&lt;li&gt;register：注册视图，实际就是注册route、middleware、exception到app，此时会利用make_setup&lt;em&gt;state返回的BlueprintSetup示例进行对于的add&lt;/em&gt;***一系列操作，相当于Sanic().route()效果&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;请看下&lt;code&gt;route&lt;/code&gt;和&lt;code&gt;register&lt;/code&gt;函数，然后再看下面的代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 生成一个匿名函数到self.deferred_functions列表里 包含三个参数 handler(foo), uri, methods
+@blueprint.route(&#39;/foo&#39;)
+async def foo(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
+
+
+@blueprint2.route(&#39;/foo&#39;)
+async def foo2(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
+
+# 上一个例子说过这个函数，Sanic().register_blueprint() 注册蓝图
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;怎么样，现在来看，是不是很轻松，这一行&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)&lt;/code&gt;服务启动代码不用多说吧？&lt;/p&gt;
+
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+
+&lt;p&gt;看到这里，相信你已经完全理解了Sanic的运行机制，虽然还有&lt;code&gt;middleware&amp;amp;exception&lt;/code&gt;的注册以及调用机制没讲，但这和&lt;code&gt;route&lt;/code&gt;的运行机制一样，如果你懂了&lt;code&gt;route&lt;/code&gt;那么这两个也很简单&lt;/p&gt;
+
+&lt;p&gt;本人技术微末，若有错误，请指出，不胜感激&lt;/p&gt;
+
+&lt;p&gt;注解地址：&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 3.项目结构</title>
+      <link>http://blog.howie6879.cn/post/30/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/30/</guid>
+      <description>
+
+&lt;p&gt;一个项目，在最外层他们应该是一样的，至少需要有:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;文件夹&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;docs&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目文档说明&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;src/pro_name&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目名称&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;tests&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;测试用例&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;README.md&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目介绍&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;requirements.txt&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;该项目依赖的第三方库&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;那接下来需要讨论的，就是 &lt;code&gt;src&lt;/code&gt; 的内部结构该是什么样的呢？&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;本章将写一个 &lt;code&gt;rss&lt;/code&gt; 解析展示的项目用做演示。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-1-普通的项目结构&#34;&gt;2.1.普通的项目结构&lt;/h3&gt;
+
+&lt;p&gt;一个普通的项目：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;不需要添加后续模块功能&lt;/li&gt;
+&lt;li&gt;快速开发使用，不需要维护&lt;/li&gt;
+&lt;li&gt;无较复杂的前端需求&lt;/li&gt;
+&lt;li&gt;用完就走&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;那么就可以像 &lt;code&gt;demo01&lt;/code&gt; 中一样，只需要添加一个 &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo03/sample01/src/run.py&#34;&gt;run.py&lt;/a&gt; 或者叫做 &lt;code&gt;app.py&lt;/code&gt; 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。&lt;/p&gt;
+
+&lt;p&gt;新建一个项目如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample01
+├── docs
+│   └── demo.md
+├── src
+│   └── run.py
+├── tests
+├── .gitignore
+└──requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;任意一个 &lt;code&gt;rss&lt;/code&gt; 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，&lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import json
+from feedparser import parse
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
+    return json(data)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;访问 &lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，会返回一串json，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-01.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来，问题升级，我想要将标题链接用页面展示，该怎么弄？&lt;/p&gt;
+
+&lt;p&gt;我们需要一个页面模板，然后写入json数据，最后用 &lt;code&gt;jinja2&lt;/code&gt; 的 &lt;code&gt;template&lt;/code&gt; 将其渲染：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# template的渲染模板
+# 后面会使用更方便的模板引用方式
+template = Template(
+    &amp;quot;&amp;quot;&amp;quot;
+    &amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;rss阅读&amp;lt;/title&amp;gt;
+    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1&amp;quot;&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;article class=&amp;quot;markdown-body&amp;quot;&amp;gt;
+    {% for article in articles %}
+    &amp;lt;b&amp;gt;&amp;lt;a href=&amp;quot;{{article.link}}&amp;quot;&amp;gt;{{article.title}}&amp;lt;/a&amp;gt;&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;
+    &amp;lt;i&amp;gt;{{article.published}}&amp;lt;/i&amp;gt;&amp;lt;br/&amp;gt;
+    &amp;lt;hr/&amp;gt;
+    {% endfor %}
+&amp;lt;/article&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+    &amp;quot;&amp;quot;&amp;quot;
+)
+
+# 逻辑函数
+@app.route(&amp;quot;/html&amp;quot;)
+async def rss_html(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append(
+            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
+    html_content = template.render(articles=data)
+    return html(html_content)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体结构代码见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample01&#34;&gt;sample01&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就可以看到被展示出来的页面^_^&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-02.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;假设需要编写前端页面比较多，那么你就需要添加&lt;code&gt;static&lt;/code&gt; 以及 &lt;code&gt;templates&lt;/code&gt; 文件夹用来管理各个界面模块，具体下面会介绍。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-项目结构具体说明&#34;&gt;2.2.项目结构具体说明&lt;/h3&gt;
+
+&lt;p&gt;当编写的项目过于复杂，我都会将其当做一个第三方包来管理项目中涉及的各种模块，比如 &lt;code&gt;owllook&lt;/code&gt;，目录下面你会发现有个 &lt;code&gt;__init__.py&lt;/code&gt; 文件，它初始化了当前目录下的应用，然后代码中引用某个函数可以这么写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from owllook.config import Config
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;每个项目的内部分布以及命名可能不一样（甚至目录比应该或多或少），但大体意思可能差不多，下面介绍本次项目 &lt;code&gt;src&lt;/code&gt; 下的一些文件目录结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample02
+├── docs
+│   └── demo.md
+├── src
+│   ├── config # 配置 
+│   ├── static # css、js、img
+│   ├── templates # Jinja2模板
+│   └── views # 路由、逻辑处理
+│   ├── __init__.py
+│   ├── run.py # 启动文件
+├── tests
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此处就可以将 &lt;code&gt;sample02&lt;/code&gt; 当成一个包了，咱们来试试看：&lt;/p&gt;
+
+&lt;p&gt;首先新建文件 &lt;code&gt;/views/rss.py&lt;/code&gt; :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;enable_async = sys.version_info &amp;gt;= (3, 6)
+
+app = Sanic()
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.rss&#39;, &#39;../templates&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
+    enable_async=enable_async)
+
+
+async def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    rendered_template = await template.render_async(**kwargs)
+    return html(rendered_template)
+
+
+@app.route(&amp;quot;/html&amp;quot;)
+async def rss_html(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append(
+            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
+    return await template(&#39;rss.html&#39;, articles=articles)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里使用异步的方式引入了 &lt;code&gt;jinja2&lt;/code&gt; ，需要注意的是python版本必须3.6+，否则就得使用同步的方式来引入 &lt;code&gt;jinja2&lt;/code&gt; ，后面章节会继续介绍。&lt;/p&gt;
+
+&lt;p&gt;此时启动文件 &lt;code&gt;run.py&lt;/code&gt; 只要引入 &lt;code&gt;/views/rss.py&lt;/code&gt; 的 &lt;code&gt;app&lt;/code&gt; 实例即可：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# !/usr/bin/env python
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.views import app
+from src.config import CONFIG
+
+app.static(&#39;/static&#39;, CONFIG.BASE_DIR + &#39;/static&#39;)
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;还有一些css文件这里就不介绍，具体代码请看&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample02&#34;&gt;sample02&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就好，效果如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-03.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-3-说明&#34;&gt;2.3.说明&lt;/h3&gt;
+
+&lt;p&gt;关于 &lt;code&gt;views templates static&lt;/code&gt; 内部的构造也是值得一些，这就涉及到蓝图 &lt;code&gt;Blueprint&lt;/code&gt; ，后面介绍蓝图的时候会进行介绍。&lt;/p&gt;
+
+&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/&#34;&gt;demo03&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 2.配置</title>
+      <link>http://blog.howie6879.cn/post/29/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/29/</guid>
+      <description>&lt;p&gt;对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。&lt;/p&gt;
+
+&lt;p&gt;新建文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
+├── config
+│   ├── __init__.py
+│   └── config.py
+└── run.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;其中 &lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;代码示例中开启了 &lt;code&gt;debug&lt;/code&gt; 模式，假设我们需要通过 &lt;code&gt;config.py&lt;/code&gt; 配置文件来实现控制服务的 &lt;code&gt;debug&lt;/code&gt; 模式开启与否，那该怎么实现呢。&lt;/p&gt;
+
+&lt;p&gt;在 &lt;code&gt;config.py&lt;/code&gt; 中添加一行：&lt;code&gt;DEBUG=True&lt;/code&gt; ，然后 &lt;code&gt;run.py&lt;/code&gt; 内容改为：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+from config import DEBUG
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=DEBUG)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;表面上看，功能确实实现了，但这实际上却不是很好的做法，若部署在生产环境中，难道还要特地再将 &lt;code&gt;debug&lt;/code&gt; 改为 &lt;code&gt;False&lt;/code&gt; 么，这显然很浪费时间，如果需要改变的参数有很多，那就很难维护了。&lt;/p&gt;
+
+&lt;p&gt;那么，正确的做法应该是怎么样的呢？&lt;/p&gt;
+
+&lt;p&gt;首先在文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+└── run.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后使用类继承的方式使这三个配置文件联系起来，比如在 &lt;code&gt;config.py&lt;/code&gt; 中就只放公有配置，如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+
+class Config():
+    &amp;quot;&amp;quot;&amp;quot;
+    Basic config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+    # Application config
+    TIMEZONE = &#39;Asia/Shanghai&#39;
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;而在 &lt;code&gt;pro_config.py或dev_config.py&lt;/code&gt; 中就可以自由地编写不同的配置了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# dev_config
+#!/usr/bin/env python
+from .config import Config
+
+
+class DevConfig(Config):
+    &amp;quot;&amp;quot;&amp;quot;
+    Dev config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+
+    # Application config
+    DEBUG = True
+
+# pro_config
+#!/usr/bin/env python
+from .config import Config
+
+
+class ProConfig(Config):
+    &amp;quot;&amp;quot;&amp;quot;
+    Pro config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+
+    # Application config
+    DEBUG = False
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;配置文件还需要根据系统环境变量的设置进行不同配置环境的切换，比如设置 &lt;code&gt;MODE&lt;/code&gt; 系统环境变量，然后可以根据其不同的值切换到不同的配置文件，因此在 &lt;code&gt;__init__.py&lt;/code&gt; 中需要这么写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+
+def load_config():
+    &amp;quot;&amp;quot;&amp;quot;
+    Load a config class
+    &amp;quot;&amp;quot;&amp;quot;
+
+    mode = os.environ.get(&#39;MODE&#39;, &#39;DEV&#39;)
+    try:
+        if mode == &#39;PRO&#39;:
+            from .pro_config import ProConfig
+            return ProConfig
+        elif mode == &#39;DEV&#39;:
+            from .dev_config import DevConfig
+            return DevConfig
+        else:
+            from .dev_config import DevConfig
+            return DevConfig
+    except ImportError:
+        from .config import Config
+        return Config
+
+
+CONFIG = load_config()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;默认 &lt;code&gt;MODE&lt;/code&gt; 设置为 &lt;code&gt;DEV&lt;/code&gt;，在 &lt;code&gt;run.py&lt;/code&gt; 文件中就可以这么调用：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+from config import CONFIG
+
+app = Sanic()
+app.config.from_object(CONFIG)
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=app.config[&#39;DEBUG&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;而在生产环境的服务器上，直接通过：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 通过设置MODE的值进行配置文件的选择
+export MODE=PRO 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;若是利用 &lt;code&gt;supervisor&lt;/code&gt; 来启动服务，可通过添加&lt;code&gt;environment = MODE=&amp;quot;PRO&amp;quot;&lt;/code&gt; 来设置环境变量，是不是很方便呢。&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 1.初使用</title>
+      <link>http://blog.howie6879.cn/post/28/</link>
+      <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/28/</guid>
+      <description>
+
+&lt;blockquote&gt;
+&lt;p&gt;系统：mac or linux，不要问我win为什么不可以&lt;/p&gt;
+
+&lt;p&gt;版本：python3.5+&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code&gt;Sanic&lt;/code&gt;是一个支持async/await 语法编写项目的异步非阻塞框架，那么很显然，我们需要一个&lt;code&gt;python3.5+&lt;/code&gt;的环境，那么就以运行一个&lt;code&gt;sanic&lt;/code&gt;基础服务为目的来开始。&lt;/p&gt;
+
+&lt;h3 id=&#34;1-1-干净的环境&#34;&gt;1.1.干净的环境&lt;/h3&gt;
+
+&lt;p&gt;暂且先回忆一下你家的房间，你会在厨房做饭、卧室睡觉、浴室洗澡、书房看书，一切是那么有条不紊、井然有序，在不同的环境惬意地做着不同的事，相信这个观点我们应该可以达成共识吧？&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;如若不然，那么再想象下，若在同一间房煮饭、洗澡、睡觉甚至上厕所，这样的环境你可以忍受么，不出意外，相信此时你的脑海中浮现的应该是 &lt;strong&gt;脏、乱、差&lt;/strong&gt; 这三个字。&lt;/p&gt;
+
+&lt;p&gt;好，那么得出核心观点：&lt;strong&gt;应该在不同的环境下做不同的事&lt;/strong&gt; ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的、干净的环境，那是不是可以这样说：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;不同的项目，需要为其构建不同的虚拟环境，以免互相干扰&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;构建虚拟环境的工具很多，如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://virtualenv.pypa.io/en/stable/&#34;&gt;virtualenv&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pyenv/pyenv&#34;&gt;pyenv&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.continuum.io/downloads&#34;&gt;anaconda&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;…&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;不论你使用哪一种方式，反正我们最终目的是针对一个新项目构建一个新的环境，如果你之前没有使用过，可直接点开超链接访问，上手很简单，我本机使用&lt;code&gt;anaconda&lt;/code&gt; ：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 新建一个python3.6环境
+conda create --name python36 python=3.6
+# 安装好之后 输入下面命令进入名为python36的环境
+source activate python36
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;1-2-hello-world&#34;&gt;1.2.Hello World&lt;/h3&gt;
+
+&lt;p&gt;让我们来构建一个基于 &lt;code&gt;Sanic&lt;/code&gt; 的Hello World服务，上一步我们新建了一个新的 &lt;code&gt;python3.6&lt;/code&gt; 环境，接下来乃至以后的项目都默认处于此环境下。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 安装Sanic
+pip install sanic
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;若安装速度比较慢，可以考虑换国内源，比如 &lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/pypi/&#34;&gt;国内镜像&lt;/a&gt; 。&lt;/p&gt;
+
+&lt;p&gt;下面新建一个文件名为 &lt;code&gt;run.py&lt;/code&gt; :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行此文件，在浏览器输入 &lt;code&gt;http://0.0.0.0:8000&lt;/code&gt; ，出现的字符会让你回想起当年学c的恐惧^_^&lt;/p&gt;
+
+&lt;h3 id=&#34;1-3-说明&#34;&gt;1.3.说明&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Sanic&lt;/code&gt; github地址：&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;https://github.com/channelcat/sanic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;官方文档且读完：&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/&#34;&gt;http://sanic.readthedocs.io/en/latest/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;demo地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo01/run.py&#34;&gt;demo01&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>http://blog.howie6879.cn/post/22/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/22/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;0-前言&#34;&gt;0.前言&lt;/h2&gt;
+
+&lt;p&gt;事情的起因是这样的，前段时间在把之前写的一些同步网络请求代码改成异步的，用的是&lt;code&gt;aiohttp&lt;/code&gt;，既然是请求，那请求什么呢，就百度吧，请求什么内容呢，我随手一输自己最近看的一本小说，然后作为练手用，正好最近不知道毕设写什么，于是就做了这个，我将其取名为&lt;code&gt;owllook&lt;/code&gt;，准备做成一个推荐系统，所以我就将其部署上去，这才有了这个网站，同时，这也是我的毕业设计。&lt;/p&gt;
+
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&amp;ndash;novels_search&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;首先我想说下目前的项目进度：&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;v0.1.0：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;小说的基本搜索解析功能&lt;/li&gt;
+&lt;li&gt;搜索记录&lt;/li&gt;
+&lt;li&gt;缓存&lt;/li&gt;
+&lt;li&gt;书架&lt;/li&gt;
+&lt;li&gt;书签&lt;/li&gt;
+&lt;li&gt;登录&lt;/li&gt;
+&lt;li&gt;初步兼容手机（后续跟进）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;TODO:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul class=&#34;task-list&#34;&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 注册（开放注册）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 上次阅读&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 最新章节&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 书友推荐（很基础的推荐）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 目录获取&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 翻页&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 搜索排行&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 阅读书单&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 推荐&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;交流群：591460519，欢迎提issue&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;最近将页面重构，见&lt;a href=&#34;www.owllook.net/md&#34;&gt;md版本页面&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;1-介绍&#34;&gt;1.介绍&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;owllook&lt;/code&gt;的思路很简单，利用百度检索出来的结果，进行过滤解析后再展示，使用的技术如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;sanic：基于Python 3.5+的异步web服务器，快快快&lt;/li&gt;
+&lt;li&gt;sanic_session：sanic的持续会话插件&lt;/li&gt;
+&lt;li&gt;vloop：sanic默认使用uvloop，替代asyncio本身的loop&lt;/li&gt;
+&lt;li&gt;motor：异步的mongodb驱动&lt;/li&gt;
+&lt;li&gt;aiohttp：异步请求&lt;/li&gt;
+&lt;li&gt;aiocache：异步缓存，本项目改用了其中的decorator部分，缓存数据库使用redis&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于用户的一系列操作信息，使用&lt;code&gt;mongodb&lt;/code&gt;进行存储，而缓存则使用&lt;code&gt;redis&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;对于不同网站的小说，页面规则都不尽相同，我希望能够在代码解析后再统一展示出来，这样方便且美观，而不是仅仅跳转到对应网站就完事，清新简洁的阅读体验才是最重要的。&lt;/p&gt;
+
+&lt;p&gt;目前采用的是直接在百度上进行结果检索，也不是不能做的更大更全，只是觉得没什么意义，目前的检索结果已经很足够。&lt;/p&gt;
+
+&lt;p&gt;我尽量写少量的规则来完成解析，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析。&lt;/p&gt;
+
+&lt;p&gt;一般都是在下班时间编写这个项目，目前&lt;code&gt;v0.1&lt;/code&gt;版本大概实现。&lt;/p&gt;
+
+&lt;p&gt;后期我准备将基础功能写好之后，能够实现小说与kindle之间的对接。&lt;/p&gt;
+
+&lt;h2 id=&#34;2-解析&#34;&gt;2.解析&lt;/h2&gt;
+
+&lt;p&gt;这个项目的思路与技术都比较简单，但是小说网站的解析工作是很难全部解析完毕，下面我将举个例子怎么具体的解析一个网站，欢迎各位添砖加瓦，请先看一遍&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;。
+解析也很简单，只要求有点html以及css基础即可。&lt;/p&gt;
+
+&lt;p&gt;首先进入网站&lt;a href=&#34;http://www.owllook.net/。&#34;&gt;http://www.owllook.net/。&lt;/a&gt;
+搜索：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-01.png-blog.howie&#34; alt=&#34;01&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;注意第一条结果显示未解析，这就是我们要解析的对象了，点击进入源网站，审查小说目录对应的元素，这里显示的是：&lt;code&gt;class=&amp;quot;mulu_list&lt;/code&gt;，然后注意其&lt;code&gt;content_url&lt;/code&gt;类型是&lt;code&gt;0&lt;/code&gt;
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-02.png-blog.howie&#34; alt=&#34;02&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;进入小说章节内容页面，审查元素可以看到&lt;code&gt;id=htmlContent&lt;/code&gt;，所以&lt;code&gt;content_selector=htmlContent&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来进入项目，打开&lt;code&gt;config/rules.py&lt;/code&gt;文件，在RULES字典中加入：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;&#39;www.ybdu.com&#39;: Rules(&#39;0&#39;, {&#39;class&#39;: &#39;mulu_list&#39;}, {&#39;id&#39;: &#39;htmlContent&#39;}),
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这时候再重启服务，刷新页面：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-03.png-blog.howie&#34; alt=&#34;03&#34; /&gt;
+可以看到未解析变成了已解析，这时候点击进入，会出现两种情况：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;排版完整，不需要再写样式，此时请直接解析章节内容&lt;/li&gt;
+&lt;li&gt;排版不行，需要写样&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;现在我演示的这个链接排版就是显示不行，请打开&lt;code&gt;/static/novels/css/chapter.css&lt;/code&gt;文件，在编写之前，请先看下面这张图：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-04.jpeg-blog.howie&#34; alt=&#34;04&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;图中.mulu_list1：打错了表示区域1，.mulu_list1：表示区域3.&lt;/p&gt;
+
+&lt;p&gt;首先更改区域1的样式，我已经在代码注释写了各个区域样式代码在哪，直接更改就行，比如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-css&#34;&gt;/* 区域1 */
+.mulu_list, .acss, .list, #xslist ul, .dirlist, .list-chapter, .list_box ul, #defaulthtml4 table, .article-list &amp;gt; dl, .update, #list .box, .bookcontent &amp;gt; dl, .listmain &amp;gt; dl, .ml_main &amp;gt; dl, #list dl, #chapter_list, .chapterlist, tbody, .mt10, .catalog, #readerlists {
+    float: left;
+    overflow: hidden;
+    padding-bottom: 1px;
+    margin: auto;
+    background: #F6F4EC;
+    border-radius: 15px;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到加上了&lt;code&gt;.mulu_list&lt;/code&gt;，以此类推，最后解析完毕之后如下图：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-05.png-blog.howie&#34; alt=&#34;05&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;注意章节内容里面一些无关的链接以及原本网页自带的上一章下一章需要隐藏掉哦。&lt;/p&gt;
+
+&lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
+
+&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;仅供分享交流  不可用于商业用途&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>http://blog.howie6879.cn/post/21/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/21/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
+
+&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
+
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python -m pip install sanic
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;sanic的&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;&gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;2-问题记录&#34;&gt;2.问题记录&lt;/h2&gt;
+
+&lt;h3 id=&#34;2-1-blueprint&#34;&gt;2.1.blueprint&lt;/h3&gt;
+
+&lt;p&gt;借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
+from sanic import Sanic
+from sanic.response import json
+
+app = Sanic()
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
+
+#访问http://0.0.0.0:8000/即可
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   ├── chapter.css
+│       │   ├── content.css
+│       │   ├── index.css
+│       │   ├── main.css
+│       │   └── result.css
+│       ├── img
+│       │   ├── bookMark.png
+│       │   ├── favicon.ico
+│       │   ├── read_bg.png
+│       │   └── read_content.png
+│       └── js
+│           ├── list.js
+│           └── main.js
+├── template
+│   └── novels
+│       ├── chapter.html
+│       ├── content.html
+│       ├── donate.html
+│       ├── feedback.html
+│       ├── index.html
+│       ├── main.html
+│       └── result.html
+└── views
+    └── novels_blueprint.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# server.py
+#!/usr/bin/env python
+from sanic import Sanic
+from novels_search.views.novels_blueprint import bp
+
+app = Sanic(__name__)
+app.blueprint(bp)
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体的&lt;code&gt;novels_blueprint.py&lt;/code&gt;请点击&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-html-templates编写&#34;&gt;2.2.html templates编写&lt;/h3&gt;
+
+&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# novels_blueprint.py片段
+from sanic import Blueprint
+from jinja2 import Environment, PackageLoader, select_autoescape
+
+# 初始化blueprint并定义静态文件夹路径
+bp = Blueprint(&#39;novels_blueprint&#39;)
+bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
+
+def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    return html(template.render(kwargs))
+    
+@bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return template(&#39;index.html&#39;, title=&#39;index&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样，就实现了jinja2 的引入。&lt;/p&gt;
+
+&lt;p&gt;=========05-02===========
+在官方文档发现了已经加入了如何引入jinja2，具体见：&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&#34;&gt;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-3-session&#34;&gt;2.3.session&lt;/h3&gt;
+
+&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，见官方例子如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio_redis
+
+from sanic import Sanic
+from sanic.response import text
+from sanic_session import RedisSessionInterface
+
+app = Sanic()
+
+
+# Token from https://github.com/subyraman/sanic_session
+
+class Redis:
+    &amp;quot;&amp;quot;&amp;quot;
+    A simple wrapper class that allows you to share a connection
+    pool across your application.
+    &amp;quot;&amp;quot;&amp;quot;
+    _pool = None
+
+    async def get_redis_pool(self):
+        if not self._pool:
+            self._pool = await asyncio_redis.Pool.create(
+                host=&#39;localhost&#39;, port=6379, poolsize=10
+            )
+
+        return self._pool
+
+
+redis = Redis()
+
+# pass the getter method for the connection pool into the session
+session_interface = RedisSessionInterface(redis.get_redis_pool, expiry=604800)
+
+
+@app.middleware(&#39;request&#39;)
+async def add_session_to_request(request):
+    # before each request initialize a session
+    # using the client&#39;s request
+    await session_interface.open(request)
+
+
+@app.middleware(&#39;response&#39;)
+async def save_session(request, response):
+    # after each request save the session,
+    # pass the response to set client cookies
+    await session_interface.save(request, response)
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    # interact with the session like a normal dict
+    if not request[&#39;session&#39;].get(&#39;foo&#39;):
+        request[&#39;session&#39;][&#39;foo&#39;] = 0
+
+    request[&#39;session&#39;][&#39;foo&#39;] += 1
+
+    response = text(request[&#39;session&#39;][&#39;foo&#39;])
+
+    return response
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8888, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-4-缓存&#34;&gt;2.4.缓存&lt;/h3&gt;
+
+&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1800, cache=RedisCache, key_from_attr=&#39;url&#39;, serializer=PickleSerializer(),
+        endpoint=REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, None), port=REDIS_DICT.get(&#39;REDIS_PORT&#39;, None), namespace=&amp;quot;main&amp;quot;)
+async def cache_owllook_novels_chapter(url, netloc):
+    async with aiohttp.ClientSession() as client:
+        html = await target_fetch(client=client, url=url)
+        if html:
+            soup = BeautifulSoup(html, &#39;html5lib&#39;)
+            selector = RULES[netloc].chapter_selector
+            if selector.get(&#39;id&#39;, None):
+                content = soup.find_all(id=selector[&#39;id&#39;])
+            elif selector.get(&#39;class&#39;, None):
+                content = soup.find_all(class_=selector[&#39;class&#39;])
+            else:
+                content = soup.find_all(selector.get(&#39;tag&#39;))
+            return str(content) if content else None
+        return None
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-5-api接口验证&#34;&gt;2.5.api接口验证&lt;/h3&gt;
+
+&lt;p&gt;在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好
+from functools import wraps
+from sanic.response import json
+from novels_search.config import AUTH
+
+def authenticator(key):
+    &amp;quot;&amp;quot;&amp;quot;
+    
+    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
+    :return: 返回值
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def wrapper(func):
+        @wraps(func)
+        async def authenticate(request, *args, **kwargs):
+            value = request.headers.get(key, None)
+            if value and AUTH[key] == value:
+                response = await func(request, *args, **kwargs)
+                return response
+            else:
+                return json({&#39;msg&#39;: &#39;not_authorized&#39;, &#39;status&#39;: 403})
+
+        return authenticate
+
+    return wrapper
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;至于使用&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/bd_novels/&amp;lt;name&amp;gt;&amp;quot;)
+@authenticator(&#39;Owllook-Api-Key&#39;)
+async def bd_novels(request, name):
+    pass
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py&#34;&gt;例子&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-6-恶意将其他域名绑定到你的网站独立ip&#34;&gt;2.6.恶意将其他域名绑定到你的网站独立ip&lt;/h3&gt;
+
+&lt;p&gt;前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。&lt;/p&gt;
+
+&lt;p&gt;首先，定义你允许访问的HOST，再获取访问时获取的host，比如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# config.py
+HOST = [&#39;127.0.0.1:8001&#39;]
+
+# sanic获取host
+host = request.headers.get(&#39;host&#39;, None)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;那么就可以在sanic中间件中定义：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 当host不满足条件就调到baidu
+@app.middleware(&#39;request&#39;)
+async def add_session_to_request(request):
+    host = request.headers.get(&#39;host&#39;, None)
+    if not host or host not in HOST:
+        return redirect(&#39;http://www.baidu.com&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-7-注意&#34;&gt;2.7.注意&lt;/h3&gt;
+
+&lt;p&gt;sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见&lt;a href=&#34;https://github.com/channelcat/sanic/issues/633。&#34;&gt;https://github.com/channelcat/sanic/issues/633。&lt;/a&gt;
+sanic更新换代还是很快的。&lt;/p&gt;
+
+&lt;h2 id=&#34;3-说明&#34;&gt;3.说明&lt;/h2&gt;
+
+&lt;p&gt;遇到什么想到什么就继续更新，具体代码&lt;a href=&#34;https://github.com/howie6879/novels-search&#34;&gt;地址&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

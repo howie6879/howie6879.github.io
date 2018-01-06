@@ -1,0 +1,4437 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>http://blog.howie6879.cn/categories/python/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://blog.howie6879.cn/categories/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Sanic 使用教程 - 4.展示一个页面</title>
+      <link>http://blog.howie6879.cn/post/32/</link>
+      <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/32/</guid>
+      <description>
+
+&lt;p&gt;前面一节介绍&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。&lt;/p&gt;
+
+&lt;p&gt;相信你应该已经了解清楚，&lt;code&gt;sanic&lt;/code&gt;是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+- 接收请求
+- 找到对应的路由并执行路由对应的视图函数
+- &lt;a href=&#34;http://jinja.pocoo.org/docs/2.10/&#34;&gt;Jinja2&lt;/a&gt;模板渲染返回视图&lt;/p&gt;
+
+&lt;!--- more ---&gt;
+
+&lt;h3 id=&#34;路由和视图函数&#34;&gt;路由和视图函数&lt;/h3&gt;
+
+&lt;p&gt;在此我假设你理解 &lt;code&gt;python&lt;/code&gt; 中的装饰器，如果你并不清楚，可以看我另写的关于&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;的介绍，回归正题，还记得第一节中的代码实例么？&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+# 此处将路由 / 与视图函数 test 关联起来
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在前言介绍里，出现这几个名词 &lt;strong&gt;路由 视图函数 视图&lt;/strong&gt; ,在上面那段代码中，&lt;code&gt;test&lt;/code&gt; 就是视图函数。&lt;/p&gt;
+
+&lt;p&gt;这是一段执行逻辑，比如客户端请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt; 此时返回的内容就是由&lt;code&gt;test&lt;/code&gt; 这个视图函数提供的。&lt;/p&gt;
+
+&lt;p&gt;在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/docs/part2/1.Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2.md&#34;&gt;sanic0.1.2源码&lt;/a&gt;)来分析下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这个路由装饰器的作用很简单，就是将 &lt;code&gt;/&lt;/code&gt; 这个 &lt;code&gt;uri&lt;/code&gt; 与视图函数&lt;code&gt;test&lt;/code&gt;关联起来，或许你可以将路由想象成一个 &lt;code&gt;dict&lt;/code&gt;，当客户端若请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt;，路由就会&lt;code&gt;get&lt;/code&gt; &lt;code&gt;/&lt;/code&gt; 对应的视图函数&lt;code&gt;test&lt;/code&gt;，然后执行。&lt;/p&gt;
+
+&lt;p&gt;其实真实情况和我们想象的差不多，请看 &lt;code&gt;sanic.py&lt;/code&gt; 中的第三十行:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+# Decorator
+def route(self, uri, methods=None):
+
+    def response(handler):
+        # 路由类的add 方法将视图函数handler 与uri 关联起来
+        # 然后整个路由列表会新增一个 namedtuple 如下：
+        # Route(handler=handler, methods=methods_dict, pattern=pattern, parameters=parameters)
+        self.router.add(uri=uri, methods=methods, handler=handler)
+        return handler
+
+    return response
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此时，路由就和 &lt;code&gt;uri&lt;/code&gt; 对应的视图函数关联起来了，这就是承上，路由和视图函数就是这样对应的关系。
+103行有个&lt;code&gt;handle_request&lt;/code&gt;函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+async def handle_request(self, request, response_callback):
+    &amp;quot;&amp;quot;&amp;quot;
+    Takes a request from the HTTP Server and returns a response object to be sent back
+    The HTTP Server only expects a response object, so exception handling must be done here
+    :param request: HTTP Request object
+    :param response_callback: Response function to be called with the response as the only argument
+    :return: Nothing
+    &amp;quot;&amp;quot;&amp;quot;
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;当服务器监听到某个请求的时候，&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt; 来找到视图函数并且执行，随即生成视图返回，这便是所谓的启下。&lt;/p&gt;
+
+&lt;p&gt;其实浏览器显示的内容就是我们所谓的视图，视图是视图函数生成的，其中Jinja2起到模板渲染的作用。&lt;/p&gt;
+
+&lt;h3 id=&#34;蓝图&#34;&gt;蓝图&lt;/h3&gt;
+
+&lt;p&gt;到这里，你一定已经很明白sanic框架是怎么处理一个请求并将视图返回给客户端，然后也掌握了如何编写自己定义的模板(html)以及样式(css)，通过前面一节&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的介绍，我们可以总结出如下经验：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;对于css、js等静态文件，常规操作是将其放在自己建立的statics下面&lt;/li&gt;
+&lt;li&gt;对于html模板，常规操作是将其放在自己建立的templates下面&lt;/li&gt;
+&lt;li&gt;视图函数(即服务的逻辑实现)放在自己建立的views下面&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;是时候考虑以下这种情况了，你需要编写一个比较复杂的http服务，你需要定义几百个路由，在编写过程中你会发现有许多不顺心的地方：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;各种不同类型的路由互相交杂在一起，命名困难，管理困难&lt;/li&gt;
+&lt;li&gt;不同页面的css文件同样堆积在一起，html也是如此&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;实在是令人烦恼，可能你想要一个模块化的编写方式，一个文件编写后台，url统一是&lt;code&gt;/admin/***&lt;/code&gt;，一个文件编写发帖，&lt;code&gt;/post/***&lt;/code&gt; 等等，各个文件下面url自动会带上自定义的前缀，不用考虑命名问题，不用重复写url前缀，多么美好&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Blueprint&lt;/strong&gt;，就是sanic为你提供的解决方案，依然是上节rss的例子，让我们利用Blueprint来简单实现一下我们的需求，比如我们要构建的网站分为两个部分：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/json/index&lt;/code&gt; 返回json格式的数据&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/html/index&lt;/code&gt; 返回html视图&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们在上节代码的基础上添加Blueprint，先看看定好的项目结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
+.
+├── __init__.py
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+├── run.py
+├── statics
+│   ├── rss_html # rss_html蓝图的 css js 文件存放目录
+│   │   ├── css
+│   │   │   └── main.css
+│   │   └── js
+│   └── rss_json # rss_json蓝图的 css js 文件存放目录
+├── templates
+│   ├── rss_html # rss_html蓝图的 html 文件存放目录
+│   │   ├── index.html
+│   │   └── rss.html
+│   └── rss_json # rss_json蓝图的 html 文件存放目录
+│       └── index.html
+└── views
+    ├── __init__.py
+    ├── rss_html.py # rss_html 蓝图
+    └── rss_json.py # rss_json 蓝图
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;蓝图的目的就是让我们构建的项目灵活，可扩展，容易阅读，方便管理，一个个小的蓝图就构建了一个大型的项目，run.py里面可以随意组合注册蓝图，可抽插式的构建我们的服务，&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/sample01&#34;&gt;sample01&lt;/a&gt;里是本次示例的代码，建议先读一遍，十分简单，主要就是讲路由根据你自己定义的特性分割成一个个蓝图，比如这里的&lt;code&gt;rss_html&lt;/code&gt;和&lt;code&gt;rss_json&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+#!/usr/bin/env python
+# 部分代码
+# rss_html.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
+html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
+
+@html_bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return await template(&#39;index.html&#39;)
+
+#!/usr/bin/env python
+# 部分代码
+# rss_json.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+json_bp = Blueprint(&#39;rss_json&#39;, url_prefix=&#39;json&#39;)
+json_bp.static(&#39;/statics/rss_json&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_json&#39;)
+
+@json_bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return await template(&#39;index.html&#39;)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;不知你是否感受到这样编写服务的好处，让我们列举下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;每个蓝图都有其自己定义的前缀，如 /html/ /json/&lt;/li&gt;
+&lt;li&gt;不同蓝图下面route可相同&lt;/li&gt;
+&lt;li&gt;html以及css等 根据蓝图名称目录引用&lt;/li&gt;
+&lt;li&gt;模块化&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不多说，看运行效果：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
+cd /Sanic-For-Pythoneer/examples/demo04/sample01/src
+python run.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;现在，请访问：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/&#34;&gt;http://0.0.0.0:8000/html/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/&#34;&gt;http://0.0.0.0:8000/json/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/index&#34;&gt;http://0.0.0.0:8000/html/index&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/index&#34;&gt;http://0.0.0.0:8000/json/index&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;感觉这个设计方便了全世界^_^&lt;/p&gt;
+
+&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
+
+&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/&#34;&gt;demo04&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 源码阅读 - 基于0.1.2</title>
+      <link>http://blog.howie6879.cn/post/31/</link>
+      <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/31/</guid>
+      <description>
+
+&lt;p&gt;&lt;code&gt;Sanic&lt;/code&gt;是一个可以使用&lt;code&gt;async/await&lt;/code&gt;语法编写项目的异步非阻塞框架，它写法类似于&lt;code&gt;Flask&lt;/code&gt;，但使用了异步特性，而且还使用&lt;code&gt;uvloop&lt;/code&gt;作为事件循环，其底层使用的是&lt;code&gt;libuv&lt;/code&gt;，从而使 &lt;code&gt;Sanic&lt;/code&gt;的速度优势更加明显。&lt;/p&gt;
+
+&lt;p&gt;如果你：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;想深入了解Sanic，迫切想知道它的运行机制&lt;/li&gt;
+&lt;li&gt;直接阅读源码，做一些定制&lt;/li&gt;
+&lt;li&gt;学习&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;理解&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;理解协程&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--- more ---&gt;
+
+&lt;p&gt;Sanic-0.1.2 的核心文件如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;.
+├── __init__.py
+├── blueprints.py
+├── config.py
+├── exceptions.py
+├── log.py
+├── request.py
+├── response.py
+├── router.py
+├── sanic.py
+├── server.py
+└── utils.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。&lt;/p&gt;
+
+&lt;h3 id=&#34;simple-server-py&#34;&gt;simple_server.py&lt;/h3&gt;
+
+&lt;p&gt;让我们从&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/examples/simple_server.py&#34;&gt;simple_server&lt;/a&gt;开始吧，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+from sanic_0_1_2.src import Sanic
+from sanic_0_1_2.src.response import json
+
+app = Sanic(__name__)
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;test&amp;quot;: True})
+
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;或许你直接把&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;项目直接clone到本地比较方便调试+理解：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/howie6879/sanic_annotation
+cd sanic_annotation/sanic_0_1_2/examples/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;那么，现在一切准备就绪，开始阅读吧。&lt;/p&gt;
+
+&lt;p&gt;前两行代码导入包：
+- &lt;code&gt;Sanic&lt;/code&gt;：构建一个 Sanic 服务必须要实例化的类
+- &lt;code&gt;json&lt;/code&gt;：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：
+    - &lt;code&gt;text&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/plain; charset=utf-8&amp;quot;&lt;/code&gt;
+    - &lt;code&gt;html&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/html; charset=utf-8&amp;quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;实例化一个&lt;code&gt;Sanic&lt;/code&gt;对象，&lt;code&gt;app = Sanic(__name__)&lt;/code&gt;，可见&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;，我已经在这个文件里面做了一些注释，这里也详细说下&lt;code&gt;Sanic&lt;/code&gt;类：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;route()：装饰器，构建uri和视图函数的映射关系，调用Router().add()方法&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;exception()：装饰器，和上面差不多，不过针对的是错误处理类Handler&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;middleware()：装饰器，针对中间件&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;register_blueprint()：注册视图的函数，接受第一个参数是视图类&lt;code&gt;blueprint&lt;/code&gt;，再调用该类下的&lt;code&gt;register&lt;/code&gt;方法实现将此蓝图下的&lt;code&gt;route、exception、middleware&lt;/code&gt;统一注册到&lt;code&gt;app.route、app.exception、app.exception&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;handle_request()：这是一个很重要的异步函数，当服务启动后，如果客户端发来一个有效的请求，会自动执行 &lt;code&gt;on_message_complete&lt;/code&gt;函数，该函数的目的是异步调用 &lt;code&gt;handle_request&lt;/code&gt;函数，&lt;code&gt;handle_request&lt;/code&gt;函数会回调&lt;code&gt;write_response&lt;/code&gt;函数，&lt;code&gt;write_response&lt;/code&gt;接受的参数是此uri请求对应的视图函数，比如上面demo中，如果客户端请求&amp;rsquo;/&amp;lsquo;，那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;，然后进一步处理，再返回给客户端&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;run()：Sanic服务的启动函数，必须执行，实际上会继续调用&lt;code&gt;server.serve&lt;/code&gt;函数，详情下面会详细讲&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;stop()：终止服务&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;其实上面这部分介绍已经讲了Sanic基本的运行逻辑，如果你理解了，那下面的讲解对你来说是轻轻松松，如果不怎么明白，也不要紧，这是只是一个大体的介绍，跟着步骤来，也很容易理解，继续看代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 此处将路由 / 与视图函数 test 关联起来
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;test&amp;quot;: True})
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;app.route&lt;/code&gt;，上面介绍过，随着Sanic服务的启动而启动，可定义参数&lt;code&gt;uri, methods&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;目的是为&lt;code&gt;url&lt;/code&gt;的&lt;code&gt;path&lt;/code&gt;和视图函数对应起来，构建一对映射关系，本例中&lt;code&gt;Sanic.router&lt;/code&gt;类下的&lt;code&gt;Router.routes = []&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;会增加一个名为&lt;code&gt;Route&lt;/code&gt;的&lt;code&gt;namedtuple&lt;/code&gt;，如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;[Route(handler=&amp;lt;function test at 0x10a0f6488&amp;gt;, methods=None, pattern=re.compile(&#39;^/$&#39;), parameters=[])]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;看到没，&lt;code&gt;uri &#39;/&#39;&lt;/code&gt; 和视图函数&lt;code&gt;test&lt;/code&gt;对应起来了，如果客户端请求&lt;code&gt;&#39;/&#39;&lt;/code&gt;，当服务器监听到这个请求的时候,&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt;来找到视图函数&lt;code&gt;test&lt;/code&gt;并且执行，随即生成视图返回&lt;/p&gt;
+
+&lt;p&gt;那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受视图函数test返回的&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;说下&lt;code&gt;Router&lt;/code&gt;类，这个类的目的就是添加和获取路由对应的视图函数，把它想象成&lt;code&gt;dict&lt;/code&gt;或许更容易理解：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;add(self, uri, methods, handler)：添加一个映射关系到self.routes&lt;/li&gt;
+&lt;li&gt;get(self, request)：获取request.url对应的视图函数&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最后一行，&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)&lt;/code&gt;，Sanic 下的&lt;code&gt;run&lt;/code&gt;函数，启动一个&lt;code&gt;http server&lt;/code&gt;，主要是启动&lt;code&gt;run&lt;/code&gt;里面的&lt;code&gt;serve&lt;/code&gt;函数，参数如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+try:
+    serve(
+        host=host,
+        port=port,
+        debug=debug,
+        # 服务开始后启动的函数
+        after_start=after_start,
+        # 在服务关闭前启动的函数
+        before_stop=before_stop,
+        # Sanic(__name__).handle_request()
+        request_handler=self.handle_request,
+        # 默认读取Config
+        request_timeout=self.config.REQUEST_TIMEOUT,
+        request_max_size=self.config.REQUEST_MAX_SIZE,
+    )
+except:
+    pass
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;让我们将目光投向&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;，这也是Sanic框架的核心代码：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;serve()：里面会创建一个TCP服务的协程，然后通过&lt;code&gt;loop.run_forever()&lt;/code&gt;运行这个事件循环，以便接收客户端请求以及处理相关事件，每当一个新的客户端建立连接服务就会创建一个新的&lt;code&gt;Protocol&lt;/code&gt;实例，接受请求与返回响应离不开其中的&lt;code&gt;HttpProtocol&lt;/code&gt;，里面的函数支持接受数据、处理数据、执行视图函数、构建响应数据并返回给客户端&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;HttpProtocol：&lt;code&gt;asyncio.Protocol&lt;/code&gt;的子类，用来处理与客户端的通信，我在&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;里写了对应的注释&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;至此，Sanic 服务启动了&lt;/p&gt;
+
+&lt;p&gt;不要小看这一个小小的demo，执行一下，竟然涉及到下面这么多个文件，让我们总结一下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/router.py&#34;&gt;router.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/request.py&#34;&gt;request.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/response.py&#34;&gt;response.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/exceptions.py&#34;&gt;exceptions.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/config.py&#34;&gt;config.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/log.py&#34;&gt;log.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;除去&lt;code&gt;__init__.py&lt;/code&gt;，&lt;code&gt;Sanic&lt;/code&gt;项目一共就10个文件，这个小demo不显山不露水地竟然用到了8个，虽然其中几个没有怎么用到，但也足够说明，你如果理解了这个demo，&lt;code&gt;Sanic&lt;/code&gt;的运行逻辑以及框架代码你已经了解地很深入了&lt;/p&gt;
+
+&lt;h3 id=&#34;blueprints-py&#34;&gt;blueprints.py&lt;/h3&gt;
+
+&lt;p&gt;这个例子看完，我们就能轻易地明白什么是&lt;code&gt;blueprints&lt;/code&gt;，以及&lt;code&gt;blueprints&lt;/code&gt;的运行方式，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+from sanic_0_1_2.src import Sanic
+# 引入Blueprint
+from sanic_0_1_2.src import Blueprint
+from sanic_0_1_2.src.response import json, text
+
+app = Sanic(__name__)
+blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
+blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
+
+
+@blueprint.route(&#39;/foo&#39;)
+async def foo(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
+
+
+@blueprint2.route(&#39;/foo&#39;)
+async def foo2(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
+
+
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;让我们从这两行开始：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
+blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;显然，&lt;code&gt;blueprint&lt;/code&gt;以及&lt;code&gt;blueprint2&lt;/code&gt;是&lt;code&gt;Blueprint&lt;/code&gt;根据不同的参数生成的不同的实例对象，接下来要干嘛？没错，分析&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/blueprints.py&#34;&gt;blueprints.py&lt;/a&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;BlueprintSetup：蓝图注册类
+
+&lt;ul&gt;
+&lt;li&gt;add_route：添加路由到app&lt;/li&gt;
+&lt;li&gt;add_exception：添加对应抛出的错误到app&lt;/li&gt;
+&lt;li&gt;add_middleware：添加中间件到app&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Blueprint：蓝图类，接收两个参数：name(蓝图名称) url_prefix 该蓝图的url前缀
+
+&lt;ul&gt;
+&lt;li&gt;route：路由装饰器，将会生成一个匿名函数到self.deferred_functions列表里稍后一起处理注册到app里&lt;/li&gt;
+&lt;li&gt;middleware：同上&lt;/li&gt;
+&lt;li&gt;exception：同上&lt;/li&gt;
+&lt;li&gt;record：注册一个回调函数到self.deferred_functions列表里面，&lt;/li&gt;
+&lt;li&gt;make_setup_state：实例化BlueprintSetup&lt;/li&gt;
+&lt;li&gt;register：注册视图，实际就是注册route、middleware、exception到app，此时会利用make_setup&lt;em&gt;state返回的BlueprintSetup示例进行对于的add&lt;/em&gt;***一系列操作，相当于Sanic().route()效果&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;请看下&lt;code&gt;route&lt;/code&gt;和&lt;code&gt;register&lt;/code&gt;函数，然后再看下面的代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 生成一个匿名函数到self.deferred_functions列表里 包含三个参数 handler(foo), uri, methods
+@blueprint.route(&#39;/foo&#39;)
+async def foo(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
+
+
+@blueprint2.route(&#39;/foo&#39;)
+async def foo2(request):
+    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
+
+# 上一个例子说过这个函数，Sanic().register_blueprint() 注册蓝图
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;怎么样，现在来看，是不是很轻松，这一行&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)&lt;/code&gt;服务启动代码不用多说吧？&lt;/p&gt;
+
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+
+&lt;p&gt;看到这里，相信你已经完全理解了Sanic的运行机制，虽然还有&lt;code&gt;middleware&amp;amp;exception&lt;/code&gt;的注册以及调用机制没讲，但这和&lt;code&gt;route&lt;/code&gt;的运行机制一样，如果你懂了&lt;code&gt;route&lt;/code&gt;那么这两个也很简单&lt;/p&gt;
+
+&lt;p&gt;本人技术微末，若有错误，请指出，不胜感激&lt;/p&gt;
+
+&lt;p&gt;注解地址：&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 3.项目结构</title>
+      <link>http://blog.howie6879.cn/post/30/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/30/</guid>
+      <description>
+
+&lt;p&gt;一个项目，在最外层他们应该是一样的，至少需要有:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;文件夹&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;docs&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目文档说明&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;src/pro_name&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目名称&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;tests&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;测试用例&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;README.md&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;项目介绍&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;requirements.txt&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;该项目依赖的第三方库&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;那接下来需要讨论的，就是 &lt;code&gt;src&lt;/code&gt; 的内部结构该是什么样的呢？&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;本章将写一个 &lt;code&gt;rss&lt;/code&gt; 解析展示的项目用做演示。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-1-普通的项目结构&#34;&gt;2.1.普通的项目结构&lt;/h3&gt;
+
+&lt;p&gt;一个普通的项目：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;不需要添加后续模块功能&lt;/li&gt;
+&lt;li&gt;快速开发使用，不需要维护&lt;/li&gt;
+&lt;li&gt;无较复杂的前端需求&lt;/li&gt;
+&lt;li&gt;用完就走&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;那么就可以像 &lt;code&gt;demo01&lt;/code&gt; 中一样，只需要添加一个 &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo03/sample01/src/run.py&#34;&gt;run.py&lt;/a&gt; 或者叫做 &lt;code&gt;app.py&lt;/code&gt; 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。&lt;/p&gt;
+
+&lt;p&gt;新建一个项目如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample01
+├── docs
+│   └── demo.md
+├── src
+│   └── run.py
+├── tests
+├── .gitignore
+└──requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;任意一个 &lt;code&gt;rss&lt;/code&gt; 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，&lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import json
+from feedparser import parse
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
+    return json(data)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;访问 &lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，会返回一串json，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-01.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来，问题升级，我想要将标题链接用页面展示，该怎么弄？&lt;/p&gt;
+
+&lt;p&gt;我们需要一个页面模板，然后写入json数据，最后用 &lt;code&gt;jinja2&lt;/code&gt; 的 &lt;code&gt;template&lt;/code&gt; 将其渲染：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# template的渲染模板
+# 后面会使用更方便的模板引用方式
+template = Template(
+    &amp;quot;&amp;quot;&amp;quot;
+    &amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;rss阅读&amp;lt;/title&amp;gt;
+    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1&amp;quot;&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;article class=&amp;quot;markdown-body&amp;quot;&amp;gt;
+    {% for article in articles %}
+    &amp;lt;b&amp;gt;&amp;lt;a href=&amp;quot;{{article.link}}&amp;quot;&amp;gt;{{article.title}}&amp;lt;/a&amp;gt;&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;
+    &amp;lt;i&amp;gt;{{article.published}}&amp;lt;/i&amp;gt;&amp;lt;br/&amp;gt;
+    &amp;lt;hr/&amp;gt;
+    {% endfor %}
+&amp;lt;/article&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+    &amp;quot;&amp;quot;&amp;quot;
+)
+
+# 逻辑函数
+@app.route(&amp;quot;/html&amp;quot;)
+async def rss_html(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append(
+            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
+    html_content = template.render(articles=data)
+    return html(html_content)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体结构代码见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample01&#34;&gt;sample01&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就可以看到被展示出来的页面^_^&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-02.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;假设需要编写前端页面比较多，那么你就需要添加&lt;code&gt;static&lt;/code&gt; 以及 &lt;code&gt;templates&lt;/code&gt; 文件夹用来管理各个界面模块，具体下面会介绍。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-项目结构具体说明&#34;&gt;2.2.项目结构具体说明&lt;/h3&gt;
+
+&lt;p&gt;当编写的项目过于复杂，我都会将其当做一个第三方包来管理项目中涉及的各种模块，比如 &lt;code&gt;owllook&lt;/code&gt;，目录下面你会发现有个 &lt;code&gt;__init__.py&lt;/code&gt; 文件，它初始化了当前目录下的应用，然后代码中引用某个函数可以这么写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from owllook.config import Config
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;每个项目的内部分布以及命名可能不一样（甚至目录比应该或多或少），但大体意思可能差不多，下面介绍本次项目 &lt;code&gt;src&lt;/code&gt; 下的一些文件目录结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample02
+├── docs
+│   └── demo.md
+├── src
+│   ├── config # 配置 
+│   ├── static # css、js、img
+│   ├── templates # Jinja2模板
+│   └── views # 路由、逻辑处理
+│   ├── __init__.py
+│   ├── run.py # 启动文件
+├── tests
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此处就可以将 &lt;code&gt;sample02&lt;/code&gt; 当成一个包了，咱们来试试看：&lt;/p&gt;
+
+&lt;p&gt;首先新建文件 &lt;code&gt;/views/rss.py&lt;/code&gt; :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;enable_async = sys.version_info &amp;gt;= (3, 6)
+
+app = Sanic()
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.rss&#39;, &#39;../templates&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
+    enable_async=enable_async)
+
+
+async def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    rendered_template = await template.render_async(**kwargs)
+    return html(rendered_template)
+
+
+@app.route(&amp;quot;/html&amp;quot;)
+async def rss_html(request):
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append(
+            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
+    return await template(&#39;rss.html&#39;, articles=articles)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里使用异步的方式引入了 &lt;code&gt;jinja2&lt;/code&gt; ，需要注意的是python版本必须3.6+，否则就得使用同步的方式来引入 &lt;code&gt;jinja2&lt;/code&gt; ，后面章节会继续介绍。&lt;/p&gt;
+
+&lt;p&gt;此时启动文件 &lt;code&gt;run.py&lt;/code&gt; 只要引入 &lt;code&gt;/views/rss.py&lt;/code&gt; 的 &lt;code&gt;app&lt;/code&gt; 实例即可：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# !/usr/bin/env python
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.views import app
+from src.config import CONFIG
+
+app.static(&#39;/static&#39;, CONFIG.BASE_DIR + &#39;/static&#39;)
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;还有一些css文件这里就不介绍，具体代码请看&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample02&#34;&gt;sample02&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就好，效果如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-03.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-3-说明&#34;&gt;2.3.说明&lt;/h3&gt;
+
+&lt;p&gt;关于 &lt;code&gt;views templates static&lt;/code&gt; 内部的构造也是值得一些，这就涉及到蓝图 &lt;code&gt;Blueprint&lt;/code&gt; ，后面介绍蓝图的时候会进行介绍。&lt;/p&gt;
+
+&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/&#34;&gt;demo03&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 2.配置</title>
+      <link>http://blog.howie6879.cn/post/29/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/29/</guid>
+      <description>&lt;p&gt;对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。&lt;/p&gt;
+
+&lt;p&gt;新建文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
+├── config
+│   ├── __init__.py
+│   └── config.py
+└── run.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;其中 &lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;代码示例中开启了 &lt;code&gt;debug&lt;/code&gt; 模式，假设我们需要通过 &lt;code&gt;config.py&lt;/code&gt; 配置文件来实现控制服务的 &lt;code&gt;debug&lt;/code&gt; 模式开启与否，那该怎么实现呢。&lt;/p&gt;
+
+&lt;p&gt;在 &lt;code&gt;config.py&lt;/code&gt; 中添加一行：&lt;code&gt;DEBUG=True&lt;/code&gt; ，然后 &lt;code&gt;run.py&lt;/code&gt; 内容改为：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+from config import DEBUG
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=DEBUG)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;表面上看，功能确实实现了，但这实际上却不是很好的做法，若部署在生产环境中，难道还要特地再将 &lt;code&gt;debug&lt;/code&gt; 改为 &lt;code&gt;False&lt;/code&gt; 么，这显然很浪费时间，如果需要改变的参数有很多，那就很难维护了。&lt;/p&gt;
+
+&lt;p&gt;那么，正确的做法应该是怎么样的呢？&lt;/p&gt;
+
+&lt;p&gt;首先在文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+└── run.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后使用类继承的方式使这三个配置文件联系起来，比如在 &lt;code&gt;config.py&lt;/code&gt; 中就只放公有配置，如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+
+class Config():
+    &amp;quot;&amp;quot;&amp;quot;
+    Basic config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+    # Application config
+    TIMEZONE = &#39;Asia/Shanghai&#39;
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;而在 &lt;code&gt;pro_config.py或dev_config.py&lt;/code&gt; 中就可以自由地编写不同的配置了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# dev_config
+#!/usr/bin/env python
+from .config import Config
+
+
+class DevConfig(Config):
+    &amp;quot;&amp;quot;&amp;quot;
+    Dev config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+
+    # Application config
+    DEBUG = True
+
+# pro_config
+#!/usr/bin/env python
+from .config import Config
+
+
+class ProConfig(Config):
+    &amp;quot;&amp;quot;&amp;quot;
+    Pro config for demo02
+    &amp;quot;&amp;quot;&amp;quot;
+
+    # Application config
+    DEBUG = False
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;配置文件还需要根据系统环境变量的设置进行不同配置环境的切换，比如设置 &lt;code&gt;MODE&lt;/code&gt; 系统环境变量，然后可以根据其不同的值切换到不同的配置文件，因此在 &lt;code&gt;__init__.py&lt;/code&gt; 中需要这么写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+
+def load_config():
+    &amp;quot;&amp;quot;&amp;quot;
+    Load a config class
+    &amp;quot;&amp;quot;&amp;quot;
+
+    mode = os.environ.get(&#39;MODE&#39;, &#39;DEV&#39;)
+    try:
+        if mode == &#39;PRO&#39;:
+            from .pro_config import ProConfig
+            return ProConfig
+        elif mode == &#39;DEV&#39;:
+            from .dev_config import DevConfig
+            return DevConfig
+        else:
+            from .dev_config import DevConfig
+            return DevConfig
+    except ImportError:
+        from .config import Config
+        return Config
+
+
+CONFIG = load_config()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;默认 &lt;code&gt;MODE&lt;/code&gt; 设置为 &lt;code&gt;DEV&lt;/code&gt;，在 &lt;code&gt;run.py&lt;/code&gt; 文件中就可以这么调用：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+from config import CONFIG
+
+app = Sanic()
+app.config.from_object(CONFIG)
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=app.config[&#39;DEBUG&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;而在生产环境的服务器上，直接通过：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 通过设置MODE的值进行配置文件的选择
+export MODE=PRO 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;若是利用 &lt;code&gt;supervisor&lt;/code&gt; 来启动服务，可通过添加&lt;code&gt;environment = MODE=&amp;quot;PRO&amp;quot;&lt;/code&gt; 来设置环境变量，是不是很方便呢。&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 1.初使用</title>
+      <link>http://blog.howie6879.cn/post/28/</link>
+      <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/28/</guid>
+      <description>
+
+&lt;blockquote&gt;
+&lt;p&gt;系统：mac or linux，不要问我win为什么不可以&lt;/p&gt;
+
+&lt;p&gt;版本：python3.5+&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code&gt;Sanic&lt;/code&gt;是一个支持async/await 语法编写项目的异步非阻塞框架，那么很显然，我们需要一个&lt;code&gt;python3.5+&lt;/code&gt;的环境，那么就以运行一个&lt;code&gt;sanic&lt;/code&gt;基础服务为目的来开始。&lt;/p&gt;
+
+&lt;h3 id=&#34;1-1-干净的环境&#34;&gt;1.1.干净的环境&lt;/h3&gt;
+
+&lt;p&gt;暂且先回忆一下你家的房间，你会在厨房做饭、卧室睡觉、浴室洗澡、书房看书，一切是那么有条不紊、井然有序，在不同的环境惬意地做着不同的事，相信这个观点我们应该可以达成共识吧？&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;如若不然，那么再想象下，若在同一间房煮饭、洗澡、睡觉甚至上厕所，这样的环境你可以忍受么，不出意外，相信此时你的脑海中浮现的应该是 &lt;strong&gt;脏、乱、差&lt;/strong&gt; 这三个字。&lt;/p&gt;
+
+&lt;p&gt;好，那么得出核心观点：&lt;strong&gt;应该在不同的环境下做不同的事&lt;/strong&gt; ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的、干净的环境，那是不是可以这样说：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;不同的项目，需要为其构建不同的虚拟环境，以免互相干扰&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;构建虚拟环境的工具很多，如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://virtualenv.pypa.io/en/stable/&#34;&gt;virtualenv&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pyenv/pyenv&#34;&gt;pyenv&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.continuum.io/downloads&#34;&gt;anaconda&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;…&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;不论你使用哪一种方式，反正我们最终目的是针对一个新项目构建一个新的环境，如果你之前没有使用过，可直接点开超链接访问，上手很简单，我本机使用&lt;code&gt;anaconda&lt;/code&gt; ：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 新建一个python3.6环境
+conda create --name python36 python=3.6
+# 安装好之后 输入下面命令进入名为python36的环境
+source activate python36
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;1-2-hello-world&#34;&gt;1.2.Hello World&lt;/h3&gt;
+
+&lt;p&gt;让我们来构建一个基于 &lt;code&gt;Sanic&lt;/code&gt; 的Hello World服务，上一步我们新建了一个新的 &lt;code&gt;python3.6&lt;/code&gt; 环境，接下来乃至以后的项目都默认处于此环境下。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 安装Sanic
+pip install sanic
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;若安装速度比较慢，可以考虑换国内源，比如 &lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/pypi/&#34;&gt;国内镜像&lt;/a&gt; 。&lt;/p&gt;
+
+&lt;p&gt;下面新建一个文件名为 &lt;code&gt;run.py&lt;/code&gt; :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return text(&#39;Hello World!&#39;)
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行此文件，在浏览器输入 &lt;code&gt;http://0.0.0.0:8000&lt;/code&gt; ，出现的字符会让你回想起当年学c的恐惧^_^&lt;/p&gt;
+
+&lt;h3 id=&#34;1-3-说明&#34;&gt;1.3.说明&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Sanic&lt;/code&gt; github地址：&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;https://github.com/channelcat/sanic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;官方文档且读完：&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/&#34;&gt;http://sanic.readthedocs.io/en/latest/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;demo地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo01/run.py&#34;&gt;demo01&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>gRPC使用初试</title>
+      <link>http://blog.howie6879.cn/post/25/</link>
+      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/25/</guid>
+      <description>
+
+&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://grpc.io/&#34;&gt;gRPC&lt;/a&gt;是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用&lt;code&gt;protocol buffer&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;protocol buffer&lt;/code&gt;是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用&lt;code&gt;protocol buffer&lt;/code&gt;(&lt;code&gt;proto3&lt;/code&gt;)来进行定义，即根据&lt;code&gt;protocol buffer language&lt;/code&gt;来定义你的&lt;code&gt;protocol buffer data&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;最后再利用&lt;code&gt;protocol buffer&lt;/code&gt;编译定义的 &lt;code&gt;.proto&lt;/code&gt; 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&#34;２-实践&#34;&gt;２.实践&lt;/h2&gt;
+
+&lt;p&gt;假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
+└── proto
+    └── lower.proto
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;接下来将编写&lt;code&gt;proto&lt;/code&gt;文件，本例使用&lt;code&gt;proto3&lt;/code&gt;语法进行编写，&lt;code&gt;protobuf&lt;/code&gt;定义的语法请看&lt;a href=&#34;https://developers.google.com/protocol-buffers/docs/proto3&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;lower.proto&lt;/code&gt;文件内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-proto&#34;&gt;syntax = &amp;quot;proto3&amp;quot;;
+package lower;
+
+service Lower {
+    rpc Lower (LowerRequest) returns (LowerResult) {
+    }
+}
+
+message LowerRequest {
+    string message = 1;
+}
+
+message LowerResult {
+    string lower_message = 1;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;定义一个服务&lt;code&gt;Lower&lt;/code&gt;，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件&lt;code&gt;proto_compile.py&lt;/code&gt;，并安装相关的包：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;pip install grpcio
+pip install grpcio-tools
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# script proto_compile.py
+from grpc_tools import protoc
+
+# 或者在项目根目录运行：
+# python -m grpc_tools.protoc -I. --python_out=../ --grpc_python_out=../ ./cal.proto
+protoc.main(
+    (
+        &#39;&#39;,
+        &#39;-Iproto&#39;,
+        &#39;--python_out=.&#39;,
+        &#39;--grpc_python_out=.&#39;,
+        &#39;proto/lower.proto&#39;,
+    )
+)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行后，项目结构如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
+├── lower_pb2_grpc.py     # 编译生成的文件
+├── lower_pb2.py          # 编译生成的文件
+├── proto
+│   └── lower.proto
+└── proto_compile.py
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;最后编写客户端以及服务端脚本&lt;code&gt;lower_client.py&lt;/code&gt;、&lt;code&gt;lower_server.py&lt;/code&gt;，内容分别如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# lower_server.py
+
+import time
+import grpc
+from concurrent import futures
+import lower_pb2, lower_pb2_grpc
+
+_TIME_WAIT = 10
+
+
+class Lower(lower_pb2_grpc.LowerServicer):
+    def Lower(self, request, context):
+        return lower_pb2.LowerResult(lower_message=request.message.lower())
+
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    lower_pb2_grpc.add_LowerServicer_to_server(Lower(), server)
+    server.add_insecure_port(&#39;[::]:50052&#39;)
+    server.start()
+    try:
+        while True:
+            time.sleep(_TIME_WAIT)
+    except KeyboardInterrupt:
+        server.stop(0)
+
+
+if __name__ == &#39;__main__&#39;:
+    serve()
+
+# lower_client.py
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import grpc
+
+import lower_pb2, lower_pb2_grpc
+
+
+def run():
+    channel = grpc.insecure_channel(&amp;quot;localhost:50052&amp;quot;)
+    stub = lower_pb2_grpc.LowerStub(channel)
+    response = stub.Lower(lower_pb2.LowerRequest(message=&amp;quot;HELLO WORLD!&amp;quot;))
+    print(&amp;quot;Message result received:  %s&amp;quot; % response.lower_message)
+
+
+if __name__ == &#39;__main__&#39;:
+    run()
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此时文件目录结构如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
+├── lower_client.py
+├── lower_pb2_grpc.py
+├── lower_pb2.py
+├── lower_server.py
+├── proto
+│   └── lower.proto
+├── proto_compile.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;先运行&lt;code&gt;lower_server.py&lt;/code&gt;，再运行&lt;code&gt;lower_client.py&lt;/code&gt;，就会看到终端有结果输出：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;Message result received:  hello world!
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到，返回小写字符，&lt;code&gt;demo&lt;/code&gt;演示完毕&lt;/p&gt;
+
+&lt;h2 id=&#34;3-最后&#34;&gt;3.最后&lt;/h2&gt;
+
+&lt;p&gt;以下是我了解&lt;code&gt;gRPC&lt;/code&gt;过程中收集的一些资料：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;官方中文文档：&lt;a href=&#34;http://doc.oschina.net/grpc?t=58008&#34;&gt;http://doc.oschina.net/grpc?t=58008&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;proto中文翻译： &lt;a href=&#34;http://colobu.com/2017/03/16/Protobuf3-language-guide/&#34;&gt;http://colobu.com/2017/03/16/Protobuf3-language-guide/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;参考实例：&lt;a href=&#34;http://blog.csdn.net/lavorange/article/details/74504837&#34;&gt;http://blog.csdn.net/lavorange/article/details/74504837&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>talonspider - 简单的爬虫框架</title>
+      <link>http://blog.howie6879.cn/post/24/</link>
+      <pubDate>Wed, 07 Jun 2017 23:56:08 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/24/</guid>
+      <description>&lt;h3 id=&#34;1-为什么写这个&#34;&gt;1.为什么写这个？&lt;/h3&gt;
+
+&lt;p&gt;一些简单的页面，无需用比较大的框架来进行爬取，自己纯手写又比较麻烦&lt;/p&gt;
+
+&lt;p&gt;因此针对这个需求写了&lt;a href=&#34;https://github.com/howie6879/talonspider&#34;&gt;talonspider&lt;/a&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1.针对单页面的item提取 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talonspider/blob/master/docs/item.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2.spider模块 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talonspider/blob/master/docs/spider.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;2-介绍-使用&#34;&gt;2.介绍&amp;amp;&amp;amp;使用&lt;/h3&gt;
+
+&lt;h4 id=&#34;2-1-item&#34;&gt;2.1.item&lt;/h4&gt;
+
+&lt;p&gt;这个模块是可以独立使用的，对于一些请求比较简单的网站（比如只需要&lt;code&gt;get&lt;/code&gt;请求），单单只用这个模块就可以快速地编写出你想要的爬虫，比如(以下使用python3，python2见examples目录)：&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h5 id=&#34;2-1-1-单页面单目标&#34;&gt;2.1.1.单页面单目标&lt;/h5&gt;
+
+&lt;p&gt;比如要获取这个网址&lt;a href=&#34;http://book.qidian.com/info/1004608738&#34;&gt;http://book.qidian.com/info/1004608738&lt;/a&gt; 的书籍信息，封面等信息，可直接这样写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import time
+from talonspider import Item, TextField, AttrField
+from pprint import pprint
+
+class TestSpider(Item):
+    title = TextField(css_select=&#39;.book-info&amp;gt;h1&amp;gt;em&#39;)
+    author = TextField(css_select=&#39;a.writer&#39;)
+    cover = AttrField(css_select=&#39;a#bookImg&amp;gt;img&#39;, attr=&#39;src&#39;)
+
+    def tal_title(self, title):
+        return title
+
+    def tal_cover(self, cover):
+        return &#39;http:&#39; + cover
+
+if __name__ == &#39;__main__&#39;:
+    item_data = TestSpider.get_item(url=&#39;http://book.qidian.com/info/1004608738&#39;)
+    pprint(item_data)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/talonspider/blob/master/examples/qidian_details_by_item.py&#34;&gt;qidian_details_by_item.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h5 id=&#34;2-1-1-单页面多目标&#34;&gt;2.1.1.单页面多目标&lt;/h5&gt;
+
+&lt;p&gt;比如获取&lt;a href=&#34;[https://movie.douban.com/top250](https://movie.douban.com/top250)&#34;&gt;豆瓣250电影&lt;/a&gt;首页展示的25部电影，这一个页面有25个目标，可直接这样写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from talonspider import Item, TextField, AttrField
+from pprint import pprint
+
+# 定义继承自item的爬虫类
+class DoubanSpider(Item):
+    target_item = TextField(css_select=&#39;div.item&#39;)
+    title = TextField(css_select=&#39;span.title&#39;)
+    cover = AttrField(css_select=&#39;div.pic&amp;gt;a&amp;gt;img&#39;, attr=&#39;src&#39;)
+    abstract = TextField(css_select=&#39;span.inq&#39;)
+
+    def tal_title(self, title):
+        if isinstance(title, str):
+            return title
+        else:
+            return &#39;&#39;.join([i.text.strip().replace(&#39;\xa0&#39;, &#39;&#39;) for i in title])
+
+if __name__ == &#39;__main__&#39;:
+    items_data = DoubanSpider.get_items(url=&#39;https://movie.douban.com/top250&#39;)
+    result = []
+    for item in items_data:
+        result.append({
+            &#39;title&#39;: item.title,
+            &#39;cover&#39;: item.cover,
+            &#39;abstract&#39;: item.abstract,
+        })
+    pprint(result)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/talonspider/blob/master/examples/douban_page_by_item.py&#34;&gt;douban_page_by_item.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;2-2-spider&#34;&gt;2.2.spider&lt;/h4&gt;
+
+&lt;p&gt;当需要爬取有层次的页面时，比如爬取豆瓣250全部电影，这时候&lt;code&gt;spider&lt;/code&gt;部分就派上了用场：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# !/usr/bin/env python
+from talonspider import Spider, Item, TextField, AttrField, Request
+from talonspider.utils import get_random_user_agent
+
+
+# 定义继承自item的爬虫类
+class DoubanItem(Item):
+    target_item = TextField(css_select=&#39;div.item&#39;)
+    title = TextField(css_select=&#39;span.title&#39;)
+    cover = AttrField(css_select=&#39;div.pic&amp;gt;a&amp;gt;img&#39;, attr=&#39;src&#39;)
+    abstract = TextField(css_select=&#39;span.inq&#39;)
+
+    def tal_title(self, title):
+        if isinstance(title, str):
+            return title
+        else:
+            return &#39;&#39;.join([i.text.strip().replace(&#39;\xa0&#39;, &#39;&#39;) for i in title])
+
+
+class DoubanSpider(Spider):
+    # 定义起始url，必须
+    start_urls = [&#39;https://movie.douban.com/top250&#39;]
+    # requests配置
+    request_config = {
+        &#39;RETRIES&#39;: 3,
+        &#39;DELAY&#39;: 0,
+        &#39;TIMEOUT&#39;: 20
+    }
+	# 解析函数 必须有
+    def parse(self, res):
+        # 将html转化为etree
+        etree = self.e_html(res.html)
+        # 提取目标值生成新的url
+        pages = [i.get(&#39;href&#39;) for i in etree.cssselect(&#39;.paginator&amp;gt;a&#39;)]
+        pages.insert(0, &#39;?start=0&amp;amp;filter=&#39;)
+        headers = {
+            &amp;quot;User-Agent&amp;quot;: get_random_user_agent()
+        }
+        for page in pages:
+            url = self.start_urls[0] + page
+            yield Request(url, request_config=self.request_config, headers=headers, callback=self.parse_item)
+
+    def parse_item(self, html):
+        items_data = DoubanItem.get_items(html=html)
+        # result = []
+        for item in items_data:
+            # result.append({
+            #     &#39;title&#39;: item.title,
+            #     &#39;cover&#39;: item.cover,
+            #     &#39;abstract&#39;: item.abstract,
+            # })
+            # 保存
+            with open(&#39;douban250.txt&#39;, &#39;a+&#39;) as f:
+                f.writelines(item.title + &#39;\n&#39;)
+
+
+if __name__ == &#39;__main__&#39;:
+    DoubanSpider.start()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;控制台：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/Users/howie/anaconda3/envs/work3/bin/python /Users/howie/Documents/programming/python/git/talonspider/examples/douban_page_by_spider.py
+2017-06-07 23:17:30,346 - talonspider - INFO: talonspider started
+2017-06-07 23:17:30,693 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250
+2017-06-07 23:17:31,074 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=25&amp;amp;filter=
+2017-06-07 23:17:31,416 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=50&amp;amp;filter=
+2017-06-07 23:17:31,853 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=75&amp;amp;filter=
+2017-06-07 23:17:32,523 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=100&amp;amp;filter=
+2017-06-07 23:17:33,032 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=125&amp;amp;filter=
+2017-06-07 23:17:33,537 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=150&amp;amp;filter=
+2017-06-07 23:17:33,990 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=175&amp;amp;filter=
+2017-06-07 23:17:34,406 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=200&amp;amp;filter=
+2017-06-07 23:17:34,787 - talonspider_requests - INFO: GET a url: https://movie.douban.com/top250?start=225&amp;amp;filter=
+2017-06-07 23:17:34,809 - talonspider - INFO: Time usage：0:00:04.462108
+
+Process finished with exit code 0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此时当前目录会生成&lt;code&gt;douban250.txt&lt;/code&gt;，具体见&lt;a href=&#34;https://github.com/howie6879/talonspider/blob/master/examples/douban_page_by_spider.py&#34;&gt;douban_page_by_spider.py&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3 id=&#34;3-说明&#34;&gt;3.说明&lt;/h3&gt;
+
+&lt;p&gt;学习之作，待完善的地方还有很多，欢迎提意见，项目地址&lt;a href=&#34;https://github.com/howie6879/talonspider&#34;&gt;talonspider&lt;/a&gt;。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>http://blog.howie6879.cn/post/22/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/22/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;0-前言&#34;&gt;0.前言&lt;/h2&gt;
+
+&lt;p&gt;事情的起因是这样的，前段时间在把之前写的一些同步网络请求代码改成异步的，用的是&lt;code&gt;aiohttp&lt;/code&gt;，既然是请求，那请求什么呢，就百度吧，请求什么内容呢，我随手一输自己最近看的一本小说，然后作为练手用，正好最近不知道毕设写什么，于是就做了这个，我将其取名为&lt;code&gt;owllook&lt;/code&gt;，准备做成一个推荐系统，所以我就将其部署上去，这才有了这个网站，同时，这也是我的毕业设计。&lt;/p&gt;
+
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&amp;ndash;novels_search&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;首先我想说下目前的项目进度：&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;v0.1.0：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;小说的基本搜索解析功能&lt;/li&gt;
+&lt;li&gt;搜索记录&lt;/li&gt;
+&lt;li&gt;缓存&lt;/li&gt;
+&lt;li&gt;书架&lt;/li&gt;
+&lt;li&gt;书签&lt;/li&gt;
+&lt;li&gt;登录&lt;/li&gt;
+&lt;li&gt;初步兼容手机（后续跟进）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;TODO:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul class=&#34;task-list&#34;&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 注册（开放注册）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 上次阅读&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 最新章节&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 书友推荐（很基础的推荐）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 目录获取&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 翻页&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 搜索排行&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 阅读书单&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 推荐&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;交流群：591460519，欢迎提issue&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;最近将页面重构，见&lt;a href=&#34;www.owllook.net/md&#34;&gt;md版本页面&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;1-介绍&#34;&gt;1.介绍&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;owllook&lt;/code&gt;的思路很简单，利用百度检索出来的结果，进行过滤解析后再展示，使用的技术如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;sanic：基于Python 3.5+的异步web服务器，快快快&lt;/li&gt;
+&lt;li&gt;sanic_session：sanic的持续会话插件&lt;/li&gt;
+&lt;li&gt;vloop：sanic默认使用uvloop，替代asyncio本身的loop&lt;/li&gt;
+&lt;li&gt;motor：异步的mongodb驱动&lt;/li&gt;
+&lt;li&gt;aiohttp：异步请求&lt;/li&gt;
+&lt;li&gt;aiocache：异步缓存，本项目改用了其中的decorator部分，缓存数据库使用redis&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于用户的一系列操作信息，使用&lt;code&gt;mongodb&lt;/code&gt;进行存储，而缓存则使用&lt;code&gt;redis&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;对于不同网站的小说，页面规则都不尽相同，我希望能够在代码解析后再统一展示出来，这样方便且美观，而不是仅仅跳转到对应网站就完事，清新简洁的阅读体验才是最重要的。&lt;/p&gt;
+
+&lt;p&gt;目前采用的是直接在百度上进行结果检索，也不是不能做的更大更全，只是觉得没什么意义，目前的检索结果已经很足够。&lt;/p&gt;
+
+&lt;p&gt;我尽量写少量的规则来完成解析，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析。&lt;/p&gt;
+
+&lt;p&gt;一般都是在下班时间编写这个项目，目前&lt;code&gt;v0.1&lt;/code&gt;版本大概实现。&lt;/p&gt;
+
+&lt;p&gt;后期我准备将基础功能写好之后，能够实现小说与kindle之间的对接。&lt;/p&gt;
+
+&lt;h2 id=&#34;2-解析&#34;&gt;2.解析&lt;/h2&gt;
+
+&lt;p&gt;这个项目的思路与技术都比较简单，但是小说网站的解析工作是很难全部解析完毕，下面我将举个例子怎么具体的解析一个网站，欢迎各位添砖加瓦，请先看一遍&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;。
+解析也很简单，只要求有点html以及css基础即可。&lt;/p&gt;
+
+&lt;p&gt;首先进入网站&lt;a href=&#34;http://www.owllook.net/。&#34;&gt;http://www.owllook.net/。&lt;/a&gt;
+搜索：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-01.png-blog.howie&#34; alt=&#34;01&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;注意第一条结果显示未解析，这就是我们要解析的对象了，点击进入源网站，审查小说目录对应的元素，这里显示的是：&lt;code&gt;class=&amp;quot;mulu_list&lt;/code&gt;，然后注意其&lt;code&gt;content_url&lt;/code&gt;类型是&lt;code&gt;0&lt;/code&gt;
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-02.png-blog.howie&#34; alt=&#34;02&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;进入小说章节内容页面，审查元素可以看到&lt;code&gt;id=htmlContent&lt;/code&gt;，所以&lt;code&gt;content_selector=htmlContent&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来进入项目，打开&lt;code&gt;config/rules.py&lt;/code&gt;文件，在RULES字典中加入：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;&#39;www.ybdu.com&#39;: Rules(&#39;0&#39;, {&#39;class&#39;: &#39;mulu_list&#39;}, {&#39;id&#39;: &#39;htmlContent&#39;}),
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这时候再重启服务，刷新页面：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-03.png-blog.howie&#34; alt=&#34;03&#34; /&gt;
+可以看到未解析变成了已解析，这时候点击进入，会出现两种情况：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;排版完整，不需要再写样式，此时请直接解析章节内容&lt;/li&gt;
+&lt;li&gt;排版不行，需要写样&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;现在我演示的这个链接排版就是显示不行，请打开&lt;code&gt;/static/novels/css/chapter.css&lt;/code&gt;文件，在编写之前，请先看下面这张图：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-04.jpeg-blog.howie&#34; alt=&#34;04&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;图中.mulu_list1：打错了表示区域1，.mulu_list1：表示区域3.&lt;/p&gt;
+
+&lt;p&gt;首先更改区域1的样式，我已经在代码注释写了各个区域样式代码在哪，直接更改就行，比如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-css&#34;&gt;/* 区域1 */
+.mulu_list, .acss, .list, #xslist ul, .dirlist, .list-chapter, .list_box ul, #defaulthtml4 table, .article-list &amp;gt; dl, .update, #list .box, .bookcontent &amp;gt; dl, .listmain &amp;gt; dl, .ml_main &amp;gt; dl, #list dl, #chapter_list, .chapterlist, tbody, .mt10, .catalog, #readerlists {
+    float: left;
+    overflow: hidden;
+    padding-bottom: 1px;
+    margin: auto;
+    background: #F6F4EC;
+    border-radius: 15px;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到加上了&lt;code&gt;.mulu_list&lt;/code&gt;，以此类推，最后解析完毕之后如下图：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-10-05.png-blog.howie&#34; alt=&#34;05&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;注意章节内容里面一些无关的链接以及原本网页自带的上一章下一章需要隐藏掉哦。&lt;/p&gt;
+
+&lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
+
+&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;仅供分享交流  不可用于商业用途&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>http://blog.howie6879.cn/post/21/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/21/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
+
+&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
+
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python -m pip install sanic
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;sanic的&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;&gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;2-问题记录&#34;&gt;2.问题记录&lt;/h2&gt;
+
+&lt;h3 id=&#34;2-1-blueprint&#34;&gt;2.1.blueprint&lt;/h3&gt;
+
+&lt;p&gt;借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
+from sanic import Sanic
+from sanic.response import json
+
+app = Sanic()
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
+
+#访问http://0.0.0.0:8000/即可
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   ├── chapter.css
+│       │   ├── content.css
+│       │   ├── index.css
+│       │   ├── main.css
+│       │   └── result.css
+│       ├── img
+│       │   ├── bookMark.png
+│       │   ├── favicon.ico
+│       │   ├── read_bg.png
+│       │   └── read_content.png
+│       └── js
+│           ├── list.js
+│           └── main.js
+├── template
+│   └── novels
+│       ├── chapter.html
+│       ├── content.html
+│       ├── donate.html
+│       ├── feedback.html
+│       ├── index.html
+│       ├── main.html
+│       └── result.html
+└── views
+    └── novels_blueprint.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# server.py
+#!/usr/bin/env python
+from sanic import Sanic
+from novels_search.views.novels_blueprint import bp
+
+app = Sanic(__name__)
+app.blueprint(bp)
+
+app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体的&lt;code&gt;novels_blueprint.py&lt;/code&gt;请点击&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-html-templates编写&#34;&gt;2.2.html templates编写&lt;/h3&gt;
+
+&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# novels_blueprint.py片段
+from sanic import Blueprint
+from jinja2 import Environment, PackageLoader, select_autoescape
+
+# 初始化blueprint并定义静态文件夹路径
+bp = Blueprint(&#39;novels_blueprint&#39;)
+bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
+
+def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    return html(template.render(kwargs))
+    
+@bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return template(&#39;index.html&#39;, title=&#39;index&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样，就实现了jinja2 的引入。&lt;/p&gt;
+
+&lt;p&gt;=========05-02===========
+在官方文档发现了已经加入了如何引入jinja2，具体见：&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&#34;&gt;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-3-session&#34;&gt;2.3.session&lt;/h3&gt;
+
+&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，见官方例子如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio_redis
+
+from sanic import Sanic
+from sanic.response import text
+from sanic_session import RedisSessionInterface
+
+app = Sanic()
+
+
+# Token from https://github.com/subyraman/sanic_session
+
+class Redis:
+    &amp;quot;&amp;quot;&amp;quot;
+    A simple wrapper class that allows you to share a connection
+    pool across your application.
+    &amp;quot;&amp;quot;&amp;quot;
+    _pool = None
+
+    async def get_redis_pool(self):
+        if not self._pool:
+            self._pool = await asyncio_redis.Pool.create(
+                host=&#39;localhost&#39;, port=6379, poolsize=10
+            )
+
+        return self._pool
+
+
+redis = Redis()
+
+# pass the getter method for the connection pool into the session
+session_interface = RedisSessionInterface(redis.get_redis_pool, expiry=604800)
+
+
+@app.middleware(&#39;request&#39;)
+async def add_session_to_request(request):
+    # before each request initialize a session
+    # using the client&#39;s request
+    await session_interface.open(request)
+
+
+@app.middleware(&#39;response&#39;)
+async def save_session(request, response):
+    # after each request save the session,
+    # pass the response to set client cookies
+    await session_interface.save(request, response)
+
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    # interact with the session like a normal dict
+    if not request[&#39;session&#39;].get(&#39;foo&#39;):
+        request[&#39;session&#39;][&#39;foo&#39;] = 0
+
+    request[&#39;session&#39;][&#39;foo&#39;] += 1
+
+    response = text(request[&#39;session&#39;][&#39;foo&#39;])
+
+    return response
+
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8888, debug=True)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-4-缓存&#34;&gt;2.4.缓存&lt;/h3&gt;
+
+&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1800, cache=RedisCache, key_from_attr=&#39;url&#39;, serializer=PickleSerializer(),
+        endpoint=REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, None), port=REDIS_DICT.get(&#39;REDIS_PORT&#39;, None), namespace=&amp;quot;main&amp;quot;)
+async def cache_owllook_novels_chapter(url, netloc):
+    async with aiohttp.ClientSession() as client:
+        html = await target_fetch(client=client, url=url)
+        if html:
+            soup = BeautifulSoup(html, &#39;html5lib&#39;)
+            selector = RULES[netloc].chapter_selector
+            if selector.get(&#39;id&#39;, None):
+                content = soup.find_all(id=selector[&#39;id&#39;])
+            elif selector.get(&#39;class&#39;, None):
+                content = soup.find_all(class_=selector[&#39;class&#39;])
+            else:
+                content = soup.find_all(selector.get(&#39;tag&#39;))
+            return str(content) if content else None
+        return None
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-5-api接口验证&#34;&gt;2.5.api接口验证&lt;/h3&gt;
+
+&lt;p&gt;在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好
+from functools import wraps
+from sanic.response import json
+from novels_search.config import AUTH
+
+def authenticator(key):
+    &amp;quot;&amp;quot;&amp;quot;
+    
+    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
+    :return: 返回值
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def wrapper(func):
+        @wraps(func)
+        async def authenticate(request, *args, **kwargs):
+            value = request.headers.get(key, None)
+            if value and AUTH[key] == value:
+                response = await func(request, *args, **kwargs)
+                return response
+            else:
+                return json({&#39;msg&#39;: &#39;not_authorized&#39;, &#39;status&#39;: 403})
+
+        return authenticate
+
+    return wrapper
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;至于使用&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/bd_novels/&amp;lt;name&amp;gt;&amp;quot;)
+@authenticator(&#39;Owllook-Api-Key&#39;)
+async def bd_novels(request, name):
+    pass
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py&#34;&gt;例子&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-6-恶意将其他域名绑定到你的网站独立ip&#34;&gt;2.6.恶意将其他域名绑定到你的网站独立ip&lt;/h3&gt;
+
+&lt;p&gt;前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。&lt;/p&gt;
+
+&lt;p&gt;首先，定义你允许访问的HOST，再获取访问时获取的host，比如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# config.py
+HOST = [&#39;127.0.0.1:8001&#39;]
+
+# sanic获取host
+host = request.headers.get(&#39;host&#39;, None)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;那么就可以在sanic中间件中定义：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 当host不满足条件就调到baidu
+@app.middleware(&#39;request&#39;)
+async def add_session_to_request(request):
+    host = request.headers.get(&#39;host&#39;, None)
+    if not host or host not in HOST:
+        return redirect(&#39;http://www.baidu.com&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-7-注意&#34;&gt;2.7.注意&lt;/h3&gt;
+
+&lt;p&gt;sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见&lt;a href=&#34;https://github.com/channelcat/sanic/issues/633。&#34;&gt;https://github.com/channelcat/sanic/issues/633。&lt;/a&gt;
+sanic更新换代还是很快的。&lt;/p&gt;
+
+&lt;h2 id=&#34;3-说明&#34;&gt;3.说明&lt;/h2&gt;
+
+&lt;p&gt;遇到什么想到什么就继续更新，具体代码&lt;a href=&#34;https://github.com/howie6879/novels-search&#34;&gt;地址&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Mastering Python 01</title>
+      <link>http://blog.howie6879.cn/post/16/</link>
+      <pubDate>Fri, 27 Jan 2017 10:20:31 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/16/</guid>
+      <description>
+
+&lt;h1 id=&#34;1-准备&#34;&gt;1.准备&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.说明：《Mastering Python》读书笔记&lt;/p&gt;
+
+&lt;p&gt;2.要求：首先，希望你是处在&lt;code&gt;python3&lt;/code&gt;版本，然后拥有一个干净的虚拟环境更是必要。&lt;/p&gt;
+
+&lt;p&gt;3.virtualenv或者anaconda都是不错的选择&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;!-- more--&gt;
+
+&lt;h1 id=&#34;2-pythonic-syntax-common-pitfalls-and-style-guide&#34;&gt;2.Pythonic Syntax, Common Pitfalls, and Style Guide&lt;/h1&gt;
+
+&lt;h2 id=&#34;2-1-pythonic-code&#34;&gt;2.1.Pythonic code&lt;/h2&gt;
+
+&lt;p&gt;对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;- Clean
+- Simple
+- Beautiful
+- Explicit
+- Readable
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体的话请打开你的python解释器：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import this
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;细细感受吧。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-1-2-differences-between-value-and-identity-comparisons&#34;&gt;2.1.2.Differences between value and identity comparisons&lt;/h3&gt;
+
+&lt;p&gt;对于下面这个例子：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;a1 = 200 + 56
+a2 = 256
+b1 = -4 - 1
+b2 = -5
+c1 = 200 + 57
+c2 = 257
+d1 = -4 - 2
+d2 = -6
+print(&#39;%r == %r: %r&#39; % (a1, a2, a1 == a2))
+print(&#39;%r is %r: %r&#39; % (a1, a2, a1 is a2))
+print(&#39;%r == %r: %r&#39; % (b1, b2, b1 == b2))
+print(&#39;%r is %r: %r&#39; % (b1, b2, b1 is b2))
+print(&#39;%r == %r: %r&#39; % (c1, c2, c1 == c2))
+print(&#39;%r is %r: %r&#39; % (c1, c2, c1 is c2))
+print(&#39;%r == %r: %r&#39; % (d1, d2, d1 == d2))
+print(&#39;%r is %r: %r&#39; % (d1, d2, d1 is d2))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;256 == 256: True
+256 is 256: True
+-5 == -5: True
+-5 is -5: True
+257 == 257: True
+257 is 257: False
+-6 == -6: True
+-6 is -6: False
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到，在值相同的情况下，使用&lt;code&gt;==&lt;/code&gt;比较都返回&lt;code&gt;True&lt;/code&gt;自不必说，为何有的&lt;code&gt;id&lt;/code&gt;相同有的&lt;code&gt;id&lt;/code&gt;却不同？&lt;/p&gt;
+
+&lt;p&gt;这是因为，在&lt;code&gt;pyhton&lt;/code&gt;中，会提前为一小部分整数提前分配空间，这个整数的范围是[-5,256]，当整数范围大于256或者小于-5时，&lt;code&gt;python&lt;/code&gt;便会为该整数创建对象，于是造成id不同。如果想深入了解，可阅读&lt;a href=&#34;http://python.jobbole.com/82632/&#34;&gt;深入 Python 整数对象的实现&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-1-3-loops&#34;&gt;2.1.3.Loops&lt;/h3&gt;
+
+&lt;p&gt;对于一个列表，比如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;my_list = [1, 2, 3, 4]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;想将其输出为&lt;code&gt;[index:value]&lt;/code&gt;这种列表格式，请看以下几种实现方法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;index = 0
+my_list = [1, 2, 3, 4]
+new_list = []
+for value in my_list:
+    value = &amp;quot;{0}:{1}&amp;quot;.format(index, value)
+    new_list.append(value)
+    index += 1
+print(new_list)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;不得不说，实在很繁琐，我们可以利用&lt;code&gt;python&lt;/code&gt;提供的&lt;code&gt;enumerate&lt;/code&gt;类：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;new_list = []
+for index, value in enumerate(my_list):
+    value = &amp;quot;{0}:{1}&amp;quot;.format(index, value)
+    new_list.append(value)
+print(new_list)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;第二种方法确实精简了不少，但是，优雅的&lt;code&gt;pythonic&lt;/code&gt;不是浪得虚名，请看这种：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;my_list = [1, 2, 3, 4]
+[&amp;quot;{0}:{1}&amp;quot;.format(index, value) for index, value in enumerate(my_list)]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;[&#39;0:1&#39;, &#39;1:2&#39;, &#39;2:3&#39;, &#39;3:4&#39;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;2-2-common-pitfalls&#34;&gt;2.2.Common pitfalls&lt;/h2&gt;
+
+&lt;p&gt;虽说&lt;code&gt;python&lt;/code&gt;自诩是一种清晰易读无歧义的优雅语言，但是这个伟大的目标并不是那么容易实现。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-1-function-arguments&#34;&gt;2.2.1.Function arguments&lt;/h3&gt;
+
+&lt;p&gt;需要知道的是，&lt;strong&gt;千万不要使用可变参数作为函数默认参数&lt;/strong&gt;，看下面这样一个例子：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def spam(key, value, list_=[], dict_={}):
+    list_.append(value)
+    dict_[key] = value
+    print(&#39;List: %r&#39; % list_)
+    print(&#39;Dict: %r&#39; % dict_)
+
+
+spam(&#39;key 1&#39;, &#39;value 1&#39;)
+spam(&#39;key 2&#39;, &#39;value 2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;List: [&#39;value 1&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;}
+List: [&#39;value 1&#39;, &#39;value 2&#39;]
+Dict: {&#39;key 2&#39;: &#39;value 2&#39;, &#39;key 1&#39;: &#39;value 1&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;按照代码的思路，输出的结果应该是下面这样才对：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;List: [&#39;value 1&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;}
+List: [&#39;value 2&#39;]
+Dict: {&#39;key 2&#39;: &#39;value 2&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;实际上并非如此，首先，&lt;code&gt;list&lt;/code&gt;以及&lt;code&gt;dict&lt;/code&gt;都是可变对象，当&lt;code&gt;spam&lt;/code&gt;函数被定义，&lt;code&gt;list_&lt;/code&gt;和&lt;code&gt;dict_&lt;/code&gt;就会被创建（&lt;strong&gt;但是它们只被创建一次&lt;/strong&gt;），随后调用函数的时候，&lt;code&gt;list_&lt;/code&gt;和&lt;code&gt;dict_&lt;/code&gt;并没有被重新创建，于是，这个陷阱便出现了。&lt;/p&gt;
+
+&lt;p&gt;正确的做法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def spam(key, value, list_=None, dict_=None):
+    if list_ is None:
+        list_ = []
+    if dict_ is None:
+        dict_ = {}
+    list_.append(value)
+    dict_[key] = value
+    print(&#39;List: %r&#39; % list_)
+    print(&#39;Dict: %r&#39; % dict_)
+
+
+spam(&#39;key 1&#39;, &#39;value 1&#39;)
+spam(&#39;key 2&#39;, &#39;value 2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;List: [&#39;value 1&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;}
+List: [&#39;value 2&#39;]
+Dict: {&#39;key 2&#39;: &#39;value 2&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-2-2-class-properties&#34;&gt;2.2.2.Class properties&lt;/h3&gt;
+
+&lt;p&gt;在类的定义中，也存在这样的问题。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Spam(object):
+
+    list_ = []
+    dict_ = {}
+
+    def __init__(self, key, value):
+        self.list_.append(value)
+        self.dict_[key] = value
+        print(&#39;List: %r&#39; % self.list_)
+        print(&#39;Dict: %r&#39; % self.dict_)
+
+
+Spam(&#39;key 1&#39;, &#39;value 1&#39;)
+Spam(&#39;key 2&#39;, &#39;value 2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;output:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;List: [&#39;value 1&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;}
+List: [&#39;value 1&#39;, &#39;value 2&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;, &#39;key 2&#39;: &#39;value 2&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;替代方案：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Spam(object):
+    def __init__(self, key, value):
+        self.list_ = [key]
+        self.dict_ = {key: value}
+        print(&#39;List: %r&#39; % self.list_)
+        print(&#39;Dict: %r&#39; % self.dict_)
+
+
+Spam(&#39;key 1&#39;, &#39;value 1&#39;)
+Spam(&#39;key 2&#39;, &#39;value 2&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;List: [&#39;key 1&#39;]
+Dict: {&#39;key 1&#39;: &#39;value 1&#39;}
+List: [&#39;key 2&#39;]
+Dict: {&#39;key 2&#39;: &#39;value 2&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;__main__.Spam at 0x10498a2b0&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-2-3-modifying-variables-in-the-global-scope&#34;&gt;2.2.3.Modifying variables in the global scope&lt;/h3&gt;
+
+&lt;p&gt;在函数内对变量进行操作也有需要注意的地方。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;spam = 1
+
+
+def eggs():
+    spam += 1
+    print(spam)
+
+
+eggs()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;---------------------------------------------------------------------------
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;UnboundLocalError                         Traceback (most recent call last)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;ipython-input-8-52c0d52ad689&amp;gt; in &amp;lt;module&amp;gt;()
+      7 
+      8 
+----&amp;gt; 9 eggs()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;ipython-input-8-52c0d52ad689&amp;gt; in eggs()
+      3 
+      4 def eggs():
+----&amp;gt; 5     spam += 1
+      6     print(spam)
+      7 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;UnboundLocalError: local variable &#39;spam&#39; referenced before assignment
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在&lt;code&gt;eggs&lt;/code&gt;函数内，如果某个变量有被赋值，那么该变量就是局部变量，如果没有赋值，那么便会被解释为全局变量，所以对局部变量&lt;code&gt;spam&lt;/code&gt;进行操作的时候，在函数内并没有进行赋值，&lt;code&gt;spam&lt;/code&gt;被解释成全局变量，自然会出现错误。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-4-modifying-while-iterating&#34;&gt;2.2.4.Modifying while iterating&lt;/h3&gt;
+
+&lt;p&gt;当对某个字典进行迭代的时候：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;dict_ = {&#39;spam&#39;: &#39;eggs&#39;}
+
+for key in dict_:
+    del dict_[key]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;---------------------------------------------------------------------------
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;RuntimeError                              Traceback (most recent call last)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;ipython-input-9-b88de85f5f0b&amp;gt; in &amp;lt;module&amp;gt;()
+      1 dict_ = {&#39;spam&#39;: &#39;eggs&#39;}
+      2 
+----&amp;gt; 3 for key in dict_:
+      4     del dict_[key]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;RuntimeError: dictionary changed size during iteration
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;改正方法如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dict_ = {&#39;spam&#39;: &#39;eggs&#39;}
+
+for key in list(dict_):
+    del dict_[key]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-2-5-late-binding&#34;&gt;2.2.5.Late binding&lt;/h3&gt;
+
+&lt;p&gt;这个问题就是所谓的后期绑定，什么是后期绑定？请看下面的例子：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;eggs = [lambda a: i * a for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+# 理想结果
+# 0
+# 5
+# 10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;10
+10
+10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;果然现实和理想是有差别的，为什么会造成这样的结果呢，是因为在匿名函数中&lt;code&gt;i&lt;/code&gt;的值是2，可是明明分别循环了&lt;code&gt;0、1、2&lt;/code&gt;。
+你需要知道，定义一个函数后，函数内的变量并不是立刻就把值绑定了，而是在被调用的时候才会去查找变量，所以等&lt;code&gt;egg(5)&lt;/code&gt;去查找i这个变量的时候，&lt;code&gt;i=5&lt;/code&gt;，于是就造成了后期绑定这个陷阱。
+要解决这个问题很简单，只需要在出现后期绑定前提前对变量进行*赋值*操作即可&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 粗暴点可以直接这么来
+eggs = [lambda a, i=i: i * a for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;0
+5
+10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 优雅点
+eggs = (lambda a: i * a for i in range(3))
+for egg in eggs:
+    print(egg(5))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;0
+5
+10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 高级语法这么来
+import functools
+eggs = [functools.partial(lambda i, a: i * a, i) for i in range(3)]
+for egg in eggs:
+    print(egg(5))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;0
+5
+10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;总之，以上作为参考，能解决就好。&lt;/p&gt;
+
+&lt;h1 id=&#34;3-总结&#34;&gt;3.总结&lt;/h1&gt;
+
+&lt;p&gt;本节笔记主要记录&lt;code&gt;python&lt;/code&gt;一些优雅的写法以及陷阱。&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>ITBooks—简单的书籍下载小工具</title>
+      <link>http://blog.howie6879.cn/post/15/</link>
+      <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/15/</guid>
+      <description>
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150814.jpg-blog.howie&#34; alt=&#34;run&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
+
+&lt;p&gt;我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。&lt;/p&gt;
+
+&lt;p&gt;很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。&lt;/p&gt;
+
+&lt;p&gt;下面展示下&lt;code&gt;0.1&lt;/code&gt;版本的成果，比如说检索&lt;code&gt;Mastering python&lt;/code&gt;，空格用&lt;code&gt;+&lt;/code&gt;代替。
+&lt;code&gt;python abook.py search Mastering+python Hattem&lt;/code&gt;&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&#34;2-说明&#34;&gt;2.说明&lt;/h2&gt;
+
+&lt;p&gt;项目名称叫做&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，当然不准备只做&lt;code&gt;IT&lt;/code&gt;方面书籍，文学名著也是可以的。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150834.jpg-blog.howie&#34; alt=&#34;literature&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，是一个查询和下载书籍的&lt;code&gt;python&lt;/code&gt;脚本。
+目前只存储了&lt;code&gt;allitebooks blah&lt;/code&gt;网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用  &lt;code&gt;scrapy&lt;/code&gt;爬取信息，具体看&lt;code&gt;ITBooks/spider/allitebooks&lt;/code&gt;，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。
+添加爬虫只需要在&lt;code&gt;ITBooks/spider/allitebooks/spider&lt;/code&gt;，下新建一个&lt;code&gt;scrapy&lt;/code&gt;的爬虫脚本即可，对于数据的存储，具体在&lt;code&gt;ITBooks/database
+&lt;/code&gt;，当然，你可以直接新建一个库。
+这里放个&lt;code&gt;allitebooks&lt;/code&gt;的爬虫脚本，这里说明下，&lt;strong&gt;这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+import datetime
+import sys
+import scrapy
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import MapCompose, TakeFirst, Join
+from scrapy.http import Request
+from allitebooks.items import AllitebooksItem
+from allitebooks.pipelines import AllitebooksPipeline
+
+if sys.version_info[0] &amp;gt; 2:
+    from urllib.parse import urljoin
+else:
+    from urlparse import urljoin
+
+
+class AllitebooksSpider(scrapy.Spider):
+    name = &amp;quot;allitebooks&amp;quot;
+    allowed_domains = [&amp;quot;allitebooks.com&amp;quot;]
+    start_urls = (&#39;http://www.allitebooks.com&#39;, )
+
+    def parse(self, response):
+        &amp;quot;&amp;quot;&amp;quot;
+        Get the next pages and yield requests
+        :param response:
+        :return: request url
+        &amp;quot;&amp;quot;&amp;quot;
+        pages = response.css(&#39;.pagination&amp;gt;a::text&#39;).extract()[-1]
+        for page in range(int(pages)):
+            # Generate a list of urls
+            url = urljoin(response.url, &#39;/page/&#39; + str(page + 1))
+            yield Request(url, callback=self.parse_detail)
+
+    def parse_detail(self, response):
+        &amp;quot;&amp;quot;&amp;quot;
+        Get item URLs and yield Requests
+        :param response:
+        :return: request url
+        &amp;quot;&amp;quot;&amp;quot;
+        urls = response.css(
+            &#39;article&amp;gt;div.entry-body&amp;gt;header&amp;gt;.entry-title&amp;gt;a::attr(href)&#39;
+        ).extract()
+        for url in urls:
+            # Remove duplicate links
+            sqlDb = AllitebooksPipeline()
+            isExist = sqlDb.search_url(&#39;allitebooks&#39;, url)
+            if not isExist:
+                yield Request(url, callback=self.parse_item)
+
+    def parse_item(self, response):
+        &amp;quot;&amp;quot;&amp;quot;
+        This function parses a property page.
+        :param response:
+        :return: item
+        &amp;quot;&amp;quot;&amp;quot;
+        # Create the loader using response
+        l = ItemLoader(item=AllitebooksItem(), response=response)
+        # Load primary fields using css expressions
+        l.add_css(&#39;title&#39;, &#39;.single-title::text&#39;, MapCompose(str.strip))
+        l.add_css(&#39;cover&#39;, &#39;.entry-body-thumbnail&amp;gt;a&amp;gt;img::attr(src)&#39;)
+        book_details = response.css(&#39;.book-detail&amp;gt;dl&amp;gt;dd::text&#39;).extract()
+        author_list = response.css(
+            &#39;.book-detail&amp;gt;dl&amp;gt;dd:nth-child(2)&amp;gt;a::text&#39;).extract()
+        category_list = response.css(
+            &#39;.book-detail&amp;gt;dl&amp;gt;dd:nth-child(16)&amp;gt;a::text&#39;).extract()
+        author = &#39;,&#39;.join(author_list)
+        category = &#39;,&#39;.join(category_list)
+        book_details = book_details[len(author_list):(-len(category_list))]
+        l.add_value(&#39;author&#39;, author, MapCompose(str.strip))
+        l.add_value(&#39;category&#39;, category, MapCompose(str.strip))
+        item_name = &amp;quot;isbn year pages language file_size file_format&amp;quot;.split()
+        for index, value in enumerate(item_name):
+            l.add_value(value, book_details[index], MapCompose(str.strip))
+        l.add_css(&#39;description&#39;, &#39;.entry-content&#39;)
+        l.add_css(&#39;download&#39;, &#39;span.download-links&amp;gt;a::attr(href)&#39;,
+                  MapCompose(str.strip), TakeFirst())
+        # Housekeeping fields
+        l.add_value(&#39;url&#39;, response.url)
+        l.add_value(&#39;spider&#39;, self.name)
+        l.add_value(&#39;date&#39;, datetime.datetime.now())
+        yield l.load_item()
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;现在就是由于想在本地运行，对于自动更新是个问题，本来想使用&lt;code&gt;celery&lt;/code&gt;将&lt;code&gt;scrapy&lt;/code&gt;爬虫弄成一个个任务，我是可以在机器上这样部署，可是这对于使用者不大现实，目前是手动更新（确实很挫）。&lt;/p&gt;
+
+&lt;p&gt;接下来说说使用方法，如果你感兴趣，可以试试^_^
+脚本在&lt;code&gt;python2.7+和python3&lt;/code&gt;下都可以运行，我测试过，但是爬虫却没在&lt;code&gt;python2&lt;/code&gt;下测过，所以我建议还是用3吧。
+运行以下命令：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/howie6879/ITBooks
+cd /ITBooks/ITBooks
+python abook.py search Mastering+Python Hattem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体使用方法如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  python abook.py search &amp;lt;title&amp;gt; &amp;lt;author&amp;gt;
+  python abook.py title &amp;lt;title&amp;gt;
+  python abook.py author &amp;lt;author&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;也在根目录下写了个&lt;code&gt;bash&lt;/code&gt;，其实没什么差别：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;bash run.sh [search|title|author] &amp;lt;value&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150854.jpg-blog.howie&#34; alt=&#34;search&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150911.jpg-blog.howie&#34; alt=&#34;command&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150928.jpg-blog.howie&#34; alt=&#34;download&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;写在最后，本人技术微末，如果错漏，欢迎指教，项目&lt;code&gt;github&lt;/code&gt;地址在这里&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，欢迎各位添砖加瓦。&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>对于python抓取google搜索结果的一些了解</title>
+      <link>http://blog.howie6879.cn/post/14/</link>
+      <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/14/</guid>
+      <description>
+
+&lt;h2 id=&#34;1-问题&#34;&gt;1.问题&lt;/h2&gt;
+
+&lt;p&gt;目前主流的搜索引擎，非&lt;code&gt;google&lt;/code&gt;莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉。
+本人前段时间有个脚本用到了谷歌搜索，具体见&lt;a href=&#34;http://www.jianshu.com/p/d1cf6c6df6bb&#34;&gt;python之由公司名推算出公司官网(余弦相似度)&lt;/a&gt;当时直接使用的是一个&lt;code&gt;python&lt;/code&gt;开源项目。
+但在使用过程中，单&lt;code&gt;ip&lt;/code&gt;的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进。
+说一说爬取谷歌搜索结果的问题：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。
+2.访问过快就会出现流量异常&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&#34;2-如何解决&#34;&gt;2.如何解决&lt;/h2&gt;
+
+&lt;p&gt;对于第一个问题：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141240.jpg-blog.howie&#34; alt=&#34;大串js&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;应该有看到审查元素出来的都是js，然后检索的url是这样的：
+&lt;code&gt;https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141259.jpg-blog.howie&#34; alt=&#34;&#34; /&gt;
+然后再看url：
+&lt;code&gt;https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;对于这个&lt;code&gt;url&lt;/code&gt;，相信机智的你应该会明白些什么。
+这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的&lt;code&gt;html&lt;/code&gt;，简单写下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;    URL_SEARCH = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;quot;
+    URL_NUM = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;quot;
+
+    def search_page(query, language=&#39;en&#39;, num=None, start=0, pause=2):
+        &amp;quot;&amp;quot;&amp;quot;
+        Google search
+        :param query: Keyword
+        :param language: Language
+        :return: result
+        &amp;quot;&amp;quot;&amp;quot;
+        time.sleep(pause)
+        domain = self.get_random_domain()
+        if num is None:
+            url = URL_SEARCH
+            url = url.format(
+                domain=domain, language=language, query=quote_plus(query))
+        else:
+            url = URL_NUM
+            url = url.format(
+                domain=domain, language=language, query=quote_plus(query), num=num)
+        try:
+            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+            r = requests.get(url=url,
+                             allow_redirects=False,
+                             verify=False,
+                             timeout=30)
+            charset = chardet.detect(r.content)
+            content = r.content.decode(charset[&#39;encoding&#39;])
+            return content
+        except Exception as e:
+            logging.error(e)
+            return None
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;到了这里，问题才刚开始，你可以做个实验，我假设你是使用代理进行谷歌搜索，如果你连续不断无间隔使用谷歌搜索某一关键字二三十下，不出意外你会被要求进行这样的验证：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141352.jpg-blog.howie&#34; alt=&#34;流量异常&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这个问题可真是让人十分厌恶，我并没有很好的解决办法，能做的唯有尽量避免：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.ip轮询
+2.每次结果爬取增加休眠
+3.随机user_agent是必备&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;第一点和第三点不必多说，对于第二点增加休眠时间则需要我们好好地进行检测。
+假设在单ip随机ua情况下：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.这种情况下不休眠的话请求个两三次就会直接被封（第二天会被解封）
+2.个人觉得这不是个解决办法，因为对休眠时间把控不好的话就会造成封ip，如果不想被封，我测试的话需要休眠60s浮动，这没什么意义。
+3.而且这种情况下呗发现是直接封ip，对开发者太不友好。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;对于这种情况，受同事神来一句，发现一个暂时的解决办法，请看下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141408.jpg-blog.howie&#34; alt=&#34;google&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;单一ip不停地访问统一谷歌域名自然很容易被察觉，谷歌全球190+的域名，难道都在实时的统计ip么，可能有，但绝对不会像单域名那样严格，来做个测试。
+我将全球190+谷歌域名集中起来，像ua一样随机轮换，然后进行测试(单ip)，结果还不错：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.首先没有出现被封ip，只会提示流量异常
+2.还是需要休眠，本人休眠5~15s没有被封过，可根据自身情况来，如果想稳妥点就5~30s吧&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我将这些写成了一个项目，&lt;a href=&#34;https://github.com/howie6879/MagicGoogle&#34;&gt;MagicGoogle&lt;/a&gt;，具体代码可以看这里，对应的功能很简单：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from MagicGoogle import MagicGoogle
+import pprint
+
+# Or PROXIES = None
+PROXIES = [{
+    &#39;http&#39;: &#39;http://192.168.2.207:1080&#39;,
+    &#39;https&#39;: &#39;http://192.168.2.207:1080&#39;
+}]
+
+# Or MagicGoogle()
+mg = MagicGoogle(PROXIES)
+
+#  Crawling the whole page
+result = mg.search_page(query=&#39;python&#39;)
+
+# Crawling url
+for url in mg.search_url(query=&#39;python&#39;):
+    pprint.pprint(url)
+
+# Output
+# &#39;https://www.python.org/&#39;
+# &#39;https://www.python.org/downloads/&#39;
+# &#39;https://www.python.org/about/gettingstarted/&#39;
+# &#39;https://docs.python.org/2/tutorial/&#39;
+# &#39;https://docs.python.org/&#39;
+# &#39;https://en.wikipedia.org/wiki/Python_(programming_language)&#39;
+# &#39;https://www.codecademy.com/courses/introduction-to-python-6WeG3/0?curriculum_id=4f89dab3d788890003000096&#39;
+# &#39;https://www.codecademy.com/learn/python&#39;
+# &#39;https://developers.google.com/edu/python/&#39;
+# &#39;https://learnpythonthehardway.org/book/&#39;
+# &#39;https://www.continuum.io/downloads&#39;
+
+# Get {&#39;title&#39;,&#39;url&#39;,&#39;text&#39;}
+for i in mg.search(query=&#39;python&#39;, num=1):
+    pprint.pprint(i)
+
+# Output
+# {&#39;text&#39;: &#39;The official home of the Python Programming Language.&#39;,
+# &#39;title&#39;: &#39;Welcome to Python .org&#39;,
+# &#39;url&#39;: &#39;https://www.python.org/&#39;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
+
+&lt;p&gt;对google搜索结果的爬取，有以下建议：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;1.ip轮询
+2.ua随机
+3.domain随机
+4.休眠&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Mastering Pandas 01</title>
+      <link>http://blog.howie6879.cn/post/13/</link>
+      <pubDate>Mon, 21 Nov 2016 14:23:27 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/13/</guid>
+      <description>
+
+&lt;h2 id=&#34;1-pandas特性&#34;&gt;1.pandas特性&lt;/h2&gt;
+
+&lt;p&gt;对于python开发者来说，在面对海量数据时，&lt;code&gt;pandas&lt;/code&gt;可谓是数据分析的首选，以下关键特性是它如此热门的原因：
+    1. 可以处理各种不同格式的数据集：时间序列，表格，矩阵数据
+    2. 促进csv、DB/SQL等来源数据的加载/导入
+    3. 可以在很大数据集的基础上进行一些过滤、合并、切片等一系列操作
+    4. 可以根据使用的自定义的规则来处理缺失数据
+    &amp;hellip;
+更多信息可移步&lt;a href=&#34;https://github.com/pandas-dev/pandas&#34;&gt;pandas&lt;/a&gt;进一步了解。&lt;/p&gt;
+
+&lt;h3 id=&#34;1-1-安装&#34;&gt;1.1.安装&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 可使用 anaconda 集成环境 自带科学计算包
+pip install pandas
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;1-2-说明&#34;&gt;1.2.说明&lt;/h3&gt;
+
+&lt;p&gt;建议使用&lt;code&gt;ipython&lt;/code&gt;，本人使用&lt;code&gt;jupyter notebook&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;2-pandas-数据结构&#34;&gt;2.pandas 数据结构&lt;/h2&gt;
+
+&lt;p&gt;看完本篇文章后，您将了解以下数据结构：
+    1. pandas是基于NumPy构建的，所以numpy.ndarray数据结构必不可少
+    2. pandas.Series：一维数据结构
+    3. pandas.DataFrame：二维数据结构
+    4. pandas.Panel：三维数据结构
+&lt;!-- more --&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-1-numpy-ndarray&#34;&gt;2.1.NumPy ndarray&lt;/h3&gt;
+
+&lt;p&gt;在数值计算中，&lt;code&gt;NumPy&lt;/code&gt;非常重要，其中最重要的数据结构便是ndarray多维数组对象，&lt;code&gt;NumPy&lt;/code&gt;提供了许多方法来创造数组。&lt;/p&gt;
+
+&lt;p&gt;首先导入numpy模块&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-1-numpy-array&#34;&gt;2.1.1.numpy.array&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;data_01 = [0, 1, 2, 3]
+data_02 = [-1, -2, 5.5, 6]
+# 一维数组
+arr_01 = np.array(data_01)
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 二维数组
+arr_02 = np.array([data_01, data_02])
+arr_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# shape表示各维度大小的元组
+arr_02.shape
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+(2, 4)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# dtype说明数组数据类型的对象
+arr_01.dtype
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+dtype(&#39;int64&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.dtype
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+dtype(&#39;float64&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# ndim表示数组的维度
+arr_01.ndim
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.ndim
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-2-numpy-arange&#34;&gt;2.1.2.numpy.arange&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_03 = np.arange(12)
+arr_03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 可以设定条件 开始数值 结束数值 间隔数
+arr_04 = np.arange(3, 10, 3)
+arr_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([3, 6, 9])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-3-numpy-linspace&#34;&gt;2.1.3.numpy.linspace&lt;/h4&gt;
+
+&lt;p&gt;在设定的开始结束数值之间生成线性均匀间隔的元素&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_05 = np.linspace(0, 2.0/3, 4)
+arr_05
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0.        ,  0.22222222,  0.44444444,  0.66666667])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-4-numpy-ones&#34;&gt;2.1.4.numpy.ones&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 看代码就造用法了
+arr_06 = np.ones((3, 3), dtype=np.int)
+arr_06
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[1, 1, 1],
+       [1, 1, 1],
+       [1, 1, 1]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-5-numpy-zeros&#34;&gt;2.1.5.numpy.zeros&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_07 = np.zeros((3, 3), dtype=np.int)
+arr_07
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[0, 0, 0],
+       [0, 0, 0],
+       [0, 0, 0]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-6-numpy-eye&#34;&gt;2.1.6.numpy.eye&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_08 = np.eye(4, dtype=int)
+arr_08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[1, 0, 0, 0],
+       [0, 1, 0, 0],
+       [0, 0, 1, 0],
+       [0, 0, 0, 1]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-7-numpy-diag&#34;&gt;2.1.7.numpy.diag&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_09 = np.diag((1, 2, 3, 4))
+arr_09
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[1, 0, 0, 0],
+       [0, 2, 0, 0],
+       [0, 0, 3, 0],
+       [0, 0, 0, 4]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_10 = np.diag(arr_09, k=1)
+arr_10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 0, 0])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-8-numpy-random-randn&#34;&gt;2.1.8.numpy.random.randn&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 从标准正态分布中返回一个或多个样本值
+np.random.seed(100)
+arr_11 = np.random.rand(4)
+arr_11
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0.54340494,  0.27836939,  0.42451759,  0.84477613])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-9-numpy-empty&#34;&gt;2.1.9.numpy.empty&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_12 = np.empty((3, 2))
+arr_12
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0.,  0.],
+       [ 0.,  0.],
+       [ 0.,  0.]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-10-numpy-tile&#34;&gt;2.1.10.numpy.tile&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_13 = np.tile(arr_02, 2)
+arr_13
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ,  0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. , -1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-11-numpy-datatypes&#34;&gt;2.1.11.NumPy datatypes&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# int
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 自定义类型
+arr_14 = np.arange(10, dtype=&#39;float&#39;)
+arr_14
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;out:
+arr_15 = np.array([&#39;hello&#39;,&#39;NumPy&#39;]);
+arr_15.dtype
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+dtype(&#39;&amp;lt;U5&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_16 = np.array([True, False])
+arr_16.dtype
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+dtype(&#39;bool&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 修改类型
+arr_17 = arr_16.astype(int)
+arr_17
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([1, 0])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-12-numpy-indexing-and-slicing&#34;&gt;2.1.12.Numpy indexing and slicing&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;tuple([arr_01[0],arr_01[1],arr_01[2],arr_01[-1]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+(0, 1, 2, 3)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02[1,1]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+-2.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 翻转第二行数组元素
+arr_02[1,::-1]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 6. ,  5.5, -2. , -1. ])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02[1,0:3:2]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([-1. ,  5.5])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-13-array-masking&#34;&gt;2.1.13.Array masking&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 当需要对数组进行选择或者过滤的时候，就可使用这个功能
+# 随机生成一组数据
+arr_18 = np.random.randint(0,20,10)
+arr_18
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 2,  2,  2, 14,  2, 17, 16, 15,  4, 11])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 获取其中的偶数 首先将arr_18的数据掩饰成bool类型数据
+evenMask = (arr_18 % 2 == 0)
+# 只要是偶数 便返回True
+evenMask
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ True,  True,  True,  True,  True, False,  True, False,  True, False], dtype=bool)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 输出偶数结果
+arr_19 = arr_18[evenMask]
+arr_19
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 2,  2,  2, 14,  2, 16,  4])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-14-copies-and-views&#34;&gt;2.1.14 Copies and views&lt;/h4&gt;
+
+&lt;p&gt;当我们对原始数据进行切片操作，此时产生的视图并没有占有新的内存。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_20 = arr_01[::2]
+arr_20
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 2])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 改变arr_20的值
+arr_20[0] = 4
+arr_20
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 2])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# arr_01的值同时发生改变
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 判断两个数组是不是处于同一内存块，可用np.may_share_memory方法
+np.may_share_memory(arr_01, arr_20)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+True
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.may_share_memory(arr_18, arr_19)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+False
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# np.copy
+arr_21 = arr_01.copy()
+arr_21
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 改变arr_21的值
+arr_21[0] = 0
+arr_21
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# arr_01的值没有发生改变
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 因为此时他们分别处于不同的内存块
+np.may_share_memory(arr_01, arr_21)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+False
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-15-operations&#34;&gt;2.1.15.Operations&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 这里随便列出一些操作
+arr_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.T
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. , -1. ],
+       [ 1. , -2. ],
+       [ 2. ,  5.5],
+       [ 3. ,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.transpose(arr_02)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. , -1. ],
+       [ 1. , -2. ],
+       [ 2. ,  5.5],
+       [ 3. ,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01.prod()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+24
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.prod(arr_02, axis=0)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ -0.,  -2.,  11.,  18.])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.all(arr_01 &amp;lt; 5)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+True
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.any(arr_01%2 == 0)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+True
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-16-broadcasting&#34;&gt;2.1.16.Broadcasting&lt;/h4&gt;
+
+&lt;p&gt;广播指的是对不同形状的数组进行组合（或者说算术运算）&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([4, 1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_22 = np.ones([3,4])
+arr_22
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01 + arr_22
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 5.,  2.,  3.,  4.],
+       [ 5.,  2.,  3.,  4.],
+       [ 5.,  2.,  3.,  4.]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_23 = np.array([[1,2,3,4]])
+arr_23
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[1, 2, 3, 4]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_23.T + arr_23
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[2, 3, 4, 5],
+       [3, 4, 5, 6],
+       [4, 5, 6, 7],
+       [5, 6, 7, 8]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-17-array-shape-manipulation&#34;&gt;2.1.17.Array shape manipulation&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[ 0. ,  1. ,  2. ,  3. ],
+       [-1. , -2. ,  5.5,  6. ]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.ravel()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0. ,  1. ,  2. ,  3. , -1. , -2. ,  5.5,  6. ])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.flatten()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0. ,  1. ,  2. ,  3. , -1. , -2. ,  5.5,  6. ])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_02.flatten(&#39;F&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([ 0. , -1. ,  1. , -2. ,  2. ,  5.5,  3. ,  6. ])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01.reshape(2, 2)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[4, 1],
+       [2, 3]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_24 = np.arange(5)
+arr_24.resize((8,))
+arr_24
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([0, 1, 2, 3, 4, 0, 0, 0])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 增加维度
+arr_25 = arr_24[:, np.newaxis]
+arr_25
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[0],
+       [1],
+       [2],
+       [3],
+       [4],
+       [0],
+       [0],
+       [0]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-1-18-array-sorting&#34;&gt;2.1.18.Array sorting&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;arr_01 = arr_01.reshape(2,2,)
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[4, 1],
+       [2, 3]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 排序
+arr_01.sort(axis=0)
+arr_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[2, 1],
+       [4, 3]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;NumPy大概说到这里，具体请看&lt;a href=&#34;https://docs.scipy.org/doc/&#34;&gt;NumPy&lt;/a&gt;进一步了解。&lt;/p&gt;
+
+&lt;h3 id=&#34;2-2-series&#34;&gt;2.2.Series&lt;/h3&gt;
+
+&lt;p&gt;Series是一种类似于一维数组的对象，它由一组数据（NumPy数据类型）以及一组相关的标签（索引）组成。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 导入包
+import pandas as pd
+# 创建Series数据类型
+# ser=pd.Series(data, index=idx)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;data可使用以下的任意一种：
+    1. ndarry
+    2. dict
+    3. scalar values&lt;/p&gt;
+
+&lt;h4 id=&#34;2-2-1-ndarry&#34;&gt;2.2.1.ndarry&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ser_01 = pd.Series(np.random.rand(7), index=range(7))
+ser_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+0    0.209202
+1    0.185328
+2    0.108377
+3    0.219697
+4    0.978624
+5    0.811683
+6    0.171941
+dtype: float64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-2-2-dict&#34;&gt;2.2.2.dict&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;user = {&#39;name&#39;:&#39;howie&#39;, &#39;age&#39;:&#39;21&#39;}
+ser_02 = pd.Series(user)
+ser_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+age        21
+name    howie
+dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 指定name index
+ser_03 = pd.Series(user, index=[&#39;name&#39;, &#39;age&#39;, &#39;sex&#39;], name=&#39;user&#39;)
+# 不存在的index会返回NaN
+ser_03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+name    howie
+age        21
+sex       NaN
+Name: user, dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-2-2-scalar-values&#34;&gt;2.2.2.scalar values&lt;/h4&gt;
+
+&lt;p&gt;这里需要注意的是index必须提供&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ser_04 = pd.Series(&#39;hello&#39;, index=range(3))
+ser_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+0    hello
+1    hello
+2    hello
+dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;关于对Series的操作，其实和上述的numpy arrays类似，不过当对其进行切片时，这同样会影响到index&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 查看某个索引对应的值
+ser_02[&#39;name&#39;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+&#39;howie&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 修改
+ser_02[&#39;sex&#39;] = &#39;man&#39;
+ser_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+age        21
+name    howie
+sex       man
+dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 切片
+ser_01[:4]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+0    0.209202
+1    0.185328
+2    0.108377
+3    0.219697
+dtype: float64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ser_01[ser_01 &amp;gt; 0.5]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+4    0.978624
+5    0.811683
+dtype: float64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;2-3-dataframe&#34;&gt;2.3.DataFrame&lt;/h3&gt;
+
+&lt;p&gt;DataFrame是一个表格型的数据结构，可以理解为一个二维的有标签的数组。&lt;/p&gt;
+
+&lt;p&gt;下面介绍创建DataFrame的不同方式&lt;/p&gt;
+
+&lt;h4 id=&#34;2-3-1-using-dictionaries-of-series&#34;&gt;2.3.1.Using dictionaries of Series&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_data_01 = {
+    &#39;id&#39;: pd.Series([1, 2, 3, 4, 5]),
+    &#39;name&#39;: pd.Series([&#39;user_01&#39;, &#39;user_02&#39;, &#39;user_03&#39;, &#39;user_04&#39;, &#39;user_05&#39;]),
+    &#39;age&#39;: pd.Series(np.random.randint(20,50,5))
+}
+df_01 = pd.DataFrame(df_data_01, columns=[&#39;id&#39;, &#39;name&#39;, &#39;age&#39;])
+df_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-062938.jpg-blog.howie&#34; alt=&#34;df_01&#34; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_01.columns
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;Index([&#39;id&#39;, &#39;name&#39;, &#39;age&#39;], dtype=&#39;object&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_01.index
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;RangeIndex(start=0, stop=5, step=1)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;2-3-2-using-a-dictionary-of-ndarrays-lists&#34;&gt;2.3.2.Using a dictionary of ndarrays/lists&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_data_02 = {
+    &#39;id&#39;: [1, 2, 3, 4, 5],
+    &#39;name&#39;: [&#39;user_01&#39;, &#39;user_02&#39;, &#39;user_03&#39;, &#39;user_04&#39;, &#39;user_05&#39;],
+    &#39;age&#39;: np.random.randint(20,50,5)
+}
+df_02 = pd.DataFrame(df_data_02, columns=[&#39;id&#39;, &#39;name&#39;, &#39;age&#39;])
+df_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063030.jpg-blog.howie&#34; alt=&#34;df_02&#34; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;2-3-3-using-a-structured-array&#34;&gt;2.3.3.Using a structured array&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_data_03 = np.zeros((4,),dtype=[
+        (&#39;id&#39;, &#39;i1&#39;),
+        (&#39;name&#39;, &#39;a10&#39;),
+        (&#39;age&#39;, &#39;i4&#39;)
+    ])
+df_data_03[:] = [
+    (1,&#39;user_01&#39;,10),
+    (2,&#39;user_02&#39;,11),
+    (3,&#39;user_03&#39;,12),
+    (4,&#39;user_04&#39;,13)
+]
+df_03 = pd.DataFrame(df_data_03)
+df_03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063109.jpg-blog.howie&#34; alt=&#34;df_03&#34; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;2-3-4-using-a-series-structure&#34;&gt;2.3.4.Using a Series structure&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ser_02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+age        21
+name    howie
+sex       man
+dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_04 = pd.DataFrame(ser_02,columns=[&#39;user&#39;])
+df_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063153.jpg-blog.howie&#34; alt=&#34;df_04&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;除了以上方式生成DataFrame，还有一些其他方式，比如直接从csv、excel等直接提取生成。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 一些基本操作
+df_04[&#39;user&#39;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;age        21
+name    howie
+sex       man
+Name: user, dtype: object
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_04[&#39;user&#39;][&#39;age&#39;] = 22
+df_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063243.jpg-blog.howie&#34; alt=&#34;df_04_01&#34; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;df_01.values
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[1, &#39;user_01&#39;, 41],
+       [2, &#39;user_02&#39;, 39],
+       [3, &#39;user_03&#39;, 24],
+       [4, &#39;user_04&#39;, 24],
+       [5, &#39;user_05&#39;, 47]], dtype=object)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;del df_04[&#39;user&#39;]
+df_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063351.jpg-blog.howie&#34; alt=&#34;df_04_02&#34; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 插入一列
+df_04.insert(0,&#39;user&#39;,[21,&#39;user_01&#39;,&#39;man&#39;])
+df_04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2016-11-21-063352.jpg-blog.howie&#34; alt=&#34;df_04_03&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-4-panel&#34;&gt;2.4.Panel&lt;/h3&gt;
+
+&lt;p&gt;Panel是一个三维数组，它不像Series或者DataFrame那样被广泛使用，想象一下三维的三个轴，在Panel中分别如下：
+    1. items axis 0
+    2. major_axis axis 1
+    3. minor_axis axis 2
+下面介绍Panel的创建方式：&lt;/p&gt;
+
+&lt;h4 id=&#34;2-4-1-using-3d-numpy-array-with-axis-labels&#34;&gt;2.4.1.Using 3D NumPy array with axis labels&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 创建一个三维数组
+panel_data_01 = np.random.randn(2, 3, 4)
+panel_data_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+array([[[ 0.23784462,  0.01354855, -1.6355294 , -1.04420988],
+        [ 0.61303888,  0.73620521,  1.02692144, -1.43219061],
+        [-1.8411883 ,  0.36609323, -0.33177714, -0.68921798]],
+
+       [[ 2.03460756, -0.55071441,  0.75045333, -1.30699234],
+        [ 0.58057334, -1.10452309,  0.69012147,  0.68689007],
+        [-1.56668753,  0.90497412,  0.7788224 ,  0.42823287]]])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;panel_01 = pd.Panel(panel_data_01, 
+                    items=[&#39;Item1&#39;, &#39;Item2&#39;],
+                    major_axis=pd.date_range(&#39;19/11/2016&#39;, periods=3),
+                    minor_axis=[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;]
+                   )
+panel_01
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;out:
+&amp;lt;class &#39;pandas.core.panel.Panel&#39;&amp;gt;
+Dimensions: 2 (items) x 3 (major_axis) x 4 (minor_axis)
+Items axis: Item1 to Item2
+Major_axis axis: 2016-11-19 00:00:00 to 2016-11-21 00:00:00
+Minor_axis axis: A to D
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;3-说明&#34;&gt;3.说明&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;笔记参考：
+ 《Mastering Pandas》
+ 《利用python进行数据分析》&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;本次笔记主要记录&lt;code&gt;pandas&lt;/code&gt;数据结构，接下来将详细介绍用法。
+如果您也使用&lt;code&gt;jupyter notebook&lt;/code&gt;，可以下载本文源文件，点击&lt;a href=&#34;https://github.com/howie6879/Mastering-Python/blob/master/Mastering%20Pandas/Mastering%20Pandas%2001.ipynb&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>centos7分布式部署pyspider</title>
+      <link>http://blog.howie6879.cn/post/11/</link>
+      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/11/</guid>
+      <description>
+
+&lt;h4 id=&#34;1-搭建环境&#34;&gt;1.搭建环境：&lt;/h4&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;系统版本：&lt;/strong&gt;&lt;code&gt;Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;python版本&lt;/strong&gt;：&lt;code&gt;Python 3.5.1&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h5 id=&#34;1-1-搭建python3环境&#34;&gt;1.1.搭建python3环境：&lt;/h5&gt;
+
+&lt;p&gt;本人在尝试过后选择集成环境&lt;strong&gt;Anaconda&lt;/strong&gt;&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h6 id=&#34;1-1-1-编译&#34;&gt;1.1.1.编译&lt;/h6&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 下载依赖
+yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve
+# 下载python版本
+wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz
+# 或者使用国内源
+wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz
+mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src
+# 解压
+tar -zxf Python-3.5.1.tgz;cd Python-3.5.1
+# 编译安装
+./configure --prefix=/usr/local/python3.5 --enable-shared
+make &amp;amp;&amp;amp; make install
+# 建立软链接
+ln -s /usr/local/python3.5/bin/python3 /usr/bin/python3
+echo &amp;quot;/usr/local/python3.5/lib&amp;quot; &amp;gt; /etc/ld.so.conf.d/python3.5.conf
+ldconfig
+# 验证python3
+python3
+# Python 3.5.1 (default, Oct  9 2016, 11:44:24)
+# [GCC 4.8.5 20150623 (Red Hat 4.8.5-4)] on linux
+# Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information.
+# &amp;gt;&amp;gt;&amp;gt;
+# pip
+/usr/local/python3.5/bin/pip3 install --upgrade pip
+ln -s /usr/local/python3.5/bin/pip /usr/bin/pip
+# 本人在安装时出现问题 将pip重装
+wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
+python get-pip.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h6 id=&#34;1-1-2-集成环境anaconda&#34;&gt;1.1.2.集成环境anaconda&lt;/h6&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 也可考虑集成环境anaconda(推荐)
+wget https://repo.continuum.io/archive/Anaconda3-4.2.0-Linux-x86_64.sh
+# 直接安装即可
+./Anaconda3-4.2.0-Linux-x86_64.sh
+# 若出错，可能是解压失败
+yum install bzip2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;1-2-安装mariadb&#34;&gt;1.2.安装mariaDB&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
+yum -y install mariadb mariadb-server
+# 启动
+systemctl start mariadb
+# 设置为开机启动
+systemctl enable mariadb
+# 配置密码 默认为空
+mysql_secure_installation
+# 登录
+mysql -u root -p
+# 创建一个用户 自己设定账户密码
+CREATE USER &#39;user_name&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;user_pass&#39;;
+GRANT ALL PRIVILEGES ON *.* TO &#39;user_name&#39;@&#39;localhost&#39; WITH GRANT OPTION;
+CREATE USER &#39;user_name&#39;@&#39;%&#39; IDENTIFIED BY &#39;user_pass&#39;;
+GRANT ALL PRIVILEGES ON *.* TO &#39;user_name&#39;@&#39;%&#39; WITH GRANT OPTION;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;1-3-安装pyspider&#34;&gt;1.3.安装pyspider&lt;/h5&gt;
+
+&lt;p&gt;本人使用&lt;code&gt;Anaconda&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 搭建虚拟环境sbird python版本3.*
+conda create -n sbird python=3*
+# 进入环境
+source activate sbird
+# 安装pyspider
+pip install pyspider
+# 报错 
+# it does not exist.  The exported locale is &amp;quot;en_US.UTF-8&amp;quot; but it is not supported
+# 执行 可写入.bashrc
+export LC_ALL=en_US.utf-8
+export LANG=en_US.utf-8
+#ImportError: pycurl: libcurl link-time version (7.29.0) is older than compile-time version (7.49.0)
+conda install pycurl
+# 退出
+source deactivate sbird
+# 若在虚拟机内 出现无法访问localhost:5000 可关闭防火墙
+systemctl stop firewalld.service
+#########直接运行源码==============
+mkdir git;cd git
+# 下载
+git clone https://github.com/binux/pyspider.git
+# 安装
+/root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其他方法&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 搭建虚拟环境
+pip install virtualenv
+mkdir python;cd python
+# 创建虚拟环境pyenv3
+virtualenv -p /usr/bin/python3 pyenv3
+# 进入虚拟环境 激活环境
+cd pyenv3/
+source ./bin/activate
+pip install pyspider
+# 若pycurl报错 
+yum install libcurl-devel
+# 继续
+pip install pyspider
+# 关闭
+deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;本人推荐用anaconda方式安装&lt;/p&gt;
+
+&lt;p&gt;若pyspider运行过程中出现错误，参考&lt;code&gt;anaconda&lt;/code&gt;安装部分，至此，访问&lt;code&gt;localhost:5000&lt;/code&gt;可看到页面。&lt;/p&gt;
+
+&lt;h5 id=&#34;1-4-安装supervisor&#34;&gt;1.4.安装Supervisor&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
+yum install supervisor -y
+# 若无法检索 则添加阿里的epel源
+vim /etc/yum.repos.d/epel.repo
+# 添加以下内容
+[epel]
+name=Extra Packages for Enterprise Linux 7 - $basearch
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch
+http://mirrors.aliyuncs.com/epel/7/$basearch
+failovermethod=priority
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+[epel-debuginfo]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Debug
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch/debug
+http://mirrors.aliyuncs.com/epel/7/$basearch/debug
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+
+[epel-source]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Source
+baseurl=http://mirrors.aliyun.com/epel/7/SRPMS
+http://mirrors.aliyuncs.com/epel/7/SRPMS
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+# 安装
+yum install supervisor -y
+# 测试是否安装成功
+echo_supervisord_conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h6 id=&#34;1-4-1-supervisor用法&#34;&gt;1.4.1.Supervisor用法&lt;/h6&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;supervisord 	#supervisor的服务器端部分 启动
+supervisorctl	#启动supervisor的命令行窗口
+# 假设创建进程pyspider01
+vim /etc/supervisord.d/pyspider01.ini
+# 写入以下内容
+[program:pyspider01]
+
+command      = /root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/pyspider01.log
+# 重载
+supervisorctl reload
+# 启动
+supervisorctl start pyspider01
+# 也可这样启动
+supervisord -c /etc/supervisord.conf
+# 查看状态
+supervisorctl status
+# output 
+pyspider01                       RUNNING   pid 4026, uptime 0:02:40
+# 关闭
+supervisorctl shutdown
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;1-5-安装redis&#34;&gt;1.5.安装redis&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 消息队列采用redis
+mkdir download;cd download
+wget http://download.redis.io/releases/redis-3.2.4.tar.gz
+tar xzf redis-3.2.4.tar.gz
+cd redis-3.2.4
+make
+# 或者直接yum安装
+yum -y install redis
+# 启动
+systemctl start redis.service
+# 重启
+systemctl restart redis.service
+# 停止
+systemctl stop redis.service
+# 查看状态
+systemctl status redis.service
+# 更改文件/etc/redis.conf
+vim /etc/redis.conf
+# 更改内容
+daemonize no 改为 daemonize yes
+bind 127.0.0.1 改为 bind 10.211.55.22(当前服务器ip)
+# 重启redis
+systemctl restart redis.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;1-6-关于自启动&#34;&gt;1.6.关于自启动&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# Supervisor添加到自启动服务
+systemctl enable supervisord.service
+# redis添加到自启动服务
+systemctl enable redis.service
+# 关闭防火墙自启动
+systemctl disable firewalld.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;至此，pyspider单个服务器运行环境搭建且部署完毕，启动&lt;code&gt;localhost:5000&lt;/code&gt;进入web界面。&lt;/p&gt;
+
+&lt;p&gt;也可编写脚本运行，在&lt;code&gt;/pyspider/supervisor/pyspider01.log&lt;/code&gt;查看运行状态。&lt;/p&gt;
+
+&lt;h4 id=&#34;2-分布式部署&#34;&gt;2.分布式部署&lt;/h4&gt;
+
+&lt;p&gt;刚才配置的服务器，将其命名为&lt;code&gt;centos01&lt;/code&gt;，按照这样的配置，再分别部署两台&lt;code&gt;centos02、centos03&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;如下：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;服务器名称&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;ip&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;centos01&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;10.211.55.22&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;redis,mariaDB, scheduler&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;centos02&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;10.211.55.23&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;fetcher, processor, result_worker,phantomjs&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;centos03&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;10.211.55.24&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;fetcher, processor,,result_worker,webui&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h5 id=&#34;2-1-centos01&#34;&gt;2.1.centos01&lt;/h5&gt;
+
+&lt;p&gt;进入服务器&lt;code&gt;centos01&lt;/code&gt;，经过第一步，基本环境已经搭好，首先编辑配置文件&lt;code&gt;/pyspider/config.json&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;taskdb&amp;quot;: &amp;quot;mysql+taskdb://user_name:user_pass@10.211.55.22:3306/taskdb&amp;quot;,
+  &amp;quot;projectdb&amp;quot;: &amp;quot;mysql+projectdb://user_name:user_pass@10.211.55.22:3306/projectdb&amp;quot;,
+  &amp;quot;resultdb&amp;quot;: &amp;quot;mysql+resultdb://user_name:user_pass@10.211.55.22:3306/resultdb&amp;quot;,
+  &amp;quot;message_queue&amp;quot;: &amp;quot;redis://10.211.55.22:6379/db&amp;quot;,
+  &amp;quot;logging-config&amp;quot;: &amp;quot;/pyspider/logging.conf&amp;quot;,
+  &amp;quot;phantomjs-proxy&amp;quot;:&amp;quot;10.211.55.23:25555&amp;quot;,
+  &amp;quot;webui&amp;quot;: {
+    &amp;quot;username&amp;quot;: &amp;quot;&amp;quot;,
+    &amp;quot;password&amp;quot;: &amp;quot;&amp;quot;,
+    &amp;quot;need-auth&amp;quot;: false,
+	&amp;quot;host&amp;quot;:&amp;quot;10.211.55.24&amp;quot;,
+	&amp;quot;port&amp;quot;:&amp;quot;5000&amp;quot;,
+	&amp;quot;scheduler-rpc&amp;quot;:&amp;quot;http:// 10.211.55.22:5002&amp;quot;,
+	&amp;quot;fetcher-rpc&amp;quot;:&amp;quot;http://10.211.55.23:5001&amp;quot;
+  },
+  &amp;quot;fetcher&amp;quot;: {
+    &amp;quot;xmlrpc&amp;quot;:true,
+    &amp;quot;xmlrpc-host&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
+    &amp;quot;xmlrpc-port&amp;quot;: &amp;quot;5001&amp;quot;
+  },
+  &amp;quot;scheduler&amp;quot;: {
+    &amp;quot;xmlrpc&amp;quot;:true,
+    &amp;quot;xmlrpc-host&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
+    &amp;quot;xmlrpc-port&amp;quot;: &amp;quot;5002&amp;quot;
+  }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;尝试运行下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
+# 报错
+ImportError: No module named &#39;mysql&#39;
+# 下载 mysql-connector-python
+cd ~/git/
+git clone https://github.com/mysql/mysql-connector-python.git
+# 安装
+source activate sbird
+cd mysql-connector-python
+python setup.py install
+# 安装redis
+pip install redis
+source deactivate
+# 运行
+/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
+# 输出 ok
+[I 161010 15:57:25 scheduler:644] scheduler starting...
+[I 161010 15:57:25 scheduler:779] scheduler.xmlrpc listening on 0.0.0.0:5002
+[I 161010 15:57:25 scheduler:583] in 5m: new:0,success:0,retry:0,failed:0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行成功后，可直接更改&lt;code&gt;/etc/supervisord.d/pyspider01.ini&lt;/code&gt;如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-vim&#34;&gt;[program:pyspider01]
+
+command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/pyspider01.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
+supervisorctl reload
+# 查看状态
+supervisorctl status
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;centos01&lt;/code&gt;部署完毕。&lt;/p&gt;
+
+&lt;h5 id=&#34;2-2-centos02&#34;&gt;2.2.centos02&lt;/h5&gt;
+
+&lt;p&gt;在&lt;code&gt;centos02&lt;/code&gt;中，需要运行&lt;code&gt;result_worker、processor、phantomjs、fetcher&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;分别建立文件：&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;/etc/supervisord.d/result_worker.ini&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:result_worker]
+
+command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json result_worker
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/result_worker.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;/etc/supervisord.d/processor.ini&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:processor]
+
+command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json processor
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/processor.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;/etc/supervisord.d/phantomjs.ini&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:phantomjs]
+
+command      = /pyspider/phantomjs --config=/pyspider/pjsconfig.json /pyspider/phantomjs_fetcher.js 25555
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/phantomjs.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;/etc/supervisord.d/fetcher.ini&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:fetcher]
+
+command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json fetcher
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/fetcher.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在&lt;code&gt;pyspider&lt;/code&gt;目录中建立pjsconfig.json&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  /*--ignore-ssl-errors=true */
+  &amp;quot;ignoreSslErrors&amp;quot;: true,
+  
+  /*--ssl-protocol=true */
+  &amp;quot;sslprotocol&amp;quot;: &amp;quot;any&amp;quot;,
+  
+  /* Same as: --output-encoding=utf8 */
+  &amp;quot;outputEncoding&amp;quot;: &amp;quot;utf8&amp;quot;,
+  
+  /* persistent Cookies. */
+  /*cookiesfile=&amp;quot;e:/phontjscookies.txt&amp;quot;,*/
+  cookiesfile=&amp;quot;pyspider/phontjscookies.txt&amp;quot;,
+  
+  /* load image */
+  autoLoadImages = false
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;下载phantomjs至&lt;code&gt;/pyspider/&lt;/code&gt;文件夹，将&lt;code&gt;git/pyspider/pyspider/fetcher/phantomjs_fetcher.js&lt;/code&gt;复制到&lt;code&gt;phantomjs_fetcher.js&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
+supervisorctl reload
+# 查看状态
+supervisorctl status
+# output
+fetcher                          RUNNING   pid 3446, uptime 0:00:07
+phantomjs                        RUNNING   pid 3448, uptime 0:00:07
+processor                        RUNNING   pid 3447, uptime 0:00:07
+result_worker                    RUNNING   pid 3445, uptime 0:00:07
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;centos02&lt;/code&gt;部署完毕。&lt;/p&gt;
+
+&lt;h5 id=&#34;2-3-centos03&#34;&gt;2.3.centos03&lt;/h5&gt;
+
+&lt;p&gt;部署这三个进程&lt;code&gt;fetcher, processor, result_worker&lt;/code&gt;和&lt;code&gt;centos02&lt;/code&gt; 一样，本服务器主要是在前面的基础上加上&lt;code&gt;webui&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;建立文件：&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;/etc/supervisord.d/webui.ini&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:webui]
+
+command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json webui
+directory    = /root/git/pyspider
+user         = root
+process_name = %(program_name)s
+autostart    = true
+autorestart  = true
+startsecs    = 3
+
+redirect_stderr         = true
+stdout_logfile_maxbytes = 500MB
+stdout_logfile_backups  = 10
+stdout_logfile          = /pyspider/supervisor/webui.log
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
+supervisorctl reload
+# 查看状态
+supervisorctl status
+# output
+fetcher                          RUNNING   pid 2724, uptime 0:00:07
+processor                        RUNNING   pid 2725, uptime 0:00:07
+result_worker                    RUNNING   pid 2723, uptime 0:00:07
+webui                            RUNNING   pid 2726, uptime 0:00:07
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;3-总结&#34;&gt;3.总结&lt;/h4&gt;
+
+&lt;p&gt;访问 &lt;a href=&#34;http://10.211.55.25:5000&#34;&gt;http://10.211.55.25:5000&lt;/a&gt; 即可，尽情爬取吧。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/11/01.png-blog.howie&#34; alt=&#34;pyspider&#34; /&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>python之由公司名推算出公司官网(余弦相似度)</title>
+      <link>http://blog.howie6879.cn/post/09/</link>
+      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/09/</guid>
+      <description>
+
+&lt;h1 id=&#34;1-问题&#34;&gt;1.问题&lt;/h1&gt;
+
+&lt;p&gt;对展会数据分类后，我的新任务是如何通过&lt;code&gt;公司名、公司地址、国家&lt;/code&gt;等海关数据推断出该公司的官网网站（若官网不存在则不考虑）
+以下数据仅供参考：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;公司名&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;国家&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;地址&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;JPW INDUSTRIES INC&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;427 NEW SANFORD RD LAVERGNE TN 37086 US&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;Fujian Xishi Co., Ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;CN, CHINA&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;BusinessPartner Co.,ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;BENKAI Co.,Ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;GOLD INC&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;18245 E 40TH AVE AURORA CO 80011 US&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;需要得到结果：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;公司名&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;官方网站&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;JPW INDUSTRIES INC&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://http://www.jpwindustries.com/&#34;&gt;http://http://www.jpwindustries.com/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;Fujian Xishi Co., Ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.xishigroup.com/&#34;&gt;http://www.xishigroup.com/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;BusinessPartner Co.,ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.traderthailand.com/&#34;&gt;http://www.traderthailand.com/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;BENKAI Co.,Ltd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.benkaico.com&#34;&gt;http://www.benkaico.com&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;GOLD INC&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;https://goldbuginc.com/&#34;&gt;https://goldbuginc.com/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&#34;2-解决&#34;&gt;2.解决&lt;/h1&gt;
+
+&lt;p&gt;由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。
+大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选&lt;code&gt;google&lt;/code&gt;，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的&lt;code&gt;url&lt;/code&gt;。
+初步搜索一下，看看各种情况：
+第一种情况，检索即可很直观地得出结果
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/01.png-blog.howie&#34; alt=&#34;JPW INDUSTRIES INC &#34; /&gt;
+第二种情况，检索不能直观地得出结果，但官网确实存在（*第二检索个结果*）
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/02.png-blog.howie&#34; alt=&#34;Fujian Xishi Co., Ltd&#34; /&gt;
+第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/03.png-blog.howie&#34; alt=&#34;GOLD INC&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。
+观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其&lt;code&gt;website&lt;/code&gt;对应的&lt;code&gt;url&lt;/code&gt;绝对正确。
+故代码的第一步骤可以首先检索公司名+公司地址，观察&lt;code&gt;website&lt;/code&gt;元素是否存在，若存在，返回公司官网，否则，对公司名进行检索。
+代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def searchWeb(query, tld=&#39;com&#39;, lang=&#39;en&#39;, tbs=&#39;0&#39;, num=10, safe=&#39;off&#39;, tpe=&#39;&#39;, user_agent=None):
+    query = quote_plus(query)
+    get_page(url_home % vars())
+    url = url_search_num % vars()
+    # Request the Google Search results page.
+    html = get_page(url)
+    try:
+        href = re.findall(r&#39;Directions&amp;lt;/a&amp;gt;&amp;lt;a\s*class=&amp;quot;fl&amp;quot;\s*href=&amp;quot;(.*?)&amp;quot;.*?&amp;gt;Website&#39;, str(html))[0]
+        link = filter_result(href)
+        return link
+    except:
+        pass
+    return None
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/04.png-blog.howie&#34; alt=&#34;直接返回公司官网&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：
+&lt;code&gt;获取搜索引擎检索结果提取url&lt;/code&gt;-&amp;gt;&lt;code&gt;初步排除某些url&lt;/code&gt;-&amp;gt;&lt;code&gt;余弦相似度计算最可能的结果&lt;/code&gt;
+####2.1.获取搜索引擎检索结果提取url
+对于谷歌搜索，我使用了&lt;code&gt;MarioVilas&lt;/code&gt;的项目&lt;a href=&#34;https://github.com/MarioVilas/google&#34;&gt;google&lt;/a&gt;，毕竟在国内，为了以防万一我也写了&lt;code&gt;yahoo&lt;/code&gt;搜索，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env
+# -*-coding:utf-8-*-
+# script: yahooSearch.py
+__author__ = &#39;howie&#39;
+
+import sys
+import time
+
+if sys.version_info[0] &amp;gt; 2:
+    from urllib.request import Request, urlopen
+    from urllib.parse import quote_plus, urlparse
+else:
+    from urllib import quote_plus
+    from urllib2 import Request, urlopen
+    from urlparse import urlparse, parse_qs
+
+try:
+    from bs4 import BeautifulSoup
+
+    is_bs4 = True
+except ImportError:
+    from BeautifulSoup import BeautifulSoup
+
+    is_bs4 = False
+
+url_search = &amp;quot;https://search.yahoo.com/search?p=%(query)s&amp;amp;b=%(start)s&amp;amp;pz=%(num)s&amp;quot;
+
+headers = {
+    &#39;accept-encoding&#39;: &#39;gzip, deflate, sdch, br&#39;,
+    &#39;accept-language&#39;: &#39;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&#39;,
+    &#39;upgrade-insecure-requests&#39;: &#39;1&#39;,
+    &#39;accept&#39;: &#39;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#39;,
+    &#39;cache-control&#39;: &#39;max-age=0&#39;,
+    &#39;authority&#39;: &#39; search.yahoo.com&#39;
+}
+# 默认user_agent
+user_agent = &#39;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36&#39;
+
+
+def filter_link(link):
+    try:
+        linkData = urlparse(link)
+        if linkData.netloc and &amp;quot;yahoo.com&amp;quot; not in linkData.netloc and &amp;quot;/search/srpcache&amp;quot; not in linkData.path:
+            return link
+    except Exception:
+        pass
+    return None
+
+
+def yahooSearch(query, start=0, num=10, page=1, pause=1.0):
+    &amp;quot;&amp;quot;&amp;quot;
+    获取雅虎搜索url
+    :param query: 搜索关键词
+    :param start: 开始条目,最好为0
+    :param num: 搜索条目 建议10的倍数
+    :param page: 页数
+    :param pause: 停顿时间
+    :return: 返回url
+    &amp;quot;&amp;quot;&amp;quot;
+    query = quote_plus(query)
+    while page &amp;gt; 0:
+        url = url_search % vars()
+        time.sleep(pause)
+        request = Request(url)
+        request.add_header(&#39;User-Agent&#39;, user_agent)
+        response = urlopen(request)
+        html = response.read()
+        if is_bs4:
+            soup = BeautifulSoup(html, &#39;html.parser&#39;)
+        else:
+            soup = BeautifulSoup(html)
+        anchors = soup.find(id=&amp;quot;web&amp;quot;).find_all(&#39;a&#39;)
+        for a in anchors:
+            try:
+                link = filter_link(a[&amp;quot;href&amp;quot;])
+                if link:
+                    yield link
+            except KeyError:
+                continue
+        start += num + 1
+        page -= 1
+
+
+if __name__ == &#39;__main__&#39;:
+    # GOLD INC 18245 E 40TH AVE AURORA CO 80011 US
+    for url in yahooSearch(&amp;quot;GOLD INC 18245 E 40TH AVE AURORA CO 80011 US&amp;quot;):
+        print(url)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;####2.2.初步排除某些url
+这个可根据个人需求来配置，可添加&lt;code&gt;webConfig.py&lt;/code&gt;脚本，排除某些&lt;code&gt;url&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
+__author__ = &#39;howie&#39;
+
+config = dict(
+    # www开头或分割后数组大于二的网站
+    forbid_www=[&amp;quot;www.linkedin.com&amp;quot;, &amp;quot;www.alibaba.com&amp;quot;],
+    # 非www开头的网站
+    forbid=[&amp;quot;imexbb.com&amp;quot;, &amp;quot;made-in-china.com&amp;quot;]
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;以公司名&lt;code&gt;BENKAI Co.,Ltd&lt;/code&gt;为例，初步获取url：
+&lt;code&gt;[&#39;http://www.benkaico.com&#39;, &#39;http://hisupplier.com&#39;, &#39;http://www.hktdc.com/en&#39;]&lt;/code&gt;
+####2.3.余弦相似度计算最可能的结果
+对于公司&lt;code&gt;BENKAI Co.,Ltd&lt;/code&gt;，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。
+这里可以采用余弦相似度，具体公式可google，稍稍解释下：
+对于这三个网站：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;[&#39;http://www.benkaico.com&#39;, &#39;http://hisupplier.com&#39;, &#39;http://www.hktdc.com/en&#39;]```
+可以通过计算各个网站的`title`和`BENKAI Co.,Ltd`的相似程度来取得最可能的结果。
+#####2.3.1：对各网站title进行分词
+​```python
+{&#39;http://www.benkaico.com&#39;: [&#39;benkai&#39;, &#39;co.&#39;, &#39;,&#39;, &#39;ltd&#39;, &#39;.&#39;], 
+&#39;http://www.hktdc.com/en&#39;: [&#39;hktdc.com&#39;, &#39;â\x80\x93&#39;, &#39;page&#39;, &#39;not&#39;, &#39;found&#39;], 
+&#39;http://hisupplier.com&#39;: [&#39;china&#39;, &#39;suppliers&#39;, &#39;,&#39;, &#39;suppliers&#39;, &#39;directory&#39;, &#39;,&#39;, &#39;china&#39;, &#39;manufacturers&#39;, &#39;directory&#39;, &#39;-&#39;, &#39;hisupplier.com&#39;]}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;#####2.3.2：构建单词向量&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;{&#39;http://www.benkaico.com&#39;: [[0, 1, 1, 1, 1], [1, 1, 1, 1, 1]], 
+&#39;http://www.hktdc.com/en&#39;: [[1, 1, 0, 0, 1, 0, 0, 0, 1], [0, 0, 1, 1, 0, 1, 1, 1, 0]],
+ &#39;http://hisupplier.com&#39;: [[0, 0, 0, 1, 0, 0, 1, 1, 0, 1], [2, 1, 1, 0, 2, 1, 2, 0, 2, 0]]}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;#####2.3.3:计算余弦相似度&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;{&#39;http://www.benkaico.com&#39;: 0.94427190999915878, 
+&#39;http://www.hktdc.com/en&#39;: 0.0, 
+&#39;http://hisupplier.com&#39;: 0.31451985913875646}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;通过比较，可以看到&lt;code&gt;http://www.benkaico.com&lt;/code&gt;相似度最高的结果，跟真实结果一样。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/05.png-blog.howie&#34; alt=&#34;http://www.benkaico.com&#34; /&gt;
+全部步骤代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
+__author__ = &#39;howie&#39;
+from urllib import parse
+from bs4 import BeautifulSoup
+from collections import defaultdict
+import requests
+import re
+import nltk
+import time
+from config.webConfig import config
+from CosineSimilarity import CosineSimilarity
+from search.yahooSearch import yahooSearch
+from search.gooSearch import search, searchWeb
+
+
+class Website(object):
+    &amp;quot;&amp;quot;&amp;quot;
+    通过公司名等信息获取网站官网
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def __init__(self, engine=&#39;google&#39;):
+        self.forbid_www = config[&amp;quot;forbid_www&amp;quot;]
+        self.forbid = config[&amp;quot;forbid&amp;quot;]
+        self.engine = engine
+
+    def get_web(self, query, address=&amp;quot;&amp;quot;):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取域名
+        :param query: 搜索词
+        :param address: 在此加上地址时，query最好是公司名
+        :return: 返回最可能是官网的网站
+        &amp;quot;&amp;quot;&amp;quot;
+        if self.engine == &#39;google&#39; and address:
+            allQuery = query + &amp;quot; &amp;quot; + address
+            result = searchWeb(query=allQuery, num=5)
+            if result:
+                return result
+        allDomain = self.get_domain(query)
+        if len(allDomain) == &amp;quot;1&amp;quot;:
+            website = allDomain[0]
+        else:
+            # 初步判断网站域名
+            counts = self.get_counts(allDomain)
+            largest = max(zip(counts.values(), counts.keys()))
+            if largest[0] &amp;gt; len(allDomain) / 2:
+                website = largest[1]
+            else:
+                # 获取对应域名标题
+                domainData = self.get_title(set(allDomain))
+                # 计算相似度
+                initQuery = nltk.word_tokenize(query.lower(), language=&#39;english&#39;)
+                # 余弦相似性计算相似度
+                cos = CosineSimilarity(initQuery, domainData)
+                wordVector = cos.create_vector()
+                resultDic = cos.calculate(wordVector)
+                website = cos.get_website(resultDic)
+        return website
+
+    def get_domain(self, query):
+        &amp;quot;&amp;quot;&amp;quot;
+         获取谷歌搜索后的域名
+        :param query:搜索条件
+        :return:域名列表
+        &amp;quot;&amp;quot;&amp;quot;
+        allDomain = []
+        if self.engine == &amp;quot;google&amp;quot;:
+            for url in search(query, num=5, stop=1):
+                allDomain += self.parse_url(url)
+        elif self.engine == &amp;quot;yahoo&amp;quot;:
+            for url in yahooSearch(query):
+                allDomain += self.parse_url(url)
+        if not allDomain:
+            allDomain.append(&#39;&#39;)
+        return allDomain
+
+    def parse_url(self, url):
+        allDomain = []
+        domainParse = parse.urlparse(url)
+        # 英文网站获取
+        if &amp;quot;en&amp;quot; in domainParse[2].lower().split(&#39;/&#39;):
+            domain = domainParse[1] + &amp;quot;/en&amp;quot;
+        else:
+            domain = domainParse[1]
+        domainList = domain.split(&#39;.&#39;)
+        # 排除干扰网站
+        if len(domainList) &amp;gt;= 3 and domainList[0] != &amp;quot;www&amp;quot;:
+            isUrl = &amp;quot;.&amp;quot;.join(domain.split(&#39;.&#39;)[-2:])
+            if isUrl not in self.forbid:
+                allDomain.append(domainParse[0] + &amp;quot;://&amp;quot; + isUrl)
+        elif domain not in self.forbid_www:
+            allDomain.append(domainParse[0] + &amp;quot;://&amp;quot; + domain)
+        return allDomain
+
+    def get_title(self, setDomain):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取对应网站title，并进行分词
+        :param allDomain: 网站集合
+        :return: 网站:title分词结果
+        &amp;quot;&amp;quot;&amp;quot;
+        domainData = {}
+        for domain in setDomain:
+            headers = {
+                &amp;quot;Accept&amp;quot;: &amp;quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&amp;quot;,
+                &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, sdch&amp;quot;,
+                &amp;quot;Accept-Language&amp;quot;: &amp;quot;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&amp;quot;,
+                &amp;quot;Cache-Control&amp;quot;: &amp;quot;max-age=0&amp;quot;,
+                &amp;quot;Proxy-Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;,
+                &amp;quot;Upgrade-Insecure-Requests&amp;quot;: &amp;quot;1&amp;quot;,
+                &amp;quot;User-Agent&amp;quot;: &amp;quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.89 Safari/537.36&amp;quot;,
+            }
+            try:
+                data = requests.get(domain, headers=headers).text
+                soup = BeautifulSoup(data, &#39;html.parser&#39;)
+                title = soup.title.get_text()
+                title = re.sub(r&#39;\r\n&#39;, &#39;&#39;, title.strip())
+                titleToken = nltk.word_tokenize(title.lower(), language=&#39;english&#39;)
+                domainData[domain] = titleToken
+            except:
+                pass
+        return domainData
+
+    def get_counts(self, allDomain):
+        &amp;quot;&amp;quot;&amp;quot;
+        返回网站列表各个域名数量
+        :param allDomain: 网站列表
+        :return: 网站:数量
+        &amp;quot;&amp;quot;&amp;quot;
+        counts = defaultdict(int)
+        for eachDomain in allDomain:
+            counts[eachDomain] += 1
+        return counts
+
+
+if __name__ == &#39;__main__&#39;:
+    # allQuery = [&amp;quot;National Sales Company, Inc.&amp;quot;, &amp;quot;Decor Music Inc.&amp;quot;,&amp;quot;Fujian Xishi Co., Ltd&amp;quot;,&amp;quot;Kiho USA Inc.&amp;quot;,&amp;quot;BusinessPartner Co.,ltd&amp;quot;,&amp;quot;BENKAI Co.,Ltd&amp;quot;]
+    # GOLD INC 18245 E 40TH AVE AURORA CO 80011 US
+    allQuery = [&amp;quot;ALZARKI INTERNATIONAL&amp;quot;]
+    website = Website(engine=&#39;google&#39;)
+    for query in allQuery:
+        time.sleep(2)
+        website = website.get_web(query=query)
+        print(website)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;计算余弦相似度代码&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
+# script: CosineSimilarity.py
+__author__ = &#39;howie&#39;
+import numpy as np
+from functools import reduce
+from math import sqrt
+
+
+class CosineSimilarity(object):
+    &amp;quot;&amp;quot;&amp;quot;
+    余弦相似性计算相似度
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def __init__(self, initQuery, domainData):
+        self.title = initQuery
+        self.data = domainData
+
+    def create_vector(self):
+        &amp;quot;&amp;quot;&amp;quot;
+        创建单词向量
+        :return: wordVector = {} 目标标题以及各个网站标题对应的单词向量
+        &amp;quot;&amp;quot;&amp;quot;
+        wordVector = {}
+        for web, value in self.data.items():
+            wordVector[web] = []
+            titleVector, valueVector = [], []
+            allWord = set(self.title + value)
+            for eachWord in allWord:
+                titleNum = self.title.count(eachWord)
+                valueNum = value.count(eachWord)
+                titleVector.append(titleNum)
+                valueVector.append(valueNum)
+            wordVector[web].append(titleVector)
+            wordVector[web].append(valueVector)
+        return wordVector
+
+    def calculate(self, wordVector):
+        &amp;quot;&amp;quot;&amp;quot;
+        计算余弦相似度
+        :param wordVector: wordVector = {} 目标标题以及各个网站标题对应的单词向量
+        :return: 返回各个网站相似度值
+        &amp;quot;&amp;quot;&amp;quot;
+        resultDic = {}
+        for web, value in wordVector.items():
+            valueArr = np.array(value)
+            # 余弦相似性
+            squares = []
+            numerator = reduce(lambda x, y: x + y, valueArr[0] * valueArr[1])
+            square_title, square_data = 0.0, 0.0
+            for num in range(len(valueArr[0])):
+                square_title += pow(valueArr[0][num], 2)
+                square_data += pow(valueArr[1][num], 2)
+            squares.append(sqrt(square_title))
+            squares.append(sqrt(square_data))
+            mul_of_squares = reduce(lambda x, y: x * y, squares)
+            resultDic[web] = numerator / sum_of_squares
+        return resultDic
+
+    def get_website(self, resultDic):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取最可能是官网的网站
+        :param resultDic: 各个网站相似度值
+        :return: 最可能的网站 也可能为空
+        &amp;quot;&amp;quot;&amp;quot;
+        website = &#39;&#39;
+        largest = max(zip(resultDic.values(), resultDic.keys()))
+        if largest[0]:
+            website = largest[1]
+        # 当相似度为0
+        else:
+            websites = [key for key, values in resultDic.items() if values == 0.0]
+            for eachWebsite in websites:
+                keyword = &#39;,&#39;.join(self.data[eachWebsite]).lower()
+                if &#39;home&#39; in keyword or &amp;quot;welcome&amp;quot; in keyword:
+                    website = eachWebsite
+        return website
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;3-总结&#34;&gt;3.总结&lt;/h1&gt;
+
+&lt;p&gt;至此，若有更好的解决方案，欢迎赐教，谢谢。&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

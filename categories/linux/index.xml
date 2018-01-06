@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>http://blog.howie6879.cn/categories/linux/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://blog.howie6879.cn/categories/linux/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>centos7下使用Privoxy将socket5转http代理</title>
+      <link>http://blog.howie6879.cn/post/19/</link>
+      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/19/</guid>
+      <description>
+
+&lt;p&gt;&lt;code&gt;shadowsocks&lt;/code&gt;是一个&lt;code&gt;socket5&lt;/code&gt;的服务，对此，可以使用&lt;code&gt;Privoxy&lt;/code&gt;将其转化为&lt;code&gt;http&lt;/code&gt;&lt;/p&gt;
+
+&lt;!-- more--&gt;
+
+&lt;h2 id=&#34;1-部署shadowsocks&#34;&gt;1.部署shadowsocks&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
+pip install shadowsocks
+# 创建配置文件
+vim /etc/shadowsocks.json
+# 输入
+{
+  &amp;quot;server&amp;quot;: &amp;quot;*.*.*.*&amp;quot;,
+  &amp;quot;server_port&amp;quot;: 443,
+  &amp;quot;password&amp;quot;: &amp;quot;***&amp;quot;,
+  &amp;quot;method&amp;quot;: &amp;quot;aes-256-cfb&amp;quot;,
+  &amp;quot;local_address&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
+  &amp;quot;local_port&amp;quot;: 1080,
+  &amp;quot;workers&amp;quot;: 1
+}
+# 运行
+sslocal -c /etc/shadowsocks.json
+# 测试当前ip
+curl --socks5 127.0.0.1:1080 http://httpbin.org/ip
+#返回结果
+{
+  &amp;quot;origin&amp;quot;: &amp;quot;*.*.*.*&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;说明代理成功，接下来安装&lt;code&gt;Privoxy&lt;/code&gt;：&lt;/p&gt;
+
+&lt;h2 id=&#34;2-socket5转http&#34;&gt;2.socket5转http&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install -y privoxy
+# 编辑配置文件
+vim /etc/privoxy/config
+# 添加
+forward-socks5 / 127.0.0.1:1080 .
+systemctl restart privoxy
+systemctl status privoxy
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;若果需要在外网访问，则需在&lt;code&gt;/etc/privoxy/config&lt;/code&gt;添加&lt;code&gt;listen-address  0.0.0.0:8118&lt;/code&gt;，同时还需要将8118端口开启，假设使用iptables:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/etc/sysconfig/iptables
+# 添加
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 8118 -j ACCEPT
+# 重启
+systemctl restart iptables
+systemctl status iptables
+# 测试
+vim ~/.bashrc
+export http_proxy=http://127.0.0.1:8118   
+export https_proxy=http://127.0.0.1:8118
+# 成功会有一大串返回
+curl www.google.co
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;3-题外话&#34;&gt;3.题外话&lt;/h2&gt;
+
+&lt;p&gt;顺便一提，如果使用的是mac，需要使用代理服务，若已经配置好&lt;code&gt;shadowsocks&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;brew install privoxy
+vim /usr/local/etc/privoxy/config
+# 添加
+listen-address 0.0.0.0:8118
+forward-socks5 / 127.0.0.1:1080 .
+# 开启
+/usr/local/sbin/privoxy /usr/local/etc/privoxy/config
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>linux学习之系统启动过程</title>
+      <link>http://blog.howie6879.cn/post/02/</link>
+      <pubDate>Wed, 28 Sep 2016 20:16:19 +0000</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/02/</guid>
+      <description>
+
+&lt;hr /&gt;
+
+&lt;h3 id=&#34;1-内核引导&#34;&gt;1.内核引导&lt;/h3&gt;
+
+&lt;p&gt;操作系统接管硬件之后，首先读入/boot目录下的内核文件，本人使用&lt;code&gt;ubuntu 15.10&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/02/01.png-blog.howie&#34; alt=&#34;boot.png&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;2-启动初始化进程&#34;&gt;2.启动初始化进程&lt;/h3&gt;
+
+&lt;p&gt;没有这个进程,系统中任何进程都不会启动,从进程编号(pid)看出,&lt;code&gt;init&lt;/code&gt;是第一个运行的程序：&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0 185192  5788 ?        Ss    3月03   0:10 /sbin/init splash
+
+//各栏位意义，参考鸟哥私房菜
+USER：该 process 属於哪个使用者帐号的？
+PID ：该 process 的程序识别码。
+%CPU：该 process 使用掉的 CPU 资源百分比；
+%MEM：该 process 所占用的实体内存百分比；
+VSZ ：该 process 使用掉的虚拟内存量 (Kbytes)
+RSS ：该 process 占用的固定的内存量 (Kbytes)
+TTY ：该 process 是在那个终端机上面运行，若与终端机无关则显示 ?，另外， tty1-tty6是本机上面的登陆者程序，若为 pts/0 等等的，则表示为由网络连接进主机的程序。
+STAT：该程序目前的状态，状态显示与 ps -l 的 S 旗标相同 (R/S/T/Z)
+START：该 process 被触发启动的时间；
+TIME ：该 process 实际使用 CPU 运行的时间。
+COMMAND：该程序的实际命令为何？
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;所以第一个运行的程序是&lt;code&gt;/sbin/init&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&#34;3-运行级别&#34;&gt;3.运行级别&lt;/h3&gt;
+
+&lt;p&gt;Linux中许多程序需要开机启动，称之为&lt;code&gt;daemon(守护进程)&lt;/code&gt;，&lt;code&gt;init&lt;/code&gt;的进程的一大任务就是去运行这些开机启动的程序；那么linux怎么确定启动哪些程序呢？这就涉及到&lt;code&gt;运行级别(runlevel)&lt;/code&gt;，不同的运行级别启动不同的程序。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Linux系统有7个运行级别：
+0：系统停机状态，系统默认运行级别不能设为0，否则不能正常启动
+1：单用户工作状态，root权限，用于系统维护，禁止远程登陆
+2：多用户状态(没有NFS)
+3：完全的多用户状态(有NFS)，登陆后进入控制台命令行模式
+4：系统未使用，保留
+5：X11控制台，登陆后进入图形GUI模式
+6：系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;启动了&lt;code&gt;init&lt;/code&gt;进程之后，其首先会读取&lt;code&gt;/etc/inittab&lt;/code&gt;文件来进行初始化工作，就是查看运行级别，然后确定要启动的程序。&lt;/p&gt;
+
+&lt;p&gt;但这里要注意一个问题，现在的linux发行版本，主要有以下初始化方式，分别是&lt;code&gt;sysvinit (System V initialization)&lt;/code&gt;、ubuntu的&lt;code&gt;Upstart&lt;/code&gt;以及&lt;code&gt;systemd&lt;/code&gt;，所以在&lt;code&gt;ubuntu&lt;/code&gt;环境下，改用&lt;code&gt;/etc/init/rc-sysinit.conf&lt;/code&gt;，以前的版本有可能是在&lt;code&gt;/etc/event.d&lt;/code&gt;中。&lt;/p&gt;
+
+&lt;p&gt;所以在初始化的时候会读取&lt;code&gt;rc-sysinit.conf&lt;/code&gt;并执行相关配置和脚本，其主要作用是设置系统默认&lt;code&gt;runlevel（运行级别）&lt;/code&gt;。
+下面是rc-sysinit.conf的代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# rc-sysinit - System V initialisation compatibility
+#
+# This task runs the old System V-style system initialisation scripts,
+# and enters the default runlevel when finished.
+
+description	&amp;quot;System V initialisation compatibility&amp;quot;
+author		&amp;quot;Scott James Remnant &amp;lt;scott@netsplit.com&amp;gt;&amp;quot;
+
+start on (filesystem and static-network-up) or failsafe-boot
+stop on runlevel
+
+# Default runlevel, this may be overriden on the kernel command-line
+# or by faking an old /etc/inittab entry
+env DEFAULT_RUNLEVEL=2      #默认运行级别为2
+
+emits runlevel
+
+# There can be no previous runlevel here, but there might be old
+# information in /var/run/utmp that we pick up, and we don&#39;t want
+# that.
+#
+# These override that
+env RUNLEVEL=
+env PREVLEVEL=
+
+console output
+env INIT_VERBOSE
+
+task
+
+script
+    # Check for default runlevel in /etc/inittab
+    if [ -r /etc/inittab ]
+    then
+	eval &amp;quot;$(sed -nre &#39;s/^[^#][^:]*:([0-6sS]):initdefault:.*/DEFAULT_RUNLEVEL=&amp;quot;\1&amp;quot;;/p&#39; /etc/inittab || true)&amp;quot;
+    fi
+
+    # Check kernel command-line for typical arguments
+    for ARG in $(cat /proc/cmdline)
+    do
+	case &amp;quot;${ARG}&amp;quot; in
+	-b|emergency)
+	    # Emergency shell
+	    [ -n &amp;quot;${FROM_SINGLE_USER_MODE}&amp;quot; ] || sulogin
+	    ;;
+	[0123456sS])
+	    # Override runlevel
+	    DEFAULT_RUNLEVEL=&amp;quot;${ARG}&amp;quot;
+	    ;;
+	-s|single)
+	    # Single user mode
+	    [ -n &amp;quot;${FROM_SINGLE_USER_MODE}&amp;quot; ] || DEFAULT_RUNLEVEL=S
+	    ;;
+	esac
+    done
+
+    # Run the system initialisation scripts
+    [ -n &amp;quot;${FROM_SINGLE_USER_MODE}&amp;quot; ] || /etc/init.d/rcS
+
+    # Switch into the default runlevel
+    telinit &amp;quot;${DEFAULT_RUNLEVEL}&amp;quot;    #调用telinit进入设置的runlevel
+end script```
+通过代码可以看出其会检测是否存在/etc/inittab，说明该系统下也支持`sysvinit (System V initialization)`初始化方式，然后其设定的默认运行级别是2。
+终端输入命令`runlevel`会返回当前运行级别，本机返回`N 2`；再看倒数第二行，`telinit &amp;quot;${DEFAULT_RUNLEVEL}&amp;quot; `调用了telinit进入了设定的runlevel。
+再来看看当前目录下的rc.conf文件：
+​``` shell
+# rc - System V runlevel compatibility
+#
+# This task runs the old System V-style rc script when changing between
+# runlevels.
+
+description	&amp;quot;System V runlevel compatibility&amp;quot;
+author		&amp;quot;Scott James Remnant &amp;lt;scott@netsplit.com&amp;gt;&amp;quot;
+
+emits deconfiguring-networking
+emits unmounted-remote-filesystems
+
+start on runlevel [0123456]
+stop on runlevel [!$RUNLEVEL]#这里$RUNLEVEL=2，表示非2就不启动
+
+export RUNLEVEL
+export PREVLEVEL
+
+console output
+env INIT_VERBOSE
+
+task
+
+script
+if [ &amp;quot;$RUNLEVEL&amp;quot; = &amp;quot;0&amp;quot; -o &amp;quot;$RUNLEVEL&amp;quot; = &amp;quot;1&amp;quot; -o &amp;quot;$RUNLEVEL&amp;quot; = &amp;quot;6&amp;quot; ]; then
+    status plymouth-shutdown 2&amp;gt;/dev/null &amp;gt;/dev/null &amp;amp;&amp;amp; start wait-for-state WAITER=rc WAIT_FOR=plymouth-shutdown || :
+fi
+/etc/init.d/rc $RUNLEVEL
+end script
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;由代码&lt;code&gt;/etc/init.d/rc $RUNLEVEL&lt;/code&gt;可看出&lt;code&gt;/etc/init.d/rc&lt;/code&gt;接受参数&lt;code&gt;$RUNLEVEL&lt;/code&gt;来调用&lt;code&gt;/etc/rc${runlevel}.d/&lt;/code&gt;下的脚本，这里以&lt;code&gt;/etc/rc2.d&lt;/code&gt;为例，列出该目录下的文件：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ls -l /etc/rc2.d
+总用量 4
+-rw-r--r-- 1 root root 677  6月 15  2015 README
+lrwxrwxrwx 1 root root  21  3月 23 21:03 S05loadcpufreq -&amp;gt; ../init.d/loadcpufreq
+lrwxrwxrwx 1 root root  17  3月 23 21:03 S16openvpn -&amp;gt; ../init.d/openvpn
+lrwxrwxrwx 1 root root  22  3月 23 21:03 S19cpufrequtils -&amp;gt; ../init.d/cpufrequtils
+lrwxrwxrwx 1 root root  17  3月 23 21:03 S20hddtemp -&amp;gt; ../init.d/hddtemp
+lrwxrwxrwx 1 root root  20  3月 23 21:03 S20kerneloops -&amp;gt; ../init.d/kerneloops
+lrwxrwxrwx 1 root root  20  3月 23 21:03 S20mintsystem -&amp;gt; ../init.d/mintsystem
+lrwxrwxrwx 1 root root  15  3月 23 21:03 S20rsync -&amp;gt; ../init.d/rsync
+lrwxrwxrwx 1 root root  27  3月 23 21:03 S20speech-dispatcher -&amp;gt; ../init.d/speech-dispatcher
+lrwxrwxrwx 1 root root  32  3月 23 21:03 S20virtualbox-guest-utils -&amp;gt; ../init.d/virtualbox-guest-utils
+lrwxrwxrwx 1 root root  15  3月 23 21:03 S50saned -&amp;gt; ../init.d/saned
+lrwxrwxrwx 1 root root  19  3月 23 21:03 S70dns-clean -&amp;gt; ../init.d/dns-clean
+lrwxrwxrwx 1 root root  18  3月 23 21:03 S70pppd-dns -&amp;gt; ../init.d/pppd-dns
+lrwxrwxrwx 1 root root  17  3月 25 22:51 S91apache2 -&amp;gt; ../init.d/apache2
+lrwxrwxrwx 1 root root  21  3月 23 21:03 S99grub-common -&amp;gt; ../init.d/grub-common
+lrwxrwxrwx 1 root root  18  3月 23 21:03 S99ondemand -&amp;gt; ../init.d/ondemand
+lrwxrwxrwx 1 root root  19  3月 24 00:03 S99prltoolsd -&amp;gt; ../init.d/prltoolsd
+lrwxrwxrwx 1 root root  18  3月 23 21:03 S99rc.local -&amp;gt; ../init.d/rc.local
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;该目录下的文件名的命名形式都是&lt;code&gt;字母S+两位数字+程序名&lt;/code&gt;，S表示start，如果是K，就表示kill，两位数字表示处理顺序，越小越早处理，如果数字相同，就按照字母顺序进行启动。
+从中还可以看出这些文件的真正目录都在&lt;code&gt;/etc/init.d&lt;/code&gt;目录下，这是为了防止在不同的运行级别下启动相同的程序，这样设置为链接提供了很大的方便。
+后面执行login程序进行登录。
+暂时over，以后对代码进行更加详细的说明。&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
