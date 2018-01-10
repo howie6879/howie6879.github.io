@@ -6,8 +6,263 @@
     <description>Recent content on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 06 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 08 Jan 2018 14:57:30 +0800</lastBuildDate>
     <atom:link href="http://blog.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>神经网络与深度学习笔记 - 1.识别手写字</title>
+      <link>http://blog.howie6879.cn/post/33/</link>
+      <pubDate>Mon, 08 Jan 2018 14:57:30 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/33/</guid>
+      <description>
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 这本书主要讲的是如何掌握神经⽹络的核⼼概念，包括现代技术的深度学习，为你将来使⽤神经⽹络和深度学习打下基础，以下是我的读书笔记。&lt;/p&gt;
+
+&lt;p&gt;神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能地目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别&lt;/li&gt;
+&lt;li&gt;神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;两个重要的人工神经元：感知器和S型神经元&lt;/li&gt;
+&lt;li&gt;神经⽹络的架构&lt;/li&gt;
+&lt;li&gt;⼀个简单的分类⼿写数字的⽹络&lt;/li&gt;
+&lt;li&gt;标准的神经网络学习算法：随机梯度下降算法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;感知器&#34;&gt;感知器&lt;/h3&gt;
+
+&lt;p&gt;1943年，心理学家McCulloch和数学家Pitts发表了《&lt;a href=&#34;http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf&#34;&gt;A logical calculus of the ideas immanent in nervous activity&lt;/a&gt;》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/02.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重。&lt;/p&gt;
+
+&lt;p&gt;对于$x_{1},x_{2},&amp;hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&amp;hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘只和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/03.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$x=(x_{1},x_{2},&amp;hellip;,x_{j})$&lt;/li&gt;
+&lt;li&gt;$w=(w_{1},w_{2},&amp;hellip;,w_{j})$&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;那么感知器的规则可以重写为:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/04.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这就是感知器的数学模型，是不是就像一个逻辑回归模型？它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用&lt;code&gt;python&lt;/code&gt;写的一个感知器自动学习实现与非门，代码在&lt;a href=&#34;https://github.com/howie6879/nndl/blob/master/src/perceptron.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$x$&lt;/th&gt;
+&lt;th&gt;$y$&lt;/th&gt;
+&lt;th&gt;$output$&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能，但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。&lt;/p&gt;
+
+&lt;p&gt;可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。&lt;/p&gt;
+
+&lt;p&gt;遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。&lt;/p&gt;
+
+&lt;p&gt;感知器，终于可以多层了。&lt;/p&gt;
+
+&lt;h3 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h3&gt;
+
+&lt;p&gt;前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/05.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果&lt;code&gt;9&lt;/code&gt;，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。&lt;/p&gt;
+
+&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  \sigma(z) \equiv \frac{1}{1+e^{-z}}
+  \label{eq:3}
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;这里的$z=\sum _{j} w{_j}x{_j}+b$，那么⼀个具有输⼊$x_{1},x_{2},&amp;hellip;,x_{j}$，权重为$w_{1},w_{2},&amp;hellip;,w_{j}$，和偏置b的S型神经元的输出是：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  \frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+  \label{eq:4}
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;上面说过，感知器的激活函数只会输出两个值，分别是&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？&lt;/p&gt;
+
+&lt;p&gt;S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$\sigma(z) \leq 0.5$ 输出0&lt;/li&gt;
+&lt;li&gt;$\sigma(z)&amp;gt;0.5$  输出1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;神经-络的架构&#34;&gt;神经⽹络的架构&lt;/h3&gt;
+
+&lt;p&gt;看下面一个四层神经网络，这种类型的多层⽹络有时被称为多层感知器或者&lt;strong&gt;MLP&lt;/strong&gt;，如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/06.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;需要记住以下几个概念：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;⽹络中最左边的称为&lt;strong&gt;输⼊层&lt;/strong&gt;，其中的神经元称为&lt;strong&gt;输⼊神经元&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;中间得称之为&lt;strong&gt;隐藏层&lt;/strong&gt;，图中有两个隐藏层&lt;/li&gt;
+&lt;li&gt;最右边称之为&lt;strong&gt;输出层&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：&lt;strong&gt;前馈神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;有回路，其中反馈环路是可⾏的：&lt;strong&gt;递归神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;个简单的分类-写数字的-络&#34;&gt;⼀个简单的分类⼿写数字的⽹络&lt;/h3&gt;
+
+&lt;p&gt;对于这六个数字&lt;code&gt;504192&lt;/code&gt;，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;504192&lt;/code&gt;是连续在一起的图像，首先可以将其分割成6个小图像，比如&lt;code&gt;5&lt;/code&gt; &lt;code&gt;0&lt;/code&gt; &amp;hellip;等&lt;/li&gt;
+&lt;li&gt;再对分割开的小图像进行分类，比如识别5&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们将使⽤⼀个三层神经⽹络来识别单个数字：
+&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/07.jpg&#34; alt=&#34;from nndl&#34; /&gt;
+由于训练数据由$28*28$的⼿写数字的图像组成，所以:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊&lt;/li&gt;
+&lt;li&gt;隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元&lt;/li&gt;
+&lt;li&gt;⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个分类⼿写数字的⽹络，大概就可以这样实现。&lt;/p&gt;
+
+&lt;h3 id=&#34;随机梯度下降算法&#34;&gt;随机梯度下降算法&lt;/h3&gt;
+
+&lt;p&gt;分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤&lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST&lt;/a&gt;数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;nndl
+├── 01
+│   └── mnist_data.py
+└── MNIST_data
+    ├── t10k-images-idx3-ubyte.gz
+    ├── t10k-labels-idx1-ubyte.gz
+    ├── train-images-idx3-ubyte.gz
+    └── train-labels-idx1-ubyte.gz
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后使用&lt;code&gt;TensorFlow&lt;/code&gt;来读取数据，看看下载的数据集到底是什么样子，在&lt;code&gt;/01/mnist_data.py&lt;/code&gt;中添加如下代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+&amp;quot;&amp;quot;&amp;quot;
+ Created by howie.hu at 10/01/2018.
+&amp;quot;&amp;quot;&amp;quot;
+from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
+
+mnist = read_data_sets(&amp;quot;../MNIST_data/&amp;quot;, one_hot=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;查看一些基本信息：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;print(&amp;quot;Training data size: %s&amp;quot; % mnist.train.num_examples)
+print(&amp;quot;Validating data size: %s&amp;quot; % mnist.validation.num_examples)
+print(&amp;quot;Testing data size: %s&amp;quot; % mnist.test.num_examples)
+
+# 每张图片是长度为784的一维数组
+print(len(mnist.train.images[0]))
+
+def display_digit(image):
+    image = image.reshape([28,28])
+    plt.imshow(image, cmap=plt.get_cmap(&#39;gray_r&#39;))
+    plt.show()
+
+print(&amp;quot;样本真实数字为：%s&amp;quot; % list(mnist.train.labels[1]).index(1))
+# 显示图像
+display_digit(mnist.train.images[1])
+
+# Output
+# Training data size: 55000
+# Validating data size: 5000
+# Testing data size: 10000
+# 784
+# 样本真实数字为：3
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到显示如下图像：
+&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/08.jpg&#34; alt=&#34;from mnist&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。&lt;/p&gt;
+
+&lt;p&gt;感知器为什么可以学习，因为它可以调整$b w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个&lt;strong&gt;代价函数&lt;/strong&gt;（有时被称为损失或⽬标函数）：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+  \label{eq:6}
+\end{equation}&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;w 表⽰所有的⽹络中权重的集合&lt;/li&gt;
+&lt;li&gt;b 是所有的偏置&lt;/li&gt;
+&lt;li&gt;n 是训练输⼊数据的个数&lt;/li&gt;
+&lt;li&gt;a 是表⽰当输⼊为x时输出的向量&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;训练模型的过程就是优化代价函数的过程，&lt;em&gt;Cost Function(代价函数)&lt;/em&gt; 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，我们将采⽤称为&lt;strong&gt;梯度下降&lt;/strong&gt;的算法来达到这个⽬的。&lt;/p&gt;
+
+&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.cnblogs.com/subconscious/p/5058741.html&#34;&gt;神经网络浅讲：从神经元到深度学习&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>Hello World</title>
@@ -2289,88 +2544,6 @@ stack install stack-run
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-02-11-vs-haskell.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>centos7下使用Privoxy将socket5转http代理</title>
-      <link>http://blog.howie6879.cn/post/19/</link>
-      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
-      
-      <guid>http://blog.howie6879.cn/post/19/</guid>
-      <description>
-
-&lt;p&gt;&lt;code&gt;shadowsocks&lt;/code&gt;是一个&lt;code&gt;socket5&lt;/code&gt;的服务，对此，可以使用&lt;code&gt;Privoxy&lt;/code&gt;将其转化为&lt;code&gt;http&lt;/code&gt;&lt;/p&gt;
-
-&lt;!-- more--&gt;
-
-&lt;h2 id=&#34;1-部署shadowsocks&#34;&gt;1.部署shadowsocks&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
-pip install shadowsocks
-# 创建配置文件
-vim /etc/shadowsocks.json
-# 输入
-{
-  &amp;quot;server&amp;quot;: &amp;quot;*.*.*.*&amp;quot;,
-  &amp;quot;server_port&amp;quot;: 443,
-  &amp;quot;password&amp;quot;: &amp;quot;***&amp;quot;,
-  &amp;quot;method&amp;quot;: &amp;quot;aes-256-cfb&amp;quot;,
-  &amp;quot;local_address&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
-  &amp;quot;local_port&amp;quot;: 1080,
-  &amp;quot;workers&amp;quot;: 1
-}
-# 运行
-sslocal -c /etc/shadowsocks.json
-# 测试当前ip
-curl --socks5 127.0.0.1:1080 http://httpbin.org/ip
-#返回结果
-{
-  &amp;quot;origin&amp;quot;: &amp;quot;*.*.*.*&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;说明代理成功，接下来安装&lt;code&gt;Privoxy&lt;/code&gt;：&lt;/p&gt;
-
-&lt;h2 id=&#34;2-socket5转http&#34;&gt;2.socket5转http&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install -y privoxy
-# 编辑配置文件
-vim /etc/privoxy/config
-# 添加
-forward-socks5 / 127.0.0.1:1080 .
-systemctl restart privoxy
-systemctl status privoxy
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;若果需要在外网访问，则需在&lt;code&gt;/etc/privoxy/config&lt;/code&gt;添加&lt;code&gt;listen-address  0.0.0.0:8118&lt;/code&gt;，同时还需要将8118端口开启，假设使用iptables:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/etc/sysconfig/iptables
-# 添加
--A INPUT -p tcp -m state --state NEW -m tcp --dport 8118 -j ACCEPT
-# 重启
-systemctl restart iptables
-systemctl status iptables
-# 测试
-vim ~/.bashrc
-export http_proxy=http://127.0.0.1:8118   
-export https_proxy=http://127.0.0.1:8118
-# 成功会有一大串返回
-curl www.google.co
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;3-题外话&#34;&gt;3.题外话&lt;/h2&gt;
-
-&lt;p&gt;顺便一提，如果使用的是mac，需要使用代理服务，若已经配置好&lt;code&gt;shadowsocks&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;brew install privoxy
-vim /usr/local/etc/privoxy/config
-# 添加
-listen-address 0.0.0.0:8118
-forward-socks5 / 127.0.0.1:1080 .
-# 开启
-/usr/local/sbin/privoxy /usr/local/etc/privoxy/config
-&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     

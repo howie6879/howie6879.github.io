@@ -9,6 +9,261 @@
     <atom:link href="http://blog.howie6879.cn/categories/python/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>神经网络与深度学习笔记 - 1.识别手写字</title>
+      <link>http://blog.howie6879.cn/post/33/</link>
+      <pubDate>Mon, 08 Jan 2018 14:57:30 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/33/</guid>
+      <description>
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 这本书主要讲的是如何掌握神经⽹络的核⼼概念，包括现代技术的深度学习，为你将来使⽤神经⽹络和深度学习打下基础，以下是我的读书笔记。&lt;/p&gt;
+
+&lt;p&gt;神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能地目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别&lt;/li&gt;
+&lt;li&gt;神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;两个重要的人工神经元：感知器和S型神经元&lt;/li&gt;
+&lt;li&gt;神经⽹络的架构&lt;/li&gt;
+&lt;li&gt;⼀个简单的分类⼿写数字的⽹络&lt;/li&gt;
+&lt;li&gt;标准的神经网络学习算法：随机梯度下降算法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;感知器&#34;&gt;感知器&lt;/h3&gt;
+
+&lt;p&gt;1943年，心理学家McCulloch和数学家Pitts发表了《&lt;a href=&#34;http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf&#34;&gt;A logical calculus of the ideas immanent in nervous activity&lt;/a&gt;》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/02.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重。&lt;/p&gt;
+
+&lt;p&gt;对于$x_{1},x_{2},&amp;hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&amp;hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘只和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/03.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$x=(x_{1},x_{2},&amp;hellip;,x_{j})$&lt;/li&gt;
+&lt;li&gt;$w=(w_{1},w_{2},&amp;hellip;,w_{j})$&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;那么感知器的规则可以重写为:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/04.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这就是感知器的数学模型，是不是就像一个逻辑回归模型？它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用&lt;code&gt;python&lt;/code&gt;写的一个感知器自动学习实现与非门，代码在&lt;a href=&#34;https://github.com/howie6879/nndl/blob/master/src/perceptron.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$x$&lt;/th&gt;
+&lt;th&gt;$y$&lt;/th&gt;
+&lt;th&gt;$output$&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能，但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。&lt;/p&gt;
+
+&lt;p&gt;可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。&lt;/p&gt;
+
+&lt;p&gt;遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。&lt;/p&gt;
+
+&lt;p&gt;感知器，终于可以多层了。&lt;/p&gt;
+
+&lt;h3 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h3&gt;
+
+&lt;p&gt;前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/05.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果&lt;code&gt;9&lt;/code&gt;，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。&lt;/p&gt;
+
+&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  \sigma(z) \equiv \frac{1}{1+e^{-z}}
+  \label{eq:3}
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;这里的$z=\sum _{j} w{_j}x{_j}+b$，那么⼀个具有输⼊$x_{1},x_{2},&amp;hellip;,x_{j}$，权重为$w_{1},w_{2},&amp;hellip;,w_{j}$，和偏置b的S型神经元的输出是：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  \frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+  \label{eq:4}
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;上面说过，感知器的激活函数只会输出两个值，分别是&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？&lt;/p&gt;
+
+&lt;p&gt;S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$\sigma(z) \leq 0.5$ 输出0&lt;/li&gt;
+&lt;li&gt;$\sigma(z)&amp;gt;0.5$  输出1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;神经-络的架构&#34;&gt;神经⽹络的架构&lt;/h3&gt;
+
+&lt;p&gt;看下面一个四层神经网络，这种类型的多层⽹络有时被称为多层感知器或者&lt;strong&gt;MLP&lt;/strong&gt;，如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/06.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;需要记住以下几个概念：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;⽹络中最左边的称为&lt;strong&gt;输⼊层&lt;/strong&gt;，其中的神经元称为&lt;strong&gt;输⼊神经元&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;中间得称之为&lt;strong&gt;隐藏层&lt;/strong&gt;，图中有两个隐藏层&lt;/li&gt;
+&lt;li&gt;最右边称之为&lt;strong&gt;输出层&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：&lt;strong&gt;前馈神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;有回路，其中反馈环路是可⾏的：&lt;strong&gt;递归神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;个简单的分类-写数字的-络&#34;&gt;⼀个简单的分类⼿写数字的⽹络&lt;/h3&gt;
+
+&lt;p&gt;对于这六个数字&lt;code&gt;504192&lt;/code&gt;，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;504192&lt;/code&gt;是连续在一起的图像，首先可以将其分割成6个小图像，比如&lt;code&gt;5&lt;/code&gt; &lt;code&gt;0&lt;/code&gt; &amp;hellip;等&lt;/li&gt;
+&lt;li&gt;再对分割开的小图像进行分类，比如识别5&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们将使⽤⼀个三层神经⽹络来识别单个数字：
+&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/07.jpg&#34; alt=&#34;from nndl&#34; /&gt;
+由于训练数据由$28*28$的⼿写数字的图像组成，所以:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊&lt;/li&gt;
+&lt;li&gt;隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元&lt;/li&gt;
+&lt;li&gt;⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个分类⼿写数字的⽹络，大概就可以这样实现。&lt;/p&gt;
+
+&lt;h3 id=&#34;随机梯度下降算法&#34;&gt;随机梯度下降算法&lt;/h3&gt;
+
+&lt;p&gt;分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤&lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST&lt;/a&gt;数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;nndl
+├── 01
+│   └── mnist_data.py
+└── MNIST_data
+    ├── t10k-images-idx3-ubyte.gz
+    ├── t10k-labels-idx1-ubyte.gz
+    ├── train-images-idx3-ubyte.gz
+    └── train-labels-idx1-ubyte.gz
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后使用&lt;code&gt;TensorFlow&lt;/code&gt;来读取数据，看看下载的数据集到底是什么样子，在&lt;code&gt;/01/mnist_data.py&lt;/code&gt;中添加如下代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+&amp;quot;&amp;quot;&amp;quot;
+ Created by howie.hu at 10/01/2018.
+&amp;quot;&amp;quot;&amp;quot;
+from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
+
+mnist = read_data_sets(&amp;quot;../MNIST_data/&amp;quot;, one_hot=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;查看一些基本信息：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;print(&amp;quot;Training data size: %s&amp;quot; % mnist.train.num_examples)
+print(&amp;quot;Validating data size: %s&amp;quot; % mnist.validation.num_examples)
+print(&amp;quot;Testing data size: %s&amp;quot; % mnist.test.num_examples)
+
+# 每张图片是长度为784的一维数组
+print(len(mnist.train.images[0]))
+
+def display_digit(image):
+    image = image.reshape([28,28])
+    plt.imshow(image, cmap=plt.get_cmap(&#39;gray_r&#39;))
+    plt.show()
+
+print(&amp;quot;样本真实数字为：%s&amp;quot; % list(mnist.train.labels[1]).index(1))
+# 显示图像
+display_digit(mnist.train.images[1])
+
+# Output
+# Training data size: 55000
+# Validating data size: 5000
+# Testing data size: 10000
+# 784
+# 样本真实数字为：3
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到显示如下图像：
+&lt;img src=&#34;http://blog.howie6879.cn/images/post/33/08.jpg&#34; alt=&#34;from mnist&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。&lt;/p&gt;
+
+&lt;p&gt;感知器为什么可以学习，因为它可以调整$b w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个&lt;strong&gt;代价函数&lt;/strong&gt;（有时被称为损失或⽬标函数）：&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+  C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+  \label{eq:6}
+\end{equation}&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;w 表⽰所有的⽹络中权重的集合&lt;/li&gt;
+&lt;li&gt;b 是所有的偏置&lt;/li&gt;
+&lt;li&gt;n 是训练输⼊数据的个数&lt;/li&gt;
+&lt;li&gt;a 是表⽰当输⼊为x时输出的向量&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;训练模型的过程就是优化代价函数的过程，&lt;em&gt;Cost Function(代价函数)&lt;/em&gt; 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，我们将采⽤称为&lt;strong&gt;梯度下降&lt;/strong&gt;的算法来达到这个⽬的。&lt;/p&gt;
+
+&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.cnblogs.com/subconscious/p/5058741.html&#34;&gt;神经网络浅讲：从神经元到深度学习&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Sanic 使用教程 - 4.展示一个页面</title>
       <link>http://blog.howie6879.cn/post/32/</link>
       <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
@@ -3930,509 +4185,6 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
 &lt;p&gt;访问 &lt;a href=&#34;http://10.211.55.25:5000&#34;&gt;http://10.211.55.25:5000&lt;/a&gt; 即可，尽情爬取吧。&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/11/01.png-blog.howie&#34; alt=&#34;pyspider&#34; /&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>python之由公司名推算出公司官网(余弦相似度)</title>
-      <link>http://blog.howie6879.cn/post/09/</link>
-      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
-      
-      <guid>http://blog.howie6879.cn/post/09/</guid>
-      <description>
-
-&lt;h1 id=&#34;1-问题&#34;&gt;1.问题&lt;/h1&gt;
-
-&lt;p&gt;对展会数据分类后，我的新任务是如何通过&lt;code&gt;公司名、公司地址、国家&lt;/code&gt;等海关数据推断出该公司的官网网站（若官网不存在则不考虑）
-以下数据仅供参考：&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;center&#34;&gt;公司名&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;国家&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;地址&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;JPW INDUSTRIES INC&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;427 NEW SANFORD RD LAVERGNE TN 37086 US&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;Fujian Xishi Co., Ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;CN, CHINA&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;BusinessPartner Co.,ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;BENKAI Co.,Ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;GOLD INC&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;18245 E 40TH AVE AURORA CO 80011 US&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;需要得到结果：&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;center&#34;&gt;公司名&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;官方网站&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;JPW INDUSTRIES INC&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://http://www.jpwindustries.com/&#34;&gt;http://http://www.jpwindustries.com/&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;Fujian Xishi Co., Ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.xishigroup.com/&#34;&gt;http://www.xishigroup.com/&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;BusinessPartner Co.,ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.traderthailand.com/&#34;&gt;http://www.traderthailand.com/&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;BENKAI Co.,Ltd&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;http://www.benkaico.com&#34;&gt;http://www.benkaico.com&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;GOLD INC&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;&lt;a href=&#34;https://goldbuginc.com/&#34;&gt;https://goldbuginc.com/&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h1 id=&#34;2-解决&#34;&gt;2.解决&lt;/h1&gt;
-
-&lt;p&gt;由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。
-大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选&lt;code&gt;google&lt;/code&gt;，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的&lt;code&gt;url&lt;/code&gt;。
-初步搜索一下，看看各种情况：
-第一种情况，检索即可很直观地得出结果
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/01.png-blog.howie&#34; alt=&#34;JPW INDUSTRIES INC &#34; /&gt;
-第二种情况，检索不能直观地得出结果，但官网确实存在（*第二检索个结果*）
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/02.png-blog.howie&#34; alt=&#34;Fujian Xishi Co., Ltd&#34; /&gt;
-第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/03.png-blog.howie&#34; alt=&#34;GOLD INC&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。
-观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其&lt;code&gt;website&lt;/code&gt;对应的&lt;code&gt;url&lt;/code&gt;绝对正确。
-故代码的第一步骤可以首先检索公司名+公司地址，观察&lt;code&gt;website&lt;/code&gt;元素是否存在，若存在，返回公司官网，否则，对公司名进行检索。
-代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def searchWeb(query, tld=&#39;com&#39;, lang=&#39;en&#39;, tbs=&#39;0&#39;, num=10, safe=&#39;off&#39;, tpe=&#39;&#39;, user_agent=None):
-    query = quote_plus(query)
-    get_page(url_home % vars())
-    url = url_search_num % vars()
-    # Request the Google Search results page.
-    html = get_page(url)
-    try:
-        href = re.findall(r&#39;Directions&amp;lt;/a&amp;gt;&amp;lt;a\s*class=&amp;quot;fl&amp;quot;\s*href=&amp;quot;(.*?)&amp;quot;.*?&amp;gt;Website&#39;, str(html))[0]
-        link = filter_result(href)
-        return link
-    except:
-        pass
-    return None
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/04.png-blog.howie&#34; alt=&#34;直接返回公司官网&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：
-&lt;code&gt;获取搜索引擎检索结果提取url&lt;/code&gt;-&amp;gt;&lt;code&gt;初步排除某些url&lt;/code&gt;-&amp;gt;&lt;code&gt;余弦相似度计算最可能的结果&lt;/code&gt;
-####2.1.获取搜索引擎检索结果提取url
-对于谷歌搜索，我使用了&lt;code&gt;MarioVilas&lt;/code&gt;的项目&lt;a href=&#34;https://github.com/MarioVilas/google&#34;&gt;google&lt;/a&gt;，毕竟在国内，为了以防万一我也写了&lt;code&gt;yahoo&lt;/code&gt;搜索，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env
-# -*-coding:utf-8-*-
-# script: yahooSearch.py
-__author__ = &#39;howie&#39;
-
-import sys
-import time
-
-if sys.version_info[0] &amp;gt; 2:
-    from urllib.request import Request, urlopen
-    from urllib.parse import quote_plus, urlparse
-else:
-    from urllib import quote_plus
-    from urllib2 import Request, urlopen
-    from urlparse import urlparse, parse_qs
-
-try:
-    from bs4 import BeautifulSoup
-
-    is_bs4 = True
-except ImportError:
-    from BeautifulSoup import BeautifulSoup
-
-    is_bs4 = False
-
-url_search = &amp;quot;https://search.yahoo.com/search?p=%(query)s&amp;amp;b=%(start)s&amp;amp;pz=%(num)s&amp;quot;
-
-headers = {
-    &#39;accept-encoding&#39;: &#39;gzip, deflate, sdch, br&#39;,
-    &#39;accept-language&#39;: &#39;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&#39;,
-    &#39;upgrade-insecure-requests&#39;: &#39;1&#39;,
-    &#39;accept&#39;: &#39;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#39;,
-    &#39;cache-control&#39;: &#39;max-age=0&#39;,
-    &#39;authority&#39;: &#39; search.yahoo.com&#39;
-}
-# 默认user_agent
-user_agent = &#39;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36&#39;
-
-
-def filter_link(link):
-    try:
-        linkData = urlparse(link)
-        if linkData.netloc and &amp;quot;yahoo.com&amp;quot; not in linkData.netloc and &amp;quot;/search/srpcache&amp;quot; not in linkData.path:
-            return link
-    except Exception:
-        pass
-    return None
-
-
-def yahooSearch(query, start=0, num=10, page=1, pause=1.0):
-    &amp;quot;&amp;quot;&amp;quot;
-    获取雅虎搜索url
-    :param query: 搜索关键词
-    :param start: 开始条目,最好为0
-    :param num: 搜索条目 建议10的倍数
-    :param page: 页数
-    :param pause: 停顿时间
-    :return: 返回url
-    &amp;quot;&amp;quot;&amp;quot;
-    query = quote_plus(query)
-    while page &amp;gt; 0:
-        url = url_search % vars()
-        time.sleep(pause)
-        request = Request(url)
-        request.add_header(&#39;User-Agent&#39;, user_agent)
-        response = urlopen(request)
-        html = response.read()
-        if is_bs4:
-            soup = BeautifulSoup(html, &#39;html.parser&#39;)
-        else:
-            soup = BeautifulSoup(html)
-        anchors = soup.find(id=&amp;quot;web&amp;quot;).find_all(&#39;a&#39;)
-        for a in anchors:
-            try:
-                link = filter_link(a[&amp;quot;href&amp;quot;])
-                if link:
-                    yield link
-            except KeyError:
-                continue
-        start += num + 1
-        page -= 1
-
-
-if __name__ == &#39;__main__&#39;:
-    # GOLD INC 18245 E 40TH AVE AURORA CO 80011 US
-    for url in yahooSearch(&amp;quot;GOLD INC 18245 E 40TH AVE AURORA CO 80011 US&amp;quot;):
-        print(url)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;####2.2.初步排除某些url
-这个可根据个人需求来配置，可添加&lt;code&gt;webConfig.py&lt;/code&gt;脚本，排除某些&lt;code&gt;url&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
-__author__ = &#39;howie&#39;
-
-config = dict(
-    # www开头或分割后数组大于二的网站
-    forbid_www=[&amp;quot;www.linkedin.com&amp;quot;, &amp;quot;www.alibaba.com&amp;quot;],
-    # 非www开头的网站
-    forbid=[&amp;quot;imexbb.com&amp;quot;, &amp;quot;made-in-china.com&amp;quot;]
-)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;以公司名&lt;code&gt;BENKAI Co.,Ltd&lt;/code&gt;为例，初步获取url：
-&lt;code&gt;[&#39;http://www.benkaico.com&#39;, &#39;http://hisupplier.com&#39;, &#39;http://www.hktdc.com/en&#39;]&lt;/code&gt;
-####2.3.余弦相似度计算最可能的结果
-对于公司&lt;code&gt;BENKAI Co.,Ltd&lt;/code&gt;，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。
-这里可以采用余弦相似度，具体公式可google，稍稍解释下：
-对于这三个网站：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;[&#39;http://www.benkaico.com&#39;, &#39;http://hisupplier.com&#39;, &#39;http://www.hktdc.com/en&#39;]```
-可以通过计算各个网站的`title`和`BENKAI Co.,Ltd`的相似程度来取得最可能的结果。
-#####2.3.1：对各网站title进行分词
-​```python
-{&#39;http://www.benkaico.com&#39;: [&#39;benkai&#39;, &#39;co.&#39;, &#39;,&#39;, &#39;ltd&#39;, &#39;.&#39;], 
-&#39;http://www.hktdc.com/en&#39;: [&#39;hktdc.com&#39;, &#39;â\x80\x93&#39;, &#39;page&#39;, &#39;not&#39;, &#39;found&#39;], 
-&#39;http://hisupplier.com&#39;: [&#39;china&#39;, &#39;suppliers&#39;, &#39;,&#39;, &#39;suppliers&#39;, &#39;directory&#39;, &#39;,&#39;, &#39;china&#39;, &#39;manufacturers&#39;, &#39;directory&#39;, &#39;-&#39;, &#39;hisupplier.com&#39;]}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;#####2.3.2：构建单词向量&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;{&#39;http://www.benkaico.com&#39;: [[0, 1, 1, 1, 1], [1, 1, 1, 1, 1]], 
-&#39;http://www.hktdc.com/en&#39;: [[1, 1, 0, 0, 1, 0, 0, 0, 1], [0, 0, 1, 1, 0, 1, 1, 1, 0]],
- &#39;http://hisupplier.com&#39;: [[0, 0, 0, 1, 0, 0, 1, 1, 0, 1], [2, 1, 1, 0, 2, 1, 2, 0, 2, 0]]}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;#####2.3.3:计算余弦相似度&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;{&#39;http://www.benkaico.com&#39;: 0.94427190999915878, 
-&#39;http://www.hktdc.com/en&#39;: 0.0, 
-&#39;http://hisupplier.com&#39;: 0.31451985913875646}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;通过比较，可以看到&lt;code&gt;http://www.benkaico.com&lt;/code&gt;相似度最高的结果，跟真实结果一样。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/09/05.png-blog.howie&#34; alt=&#34;http://www.benkaico.com&#34; /&gt;
-全部步骤代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
-__author__ = &#39;howie&#39;
-from urllib import parse
-from bs4 import BeautifulSoup
-from collections import defaultdict
-import requests
-import re
-import nltk
-import time
-from config.webConfig import config
-from CosineSimilarity import CosineSimilarity
-from search.yahooSearch import yahooSearch
-from search.gooSearch import search, searchWeb
-
-
-class Website(object):
-    &amp;quot;&amp;quot;&amp;quot;
-    通过公司名等信息获取网站官网
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, engine=&#39;google&#39;):
-        self.forbid_www = config[&amp;quot;forbid_www&amp;quot;]
-        self.forbid = config[&amp;quot;forbid&amp;quot;]
-        self.engine = engine
-
-    def get_web(self, query, address=&amp;quot;&amp;quot;):
-        &amp;quot;&amp;quot;&amp;quot;
-        获取域名
-        :param query: 搜索词
-        :param address: 在此加上地址时，query最好是公司名
-        :return: 返回最可能是官网的网站
-        &amp;quot;&amp;quot;&amp;quot;
-        if self.engine == &#39;google&#39; and address:
-            allQuery = query + &amp;quot; &amp;quot; + address
-            result = searchWeb(query=allQuery, num=5)
-            if result:
-                return result
-        allDomain = self.get_domain(query)
-        if len(allDomain) == &amp;quot;1&amp;quot;:
-            website = allDomain[0]
-        else:
-            # 初步判断网站域名
-            counts = self.get_counts(allDomain)
-            largest = max(zip(counts.values(), counts.keys()))
-            if largest[0] &amp;gt; len(allDomain) / 2:
-                website = largest[1]
-            else:
-                # 获取对应域名标题
-                domainData = self.get_title(set(allDomain))
-                # 计算相似度
-                initQuery = nltk.word_tokenize(query.lower(), language=&#39;english&#39;)
-                # 余弦相似性计算相似度
-                cos = CosineSimilarity(initQuery, domainData)
-                wordVector = cos.create_vector()
-                resultDic = cos.calculate(wordVector)
-                website = cos.get_website(resultDic)
-        return website
-
-    def get_domain(self, query):
-        &amp;quot;&amp;quot;&amp;quot;
-         获取谷歌搜索后的域名
-        :param query:搜索条件
-        :return:域名列表
-        &amp;quot;&amp;quot;&amp;quot;
-        allDomain = []
-        if self.engine == &amp;quot;google&amp;quot;:
-            for url in search(query, num=5, stop=1):
-                allDomain += self.parse_url(url)
-        elif self.engine == &amp;quot;yahoo&amp;quot;:
-            for url in yahooSearch(query):
-                allDomain += self.parse_url(url)
-        if not allDomain:
-            allDomain.append(&#39;&#39;)
-        return allDomain
-
-    def parse_url(self, url):
-        allDomain = []
-        domainParse = parse.urlparse(url)
-        # 英文网站获取
-        if &amp;quot;en&amp;quot; in domainParse[2].lower().split(&#39;/&#39;):
-            domain = domainParse[1] + &amp;quot;/en&amp;quot;
-        else:
-            domain = domainParse[1]
-        domainList = domain.split(&#39;.&#39;)
-        # 排除干扰网站
-        if len(domainList) &amp;gt;= 3 and domainList[0] != &amp;quot;www&amp;quot;:
-            isUrl = &amp;quot;.&amp;quot;.join(domain.split(&#39;.&#39;)[-2:])
-            if isUrl not in self.forbid:
-                allDomain.append(domainParse[0] + &amp;quot;://&amp;quot; + isUrl)
-        elif domain not in self.forbid_www:
-            allDomain.append(domainParse[0] + &amp;quot;://&amp;quot; + domain)
-        return allDomain
-
-    def get_title(self, setDomain):
-        &amp;quot;&amp;quot;&amp;quot;
-        获取对应网站title，并进行分词
-        :param allDomain: 网站集合
-        :return: 网站:title分词结果
-        &amp;quot;&amp;quot;&amp;quot;
-        domainData = {}
-        for domain in setDomain:
-            headers = {
-                &amp;quot;Accept&amp;quot;: &amp;quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&amp;quot;,
-                &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, sdch&amp;quot;,
-                &amp;quot;Accept-Language&amp;quot;: &amp;quot;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&amp;quot;,
-                &amp;quot;Cache-Control&amp;quot;: &amp;quot;max-age=0&amp;quot;,
-                &amp;quot;Proxy-Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;,
-                &amp;quot;Upgrade-Insecure-Requests&amp;quot;: &amp;quot;1&amp;quot;,
-                &amp;quot;User-Agent&amp;quot;: &amp;quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.89 Safari/537.36&amp;quot;,
-            }
-            try:
-                data = requests.get(domain, headers=headers).text
-                soup = BeautifulSoup(data, &#39;html.parser&#39;)
-                title = soup.title.get_text()
-                title = re.sub(r&#39;\r\n&#39;, &#39;&#39;, title.strip())
-                titleToken = nltk.word_tokenize(title.lower(), language=&#39;english&#39;)
-                domainData[domain] = titleToken
-            except:
-                pass
-        return domainData
-
-    def get_counts(self, allDomain):
-        &amp;quot;&amp;quot;&amp;quot;
-        返回网站列表各个域名数量
-        :param allDomain: 网站列表
-        :return: 网站:数量
-        &amp;quot;&amp;quot;&amp;quot;
-        counts = defaultdict(int)
-        for eachDomain in allDomain:
-            counts[eachDomain] += 1
-        return counts
-
-
-if __name__ == &#39;__main__&#39;:
-    # allQuery = [&amp;quot;National Sales Company, Inc.&amp;quot;, &amp;quot;Decor Music Inc.&amp;quot;,&amp;quot;Fujian Xishi Co., Ltd&amp;quot;,&amp;quot;Kiho USA Inc.&amp;quot;,&amp;quot;BusinessPartner Co.,ltd&amp;quot;,&amp;quot;BENKAI Co.,Ltd&amp;quot;]
-    # GOLD INC 18245 E 40TH AVE AURORA CO 80011 US
-    allQuery = [&amp;quot;ALZARKI INTERNATIONAL&amp;quot;]
-    website = Website(engine=&#39;google&#39;)
-    for query in allQuery:
-        time.sleep(2)
-        website = website.get_web(query=query)
-        print(website)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;计算余弦相似度代码&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*-coding:utf-8-*-
-# script: CosineSimilarity.py
-__author__ = &#39;howie&#39;
-import numpy as np
-from functools import reduce
-from math import sqrt
-
-
-class CosineSimilarity(object):
-    &amp;quot;&amp;quot;&amp;quot;
-    余弦相似性计算相似度
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, initQuery, domainData):
-        self.title = initQuery
-        self.data = domainData
-
-    def create_vector(self):
-        &amp;quot;&amp;quot;&amp;quot;
-        创建单词向量
-        :return: wordVector = {} 目标标题以及各个网站标题对应的单词向量
-        &amp;quot;&amp;quot;&amp;quot;
-        wordVector = {}
-        for web, value in self.data.items():
-            wordVector[web] = []
-            titleVector, valueVector = [], []
-            allWord = set(self.title + value)
-            for eachWord in allWord:
-                titleNum = self.title.count(eachWord)
-                valueNum = value.count(eachWord)
-                titleVector.append(titleNum)
-                valueVector.append(valueNum)
-            wordVector[web].append(titleVector)
-            wordVector[web].append(valueVector)
-        return wordVector
-
-    def calculate(self, wordVector):
-        &amp;quot;&amp;quot;&amp;quot;
-        计算余弦相似度
-        :param wordVector: wordVector = {} 目标标题以及各个网站标题对应的单词向量
-        :return: 返回各个网站相似度值
-        &amp;quot;&amp;quot;&amp;quot;
-        resultDic = {}
-        for web, value in wordVector.items():
-            valueArr = np.array(value)
-            # 余弦相似性
-            squares = []
-            numerator = reduce(lambda x, y: x + y, valueArr[0] * valueArr[1])
-            square_title, square_data = 0.0, 0.0
-            for num in range(len(valueArr[0])):
-                square_title += pow(valueArr[0][num], 2)
-                square_data += pow(valueArr[1][num], 2)
-            squares.append(sqrt(square_title))
-            squares.append(sqrt(square_data))
-            mul_of_squares = reduce(lambda x, y: x * y, squares)
-            resultDic[web] = numerator / sum_of_squares
-        return resultDic
-
-    def get_website(self, resultDic):
-        &amp;quot;&amp;quot;&amp;quot;
-        获取最可能是官网的网站
-        :param resultDic: 各个网站相似度值
-        :return: 最可能的网站 也可能为空
-        &amp;quot;&amp;quot;&amp;quot;
-        website = &#39;&#39;
-        largest = max(zip(resultDic.values(), resultDic.keys()))
-        if largest[0]:
-            website = largest[1]
-        # 当相似度为0
-        else:
-            websites = [key for key, values in resultDic.items() if values == 0.0]
-            for eachWebsite in websites:
-                keyword = &#39;,&#39;.join(self.data[eachWebsite]).lower()
-                if &#39;home&#39; in keyword or &amp;quot;welcome&amp;quot; in keyword:
-                    website = eachWebsite
-        return website
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h1 id=&#34;3-总结&#34;&gt;3.总结&lt;/h1&gt;
-
-&lt;p&gt;至此，若有更好的解决方案，欢迎赐教，谢谢。&lt;/p&gt;
 </description>
     </item>
     
