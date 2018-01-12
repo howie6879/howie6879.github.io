@@ -6,8 +6,278 @@
     <description>Recent content in Post-rsses on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 08 Jan 2018 14:57:30 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jan 2018 10:50:30 +0800</lastBuildDate>
     <atom:link href="http://blog.howie6879.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Sanic 使用教程 - 5.数据库使用</title>
+      <link>http://blog.howie6879.cn/post/34/</link>
+      <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/34/</guid>
+      <description>
+
+&lt;p&gt;介绍中说的很明白，&lt;code&gt;Sanic&lt;/code&gt; 是一个可以使用 &lt;code&gt;async/await&lt;/code&gt; 语法编写项目的&lt;strong&gt;异步&lt;/strong&gt;非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用&lt;code&gt;aihttp&lt;/code&gt;而非&lt;code&gt;requests&lt;/code&gt;，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。&lt;/p&gt;
+
+&lt;h3 id=&#34;操作mysql&#34;&gt;操作Mysql&lt;/h3&gt;
+
+&lt;p&gt;对于mysql数据库的异步操作，我只在一些脚本中用过，用的是&lt;a href=&#34;https://github.com/aio-libs/aiomysql&#34;&gt;aiomysql&lt;/a&gt;，其中官方文档中讲得很清楚，也支持结合&lt;code&gt;sqlalchemy&lt;/code&gt;编写&lt;code&gt;ORM&lt;/code&gt;，然后aiomysql提供了自己编写的异步引擎。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from aiomysql.sa import create_engine
+# 这个才是关键
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shel&#34;&gt;aio_mysql
+├── demo.py
+├── model.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;建立表：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-mysql&#34;&gt;create database test_mysql;
+
+CREATE TABLE user
+(
+  id        INT AUTO_INCREMENT
+    PRIMARY KEY,
+  user_name VARCHAR(16) NOT NULL,
+  pwd       VARCHAR(32) NOT NULL,
+  real_name VARCHAR(6)  NOT NULL
+);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;一切准备就绪，下面编写代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# script: model.py
+import sqlalchemy as sa
+
+metadata = sa.MetaData()
+
+user = sa.Table(
+    &#39;user&#39;,
+    metadata,
+    sa.Column(&#39;id&#39;, sa.Integer, autoincrement=True, primary_key=True),
+    sa.Column(&#39;user_name&#39;, sa.String(16), nullable=False),
+    sa.Column(&#39;pwd&#39;, sa.String(32), nullable=False),
+    sa.Column(&#39;real_name&#39;, sa.String(6), nullable=False),
+)
+
+# script: demo.py
+import asyncio
+
+from aiomysql.sa import create_engine
+
+from model import user,metadata
+
+
+async def go(loop):
+    &amp;quot;&amp;quot;&amp;quot;
+    aiomysql项目地址：https://github.com/aio-libs/aiomysql
+    :param loop:
+    :return:
+    &amp;quot;&amp;quot;&amp;quot;
+    engine = await create_engine(user=&#39;root&#39;, db=&#39;test_mysql&#39;,
+                                 host=&#39;127.0.0.1&#39;, password=&#39;123456&#39;, loop=loop)
+    async with engine.acquire() as conn:
+        await conn.execute(user.insert().values(user_name=&#39;user_name01&#39;, pwd=&#39;123456&#39;, real_name=&#39;real_name01&#39;))
+        await conn.execute(&#39;commit&#39;)
+
+        async for row in conn.execute(user.select()):
+            print(row.user_name, row.pwd)
+
+    engine.close()
+    await engine.wait_closed()
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(go(loop))
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行 python demo.py，会看到如下输出：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;user_name01 123456
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;很简单吧，具体示例见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql&#34;&gt;aio_mysql&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;操作mongodb&#34;&gt;操作MongoDB&lt;/h3&gt;
+
+&lt;p&gt;我业余写的一个项目，基本用的就是&lt;code&gt;MongoDB&lt;/code&gt;来储存数据，对于异步操作&lt;code&gt;MongoDB&lt;/code&gt;，目前Python主要用的是&lt;a href=&#34;https://motor.readthedocs.io/en/stable/index.html&#34;&gt;motor&lt;/a&gt;，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_mongo
+├── demo.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;MongoDB&lt;/code&gt;是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开&lt;code&gt;demo.py&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+from functools import wraps
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
+MONGODB = dict(
+    MONGO_HOST=os.getenv(&#39;MONGO_HOST&#39;, &amp;quot;&amp;quot;),
+    MONGO_PORT=os.getenv(&#39;MONGO_PORT&#39;, 27017),
+    MONGO_USERNAME=os.getenv(&#39;MONGO_USERNAME&#39;, &amp;quot;&amp;quot;),
+    MONGO_PASSWORD=os.getenv(&#39;MONGO_PASSWORD&#39;, &amp;quot;&amp;quot;),
+    DATABASE=&#39;test_mongodb&#39;,
+)
+
+class MotorBaseOld:
+    &amp;quot;&amp;quot;&amp;quot;
+    默认实现了一个db只创建一次，缺点是更换集合麻烦
+    &amp;quot;&amp;quot;&amp;quot;
+    _db = None
+    MONGODB = MONGODB
+
+    def client(self, db):
+        # motor
+        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
+            account=&#39;{username}:{password}@&#39;.format(
+                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
+                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
+            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
+            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
+            database=db)
+        return AsyncIOMotorClient(self.motor_uri)
+
+    @property
+    def db(self):
+        if self._db is None:
+            self._db = self.client(self.MONGODB[&#39;DATABASE&#39;])[self.MONGODB[&#39;DATABASE&#39;]]
+
+        return self._db
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我最开始，使用的是这样种方式来连接&lt;code&gt;MongoDB&lt;/code&gt;，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+def singleton(cls):
+    &amp;quot;&amp;quot;&amp;quot;
+    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/%E9%99%84%E5%BD%95%EF%BC%9A%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8.md
+    :param cls: cls
+    :return: instance
+    &amp;quot;&amp;quot;&amp;quot;
+    _instances = {}
+
+    @wraps(cls)
+    def instance(*args, **kw):
+        if cls not in _instances:
+            _instances[cls] = cls(*args, **kw)
+        return _instances[cls]
+
+    return instance
+
+@singleton
+class MotorBase:
+    &amp;quot;&amp;quot;&amp;quot;
+    更改mongodb连接方式 单例模式下支持多库操作
+    About motor&#39;s doc: https://github.com/mongodb/motor
+    &amp;quot;&amp;quot;&amp;quot;
+    _db = {}
+    _collection = {}
+    MONGODB = MONGODB
+
+    def __init__(self):
+        self.motor_uri = &#39;&#39;
+
+    def client(self, db):
+        # motor
+        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
+            account=&#39;{username}:{password}@&#39;.format(
+                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
+                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
+            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
+            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
+            database=db)
+        return AsyncIOMotorClient(self.motor_uri)
+
+    def get_db(self, db=MONGODB[&#39;DATABASE&#39;]):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取一个db实例
+        :param db: database name
+        :return: the motor db instance
+        &amp;quot;&amp;quot;&amp;quot;
+        if db not in self._db:
+            self._db[db] = self.client(db)[db]
+
+        return self._db[db]
+
+    def get_collection(self, db_name, collection):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取一个集合实例
+        :param db_name: database name
+        :param collection: collection name
+        :return: the motor collection instance
+        &amp;quot;&amp;quot;&amp;quot;
+        collection_key = db_name + collection
+        if collection_key not in self._collection:
+            self._collection[collection_key] = self.get_db(db_name)[collection]
+
+        return self._collection[collection_key]
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo&#34;&gt;aio_mongo&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;操作redis&#34;&gt;操作Redis&lt;/h3&gt;
+
+&lt;p&gt;对于Redis的异步操作，我选用的是&lt;code&gt;asyncio_redis&lt;/code&gt;，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_redis
+├── demo.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;建立一个redis连接池：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+import asyncio_redis
+
+REDIS_DICT = dict(
+    IS_CACHE=True,
+    REDIS_ENDPOINT=os.getenv(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;),
+    REDIS_PORT=os.getenv(&#39;REDIS_PORT&#39;, 6379),
+    REDIS_PASSWORD=os.getenv(&#39;REDIS_PASSWORD&#39;, None),
+    DB=0,
+    POOLSIZE=10,
+)
+
+
+class RedisSession:
+    &amp;quot;&amp;quot;&amp;quot;
+    建立redis连接池
+    &amp;quot;&amp;quot;&amp;quot;
+    _pool = None
+
+    async def get_redis_pool(self):
+        if not self._pool:
+            self._pool = await asyncio_redis.Pool.create(
+                host=str(REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;)), port=int(REDIS_DICT.get(&#39;REDIS_PORT&#39;, 6379)),
+                poolsize=int(REDIS_DICT.get(&#39;POOLSIZE&#39;, 10)), password=REDIS_DICT.get(&#39;REDIS_PASSWORD&#39;, None),
+                db=REDIS_DICT.get(&#39;DB&#39;, None)
+            )
+
+        return self._pool
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py&#34;&gt;aio_redis&lt;/a&gt;，使用起来很简单，不做多叙述。&lt;/p&gt;
+
+&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
+
+&lt;p&gt;如果你使用其它类型的数据库，其实使用方式也是类似。
+本章代码地址，见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05&#34;&gt;demo05&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>神经网络与深度学习笔记 - 1.识别手写字</title>
@@ -2518,88 +2788,6 @@ stack install stack-run
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-02-11-vs-haskell.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>centos7下使用Privoxy将socket5转http代理</title>
-      <link>http://blog.howie6879.cn/post/19/</link>
-      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
-      
-      <guid>http://blog.howie6879.cn/post/19/</guid>
-      <description>
-
-&lt;p&gt;&lt;code&gt;shadowsocks&lt;/code&gt;是一个&lt;code&gt;socket5&lt;/code&gt;的服务，对此，可以使用&lt;code&gt;Privoxy&lt;/code&gt;将其转化为&lt;code&gt;http&lt;/code&gt;&lt;/p&gt;
-
-&lt;!-- more--&gt;
-
-&lt;h2 id=&#34;1-部署shadowsocks&#34;&gt;1.部署shadowsocks&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
-pip install shadowsocks
-# 创建配置文件
-vim /etc/shadowsocks.json
-# 输入
-{
-  &amp;quot;server&amp;quot;: &amp;quot;*.*.*.*&amp;quot;,
-  &amp;quot;server_port&amp;quot;: 443,
-  &amp;quot;password&amp;quot;: &amp;quot;***&amp;quot;,
-  &amp;quot;method&amp;quot;: &amp;quot;aes-256-cfb&amp;quot;,
-  &amp;quot;local_address&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
-  &amp;quot;local_port&amp;quot;: 1080,
-  &amp;quot;workers&amp;quot;: 1
-}
-# 运行
-sslocal -c /etc/shadowsocks.json
-# 测试当前ip
-curl --socks5 127.0.0.1:1080 http://httpbin.org/ip
-#返回结果
-{
-  &amp;quot;origin&amp;quot;: &amp;quot;*.*.*.*&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;说明代理成功，接下来安装&lt;code&gt;Privoxy&lt;/code&gt;：&lt;/p&gt;
-
-&lt;h2 id=&#34;2-socket5转http&#34;&gt;2.socket5转http&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install -y privoxy
-# 编辑配置文件
-vim /etc/privoxy/config
-# 添加
-forward-socks5 / 127.0.0.1:1080 .
-systemctl restart privoxy
-systemctl status privoxy
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;若果需要在外网访问，则需在&lt;code&gt;/etc/privoxy/config&lt;/code&gt;添加&lt;code&gt;listen-address  0.0.0.0:8118&lt;/code&gt;，同时还需要将8118端口开启，假设使用iptables:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/etc/sysconfig/iptables
-# 添加
--A INPUT -p tcp -m state --state NEW -m tcp --dport 8118 -j ACCEPT
-# 重启
-systemctl restart iptables
-systemctl status iptables
-# 测试
-vim ~/.bashrc
-export http_proxy=http://127.0.0.1:8118   
-export https_proxy=http://127.0.0.1:8118
-# 成功会有一大串返回
-curl www.google.co
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;3-题外话&#34;&gt;3.题外话&lt;/h2&gt;
-
-&lt;p&gt;顺便一提，如果使用的是mac，需要使用代理服务，若已经配置好&lt;code&gt;shadowsocks&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;brew install privoxy
-vim /usr/local/etc/privoxy/config
-# 添加
-listen-address 0.0.0.0:8118
-forward-socks5 / 127.0.0.1:1080 .
-# 开启
-/usr/local/sbin/privoxy /usr/local/etc/privoxy/config
-&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     

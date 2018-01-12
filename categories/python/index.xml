@@ -9,6 +9,276 @@
     <atom:link href="http://blog.howie6879.cn/categories/python/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Sanic 使用教程 - 5.数据库使用</title>
+      <link>http://blog.howie6879.cn/post/34/</link>
+      <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/34/</guid>
+      <description>
+
+&lt;p&gt;介绍中说的很明白，&lt;code&gt;Sanic&lt;/code&gt; 是一个可以使用 &lt;code&gt;async/await&lt;/code&gt; 语法编写项目的&lt;strong&gt;异步&lt;/strong&gt;非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用&lt;code&gt;aihttp&lt;/code&gt;而非&lt;code&gt;requests&lt;/code&gt;，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。&lt;/p&gt;
+
+&lt;h3 id=&#34;操作mysql&#34;&gt;操作Mysql&lt;/h3&gt;
+
+&lt;p&gt;对于mysql数据库的异步操作，我只在一些脚本中用过，用的是&lt;a href=&#34;https://github.com/aio-libs/aiomysql&#34;&gt;aiomysql&lt;/a&gt;，其中官方文档中讲得很清楚，也支持结合&lt;code&gt;sqlalchemy&lt;/code&gt;编写&lt;code&gt;ORM&lt;/code&gt;，然后aiomysql提供了自己编写的异步引擎。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from aiomysql.sa import create_engine
+# 这个才是关键
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shel&#34;&gt;aio_mysql
+├── demo.py
+├── model.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;建立表：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-mysql&#34;&gt;create database test_mysql;
+
+CREATE TABLE user
+(
+  id        INT AUTO_INCREMENT
+    PRIMARY KEY,
+  user_name VARCHAR(16) NOT NULL,
+  pwd       VARCHAR(32) NOT NULL,
+  real_name VARCHAR(6)  NOT NULL
+);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;一切准备就绪，下面编写代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# script: model.py
+import sqlalchemy as sa
+
+metadata = sa.MetaData()
+
+user = sa.Table(
+    &#39;user&#39;,
+    metadata,
+    sa.Column(&#39;id&#39;, sa.Integer, autoincrement=True, primary_key=True),
+    sa.Column(&#39;user_name&#39;, sa.String(16), nullable=False),
+    sa.Column(&#39;pwd&#39;, sa.String(32), nullable=False),
+    sa.Column(&#39;real_name&#39;, sa.String(6), nullable=False),
+)
+
+# script: demo.py
+import asyncio
+
+from aiomysql.sa import create_engine
+
+from model import user,metadata
+
+
+async def go(loop):
+    &amp;quot;&amp;quot;&amp;quot;
+    aiomysql项目地址：https://github.com/aio-libs/aiomysql
+    :param loop:
+    :return:
+    &amp;quot;&amp;quot;&amp;quot;
+    engine = await create_engine(user=&#39;root&#39;, db=&#39;test_mysql&#39;,
+                                 host=&#39;127.0.0.1&#39;, password=&#39;123456&#39;, loop=loop)
+    async with engine.acquire() as conn:
+        await conn.execute(user.insert().values(user_name=&#39;user_name01&#39;, pwd=&#39;123456&#39;, real_name=&#39;real_name01&#39;))
+        await conn.execute(&#39;commit&#39;)
+
+        async for row in conn.execute(user.select()):
+            print(row.user_name, row.pwd)
+
+    engine.close()
+    await engine.wait_closed()
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(go(loop))
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行 python demo.py，会看到如下输出：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;user_name01 123456
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;很简单吧，具体示例见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql&#34;&gt;aio_mysql&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;操作mongodb&#34;&gt;操作MongoDB&lt;/h3&gt;
+
+&lt;p&gt;我业余写的一个项目，基本用的就是&lt;code&gt;MongoDB&lt;/code&gt;来储存数据，对于异步操作&lt;code&gt;MongoDB&lt;/code&gt;，目前Python主要用的是&lt;a href=&#34;https://motor.readthedocs.io/en/stable/index.html&#34;&gt;motor&lt;/a&gt;，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_mongo
+├── demo.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;MongoDB&lt;/code&gt;是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开&lt;code&gt;demo.py&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+
+from functools import wraps
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
+MONGODB = dict(
+    MONGO_HOST=os.getenv(&#39;MONGO_HOST&#39;, &amp;quot;&amp;quot;),
+    MONGO_PORT=os.getenv(&#39;MONGO_PORT&#39;, 27017),
+    MONGO_USERNAME=os.getenv(&#39;MONGO_USERNAME&#39;, &amp;quot;&amp;quot;),
+    MONGO_PASSWORD=os.getenv(&#39;MONGO_PASSWORD&#39;, &amp;quot;&amp;quot;),
+    DATABASE=&#39;test_mongodb&#39;,
+)
+
+class MotorBaseOld:
+    &amp;quot;&amp;quot;&amp;quot;
+    默认实现了一个db只创建一次，缺点是更换集合麻烦
+    &amp;quot;&amp;quot;&amp;quot;
+    _db = None
+    MONGODB = MONGODB
+
+    def client(self, db):
+        # motor
+        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
+            account=&#39;{username}:{password}@&#39;.format(
+                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
+                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
+            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
+            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
+            database=db)
+        return AsyncIOMotorClient(self.motor_uri)
+
+    @property
+    def db(self):
+        if self._db is None:
+            self._db = self.client(self.MONGODB[&#39;DATABASE&#39;])[self.MONGODB[&#39;DATABASE&#39;]]
+
+        return self._db
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我最开始，使用的是这样种方式来连接&lt;code&gt;MongoDB&lt;/code&gt;，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+def singleton(cls):
+    &amp;quot;&amp;quot;&amp;quot;
+    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/%E9%99%84%E5%BD%95%EF%BC%9A%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8.md
+    :param cls: cls
+    :return: instance
+    &amp;quot;&amp;quot;&amp;quot;
+    _instances = {}
+
+    @wraps(cls)
+    def instance(*args, **kw):
+        if cls not in _instances:
+            _instances[cls] = cls(*args, **kw)
+        return _instances[cls]
+
+    return instance
+
+@singleton
+class MotorBase:
+    &amp;quot;&amp;quot;&amp;quot;
+    更改mongodb连接方式 单例模式下支持多库操作
+    About motor&#39;s doc: https://github.com/mongodb/motor
+    &amp;quot;&amp;quot;&amp;quot;
+    _db = {}
+    _collection = {}
+    MONGODB = MONGODB
+
+    def __init__(self):
+        self.motor_uri = &#39;&#39;
+
+    def client(self, db):
+        # motor
+        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
+            account=&#39;{username}:{password}@&#39;.format(
+                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
+                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
+            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
+            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
+            database=db)
+        return AsyncIOMotorClient(self.motor_uri)
+
+    def get_db(self, db=MONGODB[&#39;DATABASE&#39;]):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取一个db实例
+        :param db: database name
+        :return: the motor db instance
+        &amp;quot;&amp;quot;&amp;quot;
+        if db not in self._db:
+            self._db[db] = self.client(db)[db]
+
+        return self._db[db]
+
+    def get_collection(self, db_name, collection):
+        &amp;quot;&amp;quot;&amp;quot;
+        获取一个集合实例
+        :param db_name: database name
+        :param collection: collection name
+        :return: the motor collection instance
+        &amp;quot;&amp;quot;&amp;quot;
+        collection_key = db_name + collection
+        if collection_key not in self._collection:
+            self._collection[collection_key] = self.get_db(db_name)[collection]
+
+        return self._collection[collection_key]
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo&#34;&gt;aio_mongo&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;操作redis&#34;&gt;操作Redis&lt;/h3&gt;
+
+&lt;p&gt;对于Redis的异步操作，我选用的是&lt;code&gt;asyncio_redis&lt;/code&gt;，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_redis
+├── demo.py
+└── requirements.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;建立一个redis连接池：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+import os
+import asyncio_redis
+
+REDIS_DICT = dict(
+    IS_CACHE=True,
+    REDIS_ENDPOINT=os.getenv(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;),
+    REDIS_PORT=os.getenv(&#39;REDIS_PORT&#39;, 6379),
+    REDIS_PASSWORD=os.getenv(&#39;REDIS_PASSWORD&#39;, None),
+    DB=0,
+    POOLSIZE=10,
+)
+
+
+class RedisSession:
+    &amp;quot;&amp;quot;&amp;quot;
+    建立redis连接池
+    &amp;quot;&amp;quot;&amp;quot;
+    _pool = None
+
+    async def get_redis_pool(self):
+        if not self._pool:
+            self._pool = await asyncio_redis.Pool.create(
+                host=str(REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;)), port=int(REDIS_DICT.get(&#39;REDIS_PORT&#39;, 6379)),
+                poolsize=int(REDIS_DICT.get(&#39;POOLSIZE&#39;, 10)), password=REDIS_DICT.get(&#39;REDIS_PASSWORD&#39;, None),
+                db=REDIS_DICT.get(&#39;DB&#39;, None)
+            )
+
+        return self._pool
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py&#34;&gt;aio_redis&lt;/a&gt;，使用起来很简单，不做多叙述。&lt;/p&gt;
+
+&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
+
+&lt;p&gt;如果你使用其它类型的数据库，其实使用方式也是类似。
+本章代码地址，见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05&#34;&gt;demo05&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>神经网络与深度学习笔记 - 1.识别手写字</title>
       <link>http://blog.howie6879.cn/post/33/</link>
       <pubDate>Mon, 08 Jan 2018 14:57:30 +0800</pubDate>
@@ -3658,533 +3928,6 @@ Minor_axis axis: A to D
 
 &lt;p&gt;本次笔记主要记录&lt;code&gt;pandas&lt;/code&gt;数据结构，接下来将详细介绍用法。
 如果您也使用&lt;code&gt;jupyter notebook&lt;/code&gt;，可以下载本文源文件，点击&lt;a href=&#34;https://github.com/howie6879/Mastering-Python/blob/master/Mastering%20Pandas/Mastering%20Pandas%2001.ipynb&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>centos7分布式部署pyspider</title>
-      <link>http://blog.howie6879.cn/post/11/</link>
-      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
-      
-      <guid>http://blog.howie6879.cn/post/11/</guid>
-      <description>
-
-&lt;h4 id=&#34;1-搭建环境&#34;&gt;1.搭建环境：&lt;/h4&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;系统版本：&lt;/strong&gt;&lt;code&gt;Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;python版本&lt;/strong&gt;：&lt;code&gt;Python 3.5.1&lt;/code&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h5 id=&#34;1-1-搭建python3环境&#34;&gt;1.1.搭建python3环境：&lt;/h5&gt;
-
-&lt;p&gt;本人在尝试过后选择集成环境&lt;strong&gt;Anaconda&lt;/strong&gt;&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h6 id=&#34;1-1-1-编译&#34;&gt;1.1.1.编译&lt;/h6&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 下载依赖
-yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve
-# 下载python版本
-wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz
-# 或者使用国内源
-wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz
-mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src
-# 解压
-tar -zxf Python-3.5.1.tgz;cd Python-3.5.1
-# 编译安装
-./configure --prefix=/usr/local/python3.5 --enable-shared
-make &amp;amp;&amp;amp; make install
-# 建立软链接
-ln -s /usr/local/python3.5/bin/python3 /usr/bin/python3
-echo &amp;quot;/usr/local/python3.5/lib&amp;quot; &amp;gt; /etc/ld.so.conf.d/python3.5.conf
-ldconfig
-# 验证python3
-python3
-# Python 3.5.1 (default, Oct  9 2016, 11:44:24)
-# [GCC 4.8.5 20150623 (Red Hat 4.8.5-4)] on linux
-# Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information.
-# &amp;gt;&amp;gt;&amp;gt;
-# pip
-/usr/local/python3.5/bin/pip3 install --upgrade pip
-ln -s /usr/local/python3.5/bin/pip /usr/bin/pip
-# 本人在安装时出现问题 将pip重装
-wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
-python get-pip.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h6 id=&#34;1-1-2-集成环境anaconda&#34;&gt;1.1.2.集成环境anaconda&lt;/h6&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 也可考虑集成环境anaconda(推荐)
-wget https://repo.continuum.io/archive/Anaconda3-4.2.0-Linux-x86_64.sh
-# 直接安装即可
-./Anaconda3-4.2.0-Linux-x86_64.sh
-# 若出错，可能是解压失败
-yum install bzip2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h5 id=&#34;1-2-安装mariadb&#34;&gt;1.2.安装mariaDB&lt;/h5&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
-yum -y install mariadb mariadb-server
-# 启动
-systemctl start mariadb
-# 设置为开机启动
-systemctl enable mariadb
-# 配置密码 默认为空
-mysql_secure_installation
-# 登录
-mysql -u root -p
-# 创建一个用户 自己设定账户密码
-CREATE USER &#39;user_name&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;user_pass&#39;;
-GRANT ALL PRIVILEGES ON *.* TO &#39;user_name&#39;@&#39;localhost&#39; WITH GRANT OPTION;
-CREATE USER &#39;user_name&#39;@&#39;%&#39; IDENTIFIED BY &#39;user_pass&#39;;
-GRANT ALL PRIVILEGES ON *.* TO &#39;user_name&#39;@&#39;%&#39; WITH GRANT OPTION;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h5 id=&#34;1-3-安装pyspider&#34;&gt;1.3.安装pyspider&lt;/h5&gt;
-
-&lt;p&gt;本人使用&lt;code&gt;Anaconda&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 搭建虚拟环境sbird python版本3.*
-conda create -n sbird python=3*
-# 进入环境
-source activate sbird
-# 安装pyspider
-pip install pyspider
-# 报错 
-# it does not exist.  The exported locale is &amp;quot;en_US.UTF-8&amp;quot; but it is not supported
-# 执行 可写入.bashrc
-export LC_ALL=en_US.utf-8
-export LANG=en_US.utf-8
-#ImportError: pycurl: libcurl link-time version (7.29.0) is older than compile-time version (7.49.0)
-conda install pycurl
-# 退出
-source deactivate sbird
-# 若在虚拟机内 出现无法访问localhost:5000 可关闭防火墙
-systemctl stop firewalld.service
-#########直接运行源码==============
-mkdir git;cd git
-# 下载
-git clone https://github.com/binux/pyspider.git
-# 安装
-/root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;其他方法&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 搭建虚拟环境
-pip install virtualenv
-mkdir python;cd python
-# 创建虚拟环境pyenv3
-virtualenv -p /usr/bin/python3 pyenv3
-# 进入虚拟环境 激活环境
-cd pyenv3/
-source ./bin/activate
-pip install pyspider
-# 若pycurl报错 
-yum install libcurl-devel
-# 继续
-pip install pyspider
-# 关闭
-deactivate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;本人推荐用anaconda方式安装&lt;/p&gt;
-
-&lt;p&gt;若pyspider运行过程中出现错误，参考&lt;code&gt;anaconda&lt;/code&gt;安装部分，至此，访问&lt;code&gt;localhost:5000&lt;/code&gt;可看到页面。&lt;/p&gt;
-
-&lt;h5 id=&#34;1-4-安装supervisor&#34;&gt;1.4.安装Supervisor&lt;/h5&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 安装
-yum install supervisor -y
-# 若无法检索 则添加阿里的epel源
-vim /etc/yum.repos.d/epel.repo
-# 添加以下内容
-[epel]
-name=Extra Packages for Enterprise Linux 7 - $basearch
-baseurl=http://mirrors.aliyun.com/epel/7/$basearch
-http://mirrors.aliyuncs.com/epel/7/$basearch
-failovermethod=priority
-enabled=1
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-
-[epel-debuginfo]
-name=Extra Packages for Enterprise Linux 7 - $basearch - Debug
-baseurl=http://mirrors.aliyun.com/epel/7/$basearch/debug
-http://mirrors.aliyuncs.com/epel/7/$basearch/debug
-failovermethod=priority
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-gpgcheck=0
-
-[epel-source]
-name=Extra Packages for Enterprise Linux 7 - $basearch - Source
-baseurl=http://mirrors.aliyun.com/epel/7/SRPMS
-http://mirrors.aliyuncs.com/epel/7/SRPMS
-failovermethod=priority
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-gpgcheck=0
-# 安装
-yum install supervisor -y
-# 测试是否安装成功
-echo_supervisord_conf
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h6 id=&#34;1-4-1-supervisor用法&#34;&gt;1.4.1.Supervisor用法&lt;/h6&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;supervisord 	#supervisor的服务器端部分 启动
-supervisorctl	#启动supervisor的命令行窗口
-# 假设创建进程pyspider01
-vim /etc/supervisord.d/pyspider01.ini
-# 写入以下内容
-[program:pyspider01]
-
-command      = /root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/pyspider01.log
-# 重载
-supervisorctl reload
-# 启动
-supervisorctl start pyspider01
-# 也可这样启动
-supervisord -c /etc/supervisord.conf
-# 查看状态
-supervisorctl status
-# output 
-pyspider01                       RUNNING   pid 4026, uptime 0:02:40
-# 关闭
-supervisorctl shutdown
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h5 id=&#34;1-5-安装redis&#34;&gt;1.5.安装redis&lt;/h5&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 消息队列采用redis
-mkdir download;cd download
-wget http://download.redis.io/releases/redis-3.2.4.tar.gz
-tar xzf redis-3.2.4.tar.gz
-cd redis-3.2.4
-make
-# 或者直接yum安装
-yum -y install redis
-# 启动
-systemctl start redis.service
-# 重启
-systemctl restart redis.service
-# 停止
-systemctl stop redis.service
-# 查看状态
-systemctl status redis.service
-# 更改文件/etc/redis.conf
-vim /etc/redis.conf
-# 更改内容
-daemonize no 改为 daemonize yes
-bind 127.0.0.1 改为 bind 10.211.55.22(当前服务器ip)
-# 重启redis
-systemctl restart redis.service
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h5 id=&#34;1-6-关于自启动&#34;&gt;1.6.关于自启动&lt;/h5&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# Supervisor添加到自启动服务
-systemctl enable supervisord.service
-# redis添加到自启动服务
-systemctl enable redis.service
-# 关闭防火墙自启动
-systemctl disable firewalld.service
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;至此，pyspider单个服务器运行环境搭建且部署完毕，启动&lt;code&gt;localhost:5000&lt;/code&gt;进入web界面。&lt;/p&gt;
-
-&lt;p&gt;也可编写脚本运行，在&lt;code&gt;/pyspider/supervisor/pyspider01.log&lt;/code&gt;查看运行状态。&lt;/p&gt;
-
-&lt;h4 id=&#34;2-分布式部署&#34;&gt;2.分布式部署&lt;/h4&gt;
-
-&lt;p&gt;刚才配置的服务器，将其命名为&lt;code&gt;centos01&lt;/code&gt;，按照这样的配置，再分别部署两台&lt;code&gt;centos02、centos03&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;如下：&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;center&#34;&gt;服务器名称&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;ip&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;说明&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;centos01&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;10.211.55.22&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;redis,mariaDB, scheduler&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;centos02&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;10.211.55.23&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;fetcher, processor, result_worker,phantomjs&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;centos03&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;10.211.55.24&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;fetcher, processor,,result_worker,webui&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h5 id=&#34;2-1-centos01&#34;&gt;2.1.centos01&lt;/h5&gt;
-
-&lt;p&gt;进入服务器&lt;code&gt;centos01&lt;/code&gt;，经过第一步，基本环境已经搭好，首先编辑配置文件&lt;code&gt;/pyspider/config.json&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
-  &amp;quot;taskdb&amp;quot;: &amp;quot;mysql+taskdb://user_name:user_pass@10.211.55.22:3306/taskdb&amp;quot;,
-  &amp;quot;projectdb&amp;quot;: &amp;quot;mysql+projectdb://user_name:user_pass@10.211.55.22:3306/projectdb&amp;quot;,
-  &amp;quot;resultdb&amp;quot;: &amp;quot;mysql+resultdb://user_name:user_pass@10.211.55.22:3306/resultdb&amp;quot;,
-  &amp;quot;message_queue&amp;quot;: &amp;quot;redis://10.211.55.22:6379/db&amp;quot;,
-  &amp;quot;logging-config&amp;quot;: &amp;quot;/pyspider/logging.conf&amp;quot;,
-  &amp;quot;phantomjs-proxy&amp;quot;:&amp;quot;10.211.55.23:25555&amp;quot;,
-  &amp;quot;webui&amp;quot;: {
-    &amp;quot;username&amp;quot;: &amp;quot;&amp;quot;,
-    &amp;quot;password&amp;quot;: &amp;quot;&amp;quot;,
-    &amp;quot;need-auth&amp;quot;: false,
-	&amp;quot;host&amp;quot;:&amp;quot;10.211.55.24&amp;quot;,
-	&amp;quot;port&amp;quot;:&amp;quot;5000&amp;quot;,
-	&amp;quot;scheduler-rpc&amp;quot;:&amp;quot;http:// 10.211.55.22:5002&amp;quot;,
-	&amp;quot;fetcher-rpc&amp;quot;:&amp;quot;http://10.211.55.23:5001&amp;quot;
-  },
-  &amp;quot;fetcher&amp;quot;: {
-    &amp;quot;xmlrpc&amp;quot;:true,
-    &amp;quot;xmlrpc-host&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
-    &amp;quot;xmlrpc-port&amp;quot;: &amp;quot;5001&amp;quot;
-  },
-  &amp;quot;scheduler&amp;quot;: {
-    &amp;quot;xmlrpc&amp;quot;:true,
-    &amp;quot;xmlrpc-host&amp;quot;: &amp;quot;0.0.0.0&amp;quot;,
-    &amp;quot;xmlrpc-port&amp;quot;: &amp;quot;5002&amp;quot;
-  }
-}
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;尝试运行下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
-# 报错
-ImportError: No module named &#39;mysql&#39;
-# 下载 mysql-connector-python
-cd ~/git/
-git clone https://github.com/mysql/mysql-connector-python.git
-# 安装
-source activate sbird
-cd mysql-connector-python
-python setup.py install
-# 安装redis
-pip install redis
-source deactivate
-# 运行
-/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
-# 输出 ok
-[I 161010 15:57:25 scheduler:644] scheduler starting...
-[I 161010 15:57:25 scheduler:779] scheduler.xmlrpc listening on 0.0.0.0:5002
-[I 161010 15:57:25 scheduler:583] in 5m: new:0,success:0,retry:0,failed:0
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;运行成功后，可直接更改&lt;code&gt;/etc/supervisord.d/pyspider01.ini&lt;/code&gt;如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-vim&#34;&gt;[program:pyspider01]
-
-command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/pyspider01.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
-supervisorctl reload
-# 查看状态
-supervisorctl status
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;centos01&lt;/code&gt;部署完毕。&lt;/p&gt;
-
-&lt;h5 id=&#34;2-2-centos02&#34;&gt;2.2.centos02&lt;/h5&gt;
-
-&lt;p&gt;在&lt;code&gt;centos02&lt;/code&gt;中，需要运行&lt;code&gt;result_worker、processor、phantomjs、fetcher&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;分别建立文件：&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/etc/supervisord.d/result_worker.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:result_worker]
-
-command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json result_worker
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/result_worker.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;/etc/supervisord.d/processor.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:processor]
-
-command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json processor
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/processor.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;/etc/supervisord.d/phantomjs.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:phantomjs]
-
-command      = /pyspider/phantomjs --config=/pyspider/pjsconfig.json /pyspider/phantomjs_fetcher.js 25555
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/phantomjs.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;/etc/supervisord.d/fetcher.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:fetcher]
-
-command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json fetcher
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/fetcher.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在&lt;code&gt;pyspider&lt;/code&gt;目录中建立pjsconfig.json&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
-  /*--ignore-ssl-errors=true */
-  &amp;quot;ignoreSslErrors&amp;quot;: true,
-  
-  /*--ssl-protocol=true */
-  &amp;quot;sslprotocol&amp;quot;: &amp;quot;any&amp;quot;,
-  
-  /* Same as: --output-encoding=utf8 */
-  &amp;quot;outputEncoding&amp;quot;: &amp;quot;utf8&amp;quot;,
-  
-  /* persistent Cookies. */
-  /*cookiesfile=&amp;quot;e:/phontjscookies.txt&amp;quot;,*/
-  cookiesfile=&amp;quot;pyspider/phontjscookies.txt&amp;quot;,
-  
-  /* load image */
-  autoLoadImages = false
-}
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;下载phantomjs至&lt;code&gt;/pyspider/&lt;/code&gt;文件夹，将&lt;code&gt;git/pyspider/pyspider/fetcher/phantomjs_fetcher.js&lt;/code&gt;复制到&lt;code&gt;phantomjs_fetcher.js&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
-supervisorctl reload
-# 查看状态
-supervisorctl status
-# output
-fetcher                          RUNNING   pid 3446, uptime 0:00:07
-phantomjs                        RUNNING   pid 3448, uptime 0:00:07
-processor                        RUNNING   pid 3447, uptime 0:00:07
-result_worker                    RUNNING   pid 3445, uptime 0:00:07
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;centos02&lt;/code&gt;部署完毕。&lt;/p&gt;
-
-&lt;h5 id=&#34;2-3-centos03&#34;&gt;2.3.centos03&lt;/h5&gt;
-
-&lt;p&gt;部署这三个进程&lt;code&gt;fetcher, processor, result_worker&lt;/code&gt;和&lt;code&gt;centos02&lt;/code&gt; 一样，本服务器主要是在前面的基础上加上&lt;code&gt;webui&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;建立文件：&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/etc/supervisord.d/webui.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;[program:webui]
-
-command      = /root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json webui
-directory    = /root/git/pyspider
-user         = root
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = /pyspider/supervisor/webui.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重载
-supervisorctl reload
-# 查看状态
-supervisorctl status
-# output
-fetcher                          RUNNING   pid 2724, uptime 0:00:07
-processor                        RUNNING   pid 2725, uptime 0:00:07
-result_worker                    RUNNING   pid 2723, uptime 0:00:07
-webui                            RUNNING   pid 2726, uptime 0:00:07
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;3-总结&#34;&gt;3.总结&lt;/h4&gt;
-
-&lt;p&gt;访问 &lt;a href=&#34;http://10.211.55.25:5000&#34;&gt;http://10.211.55.25:5000&lt;/a&gt; 即可，尽情爬取吧。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/11/01.png-blog.howie&#34; alt=&#34;pyspider&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
