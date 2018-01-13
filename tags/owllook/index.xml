@@ -18,9 +18,7 @@
 
 &lt;h2 id=&#34;0-前言&#34;&gt;0.前言&lt;/h2&gt;
 
-&lt;p&gt;事情的起因是这样的，前段时间在把之前写的一些同步网络请求代码改成异步的，用的是&lt;code&gt;aiohttp&lt;/code&gt;，既然是请求，那请求什么呢，就百度吧，请求什么内容呢，我随手一输自己最近看的一本小说，然后作为练手用，正好最近不知道毕设写什么，于是就做了这个，我将其取名为&lt;code&gt;owllook&lt;/code&gt;，准备做成一个推荐系统，所以我就将其部署上去，这才有了这个网站，同时，这也是我的毕业设计。&lt;/p&gt;
-
-&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&amp;ndash;novels_search&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
 &lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;
@@ -49,8 +47,9 @@
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 目录获取&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 翻页&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 搜索排行&lt;/li&gt;
-&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
-&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 章节异步加载 感谢@mscststs&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 阅读书单&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 推荐&lt;/li&gt;
 &lt;/ul&gt;
@@ -72,17 +71,17 @@
 &lt;li&gt;aiocache：异步缓存，本项目改用了其中的decorator部分，缓存数据库使用redis&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;对于用户的一系列操作信息，使用&lt;code&gt;mongodb&lt;/code&gt;进行存储，而缓存则使用&lt;code&gt;redis&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;owllook使用了mongodb储存了用户使用过程中的产生的基本信息，诸如注册信息、搜索小说信息、收藏小说数据等，对于某些必要的缓存，则利用redis进行缓存处理，如小说缓存、session缓存，注意，对于限制数据：都将在24小时删除。&lt;/p&gt;
 
 &lt;p&gt;对于不同网站的小说，页面规则都不尽相同，我希望能够在代码解析后再统一展示出来，这样方便且美观，而不是仅仅跳转到对应网站就完事，清新简洁的阅读体验才是最重要的。&lt;/p&gt;
 
-&lt;p&gt;目前采用的是直接在百度上进行结果检索，也不是不能做的更大更全，只是觉得没什么意义，目前的检索结果已经很足够。&lt;/p&gt;
+&lt;p&gt;目前采用的是直接在搜索引擎上进行结果检索，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析，owllook目前解析了超过 200+ 网站，追更网站解析了50+。&lt;/p&gt;
 
-&lt;p&gt;我尽量写少量的规则来完成解析，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析。&lt;/p&gt;
+&lt;p&gt;有一些地方需要用到爬虫，比如说排行榜，一些书籍信息等，我不想动用重量级爬虫框架来写，于是我在owllook里面编写了一个很轻量的爬虫框架来做这件事，见&lt;a href=&#34;https://github.com/howie6879/talospider&#34;&gt;talospider&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;BTW，sanic写界面确实不是很方便，至于为什么写这个，一是想利用sanic尽量做成异步服务，二是想就此练习下推荐系统，顺便作为毕业设计。&lt;/p&gt;
 
 &lt;p&gt;一般都是在下班时间编写这个项目，目前&lt;code&gt;v0.1&lt;/code&gt;版本大概实现。&lt;/p&gt;
-
-&lt;p&gt;后期我准备将基础功能写好之后，能够实现小说与kindle之间的对接。&lt;/p&gt;
 
 &lt;h2 id=&#34;2-解析&#34;&gt;2.解析&lt;/h2&gt;
 
@@ -137,9 +136,7 @@
 
 &lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
 
-&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;仅供分享交流  不可用于商业用途&lt;/strong&gt;&lt;/p&gt;</description>
+&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

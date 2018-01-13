@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="http://blog.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        Sanic 使用教程 - 5.数据库使用 - howie6879
+        Sanic 使用教程 - 6.常用的技巧 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -60,10 +60,10 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                Sanic 使用教程 - 5.数据库使用
+                Sanic 使用教程 - 6.常用的技巧
             </h1>
             <div class="post-data">
-                Published on Jan 12, 2018 ,3 min reading time
+                Published on Jan 13, 2018 ,3 min reading time
             </div>
         </div>
         <div id="post-content" class="post-content">
@@ -78,265 +78,330 @@
 
  
 
-<p>介绍中说的很明白，<code>Sanic</code> 是一个可以使用 <code>async/await</code> 语法编写项目的<strong>异步</strong>非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用<code>aihttp</code>而非<code>requests</code>，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。</p>
+<p>结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白<code>Sanic</code>框架的重心不会放在诸如<code>session cache reload authorized</code>这些问题上</p>
 
-<h3 id="操作mysql">操作Mysql</h3>
+<blockquote>
+<p>Async Python 3.5+ web server that&rsquo;s written to go fast</p>
+</blockquote>
 
-<p>对于mysql数据库的异步操作，我只在一些脚本中用过，用的是<a href="https://github.com/aio-libs/aiomysql">aiomysql</a>，其中官方文档中讲得很清楚，也支持结合<code>sqlalchemy</code>编写<code>ORM</code>，然后aiomysql提供了自己编写的异步引擎。</p>
+<p>此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：</p>
 
-<pre><code class="language-python">from aiomysql.sa import create_engine
-# 这个才是关键
+<ul>
+<li>api请求json参数以及api接口验证</li>
+<li>gRPC的异步调用方式</li>
+<li>Blueprint</li>
+<li>html&amp;templates编写</li>
+<li>cache</li>
+<li>热加载</li>
+<li>session</li>
+</ul>
+
+<p>对于一些问题，我将编写一个小服务来演示这些技巧，具体见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06">demo06</a>，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：</p>
+
+<pre><code class="language-shell">src
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+├── database
+│   ├── __init__.py
+│   └── redis_base
+├── grpc_service
+│   ├── __init__.py
+│   ├── grpc_asyncio_client.py
+│   ├── grpc_client.py
+│   ├── grpc_server.py
+│   ├── hello_grpc.py
+│   ├── hello_pb2.py
+│   ├── hello_pb2_grpc.py
+│   └── proto
+├── statics
+│   ├── rss_html
+│   │   ├── css
+│   │   └── js
+│   └── rss_json
+│       ├── css
+│       └── js
+├── templates
+│   ├── rss_html
+│   └── rss_json
+├── tools
+│   ├── __init__.py
+│   └── mid_decorator.py
+├── views
+│   ├── __init__.py
+│   ├── rss_api.py
+│   ├── rss_html.py
+│   └── rss_json.py
+└── run.py
 </code></pre>
 
-<p>下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：</p>
+<p>和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的<code>database</code>，以及关于gRPC的<code>grpc_service</code>，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。</p>
 
-<pre><code class="language-shel">aio_mysql
-├── demo.py
-├── model.py
-└── requirements.txt
+<p>增加的文件是<code>rss_json.py</code>，假设这是个接口文件吧，将会根据你的请求参数返回一串json，具体还是建议直接去看代码吧，点这里<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample">sample</a>。</p>
+
+<h3 id="验证问题">验证问题</h3>
+
+<p>假设你正在编写一个api服务，比如根据传的blog名字返回其rss数据，比如<code>rss_json.py</code>：</p>
+
+<pre><code class="language-python">#!/usr/bin/env python
+from feedparser import parse
+from sanic import Blueprint
+from sanic.response import json
+
+api_bp = Blueprint('rss_api', url_prefix='v1')
+
+
+@api_bp.route(&quot;/get/rss/&lt;param&gt;&quot;)
+async def get_rss_json(request, param):
+    if param == 'howie6879':
+        url = &quot;http://blog.howie6879.cn/atom.xml&quot;
+        feed = parse(url)
+        articles = feed['entries']
+        data = []
+        for article in articles:
+            data.append({&quot;title&quot;: article[&quot;title_detail&quot;][&quot;value&quot;], &quot;link&quot;: article[&quot;link&quot;]})
+        return json(data)
+    else:
+        return json({'info': '请访问 http://0.0.0.0:8000/v1/get/rss/howie6879'})
 </code></pre>
 
-<p>建立表：</p>
+<p>启动服务后，此时用<code>GET</code>方式访问<code>http://0.0.0.0:8000/v1/get/rss/howie6879</code>，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：</p>
 
-<pre><code class="language-mysql">create database test_mysql;
-
-CREATE TABLE user
-(
-  id        INT AUTO_INCREMENT
-    PRIMARY KEY,
-  user_name VARCHAR(16) NOT NULL,
-  pwd       VARCHAR(32) NOT NULL,
-  real_name VARCHAR(6)  NOT NULL
-);
+<pre><code class="language-json">{
+    &quot;name&quot;: &quot;howie6879&quot;
+}
 </code></pre>
 
-<p>一切准备就绪，下面编写代码：</p>
+<p>在<code>rss_json.py</code>中加入一个新的视图函数：</p>
 
-<pre><code class="language-python"># script: model.py
-import sqlalchemy as sa
+<pre><code class="language-python">@api_bp.route(&quot;/post/rss/&quot;, methods=['POST'])
+async def post_rss_json(request, **kwargs):
+    post_data = json_loads(str(request.body, encoding='utf-8'))
+    name = post_data.get('name')
+    if name == 'howie6879':
+        url = &quot;http://blog.howie6879.cn/atom.xml&quot;
+        feed = parse(url)
+        articles = feed['entries']
+        data = []
+        for article in articles:
+            data.append({&quot;title&quot;: article[&quot;title_detail&quot;][&quot;value&quot;], &quot;link&quot;: article[&quot;link&quot;]})
+        return json(data)
+    else:
+        return json({'info': '参数错误'})
+</code></pre>
 
-metadata = sa.MetaData()
+<p>发送post请求到<code>http://0.0.0.0:8000/v1/post/rss/</code>，依旧和上面的结果一样，代码里面有个问题，我们需要判断<code>name</code>参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？</p>
 
-user = sa.Table(
-    'user',
-    metadata,
-    sa.Column('id', sa.Integer, autoincrement=True, primary_key=True),
-    sa.Column('user_name', sa.String(16), nullable=False),
-    sa.Column('pwd', sa.String(32), nullable=False),
-    sa.Column('real_name', sa.String(6), nullable=False),
-)
+<p>显然并不是的，如果有十个参数呢？然后再增加十几个路由呢？每个路由里有十个参数需要判断，想象一下，这样实施下来，难道要在代码里面堆积满屏幕的判断语句么？这样实在是太可怕了，我们需要更好更通用的解决方案，是时候写个装饰器来验证参数了，打开<code>mid_decorator.py</code>文件，添加一个验证的装饰器函数：</p>
 
-# script: demo.py
-import asyncio
-
-from aiomysql.sa import create_engine
-
-from model import user,metadata
-
-
-async def go(loop):
+<pre><code class="language-python">def auth_params(*keys):
     &quot;&quot;&quot;
-    aiomysql项目地址：https://github.com/aio-libs/aiomysql
-    :param loop:
+    api请求参数验证
+    :param keys: params
     :return:
     &quot;&quot;&quot;
-    engine = await create_engine(user='root', db='test_mysql',
-                                 host='127.0.0.1', password='123456', loop=loop)
-    async with engine.acquire() as conn:
-        await conn.execute(user.insert().values(user_name='user_name01', pwd='123456', real_name='real_name01'))
-        await conn.execute('commit')
 
-        async for row in conn.execute(user.select()):
-            print(row.user_name, row.pwd)
+    def wrapper(func):
+        @wraps(func)
+        async def auth_param(request=None, rpc_data=None, *args, **kwargs):
+            request_params, params = {}, []
+            if isinstance(request, Request):
+                # sanic request
+                if request.method == 'POST':
+                    try:
+                        post_data = json_loads(str(request.body, encoding='utf-8'))
+                    except Exception as e:
+                        return response_handle(request, {'info': 'error'})
+                    else:
+                        request_params.update(post_data)
+                        params = [key for key, value in post_data.items() if value]
+                elif request.method == 'GET':
+                    request_params.update(request.args)
+                    params = [key for key, value in request.args.items() if value]
+                else:
+                    return response_handle(request, {'info': 'error'})
+            else:
+                pass
 
-    engine.close()
-    await engine.wait_closed()
+            if set(keys).issubset(set(params)):
+                kwargs['request_params'] = request_params
+                return await dec_func(func, request, *args, **kwargs)
+            else:
+                return response_handle(request, {'info': 'error'})
+
+        return auth_param
+
+    return wrapper
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(go(loop))
-
+async def dec_func(func, request, *args, **kwargs):
+    try:
+        response = await func(request, *args, **kwargs)
+        return response
+    except Exception as e:
+        return response_handle(request, {'info': 'error'})
 </code></pre>
 
-<p>运行 python demo.py，会看到如下输出：</p>
+<p>注意，上面增加的路由函数改为这样：</p>
 
-<pre><code class="language-shell">user_name01 123456
+<pre><code class="language-python">@api_bp.route(&quot;/post/rss/&quot;, methods=['POST'])
+@auth_params('name')
+async def post_rss_json(request, **kwargs):
 </code></pre>
 
-<p>很简单吧，具体示例见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql">aio_mysql</a></p>
+<p>这样么一个请求进来，就会验证name是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。</p>
 
-<h3 id="操作mongodb">操作MongoDB</h3>
+<p>对于请求验证的问题，解决方法也是类似，就是利用装饰器来实现，我自己也实现过，在上面的代码链接里面可以找到，不过现在的<code>Sanic</code>官方已经提供了<code>demo</code>，见<a href="https://github.com/channelcat/sanic/blob/master/examples/authorized_sanic.py">这里</a></p>
 
-<p>我业余写的一个项目，基本用的就是<code>MongoDB</code>来储存数据，对于异步操作<code>MongoDB</code>，目前Python主要用的是<a href="https://motor.readthedocs.io/en/stable/index.html">motor</a>，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：</p>
+<h3 id="grpc的异步调用方式">gRPC的异步调用方式</h3>
 
-<pre><code class="language-shell">aio_mongo
-├── demo.py
-└── requirements.txt
+<p>在编写微服务的时候，除了需要支持<code>http</code>请求外，一般还需要支持<code>gRPC</code>请求，我在使用<code>Sanic</code>编写微服务的时候，遇到关于异步请求<code>RPC</code>的需求，当时确实困扰了我，意外发现了这个库<a href="https://github.com/vmagamedov/grpclib">grpclib</a>，进入<code>src/grpc_service</code>目录，里面就是解决方案，很简单，这里就不多说了，直接看代码就好。</p>
+
+<h3 id="blueprint">Blueprint</h3>
+
+<p>Blueprint前面的章节有仔细聊过，这里不多说，借用官方文档的例子，一个简单的sanic服务就搭好了：</p>
+
+<pre><code class="language-python"># main.py
+from sanic import Sanic
+from sanic.response import json
+
+app = Sanic()
+
+@app.route(&quot;/&quot;)
+async def test(request):
+    return json({&quot;hello&quot;: &quot;world&quot;})
+
+#访问http://0.0.0.0:8000/即可
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=8000)
 </code></pre>
 
-<p><code>MongoDB</code>是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开<code>demo.py</code>：</p>
+<p>上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：</p>
 
-<pre><code class="language-python">#!/usr/bin/env python
-import os
-
-from functools import wraps
-
-from motor.motor_asyncio import AsyncIOMotorClient
-
-MONGODB = dict(
-    MONGO_HOST=os.getenv('MONGO_HOST', &quot;&quot;),
-    MONGO_PORT=os.getenv('MONGO_PORT', 27017),
-    MONGO_USERNAME=os.getenv('MONGO_USERNAME', &quot;&quot;),
-    MONGO_PASSWORD=os.getenv('MONGO_PASSWORD', &quot;&quot;),
-    DATABASE='test_mongodb',
-)
-
-class MotorBaseOld:
-    &quot;&quot;&quot;
-    默认实现了一个db只创建一次，缺点是更换集合麻烦
-    &quot;&quot;&quot;
-    _db = None
-    MONGODB = MONGODB
-
-    def client(self, db):
-        # motor
-        self.motor_uri = 'mongodb://{account}{host}:{port}/{database}'.format(
-            account='{username}:{password}@'.format(
-                username=self.MONGODB['MONGO_USERNAME'],
-                password=self.MONGODB['MONGO_PASSWORD']) if self.MONGODB['MONGO_USERNAME'] else '',
-            host=self.MONGODB['MONGO_HOST'] if self.MONGODB['MONGO_HOST'] else 'localhost',
-            port=self.MONGODB['MONGO_PORT'] if self.MONGODB['MONGO_PORT'] else 27017,
-            database=db)
-        return AsyncIOMotorClient(self.motor_uri)
-
-    @property
-    def db(self):
-        if self._db is None:
-            self._db = self.client(self.MONGODB['DATABASE'])[self.MONGODB['DATABASE']]
-
-        return self._db
+<pre><code class="language-shell">├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   └── result.css
+│       ├── img
+│       │   └── read_content.png
+│       └── js
+│           └── main.js
+├── template
+│   └── novels
+│       └── index.html
+└── views
+    └── novels_blueprint.py
 </code></pre>
 
-<p>我最开始，使用的是这样种方式来连接<code>MongoDB</code>，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：</p>
+<p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，上面的目录树是我以前的一个项目<a href="https://github.com/howie6879/owllook">owllook</a>的，也是用<code>Sanic</code>编写的，有兴趣可以看看，不过现在结构改变挺大。</p>
 
-<pre><code class="language-python">
-def singleton(cls):
-    &quot;&quot;&quot;
-    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/%E9%99%84%E5%BD%95%EF%BC%9A%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8.md
-    :param cls: cls
-    :return: instance
-    &quot;&quot;&quot;
-    _instances = {}
+<h3 id="html-templates编写">html&amp;templates编写</h3>
 
-    @wraps(cls)
-    def instance(*args, **kw):
-        if cls not in _instances:
-            _instances[cls] = cls(*args, **kw)
-        return _instances[cls]
+<p>编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：</p>
 
-    return instance
+<pre><code class="language-python"># 适用python3.5+
+# 代码片段，明白意思就好
+from sanic import Blueprint
+from jinja2 import Environment, PackageLoader, select_autoescape
 
-@singleton
-class MotorBase:
-    &quot;&quot;&quot;
-    更改mongodb连接方式 单例模式下支持多库操作
-    About motor's doc: https://github.com/mongodb/motor
-    &quot;&quot;&quot;
-    _db = {}
-    _collection = {}
-    MONGODB = MONGODB
+# 初始化blueprint并定义静态文件夹路径
+bp = Blueprint('novels_blueprint')
+bp.static('/static', './static/novels')
 
-    def __init__(self):
-        self.motor_uri = ''
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader('views.novels_blueprint', '../templates/novels'),
+    autoescape=select_autoescape(['html', 'xml', 'tpl']))
 
-    def client(self, db):
-        # motor
-        self.motor_uri = 'mongodb://{account}{host}:{port}/{database}'.format(
-            account='{username}:{password}@'.format(
-                username=self.MONGODB['MONGO_USERNAME'],
-                password=self.MONGODB['MONGO_PASSWORD']) if self.MONGODB['MONGO_USERNAME'] else '',
-            host=self.MONGODB['MONGO_HOST'] if self.MONGODB['MONGO_HOST'] else 'localhost',
-            port=self.MONGODB['MONGO_PORT'] if self.MONGODB['MONGO_PORT'] else 27017,
-            database=db)
-        return AsyncIOMotorClient(self.motor_uri)
-
-    def get_db(self, db=MONGODB['DATABASE']):
-        &quot;&quot;&quot;
-        获取一个db实例
-        :param db: database name
-        :return: the motor db instance
-        &quot;&quot;&quot;
-        if db not in self._db:
-            self._db[db] = self.client(db)[db]
-
-        return self._db[db]
-
-    def get_collection(self, db_name, collection):
-        &quot;&quot;&quot;
-        获取一个集合实例
-        :param db_name: database name
-        :param collection: collection name
-        :return: the motor collection instance
-        &quot;&quot;&quot;
-        collection_key = db_name + collection
-        if collection_key not in self._collection:
-            self._collection[collection_key] = self.get_db(db_name)[collection]
-
-        return self._collection[collection_key]
-
+def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    return html(template.render(kwargs))
+    
+@bp.route(&quot;/&quot;)
+async def index(request):
+    return template('index.html', title='index')
 </code></pre>
 
-<p>为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo">aio_mongo</a></p>
+<p>如果是<code>python3.6</code>，可以试试下面的写法：</p>
 
-<h3 id="操作redis">操作Redis</h3>
+<pre><code class="language-python"># 适用python3.5+
+# 代码片段，明白意思就好
+#!/usr/bin/env python
+import sys
 
-<p>对于Redis的异步操作，我选用的是<code>asyncio_redis</code>，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：</p>
+from feedparser import parse
+from jinja2 import Environment, PackageLoader, select_autoescape
+from sanic import Blueprint
+from sanic.response import html
 
-<pre><code class="language-shell">aio_redis
-├── demo.py
-└── requirements.txt
+from src.config import CONFIG
+
+# https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py
+# 开启异步特性  要求3.6+
+enable_async = sys.version_info &gt;= (3, 6)
+
+html_bp = Blueprint('rss_html', url_prefix='html')
+html_bp.static('/statics/rss_html', CONFIG.BASE_DIR + '/statics/rss_html')
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader('views.rss_html', '../templates/rss_html'),
+    autoescape=select_autoescape(['html', 'xml', 'tpl']),
+    enable_async=enable_async)
+
+
+async def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    rendered_template = await template.render_async(**kwargs)
+    return html(rendered_template)
 </code></pre>
 
-<p>建立一个redis连接池：</p>
+<h3 id="cache">cache</h3>
 
-<pre><code class="language-python">#!/usr/bin/env python
-import os
-import asyncio_redis
+<p>我在项目中主要使用redis作为缓存，使用<a href="https://github.com/argaen/aiocache">aiocache</a>很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。</p>
 
-REDIS_DICT = dict(
-    IS_CACHE=True,
-    REDIS_ENDPOINT=os.getenv('REDIS_ENDPOINT', &quot;localhost&quot;),
-    REDIS_PORT=os.getenv('REDIS_PORT', 6379),
-    REDIS_PASSWORD=os.getenv('REDIS_PASSWORD', None),
-    DB=0,
-    POOLSIZE=10,
-)
+<p>比如上面的例子，每次访问<code>http://0.0.0.0:8000/v1/get/rss/howie6879</code>，都要请求一次对应的rss资源，如果做个缓存那岂不是简单很多？</p>
+
+<p>改写成这样：</p>
+
+<pre><code class="language-python">@cached(ttl=1000, cache=RedisCache, key=&quot;rss&quot;, serializer=PickleSerializer(), port=6379, namespace=&quot;main&quot;)
+async def get_rss():
+    print(&quot;第一次请求休眠3秒...&quot;)
+    await asyncio.sleep(3)
+    url = &quot;http://blog.howie6879.cn/atom.xml&quot;
+    feed = parse(url)
+    articles = feed['entries']
+    data = []
+    for article in articles:
+        data.append({&quot;title&quot;: article[&quot;title_detail&quot;][&quot;value&quot;], &quot;link&quot;: article[&quot;link&quot;]})
+    return data
 
 
-class RedisSession:
-    &quot;&quot;&quot;
-    建立redis连接池
-    &quot;&quot;&quot;
-    _pool = None
-
-    async def get_redis_pool(self):
-        if not self._pool:
-            self._pool = await asyncio_redis.Pool.create(
-                host=str(REDIS_DICT.get('REDIS_ENDPOINT', &quot;localhost&quot;)), port=int(REDIS_DICT.get('REDIS_PORT', 6379)),
-                poolsize=int(REDIS_DICT.get('POOLSIZE', 10)), password=REDIS_DICT.get('REDIS_PASSWORD', None),
-                db=REDIS_DICT.get('DB', None)
-            )
-
-        return self._pool
-
+@api_bp.route(&quot;/get/rss/&lt;name&gt;&quot;)
+async def get_rss_json(request, name):
+    if name == 'howie6879':
+        data = await get_rss()
+        return json(data)
+    else:
+        return json({'info': '请访问 http://0.0.0.0:8000/v1/get/rss/howie6879'})
 </code></pre>
 
-<p>具体见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py">aio_redis</a>，使用起来很简单，不做多叙述。</p>
+<p>为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。</p>
 
-<h3 id="说明">说明</h3>
+<p>带上装饰器，什么都解决了。</p>
 
-<p>如果你使用其它类型的数据库，其实使用方式也是类似。
-本章代码地址，见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05">demo05</a></p>
+<h3 id="热加载">热加载</h3>
+
+<p>我发现有个pr实现了这个需求，如果你有兴趣，可以看<a href="https://github.com/channelcat/sanic/pull/1047">这里</a></p>
+
+<h3 id="session">session</h3>
+
+<p>sanic对此有一个第三方插件<a href="https://github.com/subyraman/sanic_session"><code>sanic_session</code></a>，用法非常简单，有兴趣可以看看</p>
 
             <p class="post-info">
                 本文由
@@ -355,17 +420,16 @@ class RedisSession:
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.howie6879.cn%2fpost%2f34%2f" target="_blank" title="Sanic 使用教程 - 5.数据库使用" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f34%2f&text=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%205.%e6%95%b0%e6%8d%ae%e5%ba%93%e4%bd%bf%e7%94%a8" target="_blank" title="Sanic 使用教程 - 5.数据库使用" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f34%2f&amp;title=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%205.%e6%95%b0%e6%8d%ae%e5%ba%93%e4%bd%bf%e7%94%a8" target="_blank" title="Sanic 使用教程 - 5.数据库使用" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f34%2f" target="_blank" rel="nofollow">QRcode</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.howie6879.cn%2fpost%2f35%2f" target="_blank" title="Sanic 使用教程 - 6.常用的技巧" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f35%2f&text=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%206.%e5%b8%b8%e7%94%a8%e7%9a%84%e6%8a%80%e5%b7%a7" target="_blank" title="Sanic 使用教程 - 6.常用的技巧" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f35%2f&amp;title=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%206.%e5%b8%b8%e7%94%a8%e7%9a%84%e6%8a%80%e5%b7%a7" target="_blank" title="Sanic 使用教程 - 6.常用的技巧" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f35%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
-                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/35/" title="Sanic 使用教程 - 6.常用的技巧">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/33/" title="神经网络与深度学习笔记 - 1.识别手写字">→</a></span> 
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/34/" title="Sanic 使用教程 - 5.数据库使用">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>

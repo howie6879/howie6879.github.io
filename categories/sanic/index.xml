@@ -9,6 +9,341 @@
     <atom:link href="http://blog.howie6879.cn/categories/sanic/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Sanic 使用教程 - 6.常用的技巧</title>
+      <link>http://blog.howie6879.cn/post/35/</link>
+      <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/35/</guid>
+      <description>
+
+&lt;p&gt;结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白&lt;code&gt;Sanic&lt;/code&gt;框架的重心不会放在诸如&lt;code&gt;session cache reload authorized&lt;/code&gt;这些问题上&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Async Python 3.5+ web server that&amp;rsquo;s written to go fast&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;api请求json参数以及api接口验证&lt;/li&gt;
+&lt;li&gt;gRPC的异步调用方式&lt;/li&gt;
+&lt;li&gt;Blueprint&lt;/li&gt;
+&lt;li&gt;html&amp;amp;templates编写&lt;/li&gt;
+&lt;li&gt;cache&lt;/li&gt;
+&lt;li&gt;热加载&lt;/li&gt;
+&lt;li&gt;session&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于一些问题，我将编写一个小服务来演示这些技巧，具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06&#34;&gt;demo06&lt;/a&gt;，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;src
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+├── database
+│   ├── __init__.py
+│   └── redis_base
+├── grpc_service
+│   ├── __init__.py
+│   ├── grpc_asyncio_client.py
+│   ├── grpc_client.py
+│   ├── grpc_server.py
+│   ├── hello_grpc.py
+│   ├── hello_pb2.py
+│   ├── hello_pb2_grpc.py
+│   └── proto
+├── statics
+│   ├── rss_html
+│   │   ├── css
+│   │   └── js
+│   └── rss_json
+│       ├── css
+│       └── js
+├── templates
+│   ├── rss_html
+│   └── rss_json
+├── tools
+│   ├── __init__.py
+│   └── mid_decorator.py
+├── views
+│   ├── __init__.py
+│   ├── rss_api.py
+│   ├── rss_html.py
+│   └── rss_json.py
+└── run.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的&lt;code&gt;database&lt;/code&gt;，以及关于gRPC的&lt;code&gt;grpc_service&lt;/code&gt;，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。&lt;/p&gt;
+
+&lt;p&gt;增加的文件是&lt;code&gt;rss_json.py&lt;/code&gt;，假设这是个接口文件吧，将会根据你的请求参数返回一串json，具体还是建议直接去看代码吧，点这里&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample&#34;&gt;sample&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3 id=&#34;验证问题&#34;&gt;验证问题&lt;/h3&gt;
+
+&lt;p&gt;假设你正在编写一个api服务，比如根据传的blog名字返回其rss数据，比如&lt;code&gt;rss_json.py&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+from feedparser import parse
+from sanic import Blueprint
+from sanic.response import json
+
+api_bp = Blueprint(&#39;rss_api&#39;, url_prefix=&#39;v1&#39;)
+
+
+@api_bp.route(&amp;quot;/get/rss/&amp;lt;param&amp;gt;&amp;quot;)
+async def get_rss_json(request, param):
+    if param == &#39;howie6879&#39;:
+        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+        feed = parse(url)
+        articles = feed[&#39;entries&#39;]
+        data = []
+        for article in articles:
+            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
+        return json(data)
+    else:
+        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;启动服务后，此时用&lt;code&gt;GET&lt;/code&gt;方式访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+    &amp;quot;name&amp;quot;: &amp;quot;howie6879&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在&lt;code&gt;rss_json.py&lt;/code&gt;中加入一个新的视图函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
+async def post_rss_json(request, **kwargs):
+    post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
+    name = post_data.get(&#39;name&#39;)
+    if name == &#39;howie6879&#39;:
+        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+        feed = parse(url)
+        articles = feed[&#39;entries&#39;]
+        data = []
+        for article in articles:
+            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
+        return json(data)
+    else:
+        return json({&#39;info&#39;: &#39;参数错误&#39;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;发送post请求到&lt;code&gt;http://0.0.0.0:8000/v1/post/rss/&lt;/code&gt;，依旧和上面的结果一样，代码里面有个问题，我们需要判断&lt;code&gt;name&lt;/code&gt;参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？&lt;/p&gt;
+
+&lt;p&gt;显然并不是的，如果有十个参数呢？然后再增加十几个路由呢？每个路由里有十个参数需要判断，想象一下，这样实施下来，难道要在代码里面堆积满屏幕的判断语句么？这样实在是太可怕了，我们需要更好更通用的解决方案，是时候写个装饰器来验证参数了，打开&lt;code&gt;mid_decorator.py&lt;/code&gt;文件，添加一个验证的装饰器函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def auth_params(*keys):
+    &amp;quot;&amp;quot;&amp;quot;
+    api请求参数验证
+    :param keys: params
+    :return:
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def wrapper(func):
+        @wraps(func)
+        async def auth_param(request=None, rpc_data=None, *args, **kwargs):
+            request_params, params = {}, []
+            if isinstance(request, Request):
+                # sanic request
+                if request.method == &#39;POST&#39;:
+                    try:
+                        post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
+                    except Exception as e:
+                        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
+                    else:
+                        request_params.update(post_data)
+                        params = [key for key, value in post_data.items() if value]
+                elif request.method == &#39;GET&#39;:
+                    request_params.update(request.args)
+                    params = [key for key, value in request.args.items() if value]
+                else:
+                    return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
+            else:
+                pass
+
+            if set(keys).issubset(set(params)):
+                kwargs[&#39;request_params&#39;] = request_params
+                return await dec_func(func, request, *args, **kwargs)
+            else:
+                return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
+
+        return auth_param
+
+    return wrapper
+
+
+async def dec_func(func, request, *args, **kwargs):
+    try:
+        response = await func(request, *args, **kwargs)
+        return response
+    except Exception as e:
+        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意，上面增加的路由函数改为这样：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
+@auth_params(&#39;name&#39;)
+async def post_rss_json(request, **kwargs):
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样么一个请求进来，就会验证name是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。&lt;/p&gt;
+
+&lt;p&gt;对于请求验证的问题，解决方法也是类似，就是利用装饰器来实现，我自己也实现过，在上面的代码链接里面可以找到，不过现在的&lt;code&gt;Sanic&lt;/code&gt;官方已经提供了&lt;code&gt;demo&lt;/code&gt;，见&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/authorized_sanic.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;grpc的异步调用方式&#34;&gt;gRPC的异步调用方式&lt;/h3&gt;
+
+&lt;p&gt;在编写微服务的时候，除了需要支持&lt;code&gt;http&lt;/code&gt;请求外，一般还需要支持&lt;code&gt;gRPC&lt;/code&gt;请求，我在使用&lt;code&gt;Sanic&lt;/code&gt;编写微服务的时候，遇到关于异步请求&lt;code&gt;RPC&lt;/code&gt;的需求，当时确实困扰了我，意外发现了这个库&lt;a href=&#34;https://github.com/vmagamedov/grpclib&#34;&gt;grpclib&lt;/a&gt;，进入&lt;code&gt;src/grpc_service&lt;/code&gt;目录，里面就是解决方案，很简单，这里就不多说了，直接看代码就好。&lt;/p&gt;
+
+&lt;h3 id=&#34;blueprint&#34;&gt;Blueprint&lt;/h3&gt;
+
+&lt;p&gt;Blueprint前面的章节有仔细聊过，这里不多说，借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
+from sanic import Sanic
+from sanic.response import json
+
+app = Sanic()
+
+@app.route(&amp;quot;/&amp;quot;)
+async def test(request):
+    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
+
+#访问http://0.0.0.0:8000/即可
+if __name__ == &amp;quot;__main__&amp;quot;:
+    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   └── result.css
+│       ├── img
+│       │   └── read_content.png
+│       └── js
+│           └── main.js
+├── template
+│   └── novels
+│       └── index.html
+└── views
+    └── novels_blueprint.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，上面的目录树是我以前的一个项目&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;的，也是用&lt;code&gt;Sanic&lt;/code&gt;编写的，有兴趣可以看看，不过现在结构改变挺大。&lt;/p&gt;
+
+&lt;h3 id=&#34;html-templates编写&#34;&gt;html&amp;amp;templates编写&lt;/h3&gt;
+
+&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
+# 代码片段，明白意思就好
+from sanic import Blueprint
+from jinja2 import Environment, PackageLoader, select_autoescape
+
+# 初始化blueprint并定义静态文件夹路径
+bp = Blueprint(&#39;novels_blueprint&#39;)
+bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
+
+def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    return html(template.render(kwargs))
+    
+@bp.route(&amp;quot;/&amp;quot;)
+async def index(request):
+    return template(&#39;index.html&#39;, title=&#39;index&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果是&lt;code&gt;python3.6&lt;/code&gt;，可以试试下面的写法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
+# 代码片段，明白意思就好
+#!/usr/bin/env python
+import sys
+
+from feedparser import parse
+from jinja2 import Environment, PackageLoader, select_autoescape
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+# https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py
+# 开启异步特性  要求3.6+
+enable_async = sys.version_info &amp;gt;= (3, 6)
+
+html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
+html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader(&#39;views.rss_html&#39;, &#39;../templates/rss_html&#39;),
+    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
+    enable_async=enable_async)
+
+
+async def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    rendered_template = await template.render_async(**kwargs)
+    return html(rendered_template)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;cache&#34;&gt;cache&lt;/h3&gt;
+
+&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
+
+&lt;p&gt;比如上面的例子，每次访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，都要请求一次对应的rss资源，如果做个缓存那岂不是简单很多？&lt;/p&gt;
+
+&lt;p&gt;改写成这样：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1000, cache=RedisCache, key=&amp;quot;rss&amp;quot;, serializer=PickleSerializer(), port=6379, namespace=&amp;quot;main&amp;quot;)
+async def get_rss():
+    print(&amp;quot;第一次请求休眠3秒...&amp;quot;)
+    await asyncio.sleep(3)
+    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
+    feed = parse(url)
+    articles = feed[&#39;entries&#39;]
+    data = []
+    for article in articles:
+        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
+    return data
+
+
+@api_bp.route(&amp;quot;/get/rss/&amp;lt;name&amp;gt;&amp;quot;)
+async def get_rss_json(request, name):
+    if name == &#39;howie6879&#39;:
+        data = await get_rss()
+        return json(data)
+    else:
+        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。&lt;/p&gt;
+
+&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
+
+&lt;h3 id=&#34;热加载&#34;&gt;热加载&lt;/h3&gt;
+
+&lt;p&gt;我发现有个pr实现了这个需求，如果你有兴趣，可以看&lt;a href=&#34;https://github.com/channelcat/sanic/pull/1047&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;session&#34;&gt;session&lt;/h3&gt;
+
+&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，有兴趣可以看看&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Sanic 使用教程 - 5.数据库使用</title>
       <link>http://blog.howie6879.cn/post/34/</link>
       <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
@@ -1294,9 +1629,7 @@ if __name__ == &amp;quot;__main__&amp;quot;:
 
 &lt;h2 id=&#34;0-前言&#34;&gt;0.前言&lt;/h2&gt;
 
-&lt;p&gt;事情的起因是这样的，前段时间在把之前写的一些同步网络请求代码改成异步的，用的是&lt;code&gt;aiohttp&lt;/code&gt;，既然是请求，那请求什么呢，就百度吧，请求什么内容呢，我随手一输自己最近看的一本小说，然后作为练手用，正好最近不知道毕设写什么，于是就做了这个，我将其取名为&lt;code&gt;owllook&lt;/code&gt;，准备做成一个推荐系统，所以我就将其部署上去，这才有了这个网站，同时，这也是我的毕业设计。&lt;/p&gt;
-
-&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&amp;ndash;novels_search&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
 &lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;
@@ -1325,8 +1658,9 @@ if __name__ == &amp;quot;__main__&amp;quot;:
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 目录获取&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 翻页&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 搜索排行&lt;/li&gt;
-&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
-&lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 部分页面重写（进行中）&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 章节异步加载 感谢@mscststs&lt;/li&gt;
+&lt;li&gt;&lt;input type=&#34;checkbox&#34; checked disabled class=&#34;task-list-item&#34;&gt; 排行榜&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 阅读书单&lt;/li&gt;
 &lt;li&gt;&lt;input type=&#34;checkbox&#34; disabled class=&#34;task-list-item&#34;&gt; 推荐&lt;/li&gt;
 &lt;/ul&gt;
@@ -1348,17 +1682,17 @@ if __name__ == &amp;quot;__main__&amp;quot;:
 &lt;li&gt;aiocache：异步缓存，本项目改用了其中的decorator部分，缓存数据库使用redis&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;对于用户的一系列操作信息，使用&lt;code&gt;mongodb&lt;/code&gt;进行存储，而缓存则使用&lt;code&gt;redis&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;owllook使用了mongodb储存了用户使用过程中的产生的基本信息，诸如注册信息、搜索小说信息、收藏小说数据等，对于某些必要的缓存，则利用redis进行缓存处理，如小说缓存、session缓存，注意，对于限制数据：都将在24小时删除。&lt;/p&gt;
 
 &lt;p&gt;对于不同网站的小说，页面规则都不尽相同，我希望能够在代码解析后再统一展示出来，这样方便且美观，而不是仅仅跳转到对应网站就完事，清新简洁的阅读体验才是最重要的。&lt;/p&gt;
 
-&lt;p&gt;目前采用的是直接在百度上进行结果检索，也不是不能做的更大更全，只是觉得没什么意义，目前的检索结果已经很足够。&lt;/p&gt;
+&lt;p&gt;目前采用的是直接在搜索引擎上进行结果检索，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析，owllook目前解析了超过 200+ 网站，追更网站解析了50+。&lt;/p&gt;
 
-&lt;p&gt;我尽量写少量的规则来完成解析，具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/docs/%E8%A7%84%E5%88%99%E5%AE%9A%E4%B9%89.md&#34;&gt;规则定义&lt;/a&gt;，遇到自己喜欢的小说网站，方便诸位添加解析。&lt;/p&gt;
+&lt;p&gt;有一些地方需要用到爬虫，比如说排行榜，一些书籍信息等，我不想动用重量级爬虫框架来写，于是我在owllook里面编写了一个很轻量的爬虫框架来做这件事，见&lt;a href=&#34;https://github.com/howie6879/talospider&#34;&gt;talospider&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;BTW，sanic写界面确实不是很方便，至于为什么写这个，一是想利用sanic尽量做成异步服务，二是想就此练习下推荐系统，顺便作为毕业设计。&lt;/p&gt;
 
 &lt;p&gt;一般都是在下班时间编写这个项目，目前&lt;code&gt;v0.1&lt;/code&gt;版本大概实现。&lt;/p&gt;
-
-&lt;p&gt;后期我准备将基础功能写好之后，能够实现小说与kindle之间的对接。&lt;/p&gt;
 
 &lt;h2 id=&#34;2-解析&#34;&gt;2.解析&lt;/h2&gt;
 
@@ -1413,9 +1747,7 @@ if __name__ == &amp;quot;__main__&amp;quot;:
 
 &lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
 
-&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;仅供分享交流  不可用于商业用途&lt;/strong&gt;&lt;/p&gt;</description>
+&lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
