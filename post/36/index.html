@@ -94,9 +94,12 @@ curl https://getcaddy.com | bash -s personal http.git
 
 <p>配置文件是写在<code>/etc/caddy/Caddyfile</code>的，你可以改为自己定下的位置，也可以直接用这个位置，所以建立对应的目录文件：</p>
 
-<pre><code class="language-shell">mkdir /etc/caddy/
+<pre><code class="language-shell">cd ~
+mkdir /etc/caddy/
 touch /etc/caddy/Caddyfile
 </code></pre>
+
+<p>具体操作，见官方<a href="https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/README.md">说明</a>，以<code>systemd</code>为例</p>
 
 <p>域名解析到服务器IP后，开始编写<code>Caddyfile</code>：</p>
 
@@ -113,6 +116,24 @@ howie6879.cn {
     redir www.howie6879.cn
 }
 </code></pre>
+
+<p>先简单编写下，看服务能不能正常启动：</p>
+
+<pre><code class="language-shell">systemctl status caddy.service
+</code></pre>
+
+<p>输出如下：</p>
+
+<pre><code class="language-shell">● caddy.service - Caddy HTTP/2 web server
+   Loaded: loaded (/etc/systemd/system/caddy.service; enabled; vendor preset: disabled)
+   Active: active (running) since Thu 2018-05-24 02:50:05 EDT; 3s ago
+     Docs: https://caddyserver.com/docs
+ Main PID: 23604 (caddy)
+   CGroup: /system.slice/caddy.service
+           └─23604 /usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+</code></pre>
+
+<p>访问：<a href="https://www.howie6879.cn/">https://www.howie6879.cn/</a> ，一切正常</p>
 
             <p class="post-info">
                 本文由
