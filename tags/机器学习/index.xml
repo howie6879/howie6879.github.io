@@ -16,32 +16,35 @@
       <guid>https://www.howie6879.cn/post/08/</guid>
       <description>
 
-&lt;h2 id=&#34;1-目的&#34;&gt;1.目的&lt;/h2&gt;
+&lt;h2 id=&#34;目的&#34;&gt;目的&lt;/h2&gt;
 
 &lt;p&gt;在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度。
 国内数据如下：
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/01.png-blog.howie&#34; alt=&#34;01.png&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/01.png&#34; alt=&#34;01.png&#34; /&gt;
 国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理。
 国外数据就有些尴尬：
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/02.png-blog.howie&#34; alt=&#34;02.png&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/02.png&#34; alt=&#34;02.png&#34; /&gt;
 国外网站展会数据将近五万多条，跟分类有关的只有&lt;code&gt;categories&lt;/code&gt;这一列数据，都是一些标签词，还偏少。
 现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个&lt;strong&gt;朴素贝叶斯分类器&lt;/strong&gt;。&lt;/p&gt;
 
 &lt;!-- more --&gt;
 
-&lt;h2 id=&#34;2-数据&#34;&gt;2.数据&lt;/h2&gt;
+&lt;h2 id=&#34;数据&#34;&gt;数据&lt;/h2&gt;
 
-&lt;p&gt;朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
-#####2.1.数据的准备
-获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/03.png-blog.howie&#34; alt=&#34;03.png&#34; /&gt;
+&lt;p&gt;朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。&lt;/p&gt;
+
+&lt;h5 id=&#34;数据的准备&#34;&gt;数据的准备&lt;/h5&gt;
+
+&lt;p&gt;获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/03.png&#34; alt=&#34;03.png&#34; /&gt;
 训练数据主要是这两列，&lt;strong&gt;所属行业&lt;/strong&gt;以及&lt;strong&gt;展会范围&lt;/strong&gt;，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为&lt;strong&gt;训练集&lt;/strong&gt;。
 那么相对应，国外待分类的展会数据便是&lt;strong&gt;测试集&lt;/strong&gt;。
 我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
 可是现在有个问题，作为&lt;strong&gt;训练集&lt;/strong&gt;的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终&lt;strong&gt;训练集&lt;/strong&gt;达到了&lt;code&gt;39555&lt;/code&gt;条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？&lt;/p&gt;
 
-&lt;p&gt;#####2.2.分词&amp;amp;&amp;amp;提取
-不积小流，无以成江海，以小见大，咱们看这样一条数据:&lt;/p&gt;
+&lt;h5 id=&#34;分词-提取&#34;&gt;分词&amp;amp;&amp;amp;提取&lt;/h5&gt;
+
+&lt;p&gt;不积小流，无以成江海，以小见大，咱们看这样一条数据:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;所属行业：建材五金
 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等
@@ -76,7 +79,7 @@ print(feature)
 
 &lt;p&gt;这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
 大三的时候学过概率统计，也记得一个公式名为&lt;strong&gt;贝叶斯定理&lt;/strong&gt;。
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/04.jpg-blog.howie&#34; alt=&#34;04.jpg&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/04.jpg&#34; alt=&#34;04.jpg&#34; /&gt;
 这表示计算条件概率的公式:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子
@@ -92,13 +95,13 @@ P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category)...
 我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。
 2.2.1.确定训练数据有多少类别
 2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为&lt;strong&gt;id:word&lt;/strong&gt;的格式存为&lt;em&gt;id_word.txt&lt;/em&gt;
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/05.png-blog.howie&#34; alt=&#34;05.png&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/05.png&#34; alt=&#34;05.png&#34; /&gt;
 2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为&lt;strong&gt;category=id:pro(id)&lt;/strong&gt;的格式存为&lt;em&gt;tf_id_word.txt&lt;/em&gt;
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/06.png-blog.howie&#34; alt=&#34;06.png&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/06.png&#34; alt=&#34;06.png&#34; /&gt;
 2.2.4.求出样本空间中每个分类的概率*P(category)*——&lt;strong&gt;先验概率&lt;/strong&gt;，将其转为&lt;strong&gt;category:pro(category)&lt;/strong&gt;的格式存为&lt;em&gt;type_pro.txt&lt;/em&gt;
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/07.png-blog.howie&#34; alt=&#34;07.png&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/07.png&#34; alt=&#34;07.png&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;3-编码&#34;&gt;3.编码&lt;/h2&gt;
+&lt;h2 id=&#34;编码&#34;&gt;编码&lt;/h2&gt;
 
 &lt;p&gt;经过前面的步骤，现在编写代码实在简单，不过有两点要注意。
 其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。
@@ -232,7 +235,7 @@ def mainPri(keywordDic):
 
 &lt;p&gt;初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。
 让我们看看分类器的分类效果：
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/08/08.png-blog.howie&#34; alt=&#34;08.png&#34; /&gt;
+&lt;img src=&#34;https://www.howie6879.cn/images/post/08/08.png&#34; alt=&#34;08.png&#34; /&gt;
 可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。&lt;/p&gt;
 </description>
     </item>
