@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>http://blog.howie6879.cn/categories/caddy/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://blog.howie6879.cn/categories/caddy/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Caddy&#43;Git 部署博客</title>
+      <link>http://blog.howie6879.cn/post/36/</link>
+      <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/36/</guid>
+      <description>&lt;p&gt;很早就想将博客升级为HTTPS，在心中也确立了方案：&lt;/p&gt;
+
+&lt;p&gt;1.博文上传至Git
+2.Caddy结合Webhook自动更新，顺便上HTTPS&lt;/p&gt;
+
+&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，进入shell：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install git vim wget
+# 安装Caddy以及插件
+wget -qO- https://getcaddy.com | bash -s personal
+curl https://getcaddy.com | bash -s personal http.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Caddy可以配置 systemd 来实现自动启动，官方也提供了实现脚本，见&lt;a href=&#34;https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/caddy.service&#34;&gt;这里&lt;/a&gt;，注意其中的这段代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;配置文件是写在&lt;code&gt;/etc/caddy/Caddyfile&lt;/code&gt;的，你可以改为自己定下的位置，也可以直接用这个位置，所以建立对应的目录文件：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;mkdir /etc/caddy/
+touch /etc/caddy/Caddyfile
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;域名解析到服务器IP后，开始编写&lt;code&gt;Caddyfile&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;vim /etc/caddy/Caddyfile
+
+# 输入如下内容
+www.howie6879.cn {
+    root /opt/howie6879.github.io
+    timeouts none
+    gzip
+}
+
+howie6879.cn {
+    redir www.howie6879.cn
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

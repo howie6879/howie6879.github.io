@@ -6,8 +6,56 @@
     <description>Recent content in Post-rsses on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 13 Jan 2018 19:12:30 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 24 May 2018 11:40:18 +0800</lastBuildDate>
     <atom:link href="http://blog.howie6879.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Caddy&#43;Git 部署博客</title>
+      <link>http://blog.howie6879.cn/post/36/</link>
+      <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
+      
+      <guid>http://blog.howie6879.cn/post/36/</guid>
+      <description>&lt;p&gt;很早就想将博客升级为HTTPS，在心中也确立了方案：&lt;/p&gt;
+
+&lt;p&gt;1.博文上传至Git
+2.Caddy结合Webhook自动更新，顺便上HTTPS&lt;/p&gt;
+
+&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，进入shell：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install git vim wget
+# 安装Caddy以及插件
+wget -qO- https://getcaddy.com | bash -s personal
+curl https://getcaddy.com | bash -s personal http.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Caddy可以配置 systemd 来实现自动启动，官方也提供了实现脚本，见&lt;a href=&#34;https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/caddy.service&#34;&gt;这里&lt;/a&gt;，注意其中的这段代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;配置文件是写在&lt;code&gt;/etc/caddy/Caddyfile&lt;/code&gt;的，你可以改为自己定下的位置，也可以直接用这个位置，所以建立对应的目录文件：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;mkdir /etc/caddy/
+touch /etc/caddy/Caddyfile
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;域名解析到服务器IP后，开始编写&lt;code&gt;Caddyfile&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;vim /etc/caddy/Caddyfile
+
+# 输入如下内容
+www.howie6879.cn {
+    root /opt/howie6879.github.io
+    timeouts none
+    gzip
+}
+
+howie6879.cn {
+    redir www.howie6879.cn
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
     
     <item>
       <title>Sanic 使用教程 - 6.常用的技巧</title>
@@ -2969,305 +3017,6 @@ one for all free music in china&lt;/p&gt;
 &lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
 
 &lt;p&gt;功能还很简单，解析的网站有很多，希望各位添砖加瓦，容我奉上项目地址：&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>sanic使用记录</title>
-      <link>http://blog.howie6879.cn/post/21/</link>
-      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
-      
-      <guid>http://blog.howie6879.cn/post/21/</guid>
-      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
-于是我利用业余时间使用&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
-
-&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
-
-&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python -m pip install sanic
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;sanic的&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;&gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
-下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;1.blueprint&lt;/li&gt;
-&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
-&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
-&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
-&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
-&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
-&lt;li&gt;7.注意&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;2-问题记录&#34;&gt;2.问题记录&lt;/h2&gt;
-
-&lt;h3 id=&#34;2-1-blueprint&#34;&gt;2.1.blueprint&lt;/h3&gt;
-
-&lt;p&gt;借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
-from sanic import Sanic
-from sanic.response import json
-
-app = Sanic()
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
-
-#访问http://0.0.0.0:8000/即可
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
-比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
-├── static
-│   └── novels
-│       ├── css
-│       │   ├── chapter.css
-│       │   ├── content.css
-│       │   ├── index.css
-│       │   ├── main.css
-│       │   └── result.css
-│       ├── img
-│       │   ├── bookMark.png
-│       │   ├── favicon.ico
-│       │   ├── read_bg.png
-│       │   └── read_content.png
-│       └── js
-│           ├── list.js
-│           └── main.js
-├── template
-│   └── novels
-│       ├── chapter.html
-│       ├── content.html
-│       ├── donate.html
-│       ├── feedback.html
-│       ├── index.html
-│       ├── main.html
-│       └── result.html
-└── views
-    └── novels_blueprint.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
-最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# server.py
-#!/usr/bin/env python
-from sanic import Sanic
-from novels_search.views.novels_blueprint import bp
-
-app = Sanic(__name__)
-app.blueprint(bp)
-
-app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;具体的&lt;code&gt;novels_blueprint.py&lt;/code&gt;请点击&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;2-2-html-templates编写&#34;&gt;2.2.html templates编写&lt;/h3&gt;
-
-&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# novels_blueprint.py片段
-from sanic import Blueprint
-from jinja2 import Environment, PackageLoader, select_autoescape
-
-# 初始化blueprint并定义静态文件夹路径
-bp = Blueprint(&#39;novels_blueprint&#39;)
-bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
-
-def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    return html(template.render(kwargs))
-    
-@bp.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    return template(&#39;index.html&#39;, title=&#39;index&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这样，就实现了jinja2 的引入。&lt;/p&gt;
-
-&lt;p&gt;=========05-02===========
-在官方文档发现了已经加入了如何引入jinja2，具体见：&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&#34;&gt;https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;2-3-session&#34;&gt;2.3.session&lt;/h3&gt;
-
-&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，见官方例子如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio_redis
-
-from sanic import Sanic
-from sanic.response import text
-from sanic_session import RedisSessionInterface
-
-app = Sanic()
-
-
-# Token from https://github.com/subyraman/sanic_session
-
-class Redis:
-    &amp;quot;&amp;quot;&amp;quot;
-    A simple wrapper class that allows you to share a connection
-    pool across your application.
-    &amp;quot;&amp;quot;&amp;quot;
-    _pool = None
-
-    async def get_redis_pool(self):
-        if not self._pool:
-            self._pool = await asyncio_redis.Pool.create(
-                host=&#39;localhost&#39;, port=6379, poolsize=10
-            )
-
-        return self._pool
-
-
-redis = Redis()
-
-# pass the getter method for the connection pool into the session
-session_interface = RedisSessionInterface(redis.get_redis_pool, expiry=604800)
-
-
-@app.middleware(&#39;request&#39;)
-async def add_session_to_request(request):
-    # before each request initialize a session
-    # using the client&#39;s request
-    await session_interface.open(request)
-
-
-@app.middleware(&#39;response&#39;)
-async def save_session(request, response):
-    # after each request save the session,
-    # pass the response to set client cookies
-    await session_interface.save(request, response)
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    # interact with the session like a normal dict
-    if not request[&#39;session&#39;].get(&#39;foo&#39;):
-        request[&#39;session&#39;][&#39;foo&#39;] = 0
-
-    request[&#39;session&#39;][&#39;foo&#39;] += 1
-
-    response = text(request[&#39;session&#39;][&#39;foo&#39;])
-
-    return response
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8888, debug=True)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;2-4-缓存&#34;&gt;2.4.缓存&lt;/h3&gt;
-
-&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1800, cache=RedisCache, key_from_attr=&#39;url&#39;, serializer=PickleSerializer(),
-        endpoint=REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, None), port=REDIS_DICT.get(&#39;REDIS_PORT&#39;, None), namespace=&amp;quot;main&amp;quot;)
-async def cache_owllook_novels_chapter(url, netloc):
-    async with aiohttp.ClientSession() as client:
-        html = await target_fetch(client=client, url=url)
-        if html:
-            soup = BeautifulSoup(html, &#39;html5lib&#39;)
-            selector = RULES[netloc].chapter_selector
-            if selector.get(&#39;id&#39;, None):
-                content = soup.find_all(id=selector[&#39;id&#39;])
-            elif selector.get(&#39;class&#39;, None):
-                content = soup.find_all(class_=selector[&#39;class&#39;])
-            else:
-                content = soup.find_all(selector.get(&#39;tag&#39;))
-            return str(content) if content else None
-        return None
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
-
-&lt;h3 id=&#34;2-5-api接口验证&#34;&gt;2.5.api接口验证&lt;/h3&gt;
-
-&lt;p&gt;在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好
-from functools import wraps
-from sanic.response import json
-from novels_search.config import AUTH
-
-def authenticator(key):
-    &amp;quot;&amp;quot;&amp;quot;
-    
-    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
-    :return: 返回值
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def wrapper(func):
-        @wraps(func)
-        async def authenticate(request, *args, **kwargs):
-            value = request.headers.get(key, None)
-            if value and AUTH[key] == value:
-                response = await func(request, *args, **kwargs)
-                return response
-            else:
-                return json({&#39;msg&#39;: &#39;not_authorized&#39;, &#39;status&#39;: 403})
-
-        return authenticate
-
-    return wrapper
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;至于使用&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/bd_novels/&amp;lt;name&amp;gt;&amp;quot;)
-@authenticator(&#39;Owllook-Api-Key&#39;)
-async def bd_novels(request, name):
-    pass
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py&#34;&gt;例子&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;2-6-恶意将其他域名绑定到你的网站独立ip&#34;&gt;2.6.恶意将其他域名绑定到你的网站独立ip&lt;/h3&gt;
-
-&lt;p&gt;前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。&lt;/p&gt;
-
-&lt;p&gt;首先，定义你允许访问的HOST，再获取访问时获取的host，比如：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# config.py
-HOST = [&#39;127.0.0.1:8001&#39;]
-
-# sanic获取host
-host = request.headers.get(&#39;host&#39;, None)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;那么就可以在sanic中间件中定义：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 当host不满足条件就调到baidu
-@app.middleware(&#39;request&#39;)
-async def add_session_to_request(request):
-    host = request.headers.get(&#39;host&#39;, None)
-    if not host or host not in HOST:
-        return redirect(&#39;http://www.baidu.com&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;2-7-注意&#34;&gt;2.7.注意&lt;/h3&gt;
-
-&lt;p&gt;sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见&lt;a href=&#34;https://github.com/channelcat/sanic/issues/633。&#34;&gt;https://github.com/channelcat/sanic/issues/633。&lt;/a&gt;
-sanic更新换代还是很快的。&lt;/p&gt;
-
-&lt;h2 id=&#34;3-说明&#34;&gt;3.说明&lt;/h2&gt;
-
-&lt;p&gt;遇到什么想到什么就继续更新，具体代码&lt;a href=&#34;https://github.com/howie6879/novels-search&#34;&gt;地址&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -13,13 +13,11 @@
     <meta http-equiv="Cache-Control" content="no-transform" />
     <meta http-equiv="Cache-Control" content="no-siteapp" />
     
-    <link href="http://blog.howie6879.cn/tags/privoxy/index.xml" rel="alternate" type="application/rss+xml" title="howie6879" /> 
-    
     <link rel="shortcut icon" href="http://blog.howie6879.cn/images/favicon.png">
     <link rel="apple-touch-icon" href="http://blog.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        Privoxy - howie6879
+        Caddy&#43;Git 部署博客 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -30,8 +28,8 @@
 </head>
 
 
-<body class="bg-grey" gtools_scp_screen_capture_injected="true">
-
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
     <header id="header" class="header bg-white">
         <div class="navbar-container">
             <a href="http://blog.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
@@ -59,35 +57,122 @@
             </div>
         </div>
     </header>
-<div class="main-content common-page clearfix ">
-<div class="common-item">
-    <div class="common-title"> Tag : Privoxy </div>
-    <div class="post-lists">
-        <div class="post-lists-body">
-
-         <div class="post-list-item">
-    <div class="post-list-item-container ">
-        <div class="item-label ">
-            <div class="item-title"><a href="http://blog.howie6879.cn/post/19/">centos7下使用Privoxy将socket5转http代理</a></div>
-            <div class="item-meta clearfix">
-                
-                 
-                
-                <div class="item-meta-ico bg-ico-image" style="background: url(http://blog.howie6879.cn/images/bg-ico.png) no-repeat;background-size: 40px auto;"></div>
-                
-                <div class="item-meta-date"> Feb 9, 2017 </div>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                Caddy&#43;Git 部署博客
+            </h1>
+            <div class="post-data">
+                Published on May 24, 2018 ,1 min reading time
             </div>
         </div>
-    </div>
-</div>
- 
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="http://blog.howie6879.cn/tags/caddy">caddy</a>
+	
+</p>
 
+ <p>很早就想将博客升级为HTTPS，在心中也确立了方案：</p>
+
+<p>1.博文上传至Git
+2.Caddy结合Webhook自动更新，顺便上HTTPS</p>
+
+<p>流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用<a href="https://bwh1.net/cart.php?a=confproduct&amp;i=0">搬瓦工的年付19.9$</a>方案，购买之后，进入shell：</p>
+
+<pre><code class="language-shell">yum install git vim wget
+# 安装Caddy以及插件
+wget -qO- https://getcaddy.com | bash -s personal
+curl https://getcaddy.com | bash -s personal http.git
+</code></pre>
+
+<p>Caddy可以配置 systemd 来实现自动启动，官方也提供了实现脚本，见<a href="https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/caddy.service">这里</a>，注意其中的这段代码：</p>
+
+<pre><code class="language-shell">ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+</code></pre>
+
+<p>配置文件是写在<code>/etc/caddy/Caddyfile</code>的，你可以改为自己定下的位置，也可以直接用这个位置，所以建立对应的目录文件：</p>
+
+<pre><code class="language-shell">mkdir /etc/caddy/
+touch /etc/caddy/Caddyfile
+</code></pre>
+
+<p>域名解析到服务器IP后，开始编写<code>Caddyfile</code>：</p>
+
+<pre><code class="language-shell">vim /etc/caddy/Caddyfile
+
+# 输入如下内容
+www.howie6879.cn {
+    root /opt/howie6879.github.io
+    timeouts none
+    gzip
+}
+
+howie6879.cn {
+    redir www.howie6879.cn
+}
+</code></pre>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="http://blog.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！<br>
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.howie6879.cn%2fpost%2f36%2f" target="_blank" title="Caddy&#43;Git 部署博客" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f36%2f&text=Caddy%2bGit%20%e9%83%a8%e7%bd%b2%e5%8d%9a%e5%ae%a2" target="_blank" title="Caddy&#43;Git 部署博客" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f36%2f&amp;title=Caddy%2bGit%20%e9%83%a8%e7%bd%b2%e5%8d%9a%e5%ae%a2" target="_blank" title="Caddy&#43;Git 部署博客" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=http%3a%2f%2fblog.howie6879.cn%2fpost%2f36%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                
+                <span class="bottom-bar-item"><a href="http://blog.howie6879.cn/post/35/" title="Sanic 使用教程 - 6.常用的技巧">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
         </div>
     </div>
-</div>
+
+    
+
+
+<div class="comment-container">
+    <div id="comments" class="clearfix">
+            <div id="container"></div>
+            <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+            <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+            <script>
+                var gitment = new Gitment({
+                id: location.href, 
+                owner: 'howie6879',
+                repo: 'howie6879.github.io',
+                oauth: {
+                    client_id: 'fcac95bc977ce2d76103',
+                    client_secret: '1e35e7f20a0577fa2ebe7bdfdb7228ff9435250f',
+                },
+                })
+                gitment.render(document.getElementById('comments'))
+            </script>
+    </div>
 </div>
 
-<footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
     <div class="footer-social">
         <div class="footer-container clearfix">
             <div class="social-list">
@@ -159,12 +244,125 @@
     </div>
 </footer>
 
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
 
 <script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
 <script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
 <script src="http://blog.howie6879.cn/js/instantclick.min.js?v20140319"></script>
 <script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
 <script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
 
 
 
