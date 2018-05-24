@@ -10,7 +10,7 @@
     <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Caddy&#43;Git 部署博客</title>
+      <title>Caddy&#43;Git 升级博客HTTPS</title>
       <link>https://www.howie6879.cn/post/36/</link>
       <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
       
@@ -20,7 +20,7 @@
 &lt;p&gt;1.博文上传至Git
 2.Caddy结合Webhook自动更新，顺便上HTTPS&lt;/p&gt;
 
-&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，进入shell：&lt;/p&gt;
+&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，选择CentOS7，安装后进入shell：&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install git vim wget
 # 安装Caddy以及插件
@@ -60,7 +60,12 @@ howie6879.cn {
 
 &lt;p&gt;先简单编写下，看服务能不能正常启动：&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;systemctl status caddy.service
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 启动
+systemctl start caddy.service
+# 关闭
+systemctl stop caddy.service
+# 状态
+systemctl status caddy.service
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;输出如下：&lt;/p&gt;
@@ -74,9 +79,31 @@ howie6879.cn {
            └─23604 /usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 查看日志
+journalctl --boot -u caddy.service
+&lt;/code&gt;&lt;/pre&gt;
+
 &lt;p&gt;访问：&lt;a href=&#34;https://www.howie6879.cn/&#34;&gt;https://www.howie6879.cn/&lt;/a&gt; ，一切正常，至此，博客算迁移完成了，现在还有一个麻烦的地方在于，每次提交更新到Git仓库，总是需要手动下拉一次代码来更新网站博文，这样感觉比较麻烦&lt;/p&gt;
 
-&lt;p&gt;或许可以让Caddy每隔多长时间自动拉取最新的仓库内容，但这样有点浪费资源，还是做成被动触发比较好，所以还是让我们的Webhook登场吧&lt;/p&gt;
+&lt;p&gt;或许可以让Caddy每隔多长时间自动拉取最新的仓库内容，比如60S，这样配置：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;www.howie6879.com {
+    root /var/www/howie6879.github.io
+    git {
+        repo     https://github.com/howie6879/howie6879.github.io.git
+        path     /var/www/howie6879.github.io
+        interval 60
+    }
+    timeouts none
+    gzip
+}
+
+howie6879.com {
+    redir www.howie6879.com
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;但这样有点浪费资源，还是做成被动触发比较好，所以还是让我们的Webhook登场吧，我暂时有点懒，懒得动。。。&lt;/p&gt;
 </description>
     </item>
     
