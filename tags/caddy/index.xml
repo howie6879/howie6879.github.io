@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>https://www.howie6879.cn/tags/caddy/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://www.howie6879.cn/tags/caddy/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Caddy&#43;Git 升级博客HTTPS</title>
+      <link>https://www.howie6879.cn/post/36/</link>
+      <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/36/</guid>
+      <description>&lt;p&gt;很早就想将博客升级为HTTPS，在心中也确立了方案，步骤也很简单：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;博文上传至Git&lt;/li&gt;
+&lt;li&gt;Caddy结合Webhook自动更新，顺便上HTTPS&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，选择CentOS7，安装后进入shell：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install git vim wget
+# 安装Caddy以及插件
+wget -qO- https://getcaddy.com | bash -s personal
+curl https://getcaddy.com | bash -s personal http.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Caddy可以配置 systemd 来实现自动启动，官方也提供了实现脚本，见&lt;a href=&#34;https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/caddy.service&#34;&gt;这里&lt;/a&gt;，注意其中的这段代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;配置文件是写在&lt;code&gt;/etc/caddy/Caddyfile&lt;/code&gt;的，你可以改为自己定下的位置，也可以直接用这个位置，所以建立对应的目录文件：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;cd ~
+mkdir /etc/caddy/
+touch /etc/caddy/Caddyfile
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;以&lt;code&gt;systemd&lt;/code&gt;为例,具体操作见官方&lt;a href=&#34;https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/README.md&#34;&gt;说明&lt;/a&gt;，一定要好好看，如果懒得看，就直接上手&lt;code&gt;supervisor&lt;/code&gt;吧&lt;/p&gt;
+
+&lt;p&gt;域名解析到服务器IP后，开始编写&lt;code&gt;Caddyfile&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;vim /etc/caddy/Caddyfile
+
+# 输入如下内容
+www.howie6879.cn {
+    root /var/www/howie6879.github.io/
+    timeouts none
+    gzip
+}
+
+howie6879.cn {
+    redir www.howie6879.cn
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;先简单编写下，看服务能不能正常启动：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 启动
+systemctl start caddy.service
+# 关闭
+systemctl stop caddy.service
+# 状态
+systemctl status caddy.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;输出如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;● caddy.service - Caddy HTTP/2 web server
+   Loaded: loaded (/etc/systemd/system/caddy.service; enabled; vendor preset: disabled)
+   Active: active (running) since Thu 2018-05-24 02:50:05 EDT; 3s ago
+     Docs: https://caddyserver.com/docs
+ Main PID: 23604 (caddy)
+   CGroup: /system.slice/caddy.service
+           └─23604 /usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 查看日志
+journalctl --boot -u caddy.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;访问：&lt;a href=&#34;https://www.howie6879.cn/&#34;&gt;https://www.howie6879.cn/&lt;/a&gt; ，一切正常，至此，博客算迁移完成了，现在还有一个麻烦的地方在于，每次提交更新到Git仓库，总是需要手动下拉一次代码来更新网站博文，这样感觉比较麻烦&lt;/p&gt;
+
+&lt;p&gt;或许可以让Caddy每隔多长时间自动拉取最新的仓库内容，比如60S，这样配置：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;www.howie6879.com {
+    root /var/www/howie6879.github.io
+    git {
+        repo     https://github.com/howie6879/howie6879.github.io.git
+        path     /var/www/howie6879.github.io
+        interval 60
+    }
+    timeouts none
+    gzip
+}
+
+howie6879.com {
+    redir www.howie6879.com
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;但这样有点浪费资源，还是做成被动触发比较好，所以还是让我们的Webhook登场吧，我暂时有点懒，懒得动。。。&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

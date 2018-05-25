@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>howie6879</title>
+    <link>https://www.howie6879.cn/tags/chrome/index.xml</link>
+    <description>Recent content on howie6879</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://www.howie6879.cn/tags/chrome/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>快速将网页版简书打造成具有个人特色的简书桌面应用</title>
+      <link>https://www.howie6879.cn/post/01/</link>
+      <pubDate>Wed, 28 Sep 2016 18:04:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/01/</guid>
+      <description>
+
+&lt;p&gt;近日对谷歌扩展以及应用很感兴趣，于是研究了下官方文档，特写此文记录一下，若有错误，敬请指教，如需转载，请说明出处。&lt;/p&gt;
+
+&lt;h2 id=&#34;1-技术需求&#34;&gt;1.技术需求&lt;/h2&gt;
+
+&lt;p&gt;怎么用&lt;code&gt;html css javascript&lt;/code&gt;这些前端技术来编写一个桌面应用，说到这，不得不说谷歌浏览器这款伟大的产品，其自行开发的V8引擎大大提升了&lt;code&gt;javascript&lt;/code&gt;在&lt;code&gt;chrome&lt;/code&gt;中的执行效率，甚至可以将谷歌浏览器想象成一个操作系统，而&lt;code&gt;chrome app&lt;/code&gt;则是运行在其上的应用。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;chrome app&lt;/code&gt;开发十分迅速，是一个非常好玩的技术，下面就以网页版的简书为例子，快速将其打造成一个桌面应用，而且还是兼容的呢。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;文档以及书籍参考：
+  官方文档：&lt;a href=&#34;https://developer.chrome.com/apps/about_apps&#34;&gt;chrome apps about_apps&lt;/a&gt;
+参考书籍：&lt;a href=&#34;http://www.ituring.com.cn/book/1421&#34;&gt;Chrome扩展及应用开发&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;利用谷歌直接将一个网页打造成桌面应用实现起来可谓十分轻松，开发者只需要掌握&lt;code&gt;html css javascript&lt;/code&gt;前端技术，再结合官方文档，基本上都能快速掌握。&lt;/p&gt;
+
+&lt;p&gt;所以，只要你有基本的&lt;code&gt;html css javascript&lt;/code&gt;技术，就可以很快的开发出有自己特色的简述桌面应用。反之，请去百度之，很快就可以基本掌握。&lt;/p&gt;
+
+&lt;p&gt;对于本篇文章的目的：&lt;strong&gt;快速将网页版简书打造成桌面应用&lt;/strong&gt;，只需要掌握&lt;a href=&#34;https://developer.chrome.com/apps/tags/webview&#34;&gt;Webview Tag&lt;/a&gt;，便可完成简书的桌面应用。&lt;/p&gt;
+
+&lt;p&gt;在进行代码层次的说明之前，先上一张完成后的效果图：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/01.png-blog.howie&#34; alt=&#34;01&#34; /&gt;&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&#34;2-应用说明&#34;&gt;2.应用说明&lt;/h2&gt;
+
+&lt;p&gt;在编写应用之前，请容我先解释一下&lt;code&gt;chrome app&lt;/code&gt;应该包含哪些文件，其由以下部分组成。
+&amp;gt;- &lt;strong&gt;manifest&lt;/strong&gt;文件将应用的一些信息提供给Chrome:这个应用是？它怎么运行？需要哪些额外的权限？
+&amp;gt;- &lt;strong&gt;background script&lt;/strong&gt;用来创建一个事件页面然后可靠地管理软件生命周期
+&amp;gt;- 所有代码必须包含在&lt;code&gt;chrome app&lt;/code&gt;的包内，其中包含&lt;code&gt;html css js&lt;/code&gt;以及Native Client模块。
+&amp;gt;- 所有&lt;strong&gt;icons&lt;/strong&gt;和其他有利资源最好也包括在包里面
+&amp;gt;- &lt;strong&gt;说明：&lt;/strong&gt;若想深入了解，可以去看官方文档：&lt;a href=&#34;https://developer.chrome.com/apps/first_app&#34;&gt;chrome apps first_app&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;知道了这些后，我们就可以看一下代码的目录结构，进行了解，具体再一一说明：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/02.png-blog.howie&#34; alt=&#34;02&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;2-代码说明&#34;&gt;2.代码说明&lt;/h2&gt;
+
+&lt;p&gt;可以看到图中分别有&lt;code&gt;css/ images/ js/&lt;/code&gt;文件夹以及&lt;code&gt;main.html manifest.json&lt;/code&gt;文件，不过最主要的是&lt;code&gt;manifest.json main.html background.js&lt;/code&gt;这三个文件，下面的叙述也是围绕这三个文件来做讲解。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2.1.manifest.json&lt;/strong&gt;
+&lt;code&gt;manifest.json&lt;/code&gt;文件的作用在上面的应用说明中已经解释得很清楚，其实不仅仅是&lt;code&gt;chrome app&lt;/code&gt;，谷歌扩展也需要一个&lt;code&gt;json&lt;/code&gt;格式的manifest，所以&lt;code&gt;manifest.json&lt;/code&gt;文件很重要。
+代码如下所示：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+	&amp;quot;app&amp;quot;:{
+		&amp;quot;background&amp;quot;:{
+			&amp;quot;scripts&amp;quot;:[&amp;quot;js/background.js&amp;quot;]
+		}
+	},
+	&amp;quot;manifest_version&amp;quot;:2,
+	&amp;quot;name&amp;quot;:&amp;quot;简书&amp;quot;,
+	&amp;quot;version&amp;quot;:&amp;quot;0.1.0&amp;quot;,
+	&amp;quot;description&amp;quot;:&amp;quot;谷歌应用版的简书，对网页版本作出一些优化#__#,添加到桌面方便启动.&amp;quot;,
+	&amp;quot;icons&amp;quot;: { 
+		&amp;quot;16&amp;quot;: &amp;quot;images/ico_16.png&amp;quot;,
+		&amp;quot;48&amp;quot;: &amp;quot;images/ico_48.png&amp;quot;,
+		&amp;quot;128&amp;quot;: &amp;quot;images/ico_128.png&amp;quot; 
+	},
+        //权限
+	&amp;quot;permissions&amp;quot;:[//这里需要简书网页域名的权限以及webview调用简书页面显示到新窗口
+		&amp;quot;http://www.jianshu.com/*&amp;quot;,
+		&amp;quot;webview&amp;quot;
+	]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面字段意思表达地很清楚，我们来看看:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;app              //Event Page会监听onLaunched事件，随即创建窗口，应用介绍有说这个作用，这里意思是app下面的background域会通过js/background.js创建窗口。
+manifest_version //整数表示文件自身格式的版本号,按照这个写就好了
+name             //应用名称
+version          //版本号
+其他都是某字段对应的意思，这里不一一解释
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果你想更加详细地了解，我不会说360全部都翻译了谷歌的官方文档，请移步&lt;a href=&#34;http://open.chrome.360.cn/extension_dev/manifest.html&#34;&gt;manifest详细说明&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2.2.main.html&lt;/strong&gt;
+定义好&lt;code&gt;manifest.json&lt;/code&gt;文件之后，现在浏览器知道了我们的应用叫什么，怎么运行的，需要哪些额外的权限。&lt;/p&gt;
+
+&lt;p&gt;那么，应用启动后，应用会通过&lt;code&gt;Event Page&lt;/code&gt;监听&lt;code&gt;onLaunched&lt;/code&gt;事件，然后创建一个窗口，那么窗口显示什么界面呢？这个界面就是&lt;code&gt;main.html&lt;/code&gt;文件。&lt;/p&gt;
+
+&lt;p&gt;这个界面主要看开发者的心情，想怎么写就怎么写，但是不要忘了引入&lt;code&gt;background.js&lt;/code&gt;文件，其作用下面再说。&lt;/p&gt;
+
+&lt;p&gt;代码如下所示：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+	&amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+	&amp;lt;title&amp;gt;简书桌面版&amp;lt;/title&amp;gt;
+	&amp;lt;link rel=&amp;quot;stylesheet&amp;quot; type=&amp;quot;text/css&amp;quot; href=&amp;quot;css/main.css&amp;quot;&amp;gt;
+	&amp;lt;script type=&amp;quot;text/javascript&amp;quot; src=&amp;quot;js/control.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+	&amp;lt;div id=&amp;quot;title_bar&amp;quot;&amp;gt;简书--找回文字的力量
+		&amp;lt;a id=&amp;quot;close&amp;quot;&amp;gt;&amp;lt;/a&amp;gt;
+		&amp;lt;a id=&amp;quot;minimize&amp;quot;&amp;gt;&amp;lt;/a&amp;gt;
+	&amp;lt;/div&amp;gt;
+	&amp;lt;webview id=&amp;quot;web_content&amp;quot;&amp;gt;&amp;lt;/webview&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;main.html&lt;/code&gt;文件里面的代码结构十分简单，这个界面可以分为三个部分，标题、控制按钮（关闭以及最小化）、webview显示的主体内容部分，当该窗口显示之后，若想对窗口进行样式上的修改，可以加一个 &lt;code&gt;css&lt;/code&gt;文件，我这里是这样定义的：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-css&#34;&gt;//添加边框
+body{
+	margin: 0;
+	padding: 0;
+	border: #EEE 1px solid;
+}
+//标题栏部分样式
+#title_bar{
+	-webkit-app-region:drag;	    //作用是让鼠标可以拖动窗口界面
+	height: 26px;
+	line-height: 26px;
+	font-size: 15px;
+	background-color: #EEE;
+	padding: 0 10px;
+	box-sizing: border-box;
+}
+//控制图标样式
+#title_bar a{
+	position: relative;
+	-webkit-app-region:no-drag;    //让控制图标可以被点击
+	display: inline-block;
+	float: right;
+	height: 14px;
+	width: 14px;
+	margin: 6px;
+	border: gray 1px solid;
+	box-sizing: border-box;
+	border-radius: 7px;
+}
+#close:hover{
+	background-color: #cf4646;
+}
+#minimize:hover{
+	background-color: #46B6CF;
+}
+/**
+ * show content
+ * 这定义了webview调用简书网页页面后的宽高
+ */
+#web_content{
+	width: 100%;
+	height: 614px;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;好了，窗口的样式大概写出来了，下面要做的就是怎么将这个页面作为窗口显示出来，这就要看&lt;code&gt;background.js&lt;/code&gt;文件了。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2.3.background.js&lt;/strong&gt;
+简单来说，background.js会指定应用启动是创建的窗口，上代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;//Event Page监听onLaunched事件
+chrome.app.runtime.onLaunched.addListener(function(){
+	var screenWidth = screen.availWidth;
+	var screenHeight = screen.availHeight;
+	var width = 1200;
+	var height = 640;
+	var main_window = chrome.app.window.get(&#39;main&#39;);
+	if (main_window) {
+		main_window.show();
+	}else{
+        //这里就创建了一个id是main的新窗口，窗口内容是main.html	
+		chrome.app.window.create(&amp;quot;main.html&amp;quot;,{
+			id:&#39;main&#39;,
+			bounds:{
+				width:width,
+				height:height,
+				left: Math.round((screenWidth-width)/2),
+				top:  Math.round((screenHeight-height)/2)
+			},
+			minHeight: height,
+			minWidth:  width,
+			maxHeight: height,
+			maxWidth:  width,
+			frame: &#39;none&#39;//不显示标题栏目，因为我们自己有写标题样式，不用使用默认的。
+		});
+	}
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;通过注释就会明白这段代码的意思，现在，我们的应用就已经创建完成了，我们可以看看界面是什么样子了。&lt;/p&gt;
+
+&lt;p&gt;不过在这之前，我们先要将应用加载到谷歌浏览器中，请打开谷歌浏览器，地址栏输入&lt;code&gt;chrome://extensions/&lt;/code&gt;，打开开发者模式，点击&lt;code&gt;加载已解压的扩展程序...&lt;/code&gt;，最后加载你创建的应用包，加载成功后如下所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/06.png-blog.howie&#34; alt=&#34;06&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;点击启动后，请看：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/03.png-blog.howie&#34; alt=&#34;03&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;main.html&lt;/code&gt;很好地显示出来了，其中标题（*简书&amp;ndash;找回文字的力量*），两个控制按钮，中间一大快空白部分（*空白部分是即将显示的主题内容*）都是我们刚才定义的。&lt;/p&gt;
+
+&lt;p&gt;现在我们就差最后一步就可以完成这个简书桌面应用了，就是利用&lt;a href=&#34;https://developer.chrome.com/apps/tags/webview&#34;&gt;Webview Tag&lt;/a&gt;调用简书网页页面，将其显示在&lt;code&gt;main.html&lt;/code&gt;的&lt;code&gt;&amp;lt;webview id=&amp;quot;web_content&amp;quot;&amp;gt;&amp;lt;/webview&amp;gt;&lt;/code&gt;中，我将具体代码写在了&lt;code&gt;js/control.js&lt;/code&gt;中，如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;//webwiew methods
+window.onload = function(){
+	var web_content = document.getElementById(&#39;web_content&#39;);
+	web_content.src=&amp;quot;http://www.jianshu.com/&amp;quot;;//定义获取的网页页面
+//在应用显示之前加载以下文件，但是应用加载出来后，在应用里面某些界面还需要脚本，所以下面又增加了一个方法。
+	web_content.addContentScripts([  
+  	{
+	    name: &#39;jianshu&#39;,
+	    matches: [&#39;http://*.jianshu.com/*&#39;],
+	    css: { files: [&#39;css/jianshu.css&#39;] },
+	    js: { files: [&#39;js/jquery.1.11.3.min.js&#39;,&#39;js/jianshu.js&#39;] },
+	    run_at: &#39;document_start&#39;
+	}]);
+//在每次页面加载后加入以下文件
+	web_content.addEventListener(&#39;loadcommit&#39;,
+	function(e) {
+		web_content.executeScript({ file: &amp;quot;js/jquery.1.11.3.min.js&amp;quot; });
+		web_content.executeScript({ file: &amp;quot;js/jianshu.js&amp;quot; });
+	});
+//控制按钮的方法，缩小以及关闭，还多写了一个最大化的方法，不过没有调用
+	var current_window = chrome.app.window.current();
+
+	document.getElementById(&#39;minimize&#39;).onclick = function(){
+		current_window.minimize();
+	}
+
+	document.getElementById(&#39;close&#39;).onclick = function(){
+		current_window.close();
+	}
+
+	document.getElementById(&#39;maximize&#39;).onclick = function(){
+		current_window.isMaximized()?current_window.restore():current_window.maximize();
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;完成后界面是这样的：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/04.png-blog.howie&#34; alt=&#34;04&#34; /&gt;
+&lt;strong&gt;2.4.增加自己的特色&lt;/strong&gt;
+到了这一步，恭喜你，你已经可以自己打造一个桌面应用了，到此，我们的简书桌面应用已经可以运行，我们现在要做的就是收尾工作，既然都已经将网页版本的简书都放进了我们的webview标签之中，那么我们为何不写一些自己想要的样式呢？&lt;/p&gt;
+
+&lt;p&gt;在&lt;code&gt;control.js&lt;/code&gt;文件中，我们分别引入了&lt;code&gt;js/jquery.1.11.3.min.js js/jianshu.js css/jianshu.css&lt;/code&gt;文件，那么它们是干什么的呢，这些文件可以在简书页面加载时候一同加载进去，让我来演示一下就明白了。
+比如说，在上面的图中左侧有个手机按钮来提示下载简书app，但是我已经下载了不想再看到，所以我可以写个js将其隐藏掉，将代码写在&lt;code&gt;js/jianshu.js&lt;/code&gt;里，审查元素，知道其class是：&lt;code&gt;ad-selector&lt;/code&gt;，所以可以这么写：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;$(document).ready(function(){
+	$(&amp;quot;.ad-selector&amp;quot;).hide();  //将那个图标隐藏
+	$(&amp;quot;.search-form&amp;quot;).removeAttr(&#39;target&#39;);//不要target属性
+	$(&#39;a&#39;).removeAttr(&#39;target&#39;);
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我们可以来看看效果：
+&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/01/05.png-blog.howie&#34; alt=&#34;05&#34; /&gt;
+怎么样，还不错吧，同样的，如果你对简书布局有什么想改动的地方，可以将&lt;code&gt;css&lt;/code&gt;代码写在 &lt;code&gt;css/jianshu.css&lt;/code&gt;中，好了，现在简书桌面应用已经打造完成了，只要将这个应用移动到你的桌面，就可以和使用其他应用一样使用了，而且兼容所有平台，当然前提是你得有谷歌浏览器。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
+
+&lt;p&gt;终于，我们将网页版简书打造成了桌面版，是不是非常方便，总结来看就是我们先定义  &lt;code&gt;manifest.json&lt;/code&gt;文件，告诉浏览器我们编写的应用是什么，怎么启动什么的，然后再定义启动页面&lt;code&gt;main.html&lt;/code&gt;,最后&lt;code&gt;background.js&lt;/code&gt;将其作为窗口调用。&lt;/p&gt;
+
+&lt;p&gt;这样一个桌面应用就完成了，如果要进行修改，可以利用webview进行引入&lt;code&gt;css js&lt;/code&gt;文件，就如同&lt;code&gt;js/control.js&lt;/code&gt;引入的&lt;code&gt;js/jianshu.js css/jianshu.css&lt;/code&gt;文件，就是这样。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;4-源码&#34;&gt;4.源码&lt;/h2&gt;
+
+&lt;p&gt;源代码&lt;a href=&#34;http://pan.baidu.com/s/1dDS8bIx&#34;&gt;百度网盘下载地址&lt;/a&gt;,提取码：&lt;code&gt;8k4d&lt;/code&gt;，有兴趣的可以自行下载。&lt;/p&gt;
+
+&lt;p&gt;===============03-10更新=============
+将这个传到了谷歌商店，有兴趣的可以试试，&lt;a href=&#34;https://chrome.google.com/webstore/detail/%E7%AE%80%E4%B9%A6/phocpflpobocakpjkkpemklpnajbggbn?utm_source=chrome-ntp-icon&amp;amp;hl=zh-CN&#34;&gt;下载地址&lt;/a&gt; 。
+谢谢。&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
