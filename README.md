@@ -1,3 +1,3 @@
 ## Howie's blog
 
-http://blog.howie6879.cn
+我的博客：[howie6879](https://www.howie6879.cn/)

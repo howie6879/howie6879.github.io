@@ -6,8 +6,32 @@
     <description>Recent content on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Sep 2018 17:54:42 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 29 Sep 2018 17:54:42 +0800</lastBuildDate>
     <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>统计学习方法笔记：3.k近邻法</title>
+      <link>https://www.howie6879.cn/post/39/</link>
+      <pubDate>Sat, 29 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/39/</guid>
+      <description>&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;阅读章节：第三章：k近邻法&lt;/li&gt;
+&lt;li&gt;开始时间：2018-09-29&lt;/li&gt;
+&lt;li&gt;结束时间：2018-10-09（国庆出去耍）&lt;/li&gt;
+&lt;li&gt;目标：读完第三章，掌握基本概念，产出一篇笔记&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：
+- K近邻算法
+- K近邻模型
+- K近邻法的实现：kd树&lt;/p&gt;
+
+&lt;p&gt;work in process&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>统计学习方法笔记：2.感知机</title>
@@ -3151,174 +3175,6 @@ sudo usermod -aG docker $USER
 
 &lt;p&gt;图片来自网络&lt;/p&gt;
 &lt;/blockquote&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>gRPC使用初试</title>
-      <link>https://www.howie6879.cn/post/25/</link>
-      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
-      
-      <guid>https://www.howie6879.cn/post/25/</guid>
-      <description>
-
-&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://grpc.io/&#34;&gt;gRPC&lt;/a&gt;是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用&lt;code&gt;protocol buffer&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;protocol buffer&lt;/code&gt;是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用&lt;code&gt;protocol buffer&lt;/code&gt;(&lt;code&gt;proto3&lt;/code&gt;)来进行定义，即根据&lt;code&gt;protocol buffer language&lt;/code&gt;来定义你的&lt;code&gt;protocol buffer data&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;最后再利用&lt;code&gt;protocol buffer&lt;/code&gt;编译定义的 &lt;code&gt;.proto&lt;/code&gt; 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h2 id=&#34;２-实践&#34;&gt;２.实践&lt;/h2&gt;
-
-&lt;p&gt;假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
-└── proto
-    └── lower.proto
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;接下来将编写&lt;code&gt;proto&lt;/code&gt;文件，本例使用&lt;code&gt;proto3&lt;/code&gt;语法进行编写，&lt;code&gt;protobuf&lt;/code&gt;定义的语法请看&lt;a href=&#34;https://developers.google.com/protocol-buffers/docs/proto3&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;lower.proto&lt;/code&gt;文件内容如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-proto&#34;&gt;syntax = &amp;quot;proto3&amp;quot;;
-package lower;
-
-service Lower {
-    rpc Lower (LowerRequest) returns (LowerResult) {
-    }
-}
-
-message LowerRequest {
-    string message = 1;
-}
-
-message LowerResult {
-    string lower_message = 1;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;定义一个服务&lt;code&gt;Lower&lt;/code&gt;，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件&lt;code&gt;proto_compile.py&lt;/code&gt;，并安装相关的包：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;pip install grpcio
-pip install grpcio-tools
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# script proto_compile.py
-from grpc_tools import protoc
-
-# 或者在项目根目录运行：
-# python -m grpc_tools.protoc -I. --python_out=../ --grpc_python_out=../ ./cal.proto
-protoc.main(
-    (
-        &#39;&#39;,
-        &#39;-Iproto&#39;,
-        &#39;--python_out=.&#39;,
-        &#39;--grpc_python_out=.&#39;,
-        &#39;proto/lower.proto&#39;,
-    )
-)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;运行后，项目结构如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
-├── lower_pb2_grpc.py     # 编译生成的文件
-├── lower_pb2.py          # 编译生成的文件
-├── proto
-│   └── lower.proto
-└── proto_compile.py
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;最后编写客户端以及服务端脚本&lt;code&gt;lower_client.py&lt;/code&gt;、&lt;code&gt;lower_server.py&lt;/code&gt;，内容分别如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# lower_server.py
-
-import time
-import grpc
-from concurrent import futures
-import lower_pb2, lower_pb2_grpc
-
-_TIME_WAIT = 10
-
-
-class Lower(lower_pb2_grpc.LowerServicer):
-    def Lower(self, request, context):
-        return lower_pb2.LowerResult(lower_message=request.message.lower())
-
-
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    lower_pb2_grpc.add_LowerServicer_to_server(Lower(), server)
-    server.add_insecure_port(&#39;[::]:50052&#39;)
-    server.start()
-    try:
-        while True:
-            time.sleep(_TIME_WAIT)
-    except KeyboardInterrupt:
-        server.stop(0)
-
-
-if __name__ == &#39;__main__&#39;:
-    serve()
-
-# lower_client.py
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import grpc
-
-import lower_pb2, lower_pb2_grpc
-
-
-def run():
-    channel = grpc.insecure_channel(&amp;quot;localhost:50052&amp;quot;)
-    stub = lower_pb2_grpc.LowerStub(channel)
-    response = stub.Lower(lower_pb2.LowerRequest(message=&amp;quot;HELLO WORLD!&amp;quot;))
-    print(&amp;quot;Message result received:  %s&amp;quot; % response.lower_message)
-
-
-if __name__ == &#39;__main__&#39;:
-    run()
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时文件目录结构如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo
-├── lower_client.py
-├── lower_pb2_grpc.py
-├── lower_pb2.py
-├── lower_server.py
-├── proto
-│   └── lower.proto
-├── proto_compile.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;先运行&lt;code&gt;lower_server.py&lt;/code&gt;，再运行&lt;code&gt;lower_client.py&lt;/code&gt;，就会看到终端有结果输出：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;Message result received:  hello world!
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到，返回小写字符，&lt;code&gt;demo&lt;/code&gt;演示完毕&lt;/p&gt;
-
-&lt;h2 id=&#34;3-最后&#34;&gt;3.最后&lt;/h2&gt;
-
-&lt;p&gt;以下是我了解&lt;code&gt;gRPC&lt;/code&gt;过程中收集的一些资料：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;官方中文文档：&lt;a href=&#34;http://doc.oschina.net/grpc?t=58008&#34;&gt;http://doc.oschina.net/grpc?t=58008&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;proto中文翻译： &lt;a href=&#34;http://colobu.com/2017/03/16/Protobuf3-language-guide/&#34;&gt;http://colobu.com/2017/03/16/Protobuf3-language-guide/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;参考实例：&lt;a href=&#34;http://blog.csdn.net/lavorange/article/details/74504837&#34;&gt;http://blog.csdn.net/lavorange/article/details/74504837&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
