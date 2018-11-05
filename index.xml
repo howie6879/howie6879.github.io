@@ -2,12 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>howie6879</title>
-    <link>https://www.howie6879.cn/index.xml</link>
+    <link>https://www.howie6879.cn/</link>
     <description>Recent content on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 29 Sep 2018 17:54:42 +0800</lastBuildDate>
-    <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>统计学习方法笔记：3.k近邻法</title>
@@ -15,126 +17,28 @@
       <pubDate>Sat, 29 Sep 2018 17:54:42 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/39/</guid>
-      <description>
-
-&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;阅读章节：第三章：k近邻法&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-29&lt;/li&gt;
-&lt;li&gt;结束时间：2018-10-23（比较忙）&lt;/li&gt;
-&lt;li&gt;目标：读完第三章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;k近邻算法&lt;/li&gt;
-&lt;li&gt;k近邻模型&lt;/li&gt;
-&lt;li&gt;k近邻法的实现：kd树&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;k近邻算法&#34;&gt;k近邻算法&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是k近邻算法？&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),&amp;hellip;,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,&amp;hellip;,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$&lt;/p&gt;
-
-&lt;p&gt;关键点在于是如何进行类别的判断，描述如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvroehv4vej30yo09w44m.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类&lt;/p&gt;
-
-&lt;p&gt;上面&lt;code&gt;3.1&lt;/code&gt;的公式这里解释一下：随着变量&lt;code&gt;j&lt;/code&gt;的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功&lt;/p&gt;
-
-&lt;h2 id=&#34;k近邻模型&#34;&gt;k近邻模型&lt;/h2&gt;
-
-&lt;p&gt;k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定&lt;/p&gt;
-
-&lt;h3 id=&#34;模型&#34;&gt;模型&lt;/h3&gt;
-
-&lt;p&gt;通过上面的叙述，当我们知道：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;训练集&lt;/li&gt;
-&lt;li&gt;距离度量（明可夫斯基距离）&lt;/li&gt;
-&lt;li&gt;k值&lt;/li&gt;
-&lt;li&gt;分类决策规则（多数表决）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;此时对于任何一个新的输入实例，都可以确定其所属的类&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是单元？&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元&lt;code&gt;（cell）&lt;/code&gt;，最终会将特征空间划分为下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwdo9ddtq4j30mm0gytc7.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;距离度量&#34;&gt;距离度量&lt;/h3&gt;
-
-&lt;p&gt;特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwdogsqjgyj310w0ikagg.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;k值的选择&#34;&gt;k值的选择&lt;/h3&gt;
-
-&lt;p&gt;k值的选择会对k近邻法的结果产生重大影响：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合&lt;/li&gt;
-&lt;li&gt;如果较大：k值的增大就意味着整体的模型变得简单&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;分类决策规则&#34;&gt;分类决策规则&lt;/h3&gt;
-
-&lt;p&gt;k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化&lt;/p&gt;
-
-&lt;h2 id=&#34;k近邻法的实现-kd树&#34;&gt;k近邻法的实现：kd树&lt;/h2&gt;
-
-&lt;p&gt;实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索&lt;/p&gt;
-
-&lt;p&gt;k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的&lt;/p&gt;
-
-&lt;p&gt;为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法&lt;/p&gt;
-
-&lt;h3 id=&#34;构造kd树&#34;&gt;构造kd树&lt;/h3&gt;
-
-&lt;p&gt;k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）&lt;/p&gt;
-
-&lt;p&gt;k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwi6yaofqzj30ze0uuwqq.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;实际做一道例题有助于对算法的理解：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwi711siqbj30zw03q408.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2)&lt;/li&gt;
-&lt;li&gt;根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树&lt;/li&gt;
-&lt;li&gt;构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树&lt;/li&gt;
-&lt;li&gt;构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面&lt;/li&gt;
-&lt;li&gt;无法继续划分，k-d tree构建完成&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7auqqs6j30yk0xmwld.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;搜索kd树&#34;&gt;搜索kd树&lt;/h3&gt;
-
-&lt;p&gt;给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7oqbc9dj312i0wktlt.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;有助于理解kd树的博客文章：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/23966698&#34;&gt;数学】kd 树算法之详细篇&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://leileiluoluo.com/posts/kdtree-algorithm-and-implementation.html&#34;&gt;K-D TREE算法原理及实现&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第三章：k近邻法 开始时间：2018-09-29 结束时间：2018-10-23（比较忙） 目标：读完第三章，掌握基本概念，产出一篇笔记  k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：
+ k近邻算法 k近邻模型 k近邻法的实现：kd树  k近邻算法 什么是k近邻算法？
+给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),&amp;hellip;,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,&amp;hellip;,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$
+关键点在于是如何进行类别的判断，描述如下：
+思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类
+上面3.1的公式这里解释一下：随着变量j的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功
+k近邻模型 k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定
+模型 通过上面的叙述，当我们知道：
+ 训练集 距离度量（明可夫斯基距离） k值 分类决策规则（多数表决）  此时对于任何一个新的输入实例，都可以确定其所属的类
+什么是单元？
+特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元（cell），最终会将特征空间划分为下图所示：
+距离度量 特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）
+k值的选择 k值的选择会对k近邻法的结果产生重大影响：
+ 如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合 如果较大：k值的增大就意味着整体的模型变得简单  分类决策规则 k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化
+k近邻法的实现：kd树 实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索
+k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的
+为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法
+构造kd树 k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）
+k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树
+实际做一道例题有助于对算法的理解：
+ 首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2) 根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树 构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树 构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面 无法继续划分，k-d tree构建完成  搜索kd树 给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高</description>
     </item>
     
     <item>
@@ -143,275 +47,20 @@
       <pubDate>Tue, 18 Sep 2018 17:54:42 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/38/</guid>
-      <description>
-
-&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;阅读章节：第二章：感知机&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-18&lt;/li&gt;
-&lt;li&gt;结束时间：2018-09-21&lt;/li&gt;
-&lt;li&gt;目标：读完第二章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本章主要介绍了二类分类的线性分类模型：感知机：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;感知机模型&lt;/li&gt;
-&lt;li&gt;感知机学习策略&lt;/li&gt;
-&lt;li&gt;感知机学习算法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见&lt;a href=&#34;https://www.howie6879.cn/post/33/&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;感知机模型&#34;&gt;感知机模型&lt;/h2&gt;
-
-&lt;p&gt;感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取&lt;code&gt;+1&lt;/code&gt;和&lt;code&gt;–1&lt;/code&gt;值，属于判别模型&lt;/p&gt;
-
-&lt;p&gt;注：&lt;code&gt;+1 -1 分别代表正负类，有的可能用 1 0 表示&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;在介绍感知机定义之前，下面几个概念需要说明一下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间：输入所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;输出空间：输出所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;特征空间：每个具体的输入是一个实例，由特征向量表示&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;所以对于一个感知机模型，可以这样表示：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$&lt;/li&gt;
-&lt;li&gt;输出空间：$\gamma = \{+1,-1 \}$&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;那么感知机就是由输入空间到输出空间的函数：&lt;/p&gt;
-
-&lt;p&gt;$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$&lt;/p&gt;
-
-&lt;p&gt;其中：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$sign$: 符号函数&lt;/li&gt;
-&lt;li&gt;$w$: 权值（weight）或权值向量（weight vector）&lt;/li&gt;
-&lt;li&gt;$b$: 偏置（bias）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;感知机的几何解释如下：线性方程&lt;/p&gt;
-
-&lt;p&gt;$$w\cdot x + b =0$$&lt;/p&gt;
-
-&lt;p&gt;如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$w$: 超平面的法向量&lt;/li&gt;
-&lt;li&gt;$b$: 超平面的截距&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;感知机学习策略&#34;&gt;感知机学习策略&lt;/h2&gt;
-
-&lt;h3 id=&#34;数据集的线性可分性&#34;&gt;数据集的线性可分性&lt;/h3&gt;
-
-&lt;p&gt;什么是数据集的线性可分性，很简单，对于一个数据集：&lt;/p&gt;
-
-&lt;p&gt;$$T = {(x_1,y_1),(x_2,y_2),&amp;hellip;,(x_n,y_n)}$$&lt;/p&gt;
-
-&lt;p&gt;如果存在上面一节说的超平面$S$：$w\cdot x + b =0$，能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，则称数据集T为线性可分数据集（linearly separable data set），否则，称数据集T线性不可分&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习策略-1&#34;&gt;感知机学习策略&lt;/h3&gt;
-
-&lt;p&gt;找出超平面$S$，其实就是确定感知机模型参数：$w b$，根据统计学习方法三要素，此时我们需要确定一个学习策略，比如前面所说的损失函数（经验函数），并使其最小化（猜也猜得到策略讲完，后面就是说学习算法了哈哈）&lt;/p&gt;
-
-&lt;p&gt;上一章以线性代数为例子，用损失函数来度量预测错误的程度，这里的损失函数可以用误分类点到超平面$S$的总距离，输入空间$\mathbb{R} ^n$中任一点$x_0$到超平面$S$的距离：&lt;/p&gt;
-
-&lt;p&gt;$$\frac{1}{||w||}|w\cdot x_0+b|$$&lt;/p&gt;
-
-&lt;p&gt;其中，$||w||$是$w$的$L_2$范数，假设超平面S的误分类点集合为$M$，那么所有误分类点到超平面$S$的总距离为：&lt;/p&gt;
-
-&lt;p&gt;$$-\frac{1}{||w||}\sum_{x_i\in M} y_i(w\cdot x_i + b)$$&lt;/p&gt;
-
-&lt;p&gt;最终推导出感知机学习的损失函数：&lt;/p&gt;
-
-&lt;p&gt;$$L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b)$$&lt;/p&gt;
-
-&lt;h2 id=&#34;感知机学习算法&#34;&gt;感知机学习算法&lt;/h2&gt;
-
-&lt;p&gt;上面一节已经确定了学习策略，按照统计学习方法三要素，目前需要一个算法来求解，目前最优化的方法是随机梯度下降法&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习算法的原始形式&#34;&gt;感知机学习算法的原始形式&lt;/h3&gt;
-
-&lt;p&gt;现在感知机学习算法就是对下面最优化问题的算法：&lt;/p&gt;
-
-&lt;p&gt;$$ \min_{w,b} L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b) $$&lt;/p&gt;
-
-&lt;p&gt;现在的问题就转化成，求出参数$w$和$b$，使得上列损失函数达到极小化，这里我直接贴出书中的算法，后面的例子我会用&lt;code&gt;Python&lt;/code&gt;代码实现：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvgcb5sc33j30ye0g0gul.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;有了解题方法怎么能没有题目呢？李杭老师自然是考虑到了，请听题：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvgccchxw7j30yg03mgnl.jpg&#34; alt=&#34;&#34; /&gt;
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvgccr7zbwj30z80j20vb.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;借用&lt;code&gt;Linus Torvalds&lt;/code&gt;大佬的一句话：&lt;strong&gt;Talk less, show me your code&lt;/strong&gt;，所以直接看代码吧：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-&amp;quot;&amp;quot;&amp;quot;
- Created by howie.hu at 2018/9/20.
-&amp;quot;&amp;quot;&amp;quot;
-import numpy as np
-
-
-class Perceptron:
-    &amp;quot;&amp;quot;&amp;quot;
-    李航老师统计学习方法第二章感知机例2.1代码实现
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, input_nums=2):
-        # 权重 已经确定只会有两个二进制输入
-        self.w = np.zeros(input_nums)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=10, rate=1):
-        &amp;quot;&amp;quot;&amp;quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        :param rate: 学习率
-        &amp;quot;&amp;quot;&amp;quot;
-        for i in range(learn_nums):
-            for index, input_vector in enumerate(input_vectors):
-                label = labels[index]
-                delta = label * (sum(self.w * input_vector) + self.b)
-                if delta &amp;lt;= 0:
-                    self.w += label * input_vector * rate
-                    self.b += rate * label
-                    break
-        print(&amp;quot;最终结果：此时感知器权重为{0}，偏置项为{1}&amp;quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &amp;gt; 0 else -1
-
-
-if __name__ == &#39;__main__&#39;:
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;输出如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;算法的收敛性&#34;&gt;算法的收敛性&lt;/h3&gt;
-
-&lt;p&gt;对于线性可分数据集感知机学习算法原始形式收敛，即经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型，定理&lt;code&gt;2.1&lt;/code&gt;如下：&lt;/p&gt;
-
-&lt;p&gt;假设训练数据集$T = {(x_1,y_1),(x_2,y_2),&amp;hellip;,(x_n,y_n)}$是线性可分的，其中$x_i\in \chi  =\mathbb{R} ^n$，$y_i \in \gamma =\{-1, 1\}$，$i=1,2,&amp;hellip;,N$，则有：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvhig4ajx8j30yk090gpp.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习算法的对偶形式&#34;&gt;感知机学习算法的对偶形式&lt;/h3&gt;
-
-&lt;p&gt;为什么要介绍感知机学习算法的对偶形式，主要目的就是减少运算量，这里一个&lt;a href=&#34;https://www.zhihu.com/question/26526858&#34;&gt;知乎回答&lt;/a&gt;得挺好：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvhinlwq26j312y0uoqdj.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvhiosgpfij30yu0gin5p.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;代码实现如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-&amp;quot;&amp;quot;&amp;quot;
- Created by howie.hu at 2018/9/21.
-&amp;quot;&amp;quot;&amp;quot;
-
-import numpy as np
-
-
-class Perceptron:
-    &amp;quot;&amp;quot;&amp;quot;
-    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, alpha_length=3):
-        self.alpha = np.zeros(alpha_length)
-        # 权重
-        self.w = np.zeros(2)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=7):
-        &amp;quot;&amp;quot;&amp;quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        &amp;quot;&amp;quot;&amp;quot;
-        gram = np.matmul(input_vectors, input_vectors.T)
-
-        for i in range(learn_nums):
-
-            for input_vector_index, input_vector in enumerate(input_vectors):
-                label = labels[input_vector_index]
-                delta = 0.0
-                for alpha_index, a in enumerate(self.alpha):
-                    delta += a * labels[alpha_index] * gram[input_vector_index][alpha_index]
-                delta = label * delta + self.b
-                if delta &amp;lt;= 0:
-                    self.alpha[input_vector_index] += 1
-                    self.b += label
-                    break
-        self.w = sum([j * input_vectors[i] * labels[i] for i, j in enumerate(self.alpha)])
-        print(&amp;quot;最终结果：此时感知器权重为{0}，偏置项为{1}&amp;quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &amp;gt; 0 else -1
-
-
-if __name__ == &#39;__main__&#39;:
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;一些概念的详细解释：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://blog.csdn.net/dengheCSDN/article/details/77313758&#34;&gt;超平面是什么？&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第二章：感知机 开始时间：2018-09-18 结束时间：2018-09-21 目标：读完第二章，掌握基本概念，产出一篇笔记  本章主要介绍了二类分类的线性分类模型：感知机：
+ 感知机模型 感知机学习策略 感知机学习算法  说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见这里
+感知机模型 感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取+1和–1值，属于判别模型
+注：+1 -1 分别代表正负类，有的可能用 1 0 表示
+在介绍感知机定义之前，下面几个概念需要说明一下：
+ 输入空间：输入所有可能取值的集合 输出空间：输出所有可能取值的集合 特征空间：每个具体的输入是一个实例，由特征向量表示  所以对于一个感知机模型，可以这样表示：
+ 输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$ 输出空间：$\gamma = \{+1,-1 \}$  那么感知机就是由输入空间到输出空间的函数：
+$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$
+其中：
+ $sign$: 符号函数 $w$: 权值（weight）或权值向量（weight vector） $b$: 偏置（bias）  感知机的几何解释如下：线性方程
+$$w\cdot x + b =0$$
+如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：
+ $w$: 超平面的法向量 $b$: 超平面的截距  感知机学习策略 数据集的线性可分性 什么是数据集的线性可分性，很简单，对于一个数据集：</description>
     </item>
     
     <item>
@@ -420,317 +69,18 @@ if __name__ == &#39;__main__&#39;:
       <pubDate>Sun, 16 Sep 2018 17:54:42 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/37/</guid>
-      <description>
-
-&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;阅读章节：第一章：统计学习方法概论&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-14&lt;/li&gt;
-&lt;li&gt;结束时间：2018-09-16&lt;/li&gt;
-&lt;li&gt;目标：读完第一章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;第一章主要对全书内容做了一个内容的概括：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;统计学习：定义、研究对象和方法&lt;/li&gt;
-&lt;li&gt;监督学习&lt;/li&gt;
-&lt;li&gt;统计学习三要素：模型、策略、算法&lt;/li&gt;
-&lt;li&gt;模型评估与选择：包括正则化、交叉验证与学习的泛化能力&lt;/li&gt;
-&lt;li&gt;生成模型与判别模型&lt;/li&gt;
-&lt;li&gt;分类问题、标注问题与回归问题&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;统计学习&#34;&gt;统计学习&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是统计学习&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的特点&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;统计学习以计算机及网络为平台，是建立在计算机及 网络之上的&lt;/li&gt;
-&lt;li&gt;统计学习以数据为研究对象，是数据驱动的学科&lt;/li&gt;
-&lt;li&gt;统计学习的目的是对数据进行预测与分析&lt;/li&gt;
-&lt;li&gt;统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析&lt;/li&gt;
-&lt;li&gt;统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是机器学习&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;如果&lt;code&gt;一个程序&lt;/code&gt;可以在&lt;code&gt;任务T&lt;/code&gt;上，随着&lt;code&gt;经验E&lt;/code&gt;的增加，&lt;code&gt;效果P&lt;/code&gt;也可以随之增加，则称这个程序可以从经验中学习。 &amp;mdash; 卡内基美隆大学的Tom Michael Mitchell教授&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;如果以垃圾邮件为例，&lt;code&gt;一个程序&lt;/code&gt;指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；&lt;code&gt;任务T&lt;/code&gt;指的是区分垃圾邮件的任务；&lt;code&gt;经验E&lt;/code&gt;为已经区分过是否为垃圾邮件的历史邮件；&lt;code&gt;效果P&lt;/code&gt;为机器学习算法在区分是否为垃圾邮件任务上的准确率&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的目的&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的方法&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归&lt;/li&gt;
-&lt;li&gt;非监督学习（unsupervised learning）：聚类、降维&lt;/li&gt;
-&lt;li&gt;半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM）&lt;/li&gt;
-&lt;li&gt;强化学习（reinforcement learning）：蒙特卡洛方法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;监督学习&#34;&gt;监督学习&lt;/h2&gt;
-
-&lt;h3 id=&#34;基本概念&#34;&gt;基本概念&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间（input space）：输入所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;输出空间（output space）：输出所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间&lt;/li&gt;
-&lt;li&gt;联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - &lt;a href=&#34;https://blog.csdn.net/tiankong_/article/details/78332666&#34;&gt;机器学习-联合概率分布笔记&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：
-- 分类问题：输出变量为有限个离散变量的预测问题
-- 回归问题：输入变量与输出变量均为连续变量的预测问题
-- 标注问题：输入变量与输出变量均为变量序列的预测问题&lt;/p&gt;
-
-&lt;h3 id=&#34;问题的形式化&#34;&gt;问题的形式化&lt;/h3&gt;
-
-&lt;p&gt;监督学习利用训练数据集学习一个模型，再用模型对测试样本集进行预测 （prediction）：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fv8ui8wvl6j312w0deact.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;输入训练集 -&amp;gt; 生成模型 -&amp;gt; 预测，由于训练集是人工给出的，所以称之为监督学习&lt;/p&gt;
-
-&lt;h2 id=&#34;统计学习三要素&#34;&gt;统计学习三要素&lt;/h2&gt;
-
-&lt;p&gt;统计学习方法由三要素构成，可以简单地表示为：&lt;strong&gt;方法 = 模型 + 策略 + 算法&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;模型&#34;&gt;模型&lt;/h3&gt;
-
-&lt;p&gt;在监督学习过程中，模型就是所要学习的条件概率分布或决策函数。模型的假设空间（hypothesis space）包含所有可能的条件概率分布或决策函数&lt;/p&gt;
-
-&lt;p&gt;例如，假设决策函数是输入变量的线性函数，那么模型的假设空间就是所有这些线性函数构成的函数集合，假设空间中的模型一般有无穷多个&lt;/p&gt;
-
-&lt;h3 id=&#34;策略&#34;&gt;策略&lt;/h3&gt;
-
-&lt;p&gt;知道模型的交涉空间后，现在的目的就是选择出最优的一个模型出来，而这就是统计学习的目标，这里引入两个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;损失函数（loss function）：用于度量模型一次预测的好坏&lt;/li&gt;
-&lt;li&gt;风险函数（risk function）：度量平均意义下模型预测的好坏&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;损失函数和风险函数&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))&lt;/p&gt;
-
-&lt;p&gt;统计学习中常用的损失函数有如下几种：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;0-1损失函数（0-1 loss function）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvam1mk7h6j30vy030aay.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;li&gt;平方损失函数（quadratic loss function）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvam3lshl9j30vy01w0t9.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;li&gt;绝对损失函数（absolute loss function）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvam57slnrj30we01swex.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;li&gt;对数损失函数（logarithmic loss function）或对数似然损失函数（loglikelihood loss function）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvam35pejsj30wi01ugm6.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;有了上面概念的铺垫，又可以引入下面两个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;模型f(X)关于联合分布P(X,Y)的平均意义下的损失：风险函数（risk function）或期望损失（expected loss）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvamch1uzwj3134022gmm.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;li&gt;模型f(X)关于训练数据集的平均损失：经验风险（empirical risk）或经验损失（empirical loss）：
-&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvameum2ilj30yy02y3z9.jpg&#34; alt=&#34;&#34; /&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;当样本数量足够的情况下，经验风险是趋近于期望风险的，但是现实中样本数量是有限的，，所以用经验风险估计期望风险常常并不理想，要对经验风险进行一定的矫正&lt;/p&gt;
-
-&lt;p&gt;这就关系到监督学习的两个基本策略：&lt;strong&gt;经验风险最小化和结构风险最小化&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;经验风险最小化与结构风险最小化&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;在假设空间、损失函数以及训练数据集确定的情况下，经验风险函数式（1.10）就可以确定，经验风险最小化（empirical risk minimization，ERM）的策略认为，经验风险最小的模型是最优的模型&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvamhbvfr2j30w403ejs2.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;当样本数量过小，可能会出现&lt;strong&gt;过拟合&lt;/strong&gt;问题，结构风险最小化（structural risk minimization，SRM）是为了防止过拟合而提出来的策略&lt;/p&gt;
-
-&lt;p&gt;结构风险最小化等价于正则化（regularization）：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvamj3r2v3j312w038wff.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;加上结构风险最小化的策略，此时的最优模型就是下面的最优化问题求解：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvammrcxvgj313i030wfe.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这样，监督学习问题就变成了经验风险或结构风险函数的最优化问题（1.11）和（1.13），这时经验或结构风险函数是最优化的目标函数&lt;/p&gt;
-
-&lt;h3 id=&#34;算法&#34;&gt;算法&lt;/h3&gt;
-
-&lt;p&gt;统计学习基于训练数据集，根据学习策略，从假设空间中选择最优模型，最后需要考虑用什么样的计算方法求解最优模型，这时，统计学习问题归结为最优化问题，统计学习的算法成为求解最优化问题的算法：&lt;/p&gt;
-
-&lt;h2 id=&#34;模型评估与模型选择&#34;&gt;模型评估与模型选择&lt;/h2&gt;
-
-&lt;h3 id=&#34;训练误差与测试误差&#34;&gt;训练误差与测试误差&lt;/h3&gt;
-
-&lt;p&gt;对于我们利用学习方法通过训练给出的模型，我们希望这个模型能较好的具有以下两点能力：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;拟合能力：已知数据的预测比较合理&lt;/li&gt;
-&lt;li&gt;泛化能力：未知数据的预测比较合理&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;前面说过，损失函数能够度量模型预测的好坏，所以基于损失函数的模型的训练误差（training error）和模型的测试误差（test error）就自然成为学习方法评估的标准：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvb8wvoubgj311m0msdoz.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;过拟合与模型选择&#34;&gt;过拟合与模型选择&lt;/h3&gt;
-
-&lt;p&gt;我们认为在假设空间存在一个真的模型，那么我们选择的模型的目标就是尽量接近这个真模型，假设空间很可能含有不同复杂度的模型，所以此时我们的目标就变成了寻找一个复杂度合适的模型，这里引出一个概念，过拟合（over fitting） - 所选模型的复杂度则比真模型更高&lt;/p&gt;
-
-&lt;p&gt;接下来我们的问题就转接成了需找一个模型复杂度适当的模型，前面一节我们介绍了训练误差与测试误差，那么训练误差与测试误差和模型的复杂度有没有什么关系呢，看下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvb94lyrxqj313c0gkgow.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，训练误差和模型复杂度的关系是：随着模型复杂度的增加，训练误差逐渐递减，趋向于0（此时可能过拟合），但是测试误差会有个最小值（此时才是最合适的复杂度）&lt;/p&gt;
-
-&lt;p&gt;那么我们的学习目的就出来了：选择复杂度适当的模型，以达到使测试误差最小&lt;/p&gt;
-
-&lt;p&gt;现在目的就很明确了，就是需要一个途径比较测试误差，选出最值小的，从而选出我们的模型：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;正则化&lt;/li&gt;
-&lt;li&gt;交叉验证&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;正则化与交叉验证&#34;&gt;正则化与交叉验证&lt;/h2&gt;
-
-&lt;h3 id=&#34;正则化&#34;&gt;正则化&lt;/h3&gt;
-
-&lt;p&gt;在统计学习三要素那一节讲过结构风险最小化策略，此策略的目的就是防止过拟合，正则化是结构风险最小化策略的实现，是在经验风险上加一个正则化项（regularizer）或罚项(penalty term)：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvb9g913r7j313y046myg.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;正则化的作用是选择经验风险与模型复杂度同时较小的模型&lt;/p&gt;
-
-&lt;h3 id=&#34;交叉验证&#34;&gt;交叉验证&lt;/h3&gt;
-
-&lt;p&gt;交叉验证的基本想法是重复地使用数据，把给定的数据进行切分，将切分的数据集组合为训练集与测试集，在此基础上反复地进行训练、测试以及模型选择，交叉验证有如下三种方式：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;简单交叉验证&lt;/li&gt;
-&lt;li&gt;S折交叉验证&lt;/li&gt;
-&lt;li&gt;留一交叉验证&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;泛化能力&#34;&gt;泛化能力&lt;/h2&gt;
-
-&lt;p&gt;学习方法的泛化能力（generalization  ability）是指由该方法学习到的模型对未知数据的预测能力，是学习方法本质上重要的性质&lt;/p&gt;
-
-&lt;h3 id=&#34;泛化误差&#34;&gt;泛化误差&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;泛化误差的定义&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;对于一个学到的模型，其对未知数的预测就是泛化误差（generalization error），其实就是策略那节讲的风险函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvbia7jtiaj312k0203zn.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;泛化误差反映了学习方法的泛化能力，如果一种方法学习的模型比另一种方法学习的模型具有更小的泛化误差，那么这种方法就更有效&lt;/p&gt;
-
-&lt;h3 id=&#34;泛化误差上界&#34;&gt;泛化误差上界&lt;/h3&gt;
-
-&lt;p&gt;学习方法的泛化能力分析往往是通过研究泛化误差的概率上界进行的，简称为泛化误 差上界（generalization error bound）&lt;/p&gt;
-
-&lt;p&gt;泛化误差上界性质如下：
-- 它是样本容量的函数，当样本容量增加时，泛化上界趋于0
-- 它是假设空间容量（capacity）的函数，假设空间容量越大，模型就越难学，泛化误差上界就越大&lt;/p&gt;
-
-&lt;h2 id=&#34;生成模型与判别模型&#34;&gt;生成模型与判别模型&lt;/h2&gt;
-
-&lt;p&gt;监督学习方法可以分为：
-- 生成方法（generative approach）：生成方法可以还原出联合概率分布&lt;code&gt;P(X,Y)&lt;/code&gt;，而判别方法则不能；生成方法的学习收敛速度更快，即当样本容量增加的时候，学到的模型可以更快地收敛于真实模型；当存在隐变量时，仍可以用生成方法学习，此时判别方法就不能用
-- 判别方法（discriminative approach）：判别方法直接学习的是条件概率&lt;code&gt;P(Y|X)&lt;/code&gt;或决策函数&lt;code&gt;f(X)&lt;/code&gt;，直接面对预测，往往学习的准确率更高；由于直接学习&lt;code&gt;P(Y|X)&lt;/code&gt;或&lt;code&gt;f(X)&lt;/code&gt;，可以对数据进行各种程度上 的抽象、定义特征并使用特征，因此可以简化学习问题&lt;/p&gt;
-
-&lt;p&gt;所学到的模型分别称为：
-- 生成模型（generative model）：
-    - 朴素贝叶斯法
-    - 隐马尔可夫模型
-- 判别模型（discriminative model）：
-    - k近邻法
-    - 感知机
-    - 决策树
-    - 逻辑斯谛回归模型
-    - 最大熵模型
-    - 支持向量机
-    - 提升方法
-    - 条件随机场
-    - &amp;hellip;&amp;hellip;&lt;/p&gt;
-
-&lt;h2 id=&#34;分类问题&#34;&gt;分类问题&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;在监督学习中，当输出变量Y取有限个离散值时，预测问题便成为分类问题，监督学习从数据中学习一个分类模型或分类决策函数，称为分类器（classifier）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;许多统计学习方法可以用于分类：
-- k近邻法
-- 感知机
-- 朴素贝叶斯法
-- 决策树
-- 决策列表
-- 逻辑斯谛回归模型
-- 支持向量机
-- 提升方法
-- 贝叶斯网络
-- 神经网络
-- Winnow
-- &amp;hellip;&amp;hellip;&lt;/p&gt;
-
-&lt;p&gt;评价分类器性能的指标一般是分类准确率（accuracy）：对于给定的测试数据集，分类器正确分类的样本数与总样本数之比，也就是损失函数是0-1损失时测试数据集上的准确率，见图&lt;code&gt;1.17&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;对于二类分类问题常用的评价指标是精确率（precision）与召回率（recall），因为是二分类，所以一共有四中预测情况：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;TP——将正类预测为正类数&lt;/li&gt;
-&lt;li&gt;FN——将正类预测为负类数&lt;/li&gt;
-&lt;li&gt;FP——将负类预测为正类数&lt;/li&gt;
-&lt;li&gt;TN——将负类预测为负类数&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvbit9op55j31420g2tch.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;标注问题&#34;&gt;标注问题&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;标注问题的目标在于学习一个模型， 使它能够对观测序列给出标记序列作为预测&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;许多统计学习方法可以用于标注：
-- 隐马尔可夫模型
-- 条件随机场&lt;/p&gt;
-
-&lt;p&gt;评价标注模型的指标与评价分类模型的指标一样，常用的有标注准确率、精确率和召回率，其定义与分类模型相同&lt;/p&gt;
-
-&lt;h2 id=&#34;回归问题&#34;&gt;回归问题&lt;/h2&gt;
-
-&lt;p&gt;回归用于预测输入变量（自变量）和输出变量（因变量）之间的关系，特别是当输入变量的值发生变化时，输出变量的值随之发生的变化，回归问题按照输入变量的个数，分为一元回归和多元回归；按照输入变量和输出变量之间关系的类型即模型的类型，分为线性回归和非线性回归&lt;/p&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;一些参考链接：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/WenDesi/lihang_book_algorithm&#34;&gt;致力于将李航博士《统计学习方法》一书中所有算法实现一遍&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/zzqboy/static_study&#34;&gt;《统计学习方法》的读书笔记，重现了大部分的课后题，仅供参考&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://segmentfault.com/a/1190000015561652#articleHeader2&#34;&gt;深度学习中的概率知识详解&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第一章：统计学习方法概论 开始时间：2018-09-14 结束时间：2018-09-16 目标：读完第一章，掌握基本概念，产出一篇笔记  第一章主要对全书内容做了一个内容的概括：
+ 统计学习：定义、研究对象和方法 监督学习 统计学习三要素：模型、策略、算法 模型评估与选择：包括正则化、交叉验证与学习的泛化能力 生成模型与判别模型 分类问题、标注问题与回归问题  统计学习 什么是统计学习
+统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习
+统计学习的特点
+ 统计学习以计算机及网络为平台，是建立在计算机及 网络之上的 统计学习以数据为研究对象，是数据驱动的学科 统计学习的目的是对数据进行预测与分析 统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析 统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论  什么是机器学习
+如果一个程序可以在任务T上，随着经验E的增加，效果P也可以随之增加，则称这个程序可以从经验中学习。 &amp;mdash; 卡内基美隆大学的Tom Michael Mitchell教授
+ 如果以垃圾邮件为例，一个程序指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；任务T指的是区分垃圾邮件的任务；经验E为已经区分过是否为垃圾邮件的历史邮件；效果P为机器学习算法在区分是否为垃圾邮件任务上的准确率
+ 统计学习的目的
+统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析
+统计学习的方法
+ 监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归 非监督学习（unsupervised learning）：聚类、降维 半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM） 强化学习（reinforcement learning）：蒙特卡洛方法  监督学习 基本概念  输入空间（input space）：输入所有可能取值的集合 输出空间（output space）：输出所有可能取值的集合 特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间 联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - 机器学习-联合概率分布笔记 假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）  人们根据输入、输出变量的不同类型，对预测任务给予不同的名称： - 分类问题：输出变量为有限个离散变量的预测问题 - 回归问题：输入变量与输出变量均为连续变量的预测问题 - 标注问题：输入变量与输出变量均为变量序列的预测问题</description>
     </item>
     
     <item>
@@ -739,123 +89,11 @@ if __name__ == &#39;__main__&#39;:
       <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/36/</guid>
-      <description>&lt;p&gt;很早就想将博客升级为HTTPS，在心中也确立了方案，步骤也很简单：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;博文上传至Git&lt;/li&gt;
-&lt;li&gt;Caddy结合Webhook自动更新，顺便上HTTPS&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用&lt;a href=&#34;https://bwh1.net/cart.php?a=confproduct&amp;amp;i=0&#34;&gt;搬瓦工的年付19.9$&lt;/a&gt;方案，购买之后，选择CentOS7，安装后进入shell：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install git vim wget
-# 创建用户
-useradd howie
-# 设定密码
-passwd username
-# 添加 sudo 权限
-visudo
-# 找到 
-root  ALL=(ALL)   ALL 
-# 添加 
-howie  ALL=(ALL)   ALL
-# 用刚创建的用户名登录
-# 安装Caddy以及插件，这里我列出了我需要的插件 各位酌情选择
-curl https://getcaddy.com | bash -s personal http.git,http.realip,http.ratelimit,http.ipfilter
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;首先是从git拉取代码，因为我们还是希望服务器可以自动从git远程拉取代码并且自动更新：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;mkdir git
-cd git
-git clone https://github.com/howie6879/howie6879.github.io.git
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后是编写&lt;code&gt;Caddyfile&lt;/code&gt;，这是&lt;code&gt;Caddy&lt;/code&gt;的配置文件，我将配置文件写在&lt;code&gt;/etc/caddy/Caddyfile&lt;/code&gt;，贴上我的配置内容：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;cd ~
-mkdir /etc/caddy/
-vim /etc/caddy/Caddyfile
-# 输入
-www.howie6879.cn {
-    root /home/howie/git/howie6879.github.io
-    tls xiaozizayang@gmail.com
-    timeouts none
-    gzip
-}
-howie6879.cn {
-    redir www.howie6879.cn
-}
-
-# 这里需要注意，请先将ip和博客域名解析好
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Caddy官方也提供了实现脚本，见&lt;a href=&#34;https://github.com/mholt/caddy/blob/master/dist/init/linux-systemd/caddy.service&#34;&gt;这里&lt;/a&gt;，不过我就按照自己的习惯部署了，没有参考官方的&lt;/p&gt;
-
-&lt;p&gt;接下来就可以直接启动我们的博客服务了，Caddy会自动申请证书上HTTPS，非常方便，启动：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;caddy -conf /etc/caddy/Caddyfile
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;访问：&lt;a href=&#34;https://www.howie6879.cn/&#34;&gt;https://www.howie6879.cn/&lt;/a&gt; ，一切正常，至此，博客算迁移完成了，现在还有一个麻烦的地方在于，每次提交更新到Git仓库，总是需要手动下拉一次代码来更新网站博文，这样感觉比较麻烦&lt;/p&gt;
-
-&lt;p&gt;或许可以让Caddy每隔多长时间自动拉取最新的仓库内容，比如60S，这样配置：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;www.howie6879.cn {
-    root /home/howie/git/howie6879.github.io
-    tls xiaozizayang@gmail.com
-    git {
-        repo     https://github.com/howie6879/howie6879.github.io.git
-        path     /var/www/howie6879.github.io
-        interval 60
-    }
-    timeouts none
-    gzip
-}
-howie6879.cn {
-    redir www.howie6879.cn
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;但这样有点浪费资源，还是做成被动触发比较好，所以还是让我们的Webhook登场吧，我暂时有点懒，懒得动。。。&lt;/p&gt;
-
-&lt;p&gt;最后说下，利用&lt;code&gt;Supervisor&lt;/code&gt;管理&lt;code&gt;Caddy&lt;/code&gt;的事情，毕竟上面的启动方式还是不行的:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sudo yum install python-setuptools
-sudo easy_install supervisor
-
-sudo mkdir /etc/supervisord.d/
-sudo echo_supervisord_conf &amp;gt; /etc/supervisord.conf
-
-sudo chmod -R 777 /etc/supervisord.d/
-sudo chmod -R 777 /etc/caddy/Caddyfile
-sudo chmod -R 777 /etc/supervisord.conf
-
-vim /etc/supervisord.con
-
-mkdir ~/supervisor/
-# 加上这行
-[include]
-files = /etc/supervisord.d/*.ini
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在&lt;code&gt;/etc/supervisord.d/&lt;/code&gt;增加&lt;code&gt;caddy.ini&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;[program:caddy]
-command      = caddy -conf=“/etc/caddy/Caddyfile”
-user         = howie
-process_name = %(program_name)s
-autostart    = true
-autorestart  = true
-startsecs    = 3
-redirect_stderr         = true
-stdout_logfile_maxbytes = 500MB
-stdout_logfile_backups  = 10
-stdout_logfile          = ~/supervisor/caddy.log
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;至此，大功告成&lt;/p&gt;
-</description>
+      <description>很早就想将博客升级为HTTPS，在心中也确立了方案，步骤也很简单：
+ 博文上传至Git Caddy结合Webhook自动更新，顺便上HTTPS  流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用搬瓦工的年付19.9$方案，购买之后，选择CentOS7，安装后进入shell：
+yum install git vim wget # 创建用户 useradd howie # 设定密码 passwd username # 添加 sudo 权限 visudo # 找到 root ALL=(ALL) ALL # 添加 howie ALL=(ALL) ALL # 用刚创建的用户名登录 # 安装Caddy以及插件，这里我列出了我需要的插件 各位酌情选择 curl https://getcaddy.com | bash -s personal http.git,http.realip,http.ratelimit,http.ipfilter  首先是从git拉取代码，因为我们还是希望服务器可以自动从git远程拉取代码并且自动更新：
+mkdir git cd git git clone https://github.com/howie6879/howie6879.github.io.git  然后是编写Caddyfile，这是Caddy的配置文件，我将配置文件写在/etc/caddy/Caddyfile，贴上我的配置内容：
+cd ~ mkdir /etc/caddy/ vim /etc/caddy/Caddyfile # 输入 www.howie6879.cn { root /home/howie/git/howie6879.github.io tls xiaozizayang@gmail.</description>
     </item>
     
     <item>
@@ -864,335 +102,12 @@ stdout_logfile          = ~/supervisor/caddy.log
       <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/35/</guid>
-      <description>
-
-&lt;p&gt;结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白&lt;code&gt;Sanic&lt;/code&gt;框架的重心不会放在诸如&lt;code&gt;session cache reload authorized&lt;/code&gt;这些问题上&lt;/p&gt;
-
-&lt;p&gt;本文最新内容可到github上阅读 &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7.md&#34;&gt;6.常用的技巧&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Async Python 3.5+ web server that&amp;rsquo;s written to go fast&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;api请求json参数以及api接口验证&lt;/li&gt;
-&lt;li&gt;gRPC的异步调用方式&lt;/li&gt;
-&lt;li&gt;Blueprint&lt;/li&gt;
-&lt;li&gt;html&amp;amp;templates编写&lt;/li&gt;
-&lt;li&gt;cache&lt;/li&gt;
-&lt;li&gt;热加载&lt;/li&gt;
-&lt;li&gt;session&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;对于一些问题，我将编写一个小服务来演示这些技巧，具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06&#34;&gt;demo06&lt;/a&gt;，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;src
-├── config
-│   ├── __init__.py
-│   ├── config.py
-│   ├── dev_config.py
-│   └── pro_config.py
-├── database
-│   ├── __init__.py
-│   └── redis_base
-├── grpc_service
-│   ├── __init__.py
-│   ├── grpc_asyncio_client.py
-│   ├── grpc_client.py
-│   ├── grpc_server.py
-│   ├── hello_grpc.py
-│   ├── hello_pb2.py
-│   ├── hello_pb2_grpc.py
-│   └── proto
-├── statics
-│   ├── rss_html
-│   │   ├── css
-│   │   └── js
-│   └── rss_json
-│       ├── css
-│       └── js
-├── templates
-│   ├── rss_html
-│   └── rss_json
-├── tools
-│   ├── __init__.py
-│   └── mid_decorator.py
-├── views
-│   ├── __init__.py
-│   ├── rss_api.py
-│   ├── rss_html.py
-│   └── rss_json.py
-└── run.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的&lt;code&gt;database&lt;/code&gt;，以及关于gRPC的&lt;code&gt;grpc_service&lt;/code&gt;，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。&lt;/p&gt;
-
-&lt;p&gt;增加的文件是&lt;code&gt;rss_json.py&lt;/code&gt;，假设这是个接口文件吧，将会根据你的请求参数返回一串json，具体还是建议直接去看代码吧，点这里&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample&#34;&gt;sample&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h3 id=&#34;验证问题&#34;&gt;验证问题&lt;/h3&gt;
-
-&lt;p&gt;假设你正在编写一个api服务，比如根据传的blog名字返回其rss数据，比如&lt;code&gt;rss_json.py&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from feedparser import parse
-from sanic import Blueprint
-from sanic.response import json
-
-api_bp = Blueprint(&#39;rss_api&#39;, url_prefix=&#39;v1&#39;)
-
-
-@api_bp.route(&amp;quot;/get/rss/&amp;lt;param&amp;gt;&amp;quot;)
-async def get_rss_json(request, param):
-    if param == &#39;howie6879&#39;:
-        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-        feed = parse(url)
-        articles = feed[&#39;entries&#39;]
-        data = []
-        for article in articles:
-            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;启动服务后，此时用&lt;code&gt;GET&lt;/code&gt;方式访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
-    &amp;quot;name&amp;quot;: &amp;quot;howie6879&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在&lt;code&gt;rss_json.py&lt;/code&gt;中加入一个新的视图函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
-async def post_rss_json(request, **kwargs):
-    post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
-    name = post_data.get(&#39;name&#39;)
-    if name == &#39;howie6879&#39;:
-        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-        feed = parse(url)
-        articles = feed[&#39;entries&#39;]
-        data = []
-        for article in articles:
-            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;参数错误&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;发送post请求到&lt;code&gt;http://0.0.0.0:8000/v1/post/rss/&lt;/code&gt;，依旧和上面的结果一样，代码里面有个问题，我们需要判断&lt;code&gt;name&lt;/code&gt;参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？&lt;/p&gt;
-
-&lt;p&gt;显然并不是的，如果有十个参数呢？然后再增加十几个路由呢？每个路由里有十个参数需要判断，想象一下，这样实施下来，难道要在代码里面堆积满屏幕的判断语句么？这样实在是太可怕了，我们需要更好更通用的解决方案，是时候写个装饰器来验证参数了，打开&lt;code&gt;mid_decorator.py&lt;/code&gt;文件，添加一个验证的装饰器函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def auth_params(*keys):
-    &amp;quot;&amp;quot;&amp;quot;
-    api请求参数验证
-    :param keys: params
-    :return:
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def wrapper(func):
-        @wraps(func)
-        async def auth_param(request=None, rpc_data=None, *args, **kwargs):
-            request_params, params = {}, []
-            if isinstance(request, Request):
-                # sanic request
-                if request.method == &#39;POST&#39;:
-                    try:
-                        post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
-                    except Exception as e:
-                        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-                    else:
-                        request_params.update(post_data)
-                        params = [key for key, value in post_data.items() if value]
-                elif request.method == &#39;GET&#39;:
-                    request_params.update(request.args)
-                    params = [key for key, value in request.args.items() if value]
-                else:
-                    return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-            else:
-                pass
-
-            if set(keys).issubset(set(params)):
-                kwargs[&#39;request_params&#39;] = request_params
-                return await dec_func(func, request, *args, **kwargs)
-            else:
-                return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-
-        return auth_param
-
-    return wrapper
-
-
-async def dec_func(func, request, *args, **kwargs):
-    try:
-        response = await func(request, *args, **kwargs)
-        return response
-    except Exception as e:
-        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;注意，上面增加的路由函数改为这样：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
-@auth_params(&#39;name&#39;)
-async def post_rss_json(request, **kwargs):
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这样么一个请求进来，就会验证name是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。&lt;/p&gt;
-
-&lt;p&gt;对于请求验证的问题，解决方法也是类似，就是利用装饰器来实现，我自己也实现过，在上面的代码链接里面可以找到，不过现在的&lt;code&gt;Sanic&lt;/code&gt;官方已经提供了&lt;code&gt;demo&lt;/code&gt;，见&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/authorized_sanic.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;grpc的异步调用方式&#34;&gt;gRPC的异步调用方式&lt;/h3&gt;
-
-&lt;p&gt;在编写微服务的时候，除了需要支持&lt;code&gt;http&lt;/code&gt;请求外，一般还需要支持&lt;code&gt;gRPC&lt;/code&gt;请求，我在使用&lt;code&gt;Sanic&lt;/code&gt;编写微服务的时候，遇到关于异步请求&lt;code&gt;RPC&lt;/code&gt;的需求，当时确实困扰了我，意外发现了这个库&lt;a href=&#34;https://github.com/vmagamedov/grpclib&#34;&gt;grpclib&lt;/a&gt;，进入&lt;code&gt;src/grpc_service&lt;/code&gt;目录，里面就是解决方案，很简单，这里就不多说了，直接看代码就好。&lt;/p&gt;
-
-&lt;h3 id=&#34;blueprint&#34;&gt;Blueprint&lt;/h3&gt;
-
-&lt;p&gt;Blueprint前面的章节有仔细聊过，这里不多说，借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
-from sanic import Sanic
-from sanic.response import json
-
-app = Sanic()
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
-
-#访问http://0.0.0.0:8000/即可
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
-比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
-├── static
-│   └── novels
-│       ├── css
-│       │   └── result.css
-│       ├── img
-│       │   └── read_content.png
-│       └── js
-│           └── main.js
-├── template
-│   └── novels
-│       └── index.html
-└── views
-    └── novels_blueprint.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
-最后只要将每个单独的blueprint在主启动文件进行注册就好，上面的目录树是我以前的一个项目&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;的，也是用&lt;code&gt;Sanic&lt;/code&gt;编写的，有兴趣可以看看，不过现在结构改变挺大。&lt;/p&gt;
-
-&lt;h3 id=&#34;html-templates编写&#34;&gt;html&amp;amp;templates编写&lt;/h3&gt;
-
-&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
-# 代码片段，明白意思就好
-from sanic import Blueprint
-from jinja2 import Environment, PackageLoader, select_autoescape
-
-# 初始化blueprint并定义静态文件夹路径
-bp = Blueprint(&#39;novels_blueprint&#39;)
-bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
-
-def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    return html(template.render(kwargs))
-    
-@bp.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    return template(&#39;index.html&#39;, title=&#39;index&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果是&lt;code&gt;python3.6&lt;/code&gt;，可以试试下面的写法：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
-# 代码片段，明白意思就好
-#!/usr/bin/env python
-import sys
-
-from feedparser import parse
-from jinja2 import Environment, PackageLoader, select_autoescape
-from sanic import Blueprint
-from sanic.response import html
-
-from src.config import CONFIG
-
-# https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py
-# 开启异步特性  要求3.6+
-enable_async = sys.version_info &amp;gt;= (3, 6)
-
-html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
-html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.rss_html&#39;, &#39;../templates/rss_html&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
-    enable_async=enable_async)
-
-
-async def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    rendered_template = await template.render_async(**kwargs)
-    return html(rendered_template)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;cache&#34;&gt;cache&lt;/h3&gt;
-
-&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
-
-&lt;p&gt;比如上面的例子，每次访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，都要请求一次对应的rss资源，如果做个缓存那岂不是简单很多？&lt;/p&gt;
-
-&lt;p&gt;改写成这样：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1000, cache=RedisCache, key=&amp;quot;rss&amp;quot;, serializer=PickleSerializer(), port=6379, namespace=&amp;quot;main&amp;quot;)
-async def get_rss():
-    print(&amp;quot;第一次请求休眠3秒...&amp;quot;)
-    await asyncio.sleep(3)
-    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-    feed = parse(url)
-    articles = feed[&#39;entries&#39;]
-    data = []
-    for article in articles:
-        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-    return data
-
-
-@api_bp.route(&amp;quot;/get/rss/&amp;lt;name&amp;gt;&amp;quot;)
-async def get_rss_json(request, name):
-    if name == &#39;howie6879&#39;:
-        data = await get_rss()
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。&lt;/p&gt;
-
-&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
-
-&lt;h3 id=&#34;热加载&#34;&gt;热加载&lt;/h3&gt;
-
-&lt;p&gt;我发现有个pr实现了这个需求，如果你有兴趣，可以看&lt;a href=&#34;https://github.com/channelcat/sanic/pull/1047&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;session&#34;&gt;session&lt;/h3&gt;
-
-&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，有兴趣可以看看&lt;/p&gt;
-</description>
+      <description>结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上
+本文最新内容可到github上阅读 6.常用的技巧
+ Async Python 3.5+ web server that&amp;rsquo;s written to go fast
+ 此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
+ api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.</description>
     </item>
     
     <item>
@@ -1201,268 +116,12 @@ async def get_rss_json(request, name):
       <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/34/</guid>
-      <description>
-
-&lt;p&gt;介绍中说的很明白，&lt;code&gt;Sanic&lt;/code&gt; 是一个可以使用 &lt;code&gt;async/await&lt;/code&gt; 语法编写项目的&lt;strong&gt;异步&lt;/strong&gt;非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用&lt;code&gt;aihttp&lt;/code&gt;而非&lt;code&gt;requests&lt;/code&gt;，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。&lt;/p&gt;
-
-&lt;h3 id=&#34;操作mysql&#34;&gt;操作Mysql&lt;/h3&gt;
-
-&lt;p&gt;对于mysql数据库的异步操作，我只在一些脚本中用过，用的是&lt;a href=&#34;https://github.com/aio-libs/aiomysql&#34;&gt;aiomysql&lt;/a&gt;，其中官方文档中讲得很清楚，也支持结合&lt;code&gt;sqlalchemy&lt;/code&gt;编写&lt;code&gt;ORM&lt;/code&gt;，然后aiomysql提供了自己编写的异步引擎。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from aiomysql.sa import create_engine
-# 这个才是关键
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shel&#34;&gt;aio_mysql
-├── demo.py
-├── model.py
-└── requirements.txt
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;建立表：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-mysql&#34;&gt;create database test_mysql;
-
-CREATE TABLE user
-(
-  id        INT AUTO_INCREMENT
-    PRIMARY KEY,
-  user_name VARCHAR(16) NOT NULL,
-  pwd       VARCHAR(32) NOT NULL,
-  real_name VARCHAR(6)  NOT NULL
-);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;一切准备就绪，下面编写代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# script: model.py
-import sqlalchemy as sa
-
-metadata = sa.MetaData()
-
-user = sa.Table(
-    &#39;user&#39;,
-    metadata,
-    sa.Column(&#39;id&#39;, sa.Integer, autoincrement=True, primary_key=True),
-    sa.Column(&#39;user_name&#39;, sa.String(16), nullable=False),
-    sa.Column(&#39;pwd&#39;, sa.String(32), nullable=False),
-    sa.Column(&#39;real_name&#39;, sa.String(6), nullable=False),
-)
-
-# script: demo.py
-import asyncio
-
-from aiomysql.sa import create_engine
-
-from model import user,metadata
-
-
-async def go(loop):
-    &amp;quot;&amp;quot;&amp;quot;
-    aiomysql项目地址：https://github.com/aio-libs/aiomysql
-    :param loop:
-    :return:
-    &amp;quot;&amp;quot;&amp;quot;
-    engine = await create_engine(user=&#39;root&#39;, db=&#39;test_mysql&#39;,
-                                 host=&#39;127.0.0.1&#39;, password=&#39;123456&#39;, loop=loop)
-    async with engine.acquire() as conn:
-        await conn.execute(user.insert().values(user_name=&#39;user_name01&#39;, pwd=&#39;123456&#39;, real_name=&#39;real_name01&#39;))
-        await conn.execute(&#39;commit&#39;)
-
-        async for row in conn.execute(user.select()):
-            print(row.user_name, row.pwd)
-
-    engine.close()
-    await engine.wait_closed()
-
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(go(loop))
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;运行 python demo.py，会看到如下输出：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;user_name01 123456
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;很简单吧，具体示例见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql&#34;&gt;aio_mysql&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;操作mongodb&#34;&gt;操作MongoDB&lt;/h3&gt;
-
-&lt;p&gt;我业余写的一个项目，基本用的就是&lt;code&gt;MongoDB&lt;/code&gt;来储存数据，对于异步操作&lt;code&gt;MongoDB&lt;/code&gt;，目前Python主要用的是&lt;a href=&#34;https://motor.readthedocs.io/en/stable/index.html&#34;&gt;motor&lt;/a&gt;，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_mongo
-├── demo.py
-└── requirements.txt
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;MongoDB&lt;/code&gt;是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开&lt;code&gt;demo.py&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-import os
-
-from functools import wraps
-
-from motor.motor_asyncio import AsyncIOMotorClient
-
-MONGODB = dict(
-    MONGO_HOST=os.getenv(&#39;MONGO_HOST&#39;, &amp;quot;&amp;quot;),
-    MONGO_PORT=os.getenv(&#39;MONGO_PORT&#39;, 27017),
-    MONGO_USERNAME=os.getenv(&#39;MONGO_USERNAME&#39;, &amp;quot;&amp;quot;),
-    MONGO_PASSWORD=os.getenv(&#39;MONGO_PASSWORD&#39;, &amp;quot;&amp;quot;),
-    DATABASE=&#39;test_mongodb&#39;,
-)
-
-class MotorBaseOld:
-    &amp;quot;&amp;quot;&amp;quot;
-    默认实现了一个db只创建一次，缺点是更换集合麻烦
-    &amp;quot;&amp;quot;&amp;quot;
-    _db = None
-    MONGODB = MONGODB
-
-    def client(self, db):
-        # motor
-        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
-            account=&#39;{username}:{password}@&#39;.format(
-                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
-                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
-            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
-            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
-            database=db)
-        return AsyncIOMotorClient(self.motor_uri)
-
-    @property
-    def db(self):
-        if self._db is None:
-            self._db = self.client(self.MONGODB[&#39;DATABASE&#39;])[self.MONGODB[&#39;DATABASE&#39;]]
-
-        return self._db
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;我最开始，使用的是这样种方式来连接&lt;code&gt;MongoDB&lt;/code&gt;，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-def singleton(cls):
-    &amp;quot;&amp;quot;&amp;quot;
-    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/%E9%99%84%E5%BD%95%EF%BC%9A%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8.md
-    :param cls: cls
-    :return: instance
-    &amp;quot;&amp;quot;&amp;quot;
-    _instances = {}
-
-    @wraps(cls)
-    def instance(*args, **kw):
-        if cls not in _instances:
-            _instances[cls] = cls(*args, **kw)
-        return _instances[cls]
-
-    return instance
-
-@singleton
-class MotorBase:
-    &amp;quot;&amp;quot;&amp;quot;
-    更改mongodb连接方式 单例模式下支持多库操作
-    About motor&#39;s doc: https://github.com/mongodb/motor
-    &amp;quot;&amp;quot;&amp;quot;
-    _db = {}
-    _collection = {}
-    MONGODB = MONGODB
-
-    def __init__(self):
-        self.motor_uri = &#39;&#39;
-
-    def client(self, db):
-        # motor
-        self.motor_uri = &#39;mongodb://{account}{host}:{port}/{database}&#39;.format(
-            account=&#39;{username}:{password}@&#39;.format(
-                username=self.MONGODB[&#39;MONGO_USERNAME&#39;],
-                password=self.MONGODB[&#39;MONGO_PASSWORD&#39;]) if self.MONGODB[&#39;MONGO_USERNAME&#39;] else &#39;&#39;,
-            host=self.MONGODB[&#39;MONGO_HOST&#39;] if self.MONGODB[&#39;MONGO_HOST&#39;] else &#39;localhost&#39;,
-            port=self.MONGODB[&#39;MONGO_PORT&#39;] if self.MONGODB[&#39;MONGO_PORT&#39;] else 27017,
-            database=db)
-        return AsyncIOMotorClient(self.motor_uri)
-
-    def get_db(self, db=MONGODB[&#39;DATABASE&#39;]):
-        &amp;quot;&amp;quot;&amp;quot;
-        获取一个db实例
-        :param db: database name
-        :return: the motor db instance
-        &amp;quot;&amp;quot;&amp;quot;
-        if db not in self._db:
-            self._db[db] = self.client(db)[db]
-
-        return self._db[db]
-
-    def get_collection(self, db_name, collection):
-        &amp;quot;&amp;quot;&amp;quot;
-        获取一个集合实例
-        :param db_name: database name
-        :param collection: collection name
-        :return: the motor collection instance
-        &amp;quot;&amp;quot;&amp;quot;
-        collection_key = db_name + collection
-        if collection_key not in self._collection:
-            self._collection[collection_key] = self.get_db(db_name)[collection]
-
-        return self._collection[collection_key]
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo&#34;&gt;aio_mongo&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;操作redis&#34;&gt;操作Redis&lt;/h3&gt;
-
-&lt;p&gt;对于Redis的异步操作，我选用的是&lt;code&gt;asyncio_redis&lt;/code&gt;，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;aio_redis
-├── demo.py
-└── requirements.txt
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;建立一个redis连接池：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-import os
-import asyncio_redis
-
-REDIS_DICT = dict(
-    IS_CACHE=True,
-    REDIS_ENDPOINT=os.getenv(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;),
-    REDIS_PORT=os.getenv(&#39;REDIS_PORT&#39;, 6379),
-    REDIS_PASSWORD=os.getenv(&#39;REDIS_PASSWORD&#39;, None),
-    DB=0,
-    POOLSIZE=10,
-)
-
-
-class RedisSession:
-    &amp;quot;&amp;quot;&amp;quot;
-    建立redis连接池
-    &amp;quot;&amp;quot;&amp;quot;
-    _pool = None
-
-    async def get_redis_pool(self):
-        if not self._pool:
-            self._pool = await asyncio_redis.Pool.create(
-                host=str(REDIS_DICT.get(&#39;REDIS_ENDPOINT&#39;, &amp;quot;localhost&amp;quot;)), port=int(REDIS_DICT.get(&#39;REDIS_PORT&#39;, 6379)),
-                poolsize=int(REDIS_DICT.get(&#39;POOLSIZE&#39;, 10)), password=REDIS_DICT.get(&#39;REDIS_PASSWORD&#39;, None),
-                db=REDIS_DICT.get(&#39;DB&#39;, None)
-            )
-
-        return self._pool
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py&#34;&gt;aio_redis&lt;/a&gt;，使用起来很简单，不做多叙述。&lt;/p&gt;
-
-&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
-
-&lt;p&gt;如果你使用其它类型的数据库，其实使用方式也是类似。
-本章代码地址，见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05&#34;&gt;demo05&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键  下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt  建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL );  一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &#39;user&#39;, metadata, sa.Column(&#39;id&#39;, sa.Integer, autoincrement=True, primary_key=True), sa.</description>
     </item>
     
     <item>
@@ -1471,318 +130,19 @@ class RedisSession:
       <pubDate>Mon, 08 Jan 2018 14:57:30 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/33/</guid>
-      <description>
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 是由 &lt;a href=&#34;http://michaelnielsen.org/&#34;&gt;Michael Nielsen&lt;/a&gt; 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。&lt;/p&gt;
-
-&lt;p&gt;神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别&lt;/li&gt;
-&lt;li&gt;神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;两个重要的人工神经元：感知器和S型神经元&lt;/li&gt;
-&lt;li&gt;神经⽹络的架构&lt;/li&gt;
-&lt;li&gt;⼀个简单的分类⼿写数字的⽹络&lt;/li&gt;
-&lt;li&gt;标准的神经网络学习算法：随机梯度下降算法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;感知器&#34;&gt;感知器&lt;/h3&gt;
-
-&lt;p&gt;1943年，心理学家McCulloch和数学家Pitts发表了《&lt;a href=&#34;http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf&#34;&gt;A logical calculus of the ideas immanent in nervous activity&lt;/a&gt;》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/02.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。&lt;/p&gt;
-
-&lt;p&gt;对于$x_{1},x_{2},&amp;hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&amp;hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/03.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$x=(x_{1},x_{2},&amp;hellip;,x_{j})$&lt;/li&gt;
-&lt;li&gt;$w=(w_{1},w_{2},&amp;hellip;,w_{j})$&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;那么感知器的规则可以重写为:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/04.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这就是感知器的数学模型，是不是就像一个逻辑回归模型？它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用&lt;code&gt;python&lt;/code&gt;写的一个感知器自动学习实现与非门，代码在&lt;a href=&#34;https://github.com/howie6879/nndl/blob/master/src/perceptron.py&#34;&gt;这里&lt;/a&gt;。&lt;/p&gt;
-
-&lt;p&gt;说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;$x$&lt;/th&gt;
-&lt;th&gt;$y$&lt;/th&gt;
-&lt;th&gt;$output$&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。&lt;/p&gt;
-
-&lt;p&gt;可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。&lt;/p&gt;
-
-&lt;p&gt;遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。&lt;/p&gt;
-
-&lt;p&gt;感知器，终于可以多层了。&lt;/p&gt;
-
-&lt;h3 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h3&gt;
-
-&lt;p&gt;前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/05.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果&lt;code&gt;9&lt;/code&gt;，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。&lt;/p&gt;
-
-&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
-
-&lt;p&gt;\begin{equation}
-  \sigma(z) \equiv \frac{1}{1+e^{-z}}
-  \label{eq:3}
-\end{equation}&lt;/p&gt;
-
-&lt;p&gt;这里的$z=\sum _{j} w{_j}x{_j}+b$，那么⼀个具有输⼊$x_{1},x_{2},&amp;hellip;,x_{j}$，权重为$w_{1},w_{2},&amp;hellip;,w_{j}$，和偏置b的S型神经元的输出是：&lt;/p&gt;
-
-&lt;p&gt;\begin{equation}
-  \frac{1}{1+\exp(-\sum_j w_j x_j-b)}
-  \label{eq:4}
-\end{equation}&lt;/p&gt;
-
-&lt;p&gt;上面说过，感知器的激活函数只会输出两个值，分别是&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？&lt;/p&gt;
-
-&lt;p&gt;S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$\sigma(z) \leq 0.5$ 输出0&lt;/li&gt;
-&lt;li&gt;$\sigma(z)&amp;gt;0.5$  输出1&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;神经-络的架构&#34;&gt;神经⽹络的架构&lt;/h3&gt;
-
-&lt;p&gt;看下面一个四层神经网络，这种类型的多层⽹络有时被称为&lt;strong&gt;多层感知器&lt;/strong&gt;或者&lt;strong&gt;MLP&lt;/strong&gt;，如下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/06.jpg&#34; alt=&#34;from nndl&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;需要记住以下几个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;⽹络中最左边的称为&lt;strong&gt;输⼊层&lt;/strong&gt;，其中的神经元称为&lt;strong&gt;输⼊神经元&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;中间得称之为&lt;strong&gt;隐藏层&lt;/strong&gt;，图中有两个隐藏层&lt;/li&gt;
-&lt;li&gt;最右边称之为&lt;strong&gt;输出层&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：&lt;strong&gt;前馈神经网络&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;有回路，其中反馈环路是可⾏的：&lt;strong&gt;递归神经网络&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;个简单的分类-写数字的-络&#34;&gt;⼀个简单的分类⼿写数字的⽹络&lt;/h3&gt;
-
-&lt;p&gt;对于这六个数字&lt;code&gt;504192&lt;/code&gt;，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;504192是连续在一起的图像，首先可以将其分割成6个小图像，比如&lt;code&gt;5&lt;/code&gt; &lt;code&gt;0&lt;/code&gt; &amp;hellip;等&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;再对分割开的小图像进行分类，比如识别5
-
-我们将使⽤⼀个三层神经⽹络来识别单个数字：
-&lt;img src=&#34;https://www.howie6879.cn/images/post/33/07.jpg&#34; alt=&#34;from nndl&#34; /&gt;
-由于训练数据由$28*28$的⼿写数字的图像组成，所以:&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;一个分类⼿写数字的⽹络，大概就可以这样实现。&lt;/p&gt;
-
-&lt;h3 id=&#34;随机梯度下降算法&#34;&gt;随机梯度下降算法&lt;/h3&gt;
-
-&lt;p&gt;分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤&lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST&lt;/a&gt;数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用&lt;code&gt;jupyter notebook&lt;/code&gt;开始吧，如果没有，请自行检索教程安装，代码目录如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;nndl
-├── 01
-│   ├── mnist_data.ipynb
-└── data
-    └── MNIST_data
-        ├── t10k-images-idx3-ubyte.gz
-        ├── t10k-labels-idx1-ubyte.gz
-        ├── train-images-idx3-ubyte.gz
-        └── train-labels-idx1-ubyte.gz
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后使用&lt;code&gt;TensorFlow&lt;/code&gt;来读取数据，看看下载的数据集到底是什么样子，可以在&lt;code&gt;mnist_data.ipynb&lt;/code&gt;中添加如下代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from matplotlib import pyplot as plt
-from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
-
-mnist = read_data_sets(&amp;quot;../data/MNIST_data/&amp;quot;, one_hot=True)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;查看一些基本信息：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;print(&amp;quot;Training data size: %s&amp;quot; % mnist.train.num_examples)
-print(&amp;quot;Validating data size: %s&amp;quot; % mnist.validation.num_examples)
-print(&amp;quot;Testing data size: %s&amp;quot; % mnist.test.num_examples)
-
-# 每张图片是长度为784的一维数组
-print(len(mnist.train.images[0]))
-
-def display_digit(image):
-    image = image.reshape([28,28])
-    plt.imshow(image, cmap=plt.get_cmap(&#39;gray_r&#39;))
-    plt.show()
-
-print(&amp;quot;样本真实数字为：%s&amp;quot; % list(mnist.train.labels[1]).index(1))
-# 显示图像
-display_digit(mnist.train.images[1])
-
-# Output
-# Training data size: 55000
-# Validating data size: 5000
-# Testing data size: 10000
-# 784
-# 样本真实数字为：3
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到显示如下图像：
-&lt;img src=&#34;https://www.howie6879.cn/images/post/33/08.jpg&#34; alt=&#34;from mnist&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。&lt;/p&gt;
-
-&lt;p&gt;感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个&lt;strong&gt;代价函数&lt;/strong&gt;（有时被称为损失或⽬标函数）：&lt;/p&gt;
-
-&lt;p&gt;\begin{equation}
-  C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
-  \label{eq:6}
-\end{equation}&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;w 表⽰所有的⽹络中权重的集合&lt;/li&gt;
-&lt;li&gt;b 是所有的偏置&lt;/li&gt;
-&lt;li&gt;n 是训练输⼊数据的个数&lt;/li&gt;
-&lt;li&gt;a 是表⽰当输⼊为x时输出的向量，可以理解为output&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;训练模型的过程就是优化代价函数的过程，&lt;em&gt;Cost Function(代价函数)&lt;/em&gt; 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，其实这个就是我们平常用来评价回归算法的均方误差，也就是&lt;strong&gt;MSE&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;现在我们的目标很清晰，为了找出合适的权重和偏置值，我们需要让代价函数的值接近于0，在这个条件下我们就可以找出合适的权重和偏置值，我们将采⽤称为&lt;strong&gt;梯度下降&lt;/strong&gt;的算法来达到这个⽬的。&lt;/p&gt;
-
-&lt;h3 id=&#34;实现数字分类模型&#34;&gt;实现数字分类模型&lt;/h3&gt;
-
-&lt;p&gt;终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。&lt;/p&gt;
-
-&lt;p&gt;书籍作者很贴心地实现了模型代码，仓库见&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;，接下来我们一起来看看具体的实现代码吧。&lt;/p&gt;
-
-&lt;p&gt;首先是实现一个&lt;code&gt;Network&lt;/code&gt;类，&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-
-import random
-
-import numpy as np
-
-
-class Network(object):
-
-    def __init__(self, sizes):
-        &amp;quot;&amp;quot;&amp;quot;
-        初始化
-        :param sizes:
-            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
-        &amp;quot;&amp;quot;&amp;quot;
-        self.num_layers = len(sizes)
-        self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
-                        for x, y in zip(sizes[:-1], sizes[1:])]
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py&#34;&gt;network.py&lt;/a&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def sigmoid(z):
-    &amp;quot;&amp;quot;&amp;quot;The sigmoid function.&amp;quot;&amp;quot;&amp;quot;
-    return 1.0/(1.0+np.exp(-z))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;代码已经准备就绪，下面可以开始进行模型训练：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import mnist_loader, network
-
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
-
-net = network.Network([784, 30, 10])
-net.SGD(list(training_data), 30, 10, 3.0, test_data=list(test_data))
-
-# Output
-Epoch 0: 9023 / 10000
-Epoch 1: 9222 / 10000
-Epoch 2: 9312 / 10000
-Epoch 3: 9312 / 10000
-Epoch 4: 9383 / 10000
-Epoch 5: 9421 / 10000
-Epoch 6: 9432 / 10000
-Epoch 7: 9421 / 10000
-Epoch 8: 9454 / 10000
-Epoch 9: 9447 / 10000
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;看结果，十次迭代后，轻轻松松突破94%&lt;/p&gt;
-
-&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/zhanggyb/nndl&#34;&gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.cnblogs.com/subconscious/p/5058741.html&#34;&gt;神经网络浅讲：从神经元到深度学习&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
+神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？
+ 人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准  本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
+ 两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法  感知器 1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
+ 感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
+ 感知器的工作方式如下所示：
+$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。
+对于$x_{1},x_{2},&amp;hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&amp;hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：
+假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：
+ $x=(x_{1},x_{2},&amp;hellip;,x_{j})$ $w=(w_{1},w_{2},&amp;hellip;,w_{j})$  那么感知器的规则可以重写为:
+这就是感知器的数学模型，是不是就像一个逻辑回归模型？它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用python写的一个感知器自动学习实现与非门，代码在这里。
+说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
+   $x$ $y$ $output$     0 0 0   0 1 1   1 0 1   1 1 0    可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。</description>
     </item>
     
     <item>
@@ -1791,35 +151,8 @@ Epoch 9: 9447 / 10000
       <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/about/</guid>
-      <description>
-
-&lt;h3 id=&#34;介绍&#34;&gt;介绍&lt;/h3&gt;
-
-&lt;p&gt;努力的程序员：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Github : &lt;a href=&#34;https://github.com/howie6879&#34;&gt;howie6879&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Email : howie6879@gmail.com&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;开源项目&#34;&gt;开源项目&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;&lt;strong&gt;owllook&lt;/strong&gt;&lt;/a&gt;: &lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;在线网络小说阅读网站&amp;amp;小说搜索引擎&amp;amp;小说推荐系统搜索、追书、收藏、追更、小说API&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/aspider&#34;&gt;&lt;strong&gt;aspider&lt;/strong&gt;&lt;/a&gt;: &lt;a href=&#34;https://github.com/howie6879/aspider&#34;&gt;An async web scraping micro-framework based on asyncio&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/mlhub123&#34;&gt;&lt;strong&gt;mlhub123&lt;/strong&gt;&lt;/a&gt;: &lt;a href=&#34;https://github.com/howie6879/mlhub123&#34;&gt;机器学习&amp;amp;深度学习资源交流小组&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer&#34;&gt;&lt;strong&gt;Sanic-For-Pythoneer&lt;/strong&gt;&lt;/a&gt;: &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer&#34;&gt;一份sanic使用教程，开源小书&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/hproxy&#34;&gt;&lt;strong&gt;hproxy&lt;/strong&gt;&lt;/a&gt;:  &lt;a href=&#34;https://github.com/howie6879/hproxy&#34;&gt;Asynchronous IP proxy pool, aims to make getting proxy as convenient as possible&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;教程&#34;&gt;教程&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Sanic&lt;/strong&gt;：&lt;a href=&#34;http://blog.howie6879.cn/tags/sanic&#34;&gt;Sanic-For-Pythoneer&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;神经网络与深度学习&lt;/strong&gt;：&lt;a href=&#34;http://blog.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0&#34;&gt;神经网络与深度学习笔记&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;统计学习方法&lt;/strong&gt;：&lt;a href=&#34;https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95&#34;&gt;统计学习方法笔记&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description> 介绍 努力的程序员：
+ Github : howie6879 Email : howie6879@gmail.com  开源项目  owllook: 在线网络小说阅读网站&amp;amp;小说搜索引擎&amp;amp;小说推荐系统搜索、追书、收藏、追更、小说API aspider: An async web scraping micro-framework based on asyncio mlhub123: 机器学习&amp;amp;深度学习资源交流小组 Sanic-For-Pythoneer: 一份sanic使用教程，开源小书 hproxy: Asynchronous IP proxy pool, aims to make getting proxy as convenient as possible  教程  Sanic：Sanic-For-Pythoneer 神经网络与深度学习：神经网络与深度学习笔记 统计学习方法：统计学习方法笔记  </description>
     </item>
     
     <item>
@@ -1828,222 +161,13 @@ Epoch 9: 9447 / 10000
       <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/32/</guid>
-      <description>
-
-&lt;p&gt;前面一节介绍&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。&lt;/p&gt;
-
-&lt;p&gt;相信你应该已经了解清楚，&lt;code&gt;sanic&lt;/code&gt;是怎么接收请求并返回被请求的资源的，简单来说概括如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;接收请求&lt;/li&gt;
-&lt;li&gt;找到对应的路由并执行路由对应的视图函数&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://jinja.pocoo.org/docs/2.10/&#34;&gt;Jinja2&lt;/a&gt;模板渲染返回视图&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--- more ---&gt;
-
-&lt;h3 id=&#34;路由和视图函数&#34;&gt;路由和视图函数&lt;/h3&gt;
-
-&lt;p&gt;在此我假设你理解 &lt;code&gt;python&lt;/code&gt; 中的装饰器，如果你并不清楚，可以看我另写的关于&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;的介绍，回归正题，还记得第一节中的代码实例么？&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import text
-
-app = Sanic()
-
-# 此处将路由 / 与视图函数 test 关联起来
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在前言介绍里，出现这几个名词 &lt;strong&gt;路由 视图函数 视图&lt;/strong&gt; ,在上面那段代码中，&lt;code&gt;test&lt;/code&gt; 就是视图函数。&lt;/p&gt;
-
-&lt;p&gt;这是一段执行逻辑，比如客户端请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt; 此时返回的内容就是由&lt;code&gt;test&lt;/code&gt; 这个视图函数提供的。&lt;/p&gt;
-
-&lt;p&gt;在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/docs/part2/1.Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2.md&#34;&gt;sanic0.1.2源码&lt;/a&gt;)来分析下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这个路由装饰器的作用很简单，就是将 &lt;code&gt;/&lt;/code&gt; 这个 &lt;code&gt;uri&lt;/code&gt; 与视图函数&lt;code&gt;test&lt;/code&gt;关联起来，或许你可以将路由想象成一个 &lt;code&gt;dict&lt;/code&gt;，当客户端若请求 &lt;code&gt;0.0.0.0:8000/&lt;/code&gt;，路由就会&lt;code&gt;get&lt;/code&gt; &lt;code&gt;/&lt;/code&gt; 对应的视图函数&lt;code&gt;test&lt;/code&gt;，然后执行。&lt;/p&gt;
-
-&lt;p&gt;其实真实情况和我们想象的差不多，请看 &lt;code&gt;sanic.py&lt;/code&gt; 中的第三十行:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-# Decorator
-def route(self, uri, methods=None):
-
-    def response(handler):
-        # 路由类的add 方法将视图函数handler 与uri 关联起来
-        # 然后整个路由列表会新增一个 namedtuple 如下：
-        # Route(handler=handler, methods=methods_dict, pattern=pattern, parameters=parameters)
-        self.router.add(uri=uri, methods=methods, handler=handler)
-        return handler
-
-    return response
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时，路由就和 &lt;code&gt;uri&lt;/code&gt; 对应的视图函数关联起来了，这就是承上，路由和视图函数就是这样对应的关系。
-103行有个&lt;code&gt;handle_request&lt;/code&gt;函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-async def handle_request(self, request, response_callback):
-    &amp;quot;&amp;quot;&amp;quot;
-    Takes a request from the HTTP Server and returns a response object to be sent back
-    The HTTP Server only expects a response object, so exception handling must be done here
-    :param request: HTTP Request object
-    :param response_callback: Response function to be called with the response as the only argument
-    :return: Nothing
-    &amp;quot;&amp;quot;&amp;quot;
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;当服务器监听到某个请求的时候，&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt; 来找到视图函数并且执行，随即生成视图返回，这便是所谓的启下。&lt;/p&gt;
-
-&lt;p&gt;其实浏览器显示的内容就是我们所谓的视图，视图是视图函数生成的，其中Jinja2起到模板渲染的作用。&lt;/p&gt;
-
-&lt;h3 id=&#34;蓝图&#34;&gt;蓝图&lt;/h3&gt;
-
-&lt;p&gt;到这里，你一定已经很明白sanic框架是怎么处理一个请求并将视图返回给客户端，然后也掌握了如何编写自己定义的模板(html)以及样式(css)，通过前面一节&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md&#34;&gt;项目结构&lt;/a&gt;的介绍，我们可以总结出如下经验：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;对于css、js等静态文件，常规操作是将其放在自己建立的statics下面&lt;/li&gt;
-&lt;li&gt;对于html模板，常规操作是将其放在自己建立的templates下面&lt;/li&gt;
-&lt;li&gt;视图函数(即服务的逻辑实现)放在自己建立的views下面&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;是时候考虑以下这种情况了，你需要编写一个比较复杂的http服务，你需要定义几百个路由，在编写过程中你会发现有许多不顺心的地方：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;各种不同类型的路由互相交杂在一起，命名困难，管理困难&lt;/li&gt;
-&lt;li&gt;不同页面的css文件同样堆积在一起，html也是如此&lt;/li&gt;
-&lt;li&gt;&amp;hellip;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;实在是令人烦恼，可能你想要一个模块化的编写方式，一个文件编写后台，url统一是&lt;code&gt;/admin/***&lt;/code&gt;，一个文件编写发帖，&lt;code&gt;/post/***&lt;/code&gt; 等等，各个文件下面url自动会带上自定义的前缀，不用考虑命名问题，不用重复写url前缀，多么美好&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Blueprint&lt;/strong&gt;，就是sanic为你提供的解决方案，依然是上节rss的例子，让我们利用Blueprint来简单实现一下我们的需求，比如我们要构建的网站分为两个部分：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;/json/index&lt;/code&gt; 返回json格式的数据&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/html/index&lt;/code&gt; 返回html视图&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;我们在上节代码的基础上添加Blueprint，先看看定好的项目结构：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
-.
-├── __init__.py
-├── config
-│   ├── __init__.py
-│   ├── config.py
-│   ├── dev_config.py
-│   └── pro_config.py
-├── run.py
-├── statics
-│   ├── rss_html # rss_html蓝图的 css js 文件存放目录
-│   │   ├── css
-│   │   │   └── main.css
-│   │   └── js
-│   └── rss_json # rss_json蓝图的 css js 文件存放目录
-├── templates
-│   ├── rss_html # rss_html蓝图的 html 文件存放目录
-│   │   ├── index.html
-│   │   └── rss.html
-│   └── rss_json # rss_json蓝图的 html 文件存放目录
-│       └── index.html
-└── views
-    ├── __init__.py
-    ├── rss_html.py # rss_html 蓝图
-    └── rss_json.py # rss_json 蓝图
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;蓝图的目的就是让我们构建的项目灵活，可扩展，容易阅读，方便管理，一个个小的蓝图就构建了一个大型的项目，run.py里面可以随意组合注册蓝图，可抽插式的构建我们的服务，&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/sample01&#34;&gt;sample01&lt;/a&gt;里是本次示例的代码，建议先读一遍，十分简单，主要就是讲路由根据你自己定义的特性分割成一个个蓝图，比如这里的&lt;code&gt;rss_html&lt;/code&gt;和&lt;code&gt;rss_json&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-#!/usr/bin/env python
-# 部分代码
-# rss_html.py
-import sys
-
-from sanic import Blueprint
-from sanic.response import html
-
-from src.config import CONFIG
-
-
-html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
-html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
-
-@html_bp.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    return await template(&#39;index.html&#39;)
-
-#!/usr/bin/env python
-# 部分代码
-# rss_json.py
-import sys
-
-from sanic import Blueprint
-from sanic.response import html
-
-from src.config import CONFIG
-
-
-json_bp = Blueprint(&#39;rss_json&#39;, url_prefix=&#39;json&#39;)
-json_bp.static(&#39;/statics/rss_json&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_json&#39;)
-
-@json_bp.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    return await template(&#39;index.html&#39;)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;不知你是否感受到这样编写服务的好处，让我们列举下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;每个蓝图都有其自己定义的前缀，如 /html/ /json/&lt;/li&gt;
-&lt;li&gt;不同蓝图下面route可相同&lt;/li&gt;
-&lt;li&gt;html以及css等 根据蓝图名称目录引用&lt;/li&gt;
-&lt;li&gt;模块化&lt;/li&gt;
-&lt;li&gt;&amp;hellip;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;不多说，看运行效果：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;
-cd /Sanic-For-Pythoneer/examples/demo04/sample01/src
-python run.py
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;现在，请访问：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/&#34;&gt;http://0.0.0.0:8000/html/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/&#34;&gt;http://0.0.0.0:8000/json/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/html/index&#34;&gt;http://0.0.0.0:8000/html/index&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://0.0.0.0:8000/json/index&#34;&gt;http://0.0.0.0:8000/json/index&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;感觉这个设计方便了全世界^_^&lt;/p&gt;
-
-&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
-
-&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/&#34;&gt;demo04&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>前面一节介绍项目结构的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。
+相信你应该已经了解清楚，sanic是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+ 接收请求 找到对应的路由并执行路由对应的视图函数 Jinja2模板渲染返回视图  路由和视图函数 在此我假设你理解 python 中的装饰器，如果你并不清楚，可以看我另写的关于装饰器的介绍，回归正题，还记得第一节中的代码实例么？
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() # 此处将路由 / 与视图函数 test 关联起来 @app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;) if __name__ == &amp;quot;__main__&amp;quot;: app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)  在前言介绍里，出现这几个名词 路由 视图函数 视图 ,在上面那段代码中，test 就是视图函数。
+这是一段执行逻辑，比如客户端请求 0.0.0.0:8000/ 此时返回的内容就是由test 这个视图函数提供的。
+在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(sanic0.1.2源码)来分析下：
+@app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;)  这个路由装饰器的作用很简单，就是将 / 这个 uri 与视图函数test关联起来，或许你可以将路由想象成一个 dict，当客户端若请求 0.</description>
     </item>
     
     <item>
@@ -2052,270 +176,14 @@ python run.py
       <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/31/</guid>
-      <description>
-
-&lt;p&gt;&lt;code&gt;Sanic&lt;/code&gt;是一个可以使用&lt;code&gt;async/await&lt;/code&gt;语法编写项目的异步非阻塞框架，它写法类似于&lt;code&gt;Flask&lt;/code&gt;，但使用了异步特性，而且还使用&lt;code&gt;uvloop&lt;/code&gt;作为事件循环，其底层使用的是&lt;code&gt;libuv&lt;/code&gt;，从而使 &lt;code&gt;Sanic&lt;/code&gt;的速度优势更加明显。&lt;/p&gt;
-
-&lt;p&gt;如果你：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;想深入了解Sanic，迫切想知道它的运行机制&lt;/li&gt;
-&lt;li&gt;直接阅读源码，做一些定制&lt;/li&gt;
-&lt;li&gt;学习&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;理解&lt;a href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;&gt;装饰器&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;理解协程&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--- more ---&gt;
-
-&lt;p&gt;Sanic-0.1.2 的核心文件如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;.
-├── __init__.py
-├── blueprints.py
-├── config.py
-├── exceptions.py
-├── log.py
-├── request.py
-├── response.py
-├── router.py
-├── sanic.py
-├── server.py
-└── utils.py
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。&lt;/p&gt;
-
-&lt;h3 id=&#34;simple-server-py&#34;&gt;simple_server.py&lt;/h3&gt;
-
-&lt;p&gt;让我们从&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/examples/simple_server.py&#34;&gt;simple_server&lt;/a&gt;开始吧，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-from sanic_0_1_2.src import Sanic
-from sanic_0_1_2.src.response import json
-
-app = Sanic(__name__)
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return json({&amp;quot;test&amp;quot;: True})
-
-
-app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;或许你直接把&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;项目直接clone到本地比较方便调试+理解：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/howie6879/sanic_annotation
-cd sanic_annotation/sanic_0_1_2/examples/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;那么，现在一切准备就绪，开始阅读吧。&lt;/p&gt;
-
-&lt;p&gt;前两行代码导入包：
-- &lt;code&gt;Sanic&lt;/code&gt;：构建一个 Sanic 服务必须要实例化的类
-- &lt;code&gt;json&lt;/code&gt;：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：
-    - &lt;code&gt;text&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/plain; charset=utf-8&amp;quot;&lt;/code&gt;
-    - &lt;code&gt;html&lt;/code&gt;：&lt;code&gt;content_type=&amp;quot;text/html; charset=utf-8&amp;quot;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;实例化一个&lt;code&gt;Sanic&lt;/code&gt;对象，&lt;code&gt;app = Sanic(__name__)&lt;/code&gt;，可见&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;，我已经在这个文件里面做了一些注释，这里也详细说下&lt;code&gt;Sanic&lt;/code&gt;类：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;route()：装饰器，构建uri和视图函数的映射关系，调用Router().add()方法&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;exception()：装饰器，和上面差不多，不过针对的是错误处理类Handler&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;middleware()：装饰器，针对中间件&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;register_blueprint()：注册视图的函数，接受第一个参数是视图类&lt;code&gt;blueprint&lt;/code&gt;，再调用该类下的&lt;code&gt;register&lt;/code&gt;方法实现将此蓝图下的&lt;code&gt;route、exception、middleware&lt;/code&gt;统一注册到&lt;code&gt;app.route、app.exception、app.exception&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;handle_request()：这是一个很重要的异步函数，当服务启动后，如果客户端发来一个有效的请求，会自动执行 &lt;code&gt;on_message_complete&lt;/code&gt;函数，该函数的目的是异步调用 &lt;code&gt;handle_request&lt;/code&gt;函数，&lt;code&gt;handle_request&lt;/code&gt;函数会回调&lt;code&gt;write_response&lt;/code&gt;函数，&lt;code&gt;write_response&lt;/code&gt;接受的参数是此uri请求对应的视图函数，比如上面demo中，如果客户端请求&amp;rsquo;/&amp;lsquo;，那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;，然后进一步处理，再返回给客户端&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;run()：Sanic服务的启动函数，必须执行，实际上会继续调用&lt;code&gt;server.serve&lt;/code&gt;函数，详情下面会详细讲&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;stop()：终止服务&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;其实上面这部分介绍已经讲了Sanic基本的运行逻辑，如果你理解了，那下面的讲解对你来说是轻轻松松，如果不怎么明白，也不要紧，这是只是一个大体的介绍，跟着步骤来，也很容易理解，继续看代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 此处将路由 / 与视图函数 test 关联起来
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return json({&amp;quot;test&amp;quot;: True})
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;app.route&lt;/code&gt;，上面介绍过，随着Sanic服务的启动而启动，可定义参数&lt;code&gt;uri, methods&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;目的是为&lt;code&gt;url&lt;/code&gt;的&lt;code&gt;path&lt;/code&gt;和视图函数对应起来，构建一对映射关系，本例中&lt;code&gt;Sanic.router&lt;/code&gt;类下的&lt;code&gt;Router.routes = []&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;会增加一个名为&lt;code&gt;Route&lt;/code&gt;的&lt;code&gt;namedtuple&lt;/code&gt;，如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;[Route(handler=&amp;lt;function test at 0x10a0f6488&amp;gt;, methods=None, pattern=re.compile(&#39;^/$&#39;), parameters=[])]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;看到没，&lt;code&gt;uri &#39;/&#39;&lt;/code&gt; 和视图函数&lt;code&gt;test&lt;/code&gt;对应起来了，如果客户端请求&lt;code&gt;&#39;/&#39;&lt;/code&gt;，当服务器监听到这个请求的时候,&lt;code&gt;handle_request&lt;/code&gt;可以通过参数中的&lt;code&gt;request.url&lt;/code&gt;来找到视图函数&lt;code&gt;test&lt;/code&gt;并且执行，随即生成视图返回&lt;/p&gt;
-
-&lt;p&gt;那么这里&lt;code&gt;write_response&lt;/code&gt;就会接受视图函数test返回的&lt;code&gt;json({&amp;quot;test&amp;quot;: True})&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;说下&lt;code&gt;Router&lt;/code&gt;类，这个类的目的就是添加和获取路由对应的视图函数，把它想象成&lt;code&gt;dict&lt;/code&gt;或许更容易理解：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;add(self, uri, methods, handler)：添加一个映射关系到self.routes&lt;/li&gt;
-&lt;li&gt;get(self, request)：获取request.url对应的视图函数&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;最后一行，&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)&lt;/code&gt;，Sanic 下的&lt;code&gt;run&lt;/code&gt;函数，启动一个&lt;code&gt;http server&lt;/code&gt;，主要是启动&lt;code&gt;run&lt;/code&gt;里面的&lt;code&gt;serve&lt;/code&gt;函数，参数如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-try:
-    serve(
-        host=host,
-        port=port,
-        debug=debug,
-        # 服务开始后启动的函数
-        after_start=after_start,
-        # 在服务关闭前启动的函数
-        before_stop=before_stop,
-        # Sanic(__name__).handle_request()
-        request_handler=self.handle_request,
-        # 默认读取Config
-        request_timeout=self.config.REQUEST_TIMEOUT,
-        request_max_size=self.config.REQUEST_MAX_SIZE,
-    )
-except:
-    pass
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;让我们将目光投向&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;，这也是Sanic框架的核心代码：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;serve()：里面会创建一个TCP服务的协程，然后通过&lt;code&gt;loop.run_forever()&lt;/code&gt;运行这个事件循环，以便接收客户端请求以及处理相关事件，每当一个新的客户端建立连接服务就会创建一个新的&lt;code&gt;Protocol&lt;/code&gt;实例，接受请求与返回响应离不开其中的&lt;code&gt;HttpProtocol&lt;/code&gt;，里面的函数支持接受数据、处理数据、执行视图函数、构建响应数据并返回给客户端&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;HttpProtocol：&lt;code&gt;asyncio.Protocol&lt;/code&gt;的子类，用来处理与客户端的通信，我在&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;里写了对应的注释&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;至此，Sanic 服务启动了&lt;/p&gt;
-
-&lt;p&gt;不要小看这一个小小的demo，执行一下，竟然涉及到下面这么多个文件，让我们总结一下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py&#34;&gt;sanic.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py&#34;&gt;server.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/router.py&#34;&gt;router.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/request.py&#34;&gt;request.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/response.py&#34;&gt;response.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/exceptions.py&#34;&gt;exceptions.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/config.py&#34;&gt;config.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/log.py&#34;&gt;log.py&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;除去&lt;code&gt;__init__.py&lt;/code&gt;，&lt;code&gt;Sanic&lt;/code&gt;项目一共就10个文件，这个小demo不显山不露水地竟然用到了8个，虽然其中几个没有怎么用到，但也足够说明，你如果理解了这个demo，&lt;code&gt;Sanic&lt;/code&gt;的运行逻辑以及框架代码你已经了解地很深入了&lt;/p&gt;
-
-&lt;h3 id=&#34;blueprints-py&#34;&gt;blueprints.py&lt;/h3&gt;
-
-&lt;p&gt;这个例子看完，我们就能轻易地明白什么是&lt;code&gt;blueprints&lt;/code&gt;，以及&lt;code&gt;blueprints&lt;/code&gt;的运行方式，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-from sanic_0_1_2.src import Sanic
-# 引入Blueprint
-from sanic_0_1_2.src import Blueprint
-from sanic_0_1_2.src.response import json, text
-
-app = Sanic(__name__)
-blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
-blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
-
-
-@blueprint.route(&#39;/foo&#39;)
-async def foo(request):
-    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
-
-
-@blueprint2.route(&#39;/foo&#39;)
-async def foo2(request):
-    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
-
-
-app.register_blueprint(blueprint)
-app.register_blueprint(blueprint2)
-
-app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;让我们从这两行开始：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-blueprint = Blueprint(&#39;name&#39;, url_prefix=&#39;/my_blueprint&#39;)
-blueprint2 = Blueprint(&#39;name2&#39;, url_prefix=&#39;/my_blueprint2&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;显然，&lt;code&gt;blueprint&lt;/code&gt;以及&lt;code&gt;blueprint2&lt;/code&gt;是&lt;code&gt;Blueprint&lt;/code&gt;根据不同的参数生成的不同的实例对象，接下来要干嘛？没错，分析&lt;a href=&#34;https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/blueprints.py&#34;&gt;blueprints.py&lt;/a&gt;:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;BlueprintSetup：蓝图注册类
-
-&lt;ul&gt;
-&lt;li&gt;add_route：添加路由到app&lt;/li&gt;
-&lt;li&gt;add_exception：添加对应抛出的错误到app&lt;/li&gt;
-&lt;li&gt;add_middleware：添加中间件到app&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;Blueprint：蓝图类，接收两个参数：name(蓝图名称) url_prefix 该蓝图的url前缀
-
-&lt;ul&gt;
-&lt;li&gt;route：路由装饰器，将会生成一个匿名函数到self.deferred_functions列表里稍后一起处理注册到app里&lt;/li&gt;
-&lt;li&gt;middleware：同上&lt;/li&gt;
-&lt;li&gt;exception：同上&lt;/li&gt;
-&lt;li&gt;record：注册一个回调函数到self.deferred_functions列表里面，&lt;/li&gt;
-&lt;li&gt;make_setup_state：实例化BlueprintSetup&lt;/li&gt;
-&lt;li&gt;register：注册视图，实际就是注册route、middleware、exception到app，此时会利用make_setup&lt;em&gt;state返回的BlueprintSetup示例进行对于的add&lt;/em&gt;***一系列操作，相当于Sanic().route()效果&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;请看下&lt;code&gt;route&lt;/code&gt;和&lt;code&gt;register&lt;/code&gt;函数，然后再看下面的代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 生成一个匿名函数到self.deferred_functions列表里 包含三个参数 handler(foo), uri, methods
-@blueprint.route(&#39;/foo&#39;)
-async def foo(request):
-    return json({&#39;msg&#39;: &#39;hi from blueprint&#39;})
-
-
-@blueprint2.route(&#39;/foo&#39;)
-async def foo2(request):
-    return json({&#39;msg&#39;: &#39;hi from blueprint2&#39;})
-
-# 上一个例子说过这个函数，Sanic().register_blueprint() 注册蓝图
-app.register_blueprint(blueprint)
-app.register_blueprint(blueprint2)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;怎么样，现在来看，是不是很轻松，这一行&lt;code&gt;app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)&lt;/code&gt;服务启动代码不用多说吧？&lt;/p&gt;
-
-&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
-
-&lt;p&gt;看到这里，相信你已经完全理解了Sanic的运行机制，虽然还有&lt;code&gt;middleware&amp;amp;exception&lt;/code&gt;的注册以及调用机制没讲，但这和&lt;code&gt;route&lt;/code&gt;的运行机制一样，如果你懂了&lt;code&gt;route&lt;/code&gt;那么这两个也很简单&lt;/p&gt;
-
-&lt;p&gt;本人技术微末，若有错误，请指出，不胜感激&lt;/p&gt;
-
-&lt;p&gt;注解地址：&lt;a href=&#34;https://github.com/howie6879/sanic_annotation&#34;&gt;sanic_annotation&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>Sanic是一个可以使用async/await语法编写项目的异步非阻塞框架，它写法类似于Flask，但使用了异步特性，而且还使用uvloop作为事件循环，其底层使用的是libuv，从而使 Sanic的速度优势更加明显。
+如果你：
+ 想深入了解Sanic，迫切想知道它的运行机制 直接阅读源码，做一些定制 学习  将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：
+ 理解装饰器 理解协程  Sanic-0.1.2 的核心文件如下：
+. ├── __init__.py ├── blueprints.py ├── config.py ├── exceptions.py ├── log.py ├── request.py ├── response.py ├── router.py ├── sanic.py ├── server.py └── utils.py  通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。
+simple_server.py 让我们从simple_server开始吧，代码如下：
+from sanic_0_1_2.src import Sanic from sanic_0_1_2.src.response import json app = Sanic(__name__) @app.route(&amp;quot;/&amp;quot;) async def test(request): return json({&amp;quot;test&amp;quot;: True}) app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)  或许你直接把sanic_annotation项目直接clone到本地比较方便调试+理解：
+git clone https://github.com/howie6879/sanic_annotation cd sanic_annotation/sanic_0_1_2/examples/  那么，现在一切准备就绪，开始阅读吧。</description>
     </item>
     
     <item>
@@ -2324,243 +192,13 @@ app.register_blueprint(blueprint2)
       <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/30/</guid>
-      <description>
-
-&lt;p&gt;一个项目，在最外层他们应该是一样的，至少需要有:&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;center&#34;&gt;文件夹&lt;/th&gt;
-&lt;th align=&#34;center&#34;&gt;说明&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;docs&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;项目文档说明&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;src/pro_name&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;项目名称&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;tests&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;测试用例&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;README.md&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;项目介绍&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;requirements.txt&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;该项目依赖的第三方库&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
-&lt;td align=&#34;center&#34;&gt;…&amp;hellip;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;那接下来需要讨论的，就是 &lt;code&gt;src&lt;/code&gt; 的内部结构该是什么样的呢？&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;p&gt;本章将写一个 &lt;code&gt;rss&lt;/code&gt; 解析展示的项目用做演示。&lt;/p&gt;
-
-&lt;h3 id=&#34;2-1-普通的项目结构&#34;&gt;2.1.普通的项目结构&lt;/h3&gt;
-
-&lt;p&gt;一个普通的项目：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;不需要添加后续模块功能&lt;/li&gt;
-&lt;li&gt;快速开发使用，不需要维护&lt;/li&gt;
-&lt;li&gt;无较复杂的前端需求&lt;/li&gt;
-&lt;li&gt;用完就走&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;那么就可以像 &lt;code&gt;demo01&lt;/code&gt; 中一样，只需要添加一个 &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo03/sample01/src/run.py&#34;&gt;run.py&lt;/a&gt; 或者叫做 &lt;code&gt;app.py&lt;/code&gt; 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。&lt;/p&gt;
-
-&lt;p&gt;新建一个项目如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample01
-├── docs
-│   └── demo.md
-├── src
-│   └── run.py
-├── tests
-├── .gitignore
-└──requirements.txt
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;任意一个 &lt;code&gt;rss&lt;/code&gt; 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，&lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import json
-from feedparser import parse
-
-app = Sanic()
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-    feed = parse(url)
-    articles = feed[&#39;entries&#39;]
-    data = []
-    for article in articles:
-        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-    return json(data)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;访问 &lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，会返回一串json，如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-01.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;接下来，问题升级，我想要将标题链接用页面展示，该怎么弄？&lt;/p&gt;
-
-&lt;p&gt;我们需要一个页面模板，然后写入json数据，最后用 &lt;code&gt;jinja2&lt;/code&gt; 的 &lt;code&gt;template&lt;/code&gt; 将其渲染：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# template的渲染模板
-# 后面会使用更方便的模板引用方式
-template = Template(
-    &amp;quot;&amp;quot;&amp;quot;
-    &amp;lt;!DOCTYPE html&amp;gt;
-&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
-&amp;lt;head&amp;gt;
-    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
-    &amp;lt;title&amp;gt;rss阅读&amp;lt;/title&amp;gt;
-    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1&amp;quot;&amp;gt;
-&amp;lt;/head&amp;gt;
-&amp;lt;body&amp;gt;
-&amp;lt;article class=&amp;quot;markdown-body&amp;quot;&amp;gt;
-    {% for article in articles %}
-    &amp;lt;b&amp;gt;&amp;lt;a href=&amp;quot;{{article.link}}&amp;quot;&amp;gt;{{article.title}}&amp;lt;/a&amp;gt;&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;
-    &amp;lt;i&amp;gt;{{article.published}}&amp;lt;/i&amp;gt;&amp;lt;br/&amp;gt;
-    &amp;lt;hr/&amp;gt;
-    {% endfor %}
-&amp;lt;/article&amp;gt;
-&amp;lt;/body&amp;gt;
-&amp;lt;/html&amp;gt;
-    &amp;quot;&amp;quot;&amp;quot;
-)
-
-# 逻辑函数
-@app.route(&amp;quot;/html&amp;quot;)
-async def rss_html(request):
-    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-    feed = parse(url)
-    articles = feed[&#39;entries&#39;]
-    data = []
-    for article in articles:
-        data.append(
-            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
-    html_content = template.render(articles=data)
-    return html(html_content)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;具体结构代码见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample01&#34;&gt;sample01&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就可以看到被展示出来的页面^_^&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-02.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;假设需要编写前端页面比较多，那么你就需要添加&lt;code&gt;static&lt;/code&gt; 以及 &lt;code&gt;templates&lt;/code&gt; 文件夹用来管理各个界面模块，具体下面会介绍。&lt;/p&gt;
-
-&lt;h3 id=&#34;2-2-项目结构具体说明&#34;&gt;2.2.项目结构具体说明&lt;/h3&gt;
-
-&lt;p&gt;当编写的项目过于复杂，我都会将其当做一个第三方包来管理项目中涉及的各种模块，比如 &lt;code&gt;owllook&lt;/code&gt;，目录下面你会发现有个 &lt;code&gt;__init__.py&lt;/code&gt; 文件，它初始化了当前目录下的应用，然后代码中引用某个函数可以这么写：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from owllook.config import Config
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;每个项目的内部分布以及命名可能不一样（甚至目录比应该或多或少），但大体意思可能差不多，下面介绍本次项目 &lt;code&gt;src&lt;/code&gt; 下的一些文件目录结构：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sample02
-├── docs
-│   └── demo.md
-├── src
-│   ├── config # 配置 
-│   ├── static # css、js、img
-│   ├── templates # Jinja2模板
-│   └── views # 路由、逻辑处理
-│   ├── __init__.py
-│   ├── run.py # 启动文件
-├── tests
-└── requirements.txt
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此处就可以将 &lt;code&gt;sample02&lt;/code&gt; 当成一个包了，咱们来试试看：&lt;/p&gt;
-
-&lt;p&gt;首先新建文件 &lt;code&gt;/views/rss.py&lt;/code&gt; :&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;enable_async = sys.version_info &amp;gt;= (3, 6)
-
-app = Sanic()
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.rss&#39;, &#39;../templates&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
-    enable_async=enable_async)
-
-
-async def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    rendered_template = await template.render_async(**kwargs)
-    return html(rendered_template)
-
-
-@app.route(&amp;quot;/html&amp;quot;)
-async def rss_html(request):
-    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-    feed = parse(url)
-    articles = feed[&#39;entries&#39;]
-    data = []
-    for article in articles:
-        data.append(
-            {&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;], &amp;quot;published&amp;quot;: article[&amp;quot;published&amp;quot;]})
-    return await template(&#39;rss.html&#39;, articles=articles)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这里使用异步的方式引入了 &lt;code&gt;jinja2&lt;/code&gt; ，需要注意的是python版本必须3.6+，否则就得使用同步的方式来引入 &lt;code&gt;jinja2&lt;/code&gt; ，后面章节会继续介绍。&lt;/p&gt;
-
-&lt;p&gt;此时启动文件 &lt;code&gt;run.py&lt;/code&gt; 只要引入 &lt;code&gt;/views/rss.py&lt;/code&gt; 的 &lt;code&gt;app&lt;/code&gt; 实例即可：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# !/usr/bin/env python
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.views import app
-from src.config import CONFIG
-
-app.static(&#39;/static&#39;, CONFIG.BASE_DIR + &#39;/static&#39;)
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;还有一些css文件这里就不介绍，具体代码请看&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample02&#34;&gt;sample02&lt;/a&gt;，运行起来，然后输入 &lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt; 就好，效果如下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-10-06-03-03.png-blog.howie&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;2-3-说明&#34;&gt;2.3.说明&lt;/h3&gt;
-
-&lt;p&gt;关于 &lt;code&gt;views templates static&lt;/code&gt; 内部的构造也是值得一些，这就涉及到蓝图 &lt;code&gt;Blueprint&lt;/code&gt; ，后面介绍蓝图的时候会进行介绍。&lt;/p&gt;
-
-&lt;p&gt;代码地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/&#34;&gt;demo03&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>一个项目，在最外层他们应该是一样的，至少需要有:
+   文件夹 说明     docs 项目文档说明   src/pro_name 项目名称   tests 测试用例   README.md 项目介绍   requirements.txt 该项目依赖的第三方库   …&amp;hellip; …&amp;hellip;    那接下来需要讨论的，就是 src 的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+2.1.普通的项目结构 一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .</description>
     </item>
     
     <item>
@@ -2569,175 +207,12 @@ if __name__ == &amp;quot;__main__&amp;quot;:
       <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/29/</guid>
-      <description>&lt;p&gt;对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。&lt;/p&gt;
-
-&lt;p&gt;新建文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
-├── config
-│   ├── __init__.py
-│   └── config.py
-└── run.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;!-- more --&gt;
-
-&lt;p&gt;其中 &lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import text
-
-app = Sanic()
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;代码示例中开启了 &lt;code&gt;debug&lt;/code&gt; 模式，假设我们需要通过 &lt;code&gt;config.py&lt;/code&gt; 配置文件来实现控制服务的 &lt;code&gt;debug&lt;/code&gt; 模式开启与否，那该怎么实现呢。&lt;/p&gt;
-
-&lt;p&gt;在 &lt;code&gt;config.py&lt;/code&gt; 中添加一行：&lt;code&gt;DEBUG=True&lt;/code&gt; ，然后 &lt;code&gt;run.py&lt;/code&gt; 内容改为：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import text
-from config import DEBUG
-
-app = Sanic()
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=DEBUG)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;表面上看，功能确实实现了，但这实际上却不是很好的做法，若部署在生产环境中，难道还要特地再将 &lt;code&gt;debug&lt;/code&gt; 改为 &lt;code&gt;False&lt;/code&gt; 么，这显然很浪费时间，如果需要改变的参数有很多，那就很难维护了。&lt;/p&gt;
-
-&lt;p&gt;那么，正确的做法应该是怎么样的呢？&lt;/p&gt;
-
-&lt;p&gt;首先在文件夹 &lt;code&gt;demo2&lt;/code&gt; ，内部建立这样的文件结构：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;demo02
-├── config
-│   ├── __init__.py
-│   ├── config.py
-│   ├── dev_config.py
-│   └── pro_config.py
-└── run.py
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后使用类继承的方式使这三个配置文件联系起来，比如在 &lt;code&gt;config.py&lt;/code&gt; 中就只放公有配置，如：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-import os
-
-
-class Config():
-    &amp;quot;&amp;quot;&amp;quot;
-    Basic config for demo02
-    &amp;quot;&amp;quot;&amp;quot;
-    # Application config
-    TIMEZONE = &#39;Asia/Shanghai&#39;
-    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;而在 &lt;code&gt;pro_config.py或dev_config.py&lt;/code&gt; 中就可以自由地编写不同的配置了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# dev_config
-#!/usr/bin/env python
-from .config import Config
-
-
-class DevConfig(Config):
-    &amp;quot;&amp;quot;&amp;quot;
-    Dev config for demo02
-    &amp;quot;&amp;quot;&amp;quot;
-
-    # Application config
-    DEBUG = True
-
-# pro_config
-#!/usr/bin/env python
-from .config import Config
-
-
-class ProConfig(Config):
-    &amp;quot;&amp;quot;&amp;quot;
-    Pro config for demo02
-    &amp;quot;&amp;quot;&amp;quot;
-
-    # Application config
-    DEBUG = False
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;配置文件还需要根据系统环境变量的设置进行不同配置环境的切换，比如设置 &lt;code&gt;MODE&lt;/code&gt; 系统环境变量，然后可以根据其不同的值切换到不同的配置文件，因此在 &lt;code&gt;__init__.py&lt;/code&gt; 中需要这么写：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-import os
-
-
-def load_config():
-    &amp;quot;&amp;quot;&amp;quot;
-    Load a config class
-    &amp;quot;&amp;quot;&amp;quot;
-
-    mode = os.environ.get(&#39;MODE&#39;, &#39;DEV&#39;)
-    try:
-        if mode == &#39;PRO&#39;:
-            from .pro_config import ProConfig
-            return ProConfig
-        elif mode == &#39;DEV&#39;:
-            from .dev_config import DevConfig
-            return DevConfig
-        else:
-            from .dev_config import DevConfig
-            return DevConfig
-    except ImportError:
-        from .config import Config
-        return Config
-
-
-CONFIG = load_config()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;默认 &lt;code&gt;MODE&lt;/code&gt; 设置为 &lt;code&gt;DEV&lt;/code&gt;，在 &lt;code&gt;run.py&lt;/code&gt; 文件中就可以这么调用：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import text
-from config import CONFIG
-
-app = Sanic()
-app.config.from_object(CONFIG)
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=app.config[&#39;DEBUG&#39;])
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;而在生产环境的服务器上，直接通过：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 通过设置MODE的值进行配置文件的选择
-export MODE=PRO 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;若是利用 &lt;code&gt;supervisor&lt;/code&gt; 来启动服务，可通过添加&lt;code&gt;environment = MODE=&amp;quot;PRO&amp;quot;&lt;/code&gt; 来设置环境变量，是不是很方便呢。&lt;/p&gt;
-</description>
+      <description>对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。
+新建文件夹 demo2 ，内部建立这样的文件结构：
+demo02 ├── config │ ├── __init__.py │ └── config.py └── run.py  其中 run.py 内容如下：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() @app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;) if __name__ == &amp;quot;__main__&amp;quot;: app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)  代码示例中开启了 debug 模式，假设我们需要通过 config.py 配置文件来实现控制服务的 debug 模式开启与否，那该怎么实现呢。
+在 config.py 中添加一行：DEBUG=True ，然后 run.py 内容改为：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text from config import DEBUG app = Sanic() @app.</description>
     </item>
     
     <item>
@@ -2746,317 +221,23 @@ export MODE=PRO
       <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/28/</guid>
-      <description>
-
-&lt;p&gt;在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。&lt;/p&gt;
-
-&lt;p&gt;首先是Python3.4版本引入了&lt;code&gt;asyncio&lt;/code&gt;，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字&lt;code&gt;async/await&lt;/code&gt;，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的&lt;code&gt;asyncio&lt;/code&gt;，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。&lt;/p&gt;
-
-&lt;h3 id=&#34;安装&#34;&gt;安装&lt;/h3&gt;
-
-&lt;p&gt;Sanic是一个支持 &lt;code&gt;async/await&lt;/code&gt; 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有&lt;code&gt;Flask&lt;/code&gt;框架的使用经验，那么你可以迅速地使用&lt;code&gt;Sanic&lt;/code&gt;来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是&lt;code&gt;Falsk&lt;/code&gt;的1.5倍。&lt;/p&gt;
-
-&lt;p&gt;仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了&lt;code&gt;uvloop&lt;/code&gt;作为&lt;code&gt;asyncio&lt;/code&gt;的事件循环，&lt;code&gt;uvloop&lt;/code&gt;由Cython编写，它的出现让&lt;code&gt;asyncio&lt;/code&gt;更快，快到什么程度？&lt;a href=&#34;http://codingpy.com/article/uvloop-blazing-fast-networking-with-python/&#34;&gt;这篇&lt;/a&gt;文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。&lt;/p&gt;
-
-&lt;p&gt;怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h4 id=&#34;虚拟环境&#34;&gt;虚拟环境&lt;/h4&gt;
-
-&lt;p&gt;程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。&lt;/p&gt;
-
-&lt;p&gt;其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。&lt;/p&gt;
-
-&lt;p&gt;通过上面的叙述，我们是不是可以得出这样一个核心观点：&lt;strong&gt;应该在不同的环境下做不同的事&lt;/strong&gt; ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;不同的项目，需要为其构建不同的虚拟环境，以免互相干扰&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;构建虚拟环境的工具很多，如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://virtualenv.pypa.io/en/stable/&#34;&gt;virtualenv&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/pyenv/pyenv&#34;&gt;pyenv&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.continuum.io/downloads&#34;&gt;anaconda&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;…&amp;hellip;&lt;/p&gt;
-
-&lt;p&gt;以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。&lt;/p&gt;
-
-&lt;p&gt;安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是&lt;code&gt;anaconda&lt;/code&gt; ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 新建一个python3.6环境
-conda create --name python36 python=3.6
-# 安装好之后 输入下面命令进入名为python36的环境
-source activate python36
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;若安装速度比较慢，可以考虑换国内源，比如 &lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/pypi/&#34;&gt;国内镜像&lt;/a&gt; ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的&lt;code&gt;asyncio&lt;/code&gt;。&lt;/p&gt;
-
-&lt;h4 id=&#34;安装sanic&#34;&gt;安装Sanic&lt;/h4&gt;
-
-&lt;p&gt;Python安装第三方模块都是利用&lt;code&gt;pip&lt;/code&gt;工具进行安装，这里也不例外，首先进入上一步我们新建的 &lt;code&gt;python3.6&lt;/code&gt; 虚拟环境，然后安装：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 安装Sanic，请先使用 source activate python36 进入虚拟环境
-pip install sanic
-# 如果不想使用uvloop和ujson 可以这样安装
-SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;通过上面的命令，你就可以在 &lt;code&gt;python3.6&lt;/code&gt; 虚拟环境中安装Sanic以及其依赖的第三方库了，若想查看Sanic是否已经正确安装，可以进入终端下对应的虚拟环境，启动Python解释器，导入Sanic库：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 启动Python解释器
-python
-&amp;gt;&amp;gt;&amp;gt; import sanic
-&amp;gt;&amp;gt;&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果没有出现错误，就说明你已经正确地安装了Sanic，请继续阅读下一节，了解下如何利用Sanic来构建一个Web项目吧。&lt;/p&gt;
-
-&lt;h3 id=&#34;踏出第一步&#34;&gt;踏出第一步&lt;/h3&gt;
-
-&lt;p&gt;我们将正式使用Sanic来构建一个web项目，让我们踏出第一步，利用Sanic来编写一个返回&lt;code&gt;Hello World!&lt;/code&gt;字符串的服务程序。&lt;/p&gt;
-
-&lt;p&gt;新建一个文件，名为 &lt;code&gt;run.py&lt;/code&gt; :&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from sanic import Sanic
-from sanic.response import text
-
-app = Sanic()
-
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return text(&#39;Hello World!&#39;)
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Sanic的目标是让编写服务更加简单易用，请看上面仅用不到10行的代码，就编写好了一个简单的Web服务，运行此文件，在浏览器输入 &lt;code&gt;http://0.0.0.0:8000&lt;/code&gt; ，出现的字符会让你回想起当年学c的恐惧^_^。&lt;/p&gt;
-
-&lt;p&gt;如果你是第一次使用Sanic，上面的代码可能会让你产生一些困扰，不用担心，接下来，我们将一起用Sanic编写一个简单的资讯阅读的web服务，在这过程中，你将逐渐地了解到Sanic的一些基本用法，如路由的构建、接受请求数据以及返回响应的内容等。&lt;/p&gt;
-
-&lt;p&gt;本次示例的源代码全部在github上，见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo01/news.py&#34;&gt;examples/demo01/news.py&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h4 id=&#34;编写一个资讯阅读项目&#34;&gt;编写一个资讯阅读项目&lt;/h4&gt;
-
-&lt;p&gt;在开始编写之前，第一步最好写一下需求，哪怕是个简单不过的玩具项目也不能略过这个步骤，比如现在编写的资讯阅读项目，需求就一个，在页面中展示一些资讯新闻。&lt;/p&gt;
-
-&lt;p&gt;既然是展示资讯新闻，那么解决数据来源的问题最为重要，对于这个问题你也不用担心，因为在本次示例的源码中我编写了一个名为&lt;code&gt;get_news()&lt;/code&gt;的函数专门用来返回资讯新闻数据，简化代码如下:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;async def get_news(size=10):
-    &amp;quot;&amp;quot;&amp;quot;
-    Sanic是一个异步框架，为了更好的发挥它的性能，有些操作最好也要用异步的
-    比如这里发起请求就必须要用异步请求框架aiohttp
-    所以使用本服务的时候请先执行: pip install aiohttp
-    数据使用的是readhub网站的api接口
-    为了使这个数据获取函数正常运行，我会保持更新，所以具体代码：examples/demo01/news.py
-    &amp;quot;&amp;quot;&amp;quot;
-    async with aiohttp.ClientSession() as client:
-        async with client.get(readhub_api, params=params, headers=headers) as response:
-            assert response.status == 200
-            text = await response.json()
-        return text
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这样各位就可以只专注于Sanic的代码实现，而不必考虑其他问题，我会一直维护这个数据获取函数，以保证数据正常输出，各位请放心使用。&lt;/p&gt;
-
-&lt;h4 id=&#34;构建路由&#34;&gt;构建路由&lt;/h4&gt;
-
-&lt;p&gt;数据的问题解决之后，我们可以开始着手于需求的实现了，根据前面的描述，此时的需求是当客户端（Web浏览器）访问&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;的时候，浏览器会立马展示服务端响应返回的10条资讯新闻（假设内容由index()函数返回），若浏览器访问的是&lt;code&gt;http://0.0.0.0:8000/2&lt;/code&gt;，此时返回的就是第二页的10条资讯新闻，以此类推&amp;hellip;&amp;hellip;&lt;/p&gt;
-
-&lt;p&gt;当Sanic程序实例接收到一个请求，比如前面提到的&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，它是怎么知道这个URL可以对应到&lt;code&gt;index()&lt;/code&gt;函数呢？&lt;/p&gt;
-
-&lt;p&gt;Sanic有一个机制来保存URL和函数（一般称之为视图函数）之间的映射关系，就像&lt;code&gt;dict&lt;/code&gt;中&lt;code&gt;key&lt;/code&gt;和&lt;code&gt;value&lt;/code&gt;，这样当服务端接收到请求&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，就会立马知道，接下来需要调用&lt;code&gt;index()&lt;/code&gt;函数了，我们将其称之为路由。&lt;/p&gt;
-
-&lt;p&gt;Sanic中可以用&lt;code&gt;app.route&lt;/code&gt;修饰器来定义路由，当Sanic服务启动的时候，&lt;code&gt;app.route&lt;/code&gt;就会将其中传入的参数与装饰的函数自动注册好，比如下面这段代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    &amp;quot;&amp;quot;&amp;quot;当服务端接收到客户端的/请求时，就会调用此函数&amp;quot;&amp;quot;&amp;quot;
-    return text(&#39;Hello World!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时请求&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;就会返回&lt;code&gt;Hello World!&lt;/code&gt;，很显然，这不是我们想要的需求，我们的需求是展示10条资讯新闻，数据怎么来？你只需要调用&lt;code&gt;get_news()&lt;/code&gt;函数，就会获取到你想要的资讯数据：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    # html页面模板
-    html_tem = &amp;quot;&amp;quot;&amp;quot;
-    &amp;lt;div style=&amp;quot;width: 80%; margin-left: 10%&amp;quot;&amp;gt;
-        &amp;lt;p&amp;gt;&amp;lt;a href=&amp;quot;{href}&amp;quot; target=&amp;quot;_blank&amp;quot;&amp;gt;{title}&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;
-        &amp;lt;p&amp;gt;{summary}&amp;lt;/p&amp;gt;
-         &amp;lt;p&amp;gt;{updated_at}&amp;lt;/p&amp;gt;
-    &amp;lt;/div&amp;gt;
-    &amp;quot;&amp;quot;&amp;quot;
-    html_list = []
-    # 获取数据
-    all_news = await get_news()
-    # 生成在浏览器展示的html页面
-    for each_news in all_news:
-        html_list.append(html_tem.format(
-            href=each_news.get(&#39;news_info&#39;, [{}])[0].get(&#39;url&#39;, &#39;#&#39;),
-            title=each_news.get(&#39;title&#39;),
-            summary=each_news.get(&#39;summary&#39;),
-            updated_at=each_news.get(&#39;updated_at&#39;),
-        ))
-
-    return html(&#39;&amp;lt;hr&amp;gt;&#39;.join(html_list))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;运行此服务：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;python run news.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时，访问&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;，你就会获得Sanic服务程序返回的资讯新闻，如下图，可以看到返回服务端提供的最新资讯：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/28/01_0.jpg&#34; alt=&#34;01_0&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;页面成功地呈现出我们想要的结果，实在是令人兴奋，等等，不能高兴太早，我们还有一个需求，要根据浏览器输入的页数来展示内容，如：&lt;code&gt;http://0.0.0.0:8000/2&lt;/code&gt;，思考一下，应该怎样优雅地完成这个需求，或许你会想，再构建一对URL与视图函数的映射关系，像下面这样：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&amp;quot;/2&amp;quot;)
-async def page_2(request):
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;不得不说，这是一个糟糕的解决方案，这样没法解决接下来的第3页、第4页、甚至第n页（虽然目前这个服务程序只展示到第2页），最佳实践应该是把页数当做变量来获取，Sanic的路由机制自然提供了获取动态请求参数的功能，如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&amp;quot;/&amp;lt;page:int&amp;gt;&amp;quot;)
-@app.route(&amp;quot;/&amp;quot;)
-async def index(request, page=1):
-    &amp;quot;&amp;quot;&amp;quot;
-    支持/请求与/page请求方式
-    具体的代码逻辑也会有一点改变，可参考：examples/demo01/news.py
-    &amp;quot;&amp;quot;&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;再次运行此服务：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;python run news.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;不论是请求&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;或者&lt;code&gt;http://0.0.0.0:8000/2&lt;/code&gt;，都是我们想要的结果。&lt;/p&gt;
-
-&lt;h4 id=&#34;请求数据&#34;&gt;请求数据&lt;/h4&gt;
-
-&lt;p&gt;细心的你可能会发现，每次编写一个视图函数的时候，总是有一个&lt;code&gt;request&lt;/code&gt;参数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;async def index(request, page=1):
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;为什么必须定义这个参数，它从哪来？它有什么作用，下面我将一一为你解答。&lt;/p&gt;
-
-&lt;p&gt;如果你在客户端请求&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;的时候，顺手在视图函数里面打印下参数&lt;code&gt;request&lt;/code&gt;，会有如下输出：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;&amp;lt;Request: GET /&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;看终端的输出可以了解到&lt;code&gt;request&lt;/code&gt;参数实际上是一个名为&lt;code&gt;Request&lt;/code&gt;的实例对象，每当服务端接收到一个请求，Sanic的&lt;code&gt;handle_request&lt;/code&gt;函数必定会接收一个&lt;code&gt;Request&lt;/code&gt;实例对象，这个实例对象包含了一系列请求信息。&lt;/p&gt;
-
-&lt;p&gt;前面说到，每个URL对应一个视图函数，而Sanic的&lt;code&gt;handle_request&lt;/code&gt;接下来会将接收的&lt;code&gt;Request&lt;/code&gt;实例对象作为参数传给URL对应的视图函数，也就是上面&lt;code&gt;index&lt;/code&gt;的&lt;code&gt;request&lt;/code&gt;参数，这样一来，就必须定义&lt;code&gt;request&lt;/code&gt;来接收&lt;code&gt;Request&lt;/code&gt;实例对象，其中包含的一些请求信息对视图函数来说非常重要，目前&lt;code&gt;Request&lt;/code&gt;对象提供了以下属性：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;json&lt;/li&gt;
-&lt;li&gt;token&lt;/li&gt;
-&lt;li&gt;form&lt;/li&gt;
-&lt;li&gt;files&lt;/li&gt;
-&lt;li&gt;args&lt;/li&gt;
-&lt;li&gt;raw_args&lt;/li&gt;
-&lt;li&gt;cookies&lt;/li&gt;
-&lt;li&gt;ip&lt;/li&gt;
-&lt;li&gt;port&lt;/li&gt;
-&lt;li&gt;socket&lt;/li&gt;
-&lt;li&gt;remote_addr&lt;/li&gt;
-&lt;li&gt;path&lt;/li&gt;
-&lt;li&gt;url&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;上面只是列出了一部分属性，如果你想了解更多，可查看&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/sanic/request.py&#34;&gt;request.py&lt;/a&gt;源码文件了解。&lt;/p&gt;
-
-&lt;p&gt;为了可以实际使用下&lt;code&gt;request&lt;/code&gt;，我们可以再加一个需求，比如增加一个&lt;code&gt;GET&lt;/code&gt;请求的接口&lt;code&gt;http://0.0.0.0:8000/json&lt;/code&gt;，如果请求不设置参数&lt;code&gt;nums&lt;/code&gt;的值，则默认返回一条资讯新闻，如果设置了&lt;code&gt;nums&lt;/code&gt;参数，则该接口返回的新闻数量由参数值决定，参数最大值为10：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;@app.route(&#39;/json&#39;)
-async def index_json(request):
-    &amp;quot;&amp;quot;&amp;quot;
-    默认返回一条资讯，最多十条
-    &amp;quot;&amp;quot;&amp;quot;
-    nums = request.args.get(&#39;nums&#39;, 1)
-    # 获取数据
-    all_news = await get_news()
-    try:
-        return json(random.sample(all_news, int(nums)))
-    except ValueError:
-        return json(all_news)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;运行此服务：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;python run news.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时视图函数&lt;code&gt;index_json&lt;/code&gt;就可以根据接受的参数&lt;code&gt;nums&lt;/code&gt;来返回对应数量的新闻，访问&lt;code&gt;http://0.0.0.0:8000/json?nums=2&lt;/code&gt;，效果如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/28/01_1.jpg&#34; alt=&#34;01_1&#34; /&gt;&lt;/p&gt;
-
-&lt;h4 id=&#34;响应&#34;&gt;响应&lt;/h4&gt;
-
-&lt;p&gt;不论哪个Web框架，都是需要构建响应对象的，Sanic自然也不例外，它用的是&lt;code&gt;sanic.response&lt;/code&gt;来构建响应对象，像上面的代码中可以看到：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;from sanic.response import html, json
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这表示我们目前构建的资讯阅读服务，分别返回了&lt;code&gt;body&lt;/code&gt;格式为&lt;code&gt;html&lt;/code&gt;以及&lt;code&gt;json&lt;/code&gt;的响应对象，除了这两种格式，Sanic还提供了下面几种格式：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;json&lt;/li&gt;
-&lt;li&gt;text&lt;/li&gt;
-&lt;li&gt;raw&lt;/li&gt;
-&lt;li&gt;html&lt;/li&gt;
-&lt;li&gt;file&lt;/li&gt;
-&lt;li&gt;file_stream&lt;/li&gt;
-&lt;li&gt;stream&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;更多属性请看&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/sanic/response.py&#34;&gt;response.py&lt;/a&gt;，我们可以根据实际需求来构建响应对象，最后再返回给客户端。&lt;/p&gt;
-
-&lt;h4 id=&#34;继续深入&#34;&gt;继续深入&lt;/h4&gt;
-
-&lt;p&gt;不要以为现在编写的资讯服务已经很完善了，其实还有许多问题需要我们解决，比如访问&lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt;这个URL会返回：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;Error: Requested URL /html not found
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;服务程序为什么会抛出这个错误？因为程序中并路由没有注册&lt;code&gt;html&lt;/code&gt;，并且没有进行错误捕捉（比如此时的404），解决这个问题也很方便，比如把这个错误全部跳转到首页，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.exception(NotFound)
-def ignore_404s(request, exception):
-    return redirect(&#39;/&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此时访问一些没有注册于路由的URL，比如此时的&lt;code&gt;http://0.0.0.0:8000/html&lt;/code&gt;都会自动跳转到&lt;code&gt;http://0.0.0.0:8000/&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;现在，我们已经用Sanic编写了一个简单的资讯阅读服务，在编写的过程中使用了路由、数据请求、处理以及响应对象，这些基础知识足够你编写一些基本的服务，但这还远远不够，比如模板引、引入静态文件等，这些都等着我们在实践中继续深入了解。&lt;/p&gt;
-
-&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
-
-&lt;p&gt;本章介绍了Sanic的安装以及基本的使用，目标是希望诸位可以迅速的了解并掌握Sanic的基本使用方法，并为阅读接下来的章节打一下基础。&lt;/p&gt;
-
-&lt;p&gt;文档以及代码：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Sanic&lt;/code&gt; github地址：&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;https://github.com/channelcat/sanic&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;官方教程：&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/&#34;&gt;http://sanic.readthedocs.io/en/latest/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;demo地址：&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo01/run.py&#34;&gt;demo01&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36  若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic  通过上面的命令，你就可以在 python3.</description>
     </item>
     
     <item>
@@ -3065,95 +246,15 @@ def ignore_404s(request, exception):
       <pubDate>Tue, 22 Aug 2017 20:18:06 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/27/</guid>
-      <description>
-
-&lt;p&gt;上一篇笔记&lt;a href=&#34;http://blog.howie6879.cn/2017/08/15/26/&#34;&gt;1.Docker - 初使用&lt;/a&gt; 主要介绍了&lt;code&gt;Docker&lt;/code&gt;的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些&lt;code&gt;Docker&lt;/code&gt;镜像以及容器的基本操作&lt;/p&gt;
-
-&lt;h3 id=&#34;1-目标&#34;&gt;1.目标&lt;/h3&gt;
-
-&lt;p&gt;之前的毕设&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;是用&lt;code&gt;python&lt;/code&gt;编写的，我将它开源在&lt;code&gt;github&lt;/code&gt;上，正借此机会，将其制作成&lt;code&gt;Docker&lt;/code&gt;镜像，以便部署&lt;/p&gt;
-
-&lt;p&gt;本次笔记就以此项目为中心，目标是将该项目制作成&lt;code&gt;Docker&lt;/code&gt;镜像，并从过程中一步步熟悉&lt;code&gt;Docker&lt;/code&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;2-定制镜像&#34;&gt;2.定制镜像&lt;/h3&gt;
-
-&lt;p&gt;上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如&lt;code&gt;owllook&lt;/code&gt;基于&lt;code&gt;python3.6&lt;/code&gt;，那么我第一步便是从镜像仓库获取&lt;code&gt;python&lt;/code&gt;镜像&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;p&gt;运行命令：&lt;code&gt;docker pull python:3.6&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;稍等片刻，就会拉取一个&lt;code&gt;python3.6&lt;/code&gt;的镜像下来，让我们以这个镜像为基础来启动一个容器：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 具体可参考 dcker run --help 来了解详细命令
-docker run -it --rm python:3.6 python
-
-# 终端会有如下输出 此时进入了容器中的3.6环境
-Python 3.6.2 (default, Jul 24 2017, 19:47:39) 
-[GCC 4.9.2] on linux
-Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information.
-&amp;gt;&amp;gt;&amp;gt; 
-
-#　也可以直接进入容器
-docker run -it --rm python:3.6 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;有了基础镜像，下面我们有两种方案构建&lt;code&gt;owllook&lt;/code&gt;镜像：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;使用&lt;code&gt;docker commit&lt;/code&gt; 命令&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Dockerfile&lt;/code&gt;(使用此方案)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Dockerfile内容如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;# 基于python3.6镜像来构建owllook镜像
-FROM python:3.6
-MAINTAINER howie6879 &amp;lt;howie6879@gmail.com&amp;gt;
-RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools
-# 设置环境变量
-ENV APP_ROOT /opt
-WORKDIR ${APP_ROOT}/
-COPY requirements.txt ${APP_ROOT}/
-# 安装依赖
-RUN pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
-COPY . ${APP_ROOT}
-WORKDIR ${APP_ROOT}/owllook/
-RUN find . -name &amp;quot;*.pyc&amp;quot; -delete
-# 启动
-CMD [&amp;quot;gunicorn&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;config/dev_gunicorn.py&amp;quot;,&amp;quot;--worker-class&amp;quot;,&amp;quot;sanic.worker.GunicornWorker&amp;quot;,&amp;quot;server:app&amp;quot;]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;构建镜像：&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;docker build -t owllook:0.1 .&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;构建成功后，可直接运行，不过针对&lt;code&gt;owllook&lt;/code&gt;这个项目，我设置了几个环境变量，可运行如下命令运行：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 运行并将docker的8001端口映射到主机的8001
-# 在dev_owllook.env里面填上数据库配置 数据库ip需要注意 不得填localhost
-docker run --env-file ./dev_owllook.env -d -p 8001:8001 owllook:0.1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;仅仅是达到使用&lt;code&gt;Docker&lt;/code&gt;的程度，所花费时间真的不多，所以说&lt;code&gt;Docker&lt;/code&gt;还是很简单方便的，下一步就是上传到镜像仓库。&lt;/p&gt;
-
-&lt;h3 id=&#34;3-上传镜像&#34;&gt;3.上传镜像&lt;/h3&gt;
-
-&lt;p&gt;首先请注册&lt;a href=&#34;https://hub.docker.com/&#34;&gt;&lt;em&gt;Docker Hub&lt;/em&gt;&lt;/a&gt;账号，然后创建自己的仓库之后，比如这里创建好&lt;code&gt;howie6879/owllook&lt;/code&gt;，随即在终端输入：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 重新打包下 或者改下tag也没问题
-docker build -t howie6879/owllook:0.1 .
-# 根据提示登录
-docker login
-docker push howie6879/owllook:0.1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;稍等即大功告成&lt;/p&gt;
-
-&lt;h3 id=&#34;4-最后&#34;&gt;4.最后&lt;/h3&gt;
-
-&lt;p&gt;现在可以根据&lt;code&gt;Dockerfile&lt;/code&gt;自己构建&lt;code&gt;owllook&lt;/code&gt;镜像或者直接&lt;code&gt;docker pull owllook&lt;/code&gt;镜像，确实十分方便&lt;/p&gt;
-</description>
+      <description>上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6  有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像 FROM python:3.6 MAINTAINER howie6879 &amp;lt;howie6879@gmail.</description>
     </item>
     
     <item>
@@ -3162,124 +263,418 @@ docker push howie6879/owllook:0.1
       <pubDate>Tue, 15 Aug 2017 20:13:30 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/26/</guid>
-      <description>
+      <description>自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。
+1.准备  系统：ubuntu16.04 or centos &amp;hellip;
+ 1.1.安装 1.1.1.ubuntu16.04 首先安装依赖包，在终端输入：
+sudo apt-get update sudo apt-get install apt-transport-https ca-certificates  安装Docker，自动安装脚本提供了非常简洁的安装方式：
+# 官方下载方式 curl -sSL https://get.docker.com/ | sh # 镜像站会提升下载速度 # 阿里云的安装脚本 curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh - # DaoCloud 的安装脚本 curl -sSL https://get.daocloud.io/docker | sh  安装完成后，输入sudo service docker status 可见Docker已经启动:
+● docker.service - Docker Application Container Engine Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled) Active: active (running) since 二 2017-08-15 15:34:46 CST; 26min ago Docs: https://docs.</description>
+    </item>
+    
+    <item>
+      <title>gRPC使用初试</title>
+      <link>https://www.howie6879.cn/post/25/</link>
+      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/25/</guid>
+      <description>1.前言 gRPC是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用protocol buffer:
+protocol buffer是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用protocol buffer(proto3)来进行定义，即根据protocol buffer language来定义你的protocol buffer data
+最后再利用protocol buffer编译定义的 .proto 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码
+２.实践 假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：
+demo └── proto └── lower.proto  接下来将编写proto文件，本例使用proto3语法进行编写，protobuf定义的语法请看这里
+lower.proto文件内容如下：
+syntax = &amp;quot;proto3&amp;quot;; package lower; service Lower { rpc Lower (LowerRequest) returns (LowerResult) { } } message LowerRequest { string message = 1; } message LowerResult { string lower_message = 1; }  定义一个服务Lower，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件proto_compile.py，并安装相关的包：
+pip install grpcio pip install grpcio-tools  # script proto_compile.py from grpc_tools import protoc # 或者在项目根目录运行： # python -m grpc_tools.</description>
+    </item>
+    
+    <item>
+      <title>talospider - 简单的爬虫框架</title>
+      <link>https://www.howie6879.cn/post/24/</link>
+      <pubDate>Wed, 07 Jun 2017 23:56:08 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/24/</guid>
+      <description>&lt;h3 id=&#34;为什么写这个&#34;&gt;为什么写这个？&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-08-15-docker.png-blog.howie&#34; alt=&#34;docker&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;一些简单的页面，无需用比较大的框架来进行爬取，自己纯手写又比较麻烦&lt;/p&gt;
 
-&lt;p&gt;自己很少使用&lt;code&gt;Docker&lt;/code&gt;，也没有机会使用，毕业开始工作后，进的公司使用&lt;code&gt;Docker&lt;/code&gt;进行部署，这是我的一些笔记，以便翻阅。&lt;/p&gt;
+&lt;p&gt;因此针对这个需求写了&lt;a href=&#34;https://github.com/howie6879/talospider&#34;&gt;talospider&lt;/a&gt;:&lt;/p&gt;
 
-&lt;h3 id=&#34;1-准备&#34;&gt;1.准备&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1.针对单页面的item提取 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talospider/blob/master/docs/item.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2.spider模块 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talospider/blob/master/docs/spider.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;blockquote&gt;
-&lt;p&gt;系统：ubuntu16.04 or centos &amp;hellip;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;h3 id=&#34;介绍-使用&#34;&gt;介绍&amp;amp;&amp;amp;使用&lt;/h3&gt;
 
-&lt;h4 id=&#34;1-1-安装&#34;&gt;1.1.安装&lt;/h4&gt;
+&lt;h4 id=&#34;item&#34;&gt;item&lt;/h4&gt;
 
-&lt;h5 id=&#34;1-1-1-ubuntu16-04&#34;&gt;1.1.1.ubuntu16.04&lt;/h5&gt;
+&lt;p&gt;这个模块是可以独立使用的，对于一些请求比较简单的网站（比如只需要&lt;code&gt;get&lt;/code&gt;请求），单单只用这个模块就可以快速地编写出你想要的爬虫，比如(以下使用python3，python2见examples目录)：&lt;/p&gt;
 
-&lt;p&gt;首先安装依赖包，在终端输入：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;sudo apt-get update
-sudo apt-get install apt-transport-https ca-certificates
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;安装&lt;code&gt;Docker&lt;/code&gt;，自动安装脚本提供了非常简洁的安装方式：&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 官方下载方式
-curl -sSL https://get.docker.com/ | sh
-
-# 镜像站会提升下载速度
-# 阿里云的安装脚本
-curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh -
-
-# DaoCloud 的安装脚本
-curl -sSL https://get.daocloud.io/docker | sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;安装完成后，输入&lt;code&gt;sudo service docker status&lt;/code&gt; 可见&lt;code&gt;Docker&lt;/code&gt;已经启动:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;● docker.service - Docker Application Container Engine
-   Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
-   Active: active (running) since 二 2017-08-15 15:34:46 CST; 26min ago
-     Docs: https://docs.docker.com
- Main PID: 16890 (dockerd)
-    Tasks: 25
-   Memory: 60.1M
-      CPU: 1.980s
-   CGroup: /system.slice/docker.service
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h5 id=&#34;1-1-2-centos7&#34;&gt;1.1.2.centos7&lt;/h5&gt;
-
-&lt;p&gt;完全可以参照上面的自动安装&lt;/p&gt;
-
-&lt;h4 id=&#34;1-2-镜像加速器&#34;&gt;1.2.镜像加速器&lt;/h4&gt;
-
-&lt;p&gt;配置镜像加速器的目的是为了在使用&lt;code&gt;Docker&lt;/code&gt;的过程中能提升速度，比如使用&lt;a href=&#34;https://www.daocloud.io/mirror#accelerator-doc&#34;&gt;DaoCloud 加速器&lt;/a&gt;，输入网址，点击立即使用，按照官网的教程，一行命令搞定:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://{修改分配给你的id}.m.daocloud.io
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;2-使用&#34;&gt;2.使用&lt;/h3&gt;
-
-&lt;p&gt;下面将简单的获取一个镜像并输出一个&lt;code&gt;Hello World&lt;/code&gt;来简单演示下&lt;code&gt;Docker&lt;/code&gt;的使用，首先介绍下&lt;code&gt;Docker&lt;/code&gt;的三个基本概念，掌握了这三个基本概念，也就理解了&lt;code&gt;Docker&lt;/code&gt;的生命周期&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是镜像(Image)？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>你的浏览器可好|Chrome插件篇</title>
+      <link>https://www.howie6879.cn/post/23/</link>
+      <pubDate>Thu, 11 May 2017 23:47:40 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/23/</guid>
+      <description>&lt;p&gt;当我大学拥有第一部电脑开始，之后不论电脑是什么系统，我的首选浏览器都是&lt;code&gt;chrome&lt;/code&gt;，不仅仅是因为其速度快，更多是它丰富的扩展在吸引我。&lt;/p&gt;
 
 &lt;blockquote&gt;
-&lt;p&gt;引用《第一本Docker书》&lt;/p&gt;
-
-&lt;p&gt;镜像是构建&lt;code&gt;Docker&lt;/code&gt;世界的基石，用户基于镜像来运行自己的容器，镜像是基于联合（Union）文件系统的一种层式，由一系列指令一步一步构建出来&lt;/p&gt;
+&lt;p&gt;Chrome改变了我的浏览方式&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;strong&gt;什么是容器(Container)？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>https://www.howie6879.cn/post/22/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/22/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;容器基于镜像启动，里面可以运行一个或者多个进程&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;什么是仓库(Repository)？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;想象下&lt;code&gt;github&lt;/code&gt;就很容易理解，托管你自己创建的镜像，默认使用&lt;a href=&#34;https://hub.docker.com/&#34;&gt;Docker Hub&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>https://www.howie6879.cn/post/21/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/21/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
 
-&lt;h4 id=&#34;2-1-hello-world&#34;&gt;2.1.Hello World&lt;/h4&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 
-&lt;p&gt;运行一条命令 &lt;code&gt;docker run hello-world&lt;/code&gt;，会发现并没有运行成功，因为我是在非&lt;code&gt;root&lt;/code&gt;的情况下运行的，会报如下错误：&lt;/p&gt;
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;docker: Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock/v1.30/containers/create: dial unix /var/run/docker.sock: connect: permission denied.
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python -m pip install sanic
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;至于为什么有这个错误，具体可以看&lt;a href=&#34;https://yeasy.gitbooks.io/docker_practice/content/install/ubuntu.html&#34;&gt;这里&lt;/a&gt;，介绍得非常清楚，下面说下解决办法：&lt;/p&gt;
+&lt;p&gt;sanic的&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;&gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 一定要重新登录才会生效
-sudo usermod -aG docker $USER
-&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;用户重新登陆过后，就能成功运行了!&lt;/p&gt;
-
-&lt;h4 id=&#34;2-2-简单例子&#34;&gt;2.2.简单例子&lt;/h4&gt;
-
-&lt;p&gt;&lt;strong&gt;获取镜像&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;docker pull howie6879/cn_ubuntu&lt;/code&gt;，这条命令就是从&lt;code&gt;Docker Hub&lt;/code&gt;拉取一个镜像到本地，下面就可以使用这个镜像了,&lt;strong&gt;运行&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;docker run howie6879/cn_ubuntu:latest /bin/echo &amp;quot;Hello World&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;终端就会输出&lt;code&gt;Hello World&lt;/code&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;3-最后&#34;&gt;3.最后&lt;/h3&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;参考1：&lt;a href=&#34;https://yeasy.gitbooks.io/docker_practice/content/index.html&#34;&gt;《Docker-从入门到实践》&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;参考2：《第一本Docker书》&lt;/p&gt;
-
-&lt;p&gt;gist看&lt;a href=&#34;https://gist.github.com/83685e04e191079c56d36900e0839a3d&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;图片来自网络&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>--1.vscode搭建haskell环境</title>
+      <link>https://www.howie6879.cn/post/20/</link>
+      <pubDate>Sat, 11 Feb 2017 14:58:20 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/20/</guid>
+      <description>前言  An advanced, purely functional programming language
+ 为什么学习这门语言，现在我也讲不清楚，但如官网所说：这个是一门高级的纯函数式编程语言，本人也是刚刚接触，在此记录下使用vscode搭建环境的过程。
+安装 具体安装的话看这里就好，本人使用mac，经过后面的折腾，我建议直接安装stack，这个一些特性可以看下面： &amp;gt; Installing GHC automatically, in an isolated location. &amp;gt; Installing packages needed for your project. &amp;gt; Building your project. &amp;gt; Testing your project. &amp;gt; Benchmarking your project.
+安装的话很简单：brew install haskell-stack，虽然花的时间略长，但是好用又方便啊，如果不想使用satck，那么可以直接安装：
+brew install ghc brew install cabal-install  个人推荐使用stack，具体安装以及介绍可以看这里。 毕竟源在国外，所以我们首先必须要进行换源，幸好清华大学开源网站镜像站有提供，更具体一点可以看Stackage 镜像使用说明，这里记录下：
+vim ~/.stack/config.yaml # add package-indices: - name: Tsinghua download-prefix: https://mirrors.tuna.tsinghua.edu.cn/hackage/package/ http: https://mirrors.tuna.tsinghua.edu.cn/hackage/00-index.tar.gz setup-info: &amp;quot;http://mirrors.tuna.tsinghua.edu.cn/stackage/stack-setup.yaml&amp;quot; urls: latest-snapshot: http://mirrors.tuna.tsinghua.edu.cn/stackage/snapshots.json lts-build-plans: http://mirrors.</description>
+    </item>
+    
+    <item>
+      <title>CentOS7下使用Privoxy将socket5转http代理</title>
+      <link>https://www.howie6879.cn/post/19/</link>
+      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/19/</guid>
+      <description>shadowsocks是一个socket5的服务，对此，可以使用Privoxy将其转化为http
+部署shadowsocks # 安装 pip install shadowsocks # 创建配置文件 vim /etc/shadowsocks.json # 输入 { &amp;quot;server&amp;quot;: &amp;quot;*.*.*.*&amp;quot;, &amp;quot;server_port&amp;quot;: 443, &amp;quot;password&amp;quot;: &amp;quot;***&amp;quot;, &amp;quot;method&amp;quot;: &amp;quot;aes-256-cfb&amp;quot;, &amp;quot;local_address&amp;quot;: &amp;quot;0.0.0.0&amp;quot;, &amp;quot;local_port&amp;quot;: 1080, &amp;quot;workers&amp;quot;: 1 } # 运行 sslocal -c /etc/shadowsocks.json # 测试当前ip curl --socks5 127.0.0.1:1080 http://httpbin.org/ip #返回结果 { &amp;quot;origin&amp;quot;: &amp;quot;*.*.*.*&amp;quot; }  说明代理成功，接下来安装Privoxy：
+socket5转http yum install -y privoxy # 编辑配置文件 vim /etc/privoxy/config # 添加 forward-socks5 / 127.0.0.1:1080 . systemctl restart privoxy systemctl status privoxy  若果需要在外网访问，则需在/etc/privoxy/config添加listen-address 0.</description>
+    </item>
+    
+    <item>
+      <title>Google Custom Search</title>
+      <link>https://www.howie6879.cn/post/18/</link>
+      <pubDate>Tue, 31 Jan 2017 15:59:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/18/</guid>
+      <description>google自定义搜索，网址参见custom-search，本文记录关于key的申请以及使用方式。
+申请key 首先进入网址custom-search，这里的作用是申请cse搜索网站，填好会生成一个值，具体见cse，然后在console，生成对应的key。
+ 1.点击启用api 2.点击Custom Search API 3.点击创建项目 4.创建好之后点击启用 5.点击创建凭据
+ 最后会生成一个密钥，至此，我们需要的cse以及密钥全部获取完毕。
+使用 官方提供api的接口如下： GET
+https://www.googleapis.com/customsearch/v1?key=INSERT_YOUR_API_KEY&amp;amp;cx=017576662512468239146:omuauf_lfve&amp;amp;q=lectures  api具体参数参考此处</description>
+    </item>
+    
+    <item>
+      <title>如今的生活—2017</title>
+      <link>https://www.howie6879.cn/post/17/</link>
+      <pubDate>Sun, 29 Jan 2017 21:03:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/17/</guid>
+      <description>高三时候，为了写作文 背了这么一句话 生活如同一朵玫瑰，每瓣花代表一根梦想，每根刺代表一个现实 差不多已是三年过去 刺不多，花香犹存
+2017年对我来说是具有挑战的一年 我即将毕业 有以下愿景我希望能实现 温饱、进步、健康、爱 读书、代码、拿得出手的东西
+16年大三暑假我就从学校跑了出来，毕业照回去了一次 工作半年有余，体会不少 总感慨自己就像波涛上的浮萍 身不由己、随波逐流
+女朋友过来跟我一起生活 在一起，知道了责任有多重 我会对她好
+我是一个即将起程的士兵 还没出发，就想回家 但我不是逃兵，我并不害怕 我只是不想长大 但是，面对现实吧，拔掉那些刺 因为我知道自己的能力有多强！</description>
+    </item>
+    
+    <item>
+      <title>Mastering Python 01</title>
+      <link>https://www.howie6879.cn/post/16/</link>
+      <pubDate>Fri, 27 Jan 2017 10:20:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/16/</guid>
+      <description>1.准备  1.说明：《Mastering Python》读书笔记
+2.要求：首先，希望你是处在python3版本，然后拥有一个干净的虚拟环境更是必要。
+3.virtualenv或者anaconda都是不错的选择
+ 2.Pythonic Syntax, Common Pitfalls, and Style Guide 2.1.Pythonic code 对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：
+- Clean - Simple - Beautiful - Explicit - Readable  具体的话请打开你的python解释器：
+import this  细细感受吧。
+2.1.2.Differences between value and identity comparisons 对于下面这个例子：
+a1 = 200 + 56 a2 = 256 b1 = -4 - 1 b2 = -5 c1 = 200 + 57 c2 = 257 d1 = -4 - 2 d2 = -6 print(&#39;%r == %r: %r&#39; % (a1, a2, a1 == a2)) print(&#39;%r is %r: %r&#39; % (a1, a2, a1 is a2)) print(&#39;%r == %r: %r&#39; % (b1, b2, b1 == b2)) print(&#39;%r is %r: %r&#39; % (b1, b2, b1 is b2)) print(&#39;%r == %r: %r&#39; % (c1, c2, c1 == c2)) print(&#39;%r is %r: %r&#39; % (c1, c2, c1 is c2)) print(&#39;%r == %r: %r&#39; % (d1, d2, d1 == d2)) print(&#39;%r is %r: %r&#39; % (d1, d2, d1 is d2))  256 == 256: True 256 is 256: True -5 == -5: True -5 is -5: True 257 == 257: True 257 is 257: False -6 == -6: True -6 is -6: False  可以看到，在值相同的情况下，使用==比较都返回True自不必说，为何有的id相同有的id却不同？</description>
+    </item>
+    
+    <item>
+      <title>ITBooks—简单的书籍下载小工具</title>
+      <link>https://www.howie6879.cn/post/15/</link>
+      <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/15/</guid>
+      <description>1.前言 我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。
+很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。
+下面展示下0.1版本的成果，比如说检索Mastering python，空格用+代替。 python abook.py search Mastering+python Hattem
+2.说明 项目名称叫做ITBooks，当然不准备只做IT方面书籍，文学名著也是可以的。
+ITBooks，是一个查询和下载书籍的python脚本。 目前只存储了allitebooks blah网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用 scrapy爬取信息，具体看ITBooks/spider/allitebooks，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。 添加爬虫只需要在ITBooks/spider/allitebooks/spider，下新建一个scrapy的爬虫脚本即可，对于数据的存储，具体在ITBooks/database ，当然，你可以直接新建一个库。 这里放个allitebooks的爬虫脚本，这里说明下，这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完。
+# -*- coding: utf-8 -*- import datetime import sys import scrapy from scrapy.loader import ItemLoader from scrapy.loader.processors import MapCompose, TakeFirst, Join from scrapy.http import Request from allitebooks.items import AllitebooksItem from allitebooks.pipelines import AllitebooksPipeline if sys.version_info[0] &amp;gt; 2: from urllib.parse import urljoin else: from urlparse import urljoin class AllitebooksSpider(scrapy.Spider): name = &amp;quot;allitebooks&amp;quot; allowed_domains = [&amp;quot;allitebooks.</description>
+    </item>
+    
+    <item>
+      <title>对于python抓取google搜索结果的一些了解</title>
+      <link>https://www.howie6879.cn/post/14/</link>
+      <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/14/</guid>
+      <description>1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉。 本人前段时间有个脚本用到了谷歌搜索，具体见python之由公司名推算出公司官网(余弦相似度)当时直接使用的是一个python开源项目。 但在使用过程中，单ip的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进。 说一说爬取谷歌搜索结果的问题：
+ 1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。 2.访问过快就会出现流量异常
+ 2.如何解决 对于第一个问题：
+应该有看到审查元素出来的都是js，然后检索的url是这样的： https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT
+这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的： 然后再看url： https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1
+对于这个url，相信机智的你应该会明白些什么。 这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的html，简单写下：
+URL_SEARCH = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;quot; URL_NUM = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;quot; def search_page(query, language=&#39;en&#39;, num=None, start=0, pause=2): &amp;quot;&amp;quot;&amp;quot; Google search :param query: Keyword :param language: Language :return: result &amp;quot;&amp;quot;&amp;quot; time.sleep(pause) domain = self.get_random_domain() if num is None: url = URL_SEARCH url = url.format( domain=domain, language=language, query=quote_plus(query)) else: url = URL_NUM url = url.format( domain=domain, language=language, query=quote_plus(query), num=num) try: requests.</description>
+    </item>
+    
+    <item>
+      <title>Mastering Pandas 01</title>
+      <link>https://www.howie6879.cn/post/13/</link>
+      <pubDate>Mon, 21 Nov 2016 14:23:27 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/13/</guid>
+      <description>1.pandas特性 对于python开发者来说，在面对海量数据时，pandas可谓是数据分析的首选，以下关键特性是它如此热门的原因： 1. 可以处理各种不同格式的数据集：时间序列，表格，矩阵数据 2. 促进csv、DB/SQL等来源数据的加载/导入 3. 可以在很大数据集的基础上进行一些过滤、合并、切片等一系列操作 4. 可以根据使用的自定义的规则来处理缺失数据 &amp;hellip; 更多信息可移步pandas进一步了解。
+1.1.安装 # 可使用 anaconda 集成环境 自带科学计算包 pip install pandas  1.2.说明 建议使用ipython，本人使用jupyter notebook
+2.pandas 数据结构 看完本篇文章后，您将了解以下数据结构： 1. pandas是基于NumPy构建的，所以numpy.ndarray数据结构必不可少 2. pandas.Series：一维数据结构 3. pandas.DataFrame：二维数据结构 4. pandas.Panel：三维数据结构 2.1.NumPy ndarray 在数值计算中，NumPy非常重要，其中最重要的数据结构便是ndarray多维数组对象，NumPy提供了许多方法来创造数组。
+首先导入numpy模块
+import numpy as np  2.1.1.numpy.array data_01 = [0, 1, 2, 3] data_02 = [-1, -2, 5.5, 6] # 一维数组 arr_01 = np.array(data_01) arr_01  out: array([0, 1, 2, 3])  # 二维数组 arr_02 = np.</description>
+    </item>
+    
+    <item>
+      <title>HTTP之旅</title>
+      <link>https://www.howie6879.cn/post/12/</link>
+      <pubDate>Fri, 21 Oct 2016 21:53:07 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/12/</guid>
+      <description>读书笔记，参考：《HTTP权威指南》 《图解HTTP》
+ World Wide Web世界 如果说万维网是一棵大树，那么其中一片片脉络鲜明的绿叶便是一个个web站点。
+我们靠近它、欣赏它、甚至创造它。
+1从打开页面开始 某一刻，我们打开浏览器，弹指间输入一串url，按下Enter键，长吁一口气，世界便在眼前缤纷多彩起来，对此，八九年前的我感慨一番后会继续玩我的暴力摩托，如今，我想尝试着解释一下。
+刚刚说到打开url，那便从这里开始吧。
+问：什么是url
+*答：www.jianshu.com 这就是一个url（统一资源定位符），是URI的一个子集。*
+问：什么是URI
+*答：任意一个服务器资源都有名字，即URI（统一资源标识符）*
+问：什么是服务器资源
+*答：一个丰富的页面通过web浏览器发布一系列事务获取并显示，页面资源存放于服务器，这就是服务器资源*
+问：什么是事务</description>
+    </item>
+    
+    <item>
+      <title>CentOS7分布式部署pyspider</title>
+      <link>https://www.howie6879.cn/post/11/</link>
+      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/11/</guid>
+      <description>搭建环境：  系统版本：Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+python版本：Python 3.5.1
+ 搭建python3环境： 本人在尝试过后选择集成环境Anaconda
+编译 # 下载依赖 yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve # 下载python版本 wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz # 或者使用国内源 wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src # 解压 tar -zxf Python-3.5.1.tgz;cd Python-3.5.1 # 编译安装 ./configure --prefix=/usr/local/python3.5 --enable-shared make &amp;amp;&amp;amp; make install # 建立软链接 ln -s /usr/local/python3.</description>
+    </item>
+    
+    <item>
+      <title>祝你生日快乐</title>
+      <link>https://www.howie6879.cn/post/10/</link>
+      <pubDate>Wed, 28 Sep 2016 22:28:16 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/10/</guid>
+      <description>2016-09-29 很荣幸，能将你写到我的生命里
+生命不过百年，你我相识六年有余
+记忆中我为你过了四次生日，高一、大一、大二、大三
+第五次，祝你生日快乐
+这次却有些不同，因为我们相爱了，我可以加上一句，我爱你
+或许有些矫情，可在这夜晚中我毫不介意
+我爱你
+如果把生命想象成一条线，我们早已经在某个点相交，然后相互环绕
+越来越乱，直至一团，哪怕是世界上最好的手艺人
+这两条交织在一起的线，是怎样也无法被分开的
+不论过去或未来
+忘不了16年，初牵着你手的心动
+看电影，压马路，鼓浪屿
+很抱歉没能好好带你去玩
+还记得年后情人节的美人鱼
+开学前期四月一日的愚人节
+每次见面，都是纪念日
+暑假上海宾馆的蜗居
+南京古城的鸭血粉丝汤
+你念念叨叨的老冰棍
+总统府、中山路、那所大学的典礼
+我们的回忆有很多
+今天，你生日，我会亲口对你说
+亲爱的，生日快乐，我爱你
+一直爱到
+未来的某天，我们老眼昏花
+你依旧读着我写的这些话</description>
+    </item>
+    
+    <item>
+      <title>python之由公司名推算出公司官网(余弦相似度)</title>
+      <link>https://www.howie6879.cn/post/09/</link>
+      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/09/</guid>
+      <description>1.问题 对展会数据分类后，我的新任务是如何通过公司名、公司地址、国家等海关数据推断出该公司的官网网站（若官网不存在则不考虑） 以下数据仅供参考：
+   公司名 国家 地址     JPW INDUSTRIES INC  427 NEW SANFORD RD LAVERGNE TN 37086 US   Fujian Xishi Co., Ltd CN, CHINA    BusinessPartner Co.,ltd     BENKAI Co.,Ltd     GOLD INC  18245 E 40TH AVE AURORA CO 80011 US    需要得到结果：
+   公司名 官方网站     JPW INDUSTRIES INC http://http://www.</description>
+    </item>
+    
+    <item>
+      <title>python之朴素贝叶斯对展会数据分类</title>
+      <link>https://www.howie6879.cn/post/08/</link>
+      <pubDate>Wed, 28 Sep 2016 20:34:40 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/08/</guid>
+      <description>目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度。 国内数据如下： 国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理。 国外数据就有些尴尬： 国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。 现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入： 训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。 那么相对应，国外待分类的展会数据便是测试集。 我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。 可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等  思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。 在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。 那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;quot;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;quot; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;]  那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;  以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。 但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39;  这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。 大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。 这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).</description>
+    </item>
+    
+    <item>
+      <title>PythonTip</title>
+      <link>https://www.howie6879.cn/post/07/</link>
+      <pubDate>Wed, 28 Sep 2016 20:32:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/07/</guid>
+      <description>给你一个list L, 如 L=[2,8,3,50], 对L进行升序排序并输出,如样例L的结果为[2,3,8,50]
+ L.sort() print(L)   给你一个字符串 a， 如a=‘12345’，对a进行逆序输出a。
+ print(a[::-1])   给你一字典a，如a={1:1,2:2,3:3}，输出字典a的key，以&amp;rsquo;,&amp;lsquo;链接，如‘1,2,3&amp;rsquo;。
+ print(&#39;,&#39;.join(str(i) for i in a.keys()))   给你一个字符串 a， 输出字符奇数位置的字符串。如a=‘12345’，则输出135。
+ print(a[::2])   输出100以内的所有素数，素数之间以一个空格区分
+ def prime(num): for i in range(2,num): if not num%i:return num print(&#39; &#39;.join(str(i) for i in set(range(2,101))-set(map(prime,range(2,101)))))   已知矩形长a,宽b,输出其面积和周长，面积和周长以一个空格隔开
+ print(&amp;quot;%d %d&amp;quot;%(a*b,(a+b)*2))   给你一个list L, 如 L=[0,1,2,3,4], 输出L的中位数（若结果为小数，则保留一位小数）。
+ L.sort() if len(L)%2==0: print(sum(L[int((len(L))/2-1):int((len(L))/2+1)])/2.0) else: print(L[int((len(L)-1)/2)])   给你两个正整数a和b， 输出它们的最大公约数</description>
+    </item>
+    
+    <item>
+      <title>cx_Freeze打包py文件</title>
+      <link>https://www.howie6879.cn/post/06/</link>
+      <pubDate>Wed, 28 Sep 2016 20:30:57 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/06/</guid>
+      <description>最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist  如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;quot;packages&amp;quot;: [&amp;quot;os&amp;quot;], &amp;quot;excludes&amp;quot;: [&amp;quot;tkinter&amp;quot;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;quot;win32&amp;quot;: base = &amp;quot;Win32GUI&amp;quot; setup( name = &amp;quot;guifoo&amp;quot;, version = &amp;quot;0.1&amp;quot;, description = &amp;quot;My GUI application!</description>
+    </item>
+    
+    <item>
+      <title>Markdown简明教程</title>
+      <link>https://www.howie6879.cn/post/05/</link>
+      <pubDate>Wed, 28 Sep 2016 20:27:02 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/05/</guid>
+      <description>## 概述 ## 基本语法  分级标题 粗体和斜体 链接和图像 列表 文字引用 代码块 下划线 表格 反斜杠  说明 1.概述 本教程的目的是让你读完本教程后，能够使用Markdown来应付一些日常的书写；Markdown的目标是实现易读易写，在这里我觉得还要加上一点，那就是易学，既然易学，那为什么还要写教程呢？因为我必须让我女朋友也学会Markdown啊，哈哈。
+   参考： Markdown 语法说明
+使用环境：可以自己下载Markdown编辑器，也可以使用简书，设置方式如下：设置-&amp;gt;基础设置-&amp;gt;选择常用的编辑器切换到Markdown，然后在编辑文章时候就默认是Markdown。
+阅读：本篇教程一共九个 Markdown的基本语法，看完后足够你应付日常书写，Markdown语法和显示效果一一对应，可以使用简书自带的编辑器进行练习。
+ 2.基本语法 2-1.分级标题 为什么叫做分级标题呢？因为标题可以分为数个等级，一种是用#... title表示，注意那个#的省略号代表#的个数可以为1~6个，如# title表示一级标题， ## title表示二级标题，以此类推;还有一种是用任何数量的=和-具体效果如下所示： Markdown语法：
+# 一级标题 ## 二级标题 ### 三级标题 #### 四级标题 ##### 五级标题 ###### 六级标题 这也是一级标题 ====== 这也是二级标题 ------  显示效果：
+一级标题 二级标题 三级标题 四级标题 五级标题 六级标题 这也是一级标题 这也是二级标题 2-2.粗体和斜体 使用**和*表示粗体和斜体,还可以用__和_表示，具体效果如下：
+Markdown语法：
+**我是粗体** *我是斜体* __我也是粗体__ _我也是斜体_  显示效果：</description>
+    </item>
+    
+    <item>
+      <title>python之装饰器</title>
+      <link>https://www.howie6879.cn/post/04/</link>
+      <pubDate>Wed, 28 Sep 2016 20:24:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/04/</guid>
+      <description>认识装饰器 在python中，对于一个函数，若想在其运行前后做点什么，那么装饰器是再好不过的选择，话不多说，上代码。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 01.py __author__ = &#39;howie&#39; from functools import wraps def decorator(func): @wraps(func) def wrapper(*args, **kwargs): print(&amp;quot;%s was called&amp;quot; % func.__name__) func(*args, **kwargs) return wrapper @decorator def hello(name=&amp;quot;howie&amp;quot;): print(&amp;quot;Hello %s!&amp;quot; % name) hello()  outputs: hello was called Hello howie!  这段代码，初看之下，确实不是很理解，接下来一步一步分析，看看装饰器到底是怎么工作的。 装饰器原理 在python中，方法允许作为参数传递，想在某个函数执行前后加点料，也可以这样简单实现。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 02-1.py __author__ = &#39;howie&#39; def decorator(func): print(&amp;quot;%s was called&amp;quot; % func.__name__) func() def hello(name=&amp;quot;howie&amp;quot;): print(&amp;quot;Hello %s!</description>
+    </item>
+    
+    <item>
+      <title>mysql基本操作命令汇总--笔记</title>
+      <link>https://www.howie6879.cn/post/03/</link>
+      <pubDate>Wed, 28 Sep 2016 20:21:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/03/</guid>
+      <description>一、基本操作  对数据库以及表的一些基本操作
+ 1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student;  1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.</description>
+    </item>
+    
+    <item>
+      <title>linux学习之系统启动过程</title>
+      <link>https://www.howie6879.cn/post/02/</link>
+      <pubDate>Wed, 28 Sep 2016 20:16:19 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/02/</guid>
+      <description>1.内核引导 操作系统接管硬件之后，首先读入/boot目录下的内核文件，本人使用ubuntu 15.10:
+2.启动初始化进程 没有这个进程,系统中任何进程都不会启动,从进程编号(pid)看出,init是第一个运行的程序：
+ps aux USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND root 1 0.0 0.0 185192 5788 ? Ss 3月03 0:10 /sbin/init splash //各栏位意义，参考鸟哥私房菜 USER：该 process 属於哪个使用者帐号的？ PID ：该 process 的程序识别码。 %CPU：该 process 使用掉的 CPU 资源百分比； %MEM：该 process 所占用的实体内存百分比； VSZ ：该 process 使用掉的虚拟内存量 (Kbytes) RSS ：该 process 占用的固定的内存量 (Kbytes) TTY ：该 process 是在那个终端机上面运行，若与终端机无关则显示 ?，另外， tty1-tty6是本机上面的登陆者程序，若为 pts/0 等等的，则表示为由网络连接进主机的程序。 STAT：该程序目前的状态，状态显示与 ps -l 的 S 旗标相同 (R/S/T/Z) START：该 process 被触发启动的时间； TIME ：该 process 实际使用 CPU 运行的时间。 COMMAND：该程序的实际命令为何？  所以第一个运行的程序是/sbin/init。</description>
+    </item>
+    
+    <item>
+      <title>快速将网页版简书打造成具有个人特色的简书桌面应用</title>
+      <link>https://www.howie6879.cn/post/01/</link>
+      <pubDate>Wed, 28 Sep 2016 18:04:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/01/</guid>
+      <description>近日对谷歌扩展以及应用很感兴趣，于是研究了下官方文档，特写此文记录一下，若有错误，敬请指教，如需转载，请说明出处。
+1.技术需求 怎么用html css javascript这些前端技术来编写一个桌面应用，说到这，不得不说谷歌浏览器这款伟大的产品，其自行开发的V8引擎大大提升了javascript在chrome中的执行效率，甚至可以将谷歌浏览器想象成一个操作系统，而chrome app则是运行在其上的应用。
+chrome app开发十分迅速，是一个非常好玩的技术，下面就以网页版的简书为例子，快速将其打造成一个桌面应用，而且还是兼容的呢。
+ 文档以及书籍参考： 官方文档：chrome apps about_apps 参考书籍：Chrome扩展及应用开发
+ 利用谷歌直接将一个网页打造成桌面应用实现起来可谓十分轻松，开发者只需要掌握html css javascript前端技术，再结合官方文档，基本上都能快速掌握。
+所以，只要你有基本的html css javascript技术，就可以很快的开发出有自己特色的简述桌面应用。反之，请去百度之，很快就可以基本掌握。
+对于本篇文章的目的：快速将网页版简书打造成桌面应用，只需要掌握Webview Tag，便可完成简书的桌面应用。
+在进行代码层次的说明之前，先上一张完成后的效果图： 2.应用说明 在编写应用之前，请容我先解释一下chrome app应该包含哪些文件，其由以下部分组成。 &amp;gt;- manifest文件将应用的一些信息提供给Chrome:这个应用是？它怎么运行？需要哪些额外的权限？ &amp;gt;- background script用来创建一个事件页面然后可靠地管理软件生命周期 &amp;gt;- 所有代码必须包含在chrome app的包内，其中包含html css js以及Native Client模块。 &amp;gt;- 所有icons和其他有利资源最好也包括在包里面 &amp;gt;- 说明：若想深入了解，可以去看官方文档：chrome apps first_app
+知道了这些后，我们就可以看一下代码的目录结构，进行了解，具体再一一说明： 2.代码说明 可以看到图中分别有css/ images/ js/文件夹以及main.html manifest.json文件，不过最主要的是manifest.json main.html background.js这三个文件，下面的叙述也是围绕这三个文件来做讲解。
+2.1.manifest.json manifest.json文件的作用在上面的应用说明中已经解释得很清楚，其实不仅仅是chrome app，谷歌扩展也需要一个json格式的manifest，所以manifest.json文件很重要。 代码如下所示：
+{ &amp;quot;app&amp;quot;:{ &amp;quot;background&amp;quot;:{ &amp;quot;scripts&amp;quot;:[&amp;quot;js/background.js&amp;quot;] } }, &amp;quot;manifest_version&amp;quot;:2, &amp;quot;name&amp;quot;:&amp;quot;简书&amp;quot;, &amp;quot;version&amp;quot;:&amp;quot;0.1.0&amp;quot;, &amp;quot;description&amp;quot;:&amp;quot;谷歌应用版的简书，对网页版本作出一些优化#__#,添加到桌面方便启动.&amp;quot;, &amp;quot;icons&amp;quot;: { &amp;quot;16&amp;quot;: &amp;quot;images/ico_16.</description>
     </item>
     
   </channel>

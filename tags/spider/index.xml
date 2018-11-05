@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>howie6879</title>
-    <link>https://www.howie6879.cn/tags/spider/index.xml</link>
-    <description>Recent content on howie6879</description>
+    <title>Spider on howie6879</title>
+    <link>https://www.howie6879.cn/tags/spider/</link>
+    <description>Recent content in Spider on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://www.howie6879.cn/tags/spider/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 26 Jan 2017 23:07:42 +0000</lastBuildDate>
+    
+	<atom:link href="https://www.howie6879.cn/tags/spider/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>ITBooks—简单的书籍下载小工具</title>
@@ -14,150 +17,12 @@
       <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/15/</guid>
-      <description>
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150814.jpg-blog.howie&#34; alt=&#34;run&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;1-前言&#34;&gt;1.前言&lt;/h2&gt;
-
-&lt;p&gt;我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。&lt;/p&gt;
-
-&lt;p&gt;很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。&lt;/p&gt;
-
-&lt;p&gt;下面展示下&lt;code&gt;0.1&lt;/code&gt;版本的成果，比如说检索&lt;code&gt;Mastering python&lt;/code&gt;，空格用&lt;code&gt;+&lt;/code&gt;代替。
-&lt;code&gt;python abook.py search Mastering+python Hattem&lt;/code&gt;&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h2 id=&#34;2-说明&#34;&gt;2.说明&lt;/h2&gt;
-
-&lt;p&gt;项目名称叫做&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，当然不准备只做&lt;code&gt;IT&lt;/code&gt;方面书籍，文学名著也是可以的。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150834.jpg-blog.howie&#34; alt=&#34;literature&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，是一个查询和下载书籍的&lt;code&gt;python&lt;/code&gt;脚本。
-目前只存储了&lt;code&gt;allitebooks blah&lt;/code&gt;网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用  &lt;code&gt;scrapy&lt;/code&gt;爬取信息，具体看&lt;code&gt;ITBooks/spider/allitebooks&lt;/code&gt;，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。
-添加爬虫只需要在&lt;code&gt;ITBooks/spider/allitebooks/spider&lt;/code&gt;，下新建一个&lt;code&gt;scrapy&lt;/code&gt;的爬虫脚本即可，对于数据的存储，具体在&lt;code&gt;ITBooks/database
-&lt;/code&gt;，当然，你可以直接新建一个库。
-这里放个&lt;code&gt;allitebooks&lt;/code&gt;的爬虫脚本，这里说明下，&lt;strong&gt;这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
-import datetime
-import sys
-import scrapy
-from scrapy.loader import ItemLoader
-from scrapy.loader.processors import MapCompose, TakeFirst, Join
-from scrapy.http import Request
-from allitebooks.items import AllitebooksItem
-from allitebooks.pipelines import AllitebooksPipeline
-
-if sys.version_info[0] &amp;gt; 2:
-    from urllib.parse import urljoin
-else:
-    from urlparse import urljoin
-
-
-class AllitebooksSpider(scrapy.Spider):
-    name = &amp;quot;allitebooks&amp;quot;
-    allowed_domains = [&amp;quot;allitebooks.com&amp;quot;]
-    start_urls = (&#39;http://www.allitebooks.com&#39;, )
-
-    def parse(self, response):
-        &amp;quot;&amp;quot;&amp;quot;
-        Get the next pages and yield requests
-        :param response:
-        :return: request url
-        &amp;quot;&amp;quot;&amp;quot;
-        pages = response.css(&#39;.pagination&amp;gt;a::text&#39;).extract()[-1]
-        for page in range(int(pages)):
-            # Generate a list of urls
-            url = urljoin(response.url, &#39;/page/&#39; + str(page + 1))
-            yield Request(url, callback=self.parse_detail)
-
-    def parse_detail(self, response):
-        &amp;quot;&amp;quot;&amp;quot;
-        Get item URLs and yield Requests
-        :param response:
-        :return: request url
-        &amp;quot;&amp;quot;&amp;quot;
-        urls = response.css(
-            &#39;article&amp;gt;div.entry-body&amp;gt;header&amp;gt;.entry-title&amp;gt;a::attr(href)&#39;
-        ).extract()
-        for url in urls:
-            # Remove duplicate links
-            sqlDb = AllitebooksPipeline()
-            isExist = sqlDb.search_url(&#39;allitebooks&#39;, url)
-            if not isExist:
-                yield Request(url, callback=self.parse_item)
-
-    def parse_item(self, response):
-        &amp;quot;&amp;quot;&amp;quot;
-        This function parses a property page.
-        :param response:
-        :return: item
-        &amp;quot;&amp;quot;&amp;quot;
-        # Create the loader using response
-        l = ItemLoader(item=AllitebooksItem(), response=response)
-        # Load primary fields using css expressions
-        l.add_css(&#39;title&#39;, &#39;.single-title::text&#39;, MapCompose(str.strip))
-        l.add_css(&#39;cover&#39;, &#39;.entry-body-thumbnail&amp;gt;a&amp;gt;img::attr(src)&#39;)
-        book_details = response.css(&#39;.book-detail&amp;gt;dl&amp;gt;dd::text&#39;).extract()
-        author_list = response.css(
-            &#39;.book-detail&amp;gt;dl&amp;gt;dd:nth-child(2)&amp;gt;a::text&#39;).extract()
-        category_list = response.css(
-            &#39;.book-detail&amp;gt;dl&amp;gt;dd:nth-child(16)&amp;gt;a::text&#39;).extract()
-        author = &#39;,&#39;.join(author_list)
-        category = &#39;,&#39;.join(category_list)
-        book_details = book_details[len(author_list):(-len(category_list))]
-        l.add_value(&#39;author&#39;, author, MapCompose(str.strip))
-        l.add_value(&#39;category&#39;, category, MapCompose(str.strip))
-        item_name = &amp;quot;isbn year pages language file_size file_format&amp;quot;.split()
-        for index, value in enumerate(item_name):
-            l.add_value(value, book_details[index], MapCompose(str.strip))
-        l.add_css(&#39;description&#39;, &#39;.entry-content&#39;)
-        l.add_css(&#39;download&#39;, &#39;span.download-links&amp;gt;a::attr(href)&#39;,
-                  MapCompose(str.strip), TakeFirst())
-        # Housekeeping fields
-        l.add_value(&#39;url&#39;, response.url)
-        l.add_value(&#39;spider&#39;, self.name)
-        l.add_value(&#39;date&#39;, datetime.datetime.now())
-        yield l.load_item()
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;现在就是由于想在本地运行，对于自动更新是个问题，本来想使用&lt;code&gt;celery&lt;/code&gt;将&lt;code&gt;scrapy&lt;/code&gt;爬虫弄成一个个任务，我是可以在机器上这样部署，可是这对于使用者不大现实，目前是手动更新（确实很挫）。&lt;/p&gt;
-
-&lt;p&gt;接下来说说使用方法，如果你感兴趣，可以试试^_^
-脚本在&lt;code&gt;python2.7+和python3&lt;/code&gt;下都可以运行，我测试过，但是爬虫却没在&lt;code&gt;python2&lt;/code&gt;下测过，所以我建议还是用3吧。
-运行以下命令：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/howie6879/ITBooks
-cd /ITBooks/ITBooks
-python abook.py search Mastering+Python Hattem
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;具体使用方法如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;  python abook.py search &amp;lt;title&amp;gt; &amp;lt;author&amp;gt;
-  python abook.py title &amp;lt;title&amp;gt;
-  python abook.py author &amp;lt;author&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;也在根目录下写了个&lt;code&gt;bash&lt;/code&gt;，其实没什么差别：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;bash run.sh [search|title|author] &amp;lt;value&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150854.jpg-blog.howie&#34; alt=&#34;search&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150911.jpg-blog.howie&#34; alt=&#34;command&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-26-150928.jpg-blog.howie&#34; alt=&#34;download&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-
-&lt;p&gt;写在最后，本人技术微末，如果错漏，欢迎指教，项目&lt;code&gt;github&lt;/code&gt;地址在这里&lt;a href=&#34;https://github.com/howie6879/ITBooks&#34;&gt;ITBooks&lt;/a&gt;，欢迎各位添砖加瓦。&lt;/p&gt;
-</description>
+      <description>1.前言 我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。
+很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。
+下面展示下0.1版本的成果，比如说检索Mastering python，空格用+代替。 python abook.py search Mastering+python Hattem
+2.说明 项目名称叫做ITBooks，当然不准备只做IT方面书籍，文学名著也是可以的。
+ITBooks，是一个查询和下载书籍的python脚本。 目前只存储了allitebooks blah网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用 scrapy爬取信息，具体看ITBooks/spider/allitebooks，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。 添加爬虫只需要在ITBooks/spider/allitebooks/spider，下新建一个scrapy的爬虫脚本即可，对于数据的存储，具体在ITBooks/database ，当然，你可以直接新建一个库。 这里放个allitebooks的爬虫脚本，这里说明下，这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完。
+# -*- coding: utf-8 -*- import datetime import sys import scrapy from scrapy.loader import ItemLoader from scrapy.loader.processors import MapCompose, TakeFirst, Join from scrapy.http import Request from allitebooks.items import AllitebooksItem from allitebooks.pipelines import AllitebooksPipeline if sys.version_info[0] &amp;gt; 2: from urllib.parse import urljoin else: from urlparse import urljoin class AllitebooksSpider(scrapy.Spider): name = &amp;quot;allitebooks&amp;quot; allowed_domains = [&amp;quot;allitebooks.</description>
     </item>
     
     <item>
@@ -166,161 +31,13 @@ python abook.py search Mastering+Python Hattem
       <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
       
       <guid>https://www.howie6879.cn/post/14/</guid>
-      <description>
-
-&lt;h2 id=&#34;1-问题&#34;&gt;1.问题&lt;/h2&gt;
-
-&lt;p&gt;目前主流的搜索引擎，非&lt;code&gt;google&lt;/code&gt;莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉。
-本人前段时间有个脚本用到了谷歌搜索，具体见&lt;a href=&#34;http://www.jianshu.com/p/d1cf6c6df6bb&#34;&gt;python之由公司名推算出公司官网(余弦相似度)&lt;/a&gt;当时直接使用的是一个&lt;code&gt;python&lt;/code&gt;开源项目。
-但在使用过程中，单&lt;code&gt;ip&lt;/code&gt;的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进。
-说一说爬取谷歌搜索结果的问题：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。
-2.访问过快就会出现流量异常&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h2 id=&#34;2-如何解决&#34;&gt;2.如何解决&lt;/h2&gt;
-
-&lt;p&gt;对于第一个问题：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141240.jpg-blog.howie&#34; alt=&#34;大串js&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;应该有看到审查元素出来的都是js，然后检索的url是这样的：
-&lt;code&gt;https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：
-&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141259.jpg-blog.howie&#34; alt=&#34;&#34; /&gt;
-然后再看url：
-&lt;code&gt;https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;对于这个&lt;code&gt;url&lt;/code&gt;，相信机智的你应该会明白些什么。
-这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的&lt;code&gt;html&lt;/code&gt;，简单写下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;    URL_SEARCH = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;quot;
-    URL_NUM = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;quot;
-
-    def search_page(query, language=&#39;en&#39;, num=None, start=0, pause=2):
-        &amp;quot;&amp;quot;&amp;quot;
-        Google search
-        :param query: Keyword
-        :param language: Language
-        :return: result
-        &amp;quot;&amp;quot;&amp;quot;
-        time.sleep(pause)
-        domain = self.get_random_domain()
-        if num is None:
-            url = URL_SEARCH
-            url = url.format(
-                domain=domain, language=language, query=quote_plus(query))
-        else:
-            url = URL_NUM
-            url = url.format(
-                domain=domain, language=language, query=quote_plus(query), num=num)
-        try:
-            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-            r = requests.get(url=url,
-                             allow_redirects=False,
-                             verify=False,
-                             timeout=30)
-            charset = chardet.detect(r.content)
-            content = r.content.decode(charset[&#39;encoding&#39;])
-            return content
-        except Exception as e:
-            logging.error(e)
-            return None
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;到了这里，问题才刚开始，你可以做个实验，我假设你是使用代理进行谷歌搜索，如果你连续不断无间隔使用谷歌搜索某一关键字二三十下，不出意外你会被要求进行这样的验证：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141352.jpg-blog.howie&#34; alt=&#34;流量异常&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这个问题可真是让人十分厌恶，我并没有很好的解决办法，能做的唯有尽量避免：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;1.ip轮询
-2.每次结果爬取增加休眠
-3.随机user_agent是必备&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;第一点和第三点不必多说，对于第二点增加休眠时间则需要我们好好地进行检测。
-假设在单ip随机ua情况下：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;1.这种情况下不休眠的话请求个两三次就会直接被封（第二天会被解封）
-2.个人觉得这不是个解决办法，因为对休眠时间把控不好的话就会造成封ip，如果不想被封，我测试的话需要休眠60s浮动，这没什么意义。
-3.而且这种情况下呗发现是直接封ip，对开发者太不友好。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;对于这种情况，受同事神来一句，发现一个暂时的解决办法，请看下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-01-25-141408.jpg-blog.howie&#34; alt=&#34;google&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;单一ip不停地访问统一谷歌域名自然很容易被察觉，谷歌全球190+的域名，难道都在实时的统计ip么，可能有，但绝对不会像单域名那样严格，来做个测试。
-我将全球190+谷歌域名集中起来，像ua一样随机轮换，然后进行测试(单ip)，结果还不错：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;1.首先没有出现被封ip，只会提示流量异常
-2.还是需要休眠，本人休眠5~15s没有被封过，可根据自身情况来，如果想稳妥点就5~30s吧&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;我将这些写成了一个项目，&lt;a href=&#34;https://github.com/howie6879/MagicGoogle&#34;&gt;MagicGoogle&lt;/a&gt;，具体代码可以看这里，对应的功能很简单：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from MagicGoogle import MagicGoogle
-import pprint
-
-# Or PROXIES = None
-PROXIES = [{
-    &#39;http&#39;: &#39;http://192.168.2.207:1080&#39;,
-    &#39;https&#39;: &#39;http://192.168.2.207:1080&#39;
-}]
-
-# Or MagicGoogle()
-mg = MagicGoogle(PROXIES)
-
-#  Crawling the whole page
-result = mg.search_page(query=&#39;python&#39;)
-
-# Crawling url
-for url in mg.search_url(query=&#39;python&#39;):
-    pprint.pprint(url)
-
-# Output
-# &#39;https://www.python.org/&#39;
-# &#39;https://www.python.org/downloads/&#39;
-# &#39;https://www.python.org/about/gettingstarted/&#39;
-# &#39;https://docs.python.org/2/tutorial/&#39;
-# &#39;https://docs.python.org/&#39;
-# &#39;https://en.wikipedia.org/wiki/Python_(programming_language)&#39;
-# &#39;https://www.codecademy.com/courses/introduction-to-python-6WeG3/0?curriculum_id=4f89dab3d788890003000096&#39;
-# &#39;https://www.codecademy.com/learn/python&#39;
-# &#39;https://developers.google.com/edu/python/&#39;
-# &#39;https://learnpythonthehardway.org/book/&#39;
-# &#39;https://www.continuum.io/downloads&#39;
-
-# Get {&#39;title&#39;,&#39;url&#39;,&#39;text&#39;}
-for i in mg.search(query=&#39;python&#39;, num=1):
-    pprint.pprint(i)
-
-# Output
-# {&#39;text&#39;: &#39;The official home of the Python Programming Language.&#39;,
-# &#39;title&#39;: &#39;Welcome to Python .org&#39;,
-# &#39;url&#39;: &#39;https://www.python.org/&#39;}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;3-总结&#34;&gt;3.总结&lt;/h2&gt;
-
-&lt;p&gt;对google搜索结果的爬取，有以下建议：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;1.ip轮询
-2.ua随机
-3.domain随机
-4.休眠&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
+      <description>1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉。 本人前段时间有个脚本用到了谷歌搜索，具体见python之由公司名推算出公司官网(余弦相似度)当时直接使用的是一个python开源项目。 但在使用过程中，单ip的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进。 说一说爬取谷歌搜索结果的问题：
+ 1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。 2.访问过快就会出现流量异常
+ 2.如何解决 对于第一个问题：
+应该有看到审查元素出来的都是js，然后检索的url是这样的： https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT
+这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的： 然后再看url： https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1
+对于这个url，相信机智的你应该会明白些什么。 这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的html，简单写下：
+URL_SEARCH = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;quot; URL_NUM = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;quot; def search_page(query, language=&#39;en&#39;, num=None, start=0, pause=2): &amp;quot;&amp;quot;&amp;quot; Google search :param query: Keyword :param language: Language :return: result &amp;quot;&amp;quot;&amp;quot; time.sleep(pause) domain = self.get_random_domain() if num is None: url = URL_SEARCH url = url.format( domain=domain, language=language, query=quote_plus(query)) else: url = URL_NUM url = url.format( domain=domain, language=language, query=quote_plus(query), num=num) try: requests.</description>
     </item>
     
   </channel>
