@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        统计学习方法笔记：3.k近邻法 - howie6879
+        如何用Python创建一个简单的神经网络 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -60,143 +60,224 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                统计学习方法笔记：3.k近邻法
+                如何用Python创建一个简单的神经网络
             </h1>
             <div class="post-data">
-                Published on Sep 29, 2018 ,1 min reading time
+                Published on Dec 13, 2018 ,2 min reading time
             </div>
         </div>
         <div id="post-content" class="post-content">
             
 <p class="post-tags"> 
 	
-	<a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95">统计学习方法</a>
+	<a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91">翻译</a>
 	
 	<a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">机器学习</a>
-	
-	<a href="https://www.howie6879.cn/tags/mlhub123">mlhub123</a>
 	
 </p>
 
  
 
-<p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
+<h2 id="如何用python创建一个简单的神经网络">如何用Python创建一个简单的神经网络</h2>
 
 <ul>
-<li>阅读章节：第三章：k近邻法</li>
-<li>开始时间：2018-09-29</li>
-<li>结束时间：2018-10-23（比较忙）</li>
-<li>目标：读完第三章，掌握基本概念，产出一篇笔记</li>
+<li>原文地址：<a href="https://www.kdnuggets.com/2018/10/simple-neural-network-python.html">How to Create a Simple Neural Network in Python</a></li>
+<li>作者：<a href="https://www.linkedin.com/in/garbade">Dr. Michael J. Garbade</a></li>
+<li>翻译：<a href="https://github.com/howie6879">howie6879</a></li>
 </ul>
 
-<p>k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：</p>
+<blockquote>
+<p>理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点</p>
+</blockquote>
+
+<p>神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。</p>
+
+<p>拥有五年以上经验的德国机器学习专家<a href="https://www.education-ecosystem.com/andreybu/REaxr-machine-learning-model-python-sklearn-kera/oPGdP-machine-learning-model-python-sklearn-kera/">Andrey Bulezyuk</a>说过：<strong>神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。</strong></p>
+
+<p>基本上，一个ANN由以下组件构成：</p>
 
 <ul>
-<li>k近邻算法</li>
-<li>k近邻模型</li>
-<li>k近邻法的实现：kd树</li>
+<li>输入层：接受传递数据</li>
+<li>隐藏层</li>
+<li>输出层</li>
+<li>各层之间的权重</li>
+<li>每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用<code>Sigmoid</code>激活函数</li>
 </ul>
 
-<h2 id="k近邻算法">k近邻算法</h2>
+<p>神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据</p>
 
-<p><strong>什么是k近邻算法？</strong></p>
+<p>训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出</p>
 
-<p>给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,&hellip;,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$</p>
+<p>下面展示了一个简单的神经网络结构图：</p>
 
-<p>关键点在于是如何进行类别的判断，描述如下：</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fy56j9phy3j30jg07wt9v.jpg" alt="" /></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvroehv4vej30yo09w44m.jpg" alt="" /></p>
+<p>而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。</p>
 
-<p>思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类</p>
+<p>在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。</p>
 
-<p>上面<code>3.1</code>的公式这里解释一下：随着变量<code>j</code>的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功</p>
+<h3 id="问题">问题</h3>
 
-<h2 id="k近邻模型">k近邻模型</h2>
+<p>这里用表格列出了我们需要解决的问题：</p>
 
-<p>k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fy56j9fdidj30lg05ddfx.jpg" alt="" /></p>
 
-<h3 id="模型">模型</h3>
+<p>我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。</p>
 
-<p>通过上面的叙述，当我们知道：</p>
+<p>如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。</p>
+
+<p>让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)</p>
+
+<h3 id="创建一个神经网络类">创建一个神经网络类</h3>
+
+<p>我们将在Python中创建一个<code>NeuralNetwork</code>类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数</p>
+
+<p>尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入<code>numpy</code>包来协助计算。</p>
+
+<p>该库带有以下四个重要方法：</p>
 
 <ul>
-<li>训练集</li>
-<li>距离度量（明可夫斯基距离）</li>
-<li>k值</li>
-<li>分类决策规则（多数表决）</li>
+<li>exp：用于生成自然指数</li>
+<li>array：用于生成矩阵</li>
+<li>dot：用于乘法矩阵</li>
+<li>random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)</li>
 </ul>
 
-<p>此时对于任何一个新的输入实例，都可以确定其所属的类</p>
+<h4 id="应用-sigmoid-激活函数">应用 Sigmoid 激活函数</h4>
 
-<p><strong>什么是单元？</strong></p>
+<p>该神经网络将使用<a href="https://en.wikipedia.org/wiki/Sigmoid_function">Sigmoid function</a>作为激活函数，其绘制了一个典型的<code>S</code>形曲线：</p>
 
-<p>特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元<code>（cell）</code>，最终会将特征空间划分为下图所示：</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fy56j9u6qhj308w05xq2v.jpg" alt="" /></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwdo9ddtq4j30mm0gytc7.jpg" alt="" /></p>
+<p>此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。</p>
 
-<h3 id="距离度量">距离度量</h3>
+<p>随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。</p>
 
-<p>特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）</p>
+<p>一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是<code>X</code>，那么它的导数将是<code>x * (1-x)</code>。</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwdogsqjgyj310w0ikagg.jpg" alt="" /></p>
+<p>推导过程如下：</p>
 
-<h3 id="k值的选择">k值的选择</h3>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fy56j9y3f2j307e05ngll.jpg" alt="" /></p>
 
-<p>k值的选择会对k近邻法的结果产生重大影响：</p>
+<h4 id="训练模型">训练模型</h4>
+
+<p>在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。</p>
+
+<p>这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值</p>
+
+<p>请记住，在最开始阶段我们会对每个权重分配一个随机值</p>
+
+<p>下面是我们在这个神经网络示例问题中使用的训练过程:</p>
 
 <ul>
-<li>如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合</li>
-<li>如果较大：k值的增大就意味着整体的模型变得简单</li>
+<li>从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来</li>
+<li>我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异</li>
+<li>根据误差程度，我们利用<a href="https://en.wikipedia.org/wiki/Backpropagation#Finding_the_derivative_of_the_error">Error Weighted Derivative formula</a>对权重进行微调</li>
+<li>我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集</li>
 </ul>
 
-<h3 id="分类决策规则">分类决策规则</h3>
+<p>我们使用<code>.T</code>函数将矩阵从水平位置转换到垂直位置，因此数据会被这样排序：</p>
 
-<p>k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fy56j9iukuj305m045jr9.jpg" alt="" /></p>
 
-<h2 id="k近邻法的实现-kd树">k近邻法的实现：kd树</h2>
+<p>最终，神经元的权重将会被提供的训练集优化，因此，如果神经元被要求去思考一个新的情况，而这个情况和前面的情况是一样的，那么神经元就可以做出准确的预测，这就是反向传播的发生方式。</p>
 
-<p>实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索</p>
+<h3 id="总结">总结</h3>
 
-<p>k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的</p>
+<p>最终我们初始化了<code>NeuralNetwork</code>类并且运行代码</p>
 
-<p>为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法</p>
+<p>下面就是整体的项目代码，如何在Python项目中创建神经网络：</p>
 
-<h3 id="构造kd树">构造kd树</h3>
+<pre><code class="language-python">import numpy as np
 
-<p>k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）</p>
+class NeuralNetwork():
+    
+    def __init__(self):
+        # seeding for random number generation
+        np.random.seed(1)
+        
+        # converting weights to a 3 by 1 matrix with values from -1 to 1 and mean of 0
+        self.synaptic_weights = 2 * np.random.random((3, 1)) - 1
 
-<p>k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树</p>
+    def sigmoid(self, x):
+        #applying the sigmoid function
+        return 1 / (1 + np.exp(-x))
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi6yaofqzj30ze0uuwqq.jpg" alt="" /></p>
+    def sigmoid_derivative(self, x):
+        #computing derivative to the Sigmoid function
+        return x * (1 - x)
 
-<p>实际做一道例题有助于对算法的理解：</p>
+    def train(self, training_inputs, training_outputs, training_iterations):
+        
+        #training the model to make accurate predictions while adjusting weights continually
+        for iteration in range(training_iterations):
+            #siphon the training data via  the neuron
+            output = self.think(training_inputs)
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi711siqbj30zw03q408.jpg" alt="" /></p>
+            #computing error rate for back-propagation
+            error = training_outputs - output
+            
+            #performing weight adjustments
+            adjustments = np.dot(training_inputs.T, error * self.sigmoid_derivative(output))
 
-<ul>
-<li>首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2)</li>
-<li>根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树</li>
-<li>构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树</li>
-<li>构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面</li>
-<li>无法继续划分，k-d tree构建完成</li>
-</ul>
+            self.synaptic_weights += adjustments
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7auqqs6j30yk0xmwld.jpg" alt="" /></p>
+    def think(self, inputs):
+        #passing the inputs via the neuron to get output   
+        #converting values to floats
+        
+        inputs = inputs.astype(float)
+        output = self.sigmoid(np.dot(inputs, self.synaptic_weights))
+        return output
 
-<h3 id="搜索kd树">搜索kd树</h3>
 
-<p>给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高</p>
+if __name__ == &quot;__main__&quot;:
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7oqbc9dj312i0wktlt.jpg" alt="" /></p>
+    #initializing the neuron class
+    neural_network = NeuralNetwork()
 
-<h2 id="说明">说明</h2>
+    print(&quot;Beginning Randomly Generated Weights: &quot;)
+    print(neural_network.synaptic_weights)
 
-<p>有助于理解kd树的博客文章：</p>
+    #training data consisting of 4 examples--3 input values and 1 output
+    training_inputs = np.array([[0,0,1],
+                                [1,1,1],
+                                [1,0,1],
+                                [0,1,1]])
 
-<ul>
-<li><a href="https://zhuanlan.zhihu.com/p/23966698">数学】kd 树算法之详细篇</a></li>
-<li><a href="https://leileiluoluo.com/posts/kdtree-algorithm-and-implementation.html">K-D TREE算法原理及实现</a></li>
-</ul>
+    training_outputs = np.array([[0,1,1,0]]).T
+
+    #training taking place
+    neural_network.train(training_inputs, training_outputs, 15000)
+
+    print(&quot;Ending Weights After Training: &quot;)
+    print(neural_network.synaptic_weights)
+
+    user_input_one = str(input(&quot;User Input One: &quot;))
+    user_input_two = str(input(&quot;User Input Two: &quot;))
+    user_input_three = str(input(&quot;User Input Three: &quot;))
+    
+    print(&quot;Considering New Situation: &quot;, user_input_one, user_input_two, user_input_three)
+    print(&quot;New Output data: &quot;)
+    print(neural_network.think(np.array([user_input_one, user_input_two, user_input_three])))
+    print(&quot;Wow, we did it!&quot;)
+</code></pre>
+
+<p>我们设法创建了一个简单的神经网络。</p>
+
+<p>这个神经网络开始于自己给自己分配了一些随机的权重，此后，它使用训练数据训练自己。</p>
+
+<p>因此，如果出现新情况[1,0,0]，则其值为0.9999584。</p>
+
+<p>你记得我们想要的正确答案是1吗？</p>
+
+<p>那么，这就非常接近了 —— 思考下<code>S</code>形函数的输出值在0到1之间。</p>
+
+<p>当然，我们只使用一个神经网络来执行这个简单的任务，如果我们连接数千个人工神经网络起来会怎样？我们能否100% 地模仿人类大脑的工作方式么？</p>
+
+<p>如果你有任何疑问，请留言</p>
+
+<p>个人简历：<a href="https://www.linkedin.com/in/garbade">Dr. Michael J. Garbade</a></p>
 
             <p class="post-info">
                 本文由
@@ -215,17 +296,16 @@
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f39%2f" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f39%2f&text=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a3.k%e8%bf%91%e9%82%bb%e6%b3%95" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f39%2f&amp;title=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a3.k%e8%bf%91%e9%82%bb%e6%b3%95" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f39%2f" target="_blank" rel="nofollow">QRcode</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f40%2f" target="_blank" title="如何用Python创建一个简单的神经网络" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f40%2f&text=%e5%a6%82%e4%bd%95%e7%94%a8Python%e5%88%9b%e5%bb%ba%e4%b8%80%e4%b8%aa%e7%ae%80%e5%8d%95%e7%9a%84%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c" target="_blank" title="如何用Python创建一个简单的神经网络" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f40%2f&amp;title=%e5%a6%82%e4%bd%95%e7%94%a8Python%e5%88%9b%e5%bb%ba%e4%b8%80%e4%b8%aa%e7%ae%80%e5%8d%95%e7%9a%84%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c" target="_blank" title="如何用Python创建一个简单的神经网络" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f40%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/40/" title="如何用Python创建一个简单的神经网络">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/38/" title="统计学习方法笔记：2.感知机">→</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/39/" title="统计学习方法笔记：3.k近邻法">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>
