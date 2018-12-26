@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        python之朴素贝叶斯对展会数据分类 - howie6879
+        Python之朴素贝叶斯对展会数据分类 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -64,7 +64,7 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                python之朴素贝叶斯对展会数据分类
+                Python之朴素贝叶斯对展会数据分类
             </h1>
             <div class="post-data">
                 Published on Sep 28, 2016 ,3 min reading time
@@ -84,31 +84,37 @@
 
 <h2 id="目的">目的</h2>
 
-<p>在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度。
-国内数据如下：
-<img src="https://www.howie6879.cn/images/post/08/01.png" alt="01.png" />
-国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理。
-国外数据就有些尴尬：
-<img src="https://www.howie6879.cn/images/post/08/02.png" alt="02.png" />
-国外网站展会数据将近五万多条，跟分类有关的只有<code>categories</code>这一列数据，都是一些标签词，还偏少。
-现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个<strong>朴素贝叶斯分类器</strong>。</p>
+<p>在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：</p>
 
-<!-- more -->
+<p><img src="https://www.howie6879.cn/images/post/08/01.png" alt="01.png" /></p>
+
+<p>国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/02.png" alt="02.png" /></p>
+
+<p>国外网站展会数据将近五万多条，跟分类有关的只有<code>categories</code>这一列数据，都是一些标签词，还偏少。</p>
+
+<p>现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个<strong>朴素贝叶斯分类器</strong>。</p>
 
 <h2 id="数据">数据</h2>
 
 <p>朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。</p>
 
-<h5 id="数据的准备">数据的准备</h5>
+<h3 id="数据的准备">数据的准备</h3>
 
-<p>获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
-<img src="https://www.howie6879.cn/images/post/08/03.png" alt="03.png" />
-训练数据主要是这两列，<strong>所属行业</strong>以及<strong>展会范围</strong>，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为<strong>训练集</strong>。
-那么相对应，国外待分类的展会数据便是<strong>测试集</strong>。
-我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
-可是现在有个问题，作为<strong>训练集</strong>的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终<strong>训练集</strong>达到了<code>39555</code>条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？</p>
+<p>获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：</p>
 
-<h5 id="分词-提取">分词&amp;&amp;提取</h5>
+<p><img src="https://www.howie6879.cn/images/post/08/03.png" alt="03.png" /></p>
+
+<p>训练数据主要是这两列，<strong>所属行业</strong>以及<strong>展会范围</strong>，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为<strong>训练集</strong>。</p>
+
+<p>那么相对应，国外待分类的展会数据便是<strong>测试集</strong>。</p>
+
+<p>我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。</p>
+
+<p>可是现在有个问题，作为<strong>训练集</strong>的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终<strong>训练集</strong>达到了<code>39555</code>条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？</p>
+
+<h3 id="分词-提取">分词&amp;&amp;提取</h3>
 
 <p>不积小流，无以成江海，以小见大，咱们看这样一条数据:</p>
 
@@ -116,9 +122,11 @@
 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等
 </code></pre>
 
-<p>思考一下，这一条数据的<strong>所属行业</strong>和<strong>展会范围</strong>有什么关系，我们将从这里得到编写分类器的出发点。
-在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
-那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。</p>
+<p>思考一下，这一条数据的<strong>所属行业</strong>和<strong>展会范围</strong>有什么关系，我们将从这里得到编写分类器的出发点。</p>
+
+<p>在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。</p>
+
+<p>那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。</p>
 
 <pre><code class="language-python"># 可以利用结巴分词
 import jieba.analyse
@@ -135,18 +143,22 @@ print(feature)
 描述关键词：'配件', '各类', '家具', '五金', '照明', '浴室', '淋浴房', '浴缸'
 </code></pre>
 
-<p>以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
-但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：</p>
+<p>以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。</p>
+
+<p>但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：</p>
 
 <pre><code># data_02
 所属行业：未知
 描述关键词：'配件','家具'
 </code></pre>
 
-<p>这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
-大三的时候学过概率统计，也记得一个公式名为<strong>贝叶斯定理</strong>。
-<img src="https://www.howie6879.cn/images/post/08/04.jpg" alt="04.jpg" />
-这表示计算条件概率的公式:</p>
+<p>这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。</p>
+
+<p>大三的时候学过概率统计，也记得一个公式名为<strong>贝叶斯定理</strong>。</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/04.jpg" alt="04.jpg" /></p>
+
+<p>这表示计算条件概率的公式:</p>
 
 <pre><code class="language-python">P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子
 # 这样写会不会更加清晰
@@ -155,24 +167,37 @@ P(category\keywords) = P(category) * P(keywords\category)/ P(keywords)
 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category)...P(keywordn\category)/ P(keywords)
 </code></pre>
 
-<p>总结就是，我们先求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong>
-再求出一组待分类数据的关键词在各个类别中的概率*P(keywords\category)*——<strong>调整因子</strong>
-最后<strong>先验概率</strong> <strong>*</strong>  <strong>调整因子</strong>得出<strong>后验概率</strong>，再经过比较，后验概率最大的，便是待分类数据最可能的类别。
-我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。
-2.2.1.确定训练数据有多少类别
-2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为<strong>id:word</strong>的格式存为<em>id_word.txt</em>
-<img src="https://www.howie6879.cn/images/post/08/05.png" alt="05.png" />
-2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为<strong>category=id:pro(id)</strong>的格式存为<em>tf_id_word.txt</em>
-<img src="https://www.howie6879.cn/images/post/08/06.png" alt="06.png" />
-2.2.4.求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong>，将其转为<strong>category:pro(category)</strong>的格式存为<em>type_pro.txt</em>
-<img src="https://www.howie6879.cn/images/post/08/07.png" alt="07.png" /></p>
+<p>总结就是，我们先求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong></p>
+
+<p>再求出一组待分类数据的关键词在各个类别中的概率*P(keywords\category)*——<strong>调整因子</strong></p>
+
+<p>最后<strong>先验概率</strong> <strong>*</strong>  <strong>调整因子</strong>得出<strong>后验概率</strong>，再经过比较，后验概率最大的，便是待分类数据最可能的类别。</p>
+
+<p>我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。</p>
+
+<p>2.2.1.确定训练数据有多少类别</p>
+
+<p>2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为<strong>id:word</strong>的格式存为<em>id_word.txt</em></p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/05.png" alt="05.png" /></p>
+
+<p>2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为<strong>category=id:pro(id)</strong>的格式存为<em>tf_id_word.txt</em></p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9hhcy1cj30yg0ir4qp.jpg" alt="" /></p>
+
+<p>2.2.4.求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong>，将其转为<strong>category:pro(category)</strong>的格式存为<em>type_pro.txt</em></p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/07.png" alt="07.png" /></p>
 
 <h2 id="编码">编码</h2>
 
-<p>经过前面的步骤，现在编写代码实在简单，不过有两点要注意。
-其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。
-其二是若每个调整因子的数值都很小，大家都知道很小的值相乘，会导致结果变得更小，这样子表现出各个分类结果的后验概率便会出现问题，这个问题便是下溢出问题，解决办法便是将其转化为对数，对数相乘便是对数相加，这样便很巧妙的解决了这个问题。
-好了，直接上代码，让我们看看分类的结果吧。</p>
+<p>经过前面的步骤，现在编写代码实在简单，不过有两点要注意。</p>
+
+<p>其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。</p>
+
+<p>其二是若每个调整因子的数值都很小，大家都知道很小的值相乘，会导致结果变得更小，这样子表现出各个分类结果的后验概率便会出现问题，这个问题便是下溢出问题，解决办法便是将其转化为对数，对数相乘便是对数相加，这样便很巧妙的解决了这个问题。</p>
+
+<p>好了，直接上代码，让我们看看分类的结果吧。</p>
 
 <pre><code class="language-python"># -*-coding:utf-8-*-
 __author__ = 'howie'
@@ -299,10 +324,13 @@ def mainPri(keywordDic):
 
 </code></pre>
 
-<p>初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。
-让我们看看分类器的分类效果：
-<img src="https://www.howie6879.cn/images/post/08/08.png" alt="08.png" />
-可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。</p>
+<p>初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。</p>
+
+<p>让我们看看分类器的分类效果：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/08.png" alt="08.png" /></p>
+
+<p>可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。</p>
 
             <p class="post-info">
                 本文由
@@ -321,15 +349,15 @@ def mainPri(keywordDic):
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f" target="_blank" title="python之朴素贝叶斯对展会数据分类" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f&text=python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="python之朴素贝叶斯对展会数据分类" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f&amp;title=python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="python之朴素贝叶斯对展会数据分类" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f&text=Python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f&amp;title=Python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Weibo</a></span>
                 <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f08%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/09/" title="python之由公司名推算出公司官网(余弦相似度)">←</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/09/" title="Python之由公司名推算出公司官网(余弦相似度)">←</a></span> 
                 
                 <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/07/" title="PythonTip">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>

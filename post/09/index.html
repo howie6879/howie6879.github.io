@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        python之由公司名推算出公司官网(余弦相似度) - howie6879
+        Python之由公司名推算出公司官网(余弦相似度) - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -64,7 +64,7 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                python之由公司名推算出公司官网(余弦相似度)
+                Python之由公司名推算出公司官网(余弦相似度)
             </h1>
             <div class="post-data">
                 Published on Sep 28, 2016 ,6 min reading time
@@ -80,7 +80,7 @@
 
  
 
-<h1 id="1-问题">1.问题</h1>
+<h2 id="1-问题">1.问题</h2>
 
 <p>对展会数据分类后，我的新任务是如何通过<code>公司名、公司地址、国家</code>等海关数据推断出该公司的官网网站（若官网不存在则不考虑）
 以下数据仅供参考：</p>
@@ -165,25 +165,36 @@
 </tbody>
 </table>
 
-<!-- more -->
+<h2 id="2-解决">2.解决</h2>
 
-<h1 id="2-解决">2.解决</h1>
+<p>由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。</p>
 
-<p>由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。
-大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选<code>google</code>，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的<code>url</code>。
-初步搜索一下，看看各种情况：
-第一种情况，检索即可很直观地得出结果
-<img src="http://oe7yjec8x.bkt.clouddn.com/09/01.png-blog.howie" alt="JPW INDUSTRIES INC " />
-第二种情况，检索不能直观地得出结果，但官网确实存在（*第二检索个结果*）
-<img src="http://oe7yjec8x.bkt.clouddn.com/09/02.png-blog.howie" alt="Fujian Xishi Co., Ltd" />
-第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样</p>
+<p>大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选<code>google</code>，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的<code>url</code>。
+初步搜索一下，看看各种情况：</p>
 
-<p><img src="http://oe7yjec8x.bkt.clouddn.com/09/03.png-blog.howie" alt="GOLD INC" /></p>
+<ul>
+<li>第一种情况，检索即可很直观地得出结果</li>
+</ul>
 
-<p>对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。
-观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其<code>website</code>对应的<code>url</code>绝对正确。
-故代码的第一步骤可以首先检索公司名+公司地址，观察<code>website</code>元素是否存在，若存在，返回公司官网，否则，对公司名进行检索。
-代码：</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt="" /></p>
+
+<ul>
+<li>第二种情况，检索不能直观地得出结果，但官网确实存在（*第二检索个结果*）</li>
+</ul>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt="" /></p>
+
+<ul>
+<li>第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样</li>
+</ul>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk930d67aj30yg0iqh0h.jpg" alt="" /></p>
+
+<p>对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。</p>
+
+<p>观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其<code>website</code>对应的<code>url</code>绝对正确。</p>
+
+<p>故代码的第一步骤可以首先检索公司名+公司地址，观察<code>website</code>元素是否存在，若存在，返回公司官网，否则，对公司名进行检索，代码如下：</p>
 
 <pre><code class="language-python">def searchWeb(query, tld='com', lang='en', tbs='0', num=10, safe='off', tpe='', user_agent=None):
     query = quote_plus(query)
@@ -200,12 +211,19 @@
     return None
 </code></pre>
 
-<p><img src="http://oe7yjec8x.bkt.clouddn.com/09/04.png-blog.howie" alt="直接返回公司官网" /></p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk95j9m1lj30bf01odfm.jpg" alt="" /></p>
 
-<p>能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：
-<code>获取搜索引擎检索结果提取url</code>-&gt;<code>初步排除某些url</code>-&gt;<code>余弦相似度计算最可能的结果</code>
-####2.1.获取搜索引擎检索结果提取url
-对于谷歌搜索，我使用了<code>MarioVilas</code>的项目<a href="https://github.com/MarioVilas/google">google</a>，毕竟在国内，为了以防万一我也写了<code>yahoo</code>搜索，代码如下：</p>
+<p>能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：</p>
+
+<ul>
+<li>获取搜索引擎检索结果提取url</li>
+<li>初步排除某些url</li>
+<li>余弦相似度计算最可能的结果</li>
+</ul>
+
+<h3 id="2-1-获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</h3>
+
+<p>对于谷歌搜索，我使用了<code>MarioVilas</code>的项目<a href="https://github.com/MarioVilas/google">google</a>，毕竟在国内，为了以防万一我也写了<code>yahoo</code>搜索，代码如下：</p>
 
 <pre><code class="language-python">#!/usr/bin/env
 # -*-coding:utf-8-*-
@@ -296,8 +314,9 @@ if __name__ == '__main__':
         print(url)
 </code></pre>
 
-<p>####2.2.初步排除某些url
-这个可根据个人需求来配置，可添加<code>webConfig.py</code>脚本，排除某些<code>url</code>:</p>
+<h3 id="2-2-初步排除某些url">2.2.初步排除某些url</h3>
+
+<p>这个可根据个人需求来配置，可添加<code>webConfig.py</code>脚本，排除某些<code>url</code>:</p>
 
 <pre><code class="language-python"># -*-coding:utf-8-*-
 __author__ = 'howie'
@@ -311,11 +330,13 @@ config = dict(
 </code></pre>
 
 <p>以公司名<code>BENKAI Co.,Ltd</code>为例，初步获取url：
-<code>['http://www.benkaico.com', 'http://hisupplier.com', 'http://www.hktdc.com/en']</code>
-####2.3.余弦相似度计算最可能的结果
-对于公司<code>BENKAI Co.,Ltd</code>，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。
-这里可以采用余弦相似度，具体公式可google，稍稍解释下：
-对于这三个网站：</p>
+<code>['http://www.benkaico.com', 'http://hisupplier.com', 'http://www.hktdc.com/en']</code></p>
+
+<h3 id="2-3-余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</h3>
+
+<p>对于公司<code>BENKAI Co.,Ltd</code>，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。</p>
+
+<p>这里可以采用余弦相似度，具体公式可google，稍稍解释下，对于这三个网站：</p>
 
 <pre><code class="language-python">['http://www.benkaico.com', 'http://hisupplier.com', 'http://www.hktdc.com/en']```
 可以通过计算各个网站的`title`和`BENKAI Co.,Ltd`的相似程度来取得最可能的结果。
@@ -326,14 +347,14 @@ config = dict(
 'http://hisupplier.com': ['china', 'suppliers', ',', 'suppliers', 'directory', ',', 'china', 'manufacturers', 'directory', '-', 'hisupplier.com']}
 </code></pre>
 
-<p>#####2.3.2：构建单词向量</p>
+<h3 id="2-3-2-构建单词向量">2.3.2：构建单词向量</h3>
 
 <pre><code class="language-python">{'http://www.benkaico.com': [[0, 1, 1, 1, 1], [1, 1, 1, 1, 1]], 
 'http://www.hktdc.com/en': [[1, 1, 0, 0, 1, 0, 0, 0, 1], [0, 0, 1, 1, 0, 1, 1, 1, 0]],
  'http://hisupplier.com': [[0, 0, 0, 1, 0, 0, 1, 1, 0, 1], [2, 1, 1, 0, 2, 1, 2, 0, 2, 0]]}
 </code></pre>
 
-<p>#####2.3.3:计算余弦相似度</p>
+<h3 id="2-3-3-计算余弦相似度">2.3.3:计算余弦相似度</h3>
 
 <pre><code class="language-python">{'http://www.benkaico.com': 0.94427190999915878, 
 'http://www.hktdc.com/en': 0.0, 
@@ -342,8 +363,9 @@ config = dict(
 
 <p>通过比较，可以看到<code>http://www.benkaico.com</code>相似度最高的结果，跟真实结果一样。</p>
 
-<p><img src="http://oe7yjec8x.bkt.clouddn.com/09/05.png-blog.howie" alt="http://www.benkaico.com" />
-全部步骤代码如下：</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk97bj12zj30yd043jro.jpg" alt="" /></p>
+
+<p>全部步骤代码如下：</p>
 
 <pre><code class="language-python"># -*-coding:utf-8-*-
 __author__ = 'howie'
@@ -569,7 +591,7 @@ class CosineSimilarity(object):
         return website
 </code></pre>
 
-<h1 id="3-总结">3.总结</h1>
+<h2 id="3-总结">3.总结</h2>
 
 <p>至此，若有更好的解决方案，欢迎赐教，谢谢。</p>
 
@@ -590,9 +612,9 @@ class CosineSimilarity(object):
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f" target="_blank" title="python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f&text=python%e4%b9%8b%e7%94%b1%e5%85%ac%e5%8f%b8%e5%90%8d%e6%8e%a8%e7%ae%97%e5%87%ba%e5%85%ac%e5%8f%b8%e5%ae%98%e7%bd%91%28%e4%bd%99%e5%bc%a6%e7%9b%b8%e4%bc%bc%e5%ba%a6%29" target="_blank" title="python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f&amp;title=python%e4%b9%8b%e7%94%b1%e5%85%ac%e5%8f%b8%e5%90%8d%e6%8e%a8%e7%ae%97%e5%87%ba%e5%85%ac%e5%8f%b8%e5%ae%98%e7%bd%91%28%e4%bd%99%e5%bc%a6%e7%9b%b8%e4%bc%bc%e5%ba%a6%29" target="_blank" title="python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f" target="_blank" title="Python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f&text=Python%e4%b9%8b%e7%94%b1%e5%85%ac%e5%8f%b8%e5%90%8d%e6%8e%a8%e7%ae%97%e5%87%ba%e5%85%ac%e5%8f%b8%e5%ae%98%e7%bd%91%28%e4%bd%99%e5%bc%a6%e7%9b%b8%e4%bc%bc%e5%ba%a6%29" target="_blank" title="Python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f&amp;title=Python%e4%b9%8b%e7%94%b1%e5%85%ac%e5%8f%b8%e5%90%8d%e6%8e%a8%e7%ae%97%e5%87%ba%e5%85%ac%e5%8f%b8%e5%ae%98%e7%bd%91%28%e4%bd%99%e5%bc%a6%e7%9b%b8%e4%bc%bc%e5%ba%a6%29" target="_blank" title="Python之由公司名推算出公司官网(余弦相似度)" rel="nofollow">Weibo</a></span>
                 <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f09%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
@@ -600,7 +622,7 @@ class CosineSimilarity(object):
                 
                 <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/10/" title="祝你生日快乐">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/08/" title="python之朴素贝叶斯对展会数据分类">→</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/08/" title="Python之朴素贝叶斯对展会数据分类">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>
