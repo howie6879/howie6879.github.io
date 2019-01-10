@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        对于python抓取google搜索结果的一些了解 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                对于python抓取google搜索结果的一些了解
+            </h1>
+            <div class="post-data">
+                Published on Jan 25, 2017 ,1 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/spider">Spider</a>
+	
+	<a href="https://www.howie6879.cn/tags/python">Python</a>
+	
+	<a href="https://www.howie6879.cn/tags/google">Google</a>
+	
+</p>
+
+ 
+
+<blockquote>
+<p>大学时期博文</p>
+</blockquote>
+
+<h2 id="1-问题">1.问题</h2>
+
+<p>目前主流的搜索引擎，非<code>google</code>莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉</p>
+
+<p>本人前段时间有个脚本用到了谷歌搜索，具体见<a href="http://www.jianshu.com/p/d1cf6c6df6bb">python之由公司名推算出公司官网(余弦相似度)</a>当时直接使用的是一个<code>python</code>开源项目</p>
+
+<p>但在使用过程中，单<code>ip</code>的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进</p>
+
+<p>说一说爬取谷歌搜索结果的问题：</p>
+
+<ul>
+<li>1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。</li>
+<li>2.访问过快就会出现流量异常</li>
+</ul>
+
+<h2 id="2-如何解决">2.如何解决</h2>
+
+<p>对于第一个问题：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9xnplq9j30yg0hkqkt.jpg" alt="" /></p>
+
+<p>应该有看到审查元素出来的都是js，然后检索的url是这样的：</p>
+
+<p><code>https://www.google.com.hk/search?q=hello&amp;oq=hello&amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;sourceid=chrome&amp;ie=UTF-8&amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT</code></p>
+
+<p>这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9xw4ftyj30yg0lih9u.jpg" alt="" /></p>
+
+<p>然后再看url：
+<code>https://www.google.com.hk/search?q=hello&amp;btnG=Search&amp;safe=active&amp;gbv=1</code></p>
+
+<p>对于这个<code>url</code>，相信机智的你应该会明白些什么</p>
+
+<p>这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的<code>html</code>，简单写下：</p>
+
+<pre><code class="language-python">    URL_SEARCH = &quot;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&quot;
+    URL_NUM = &quot;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&amp;num={num}&quot;
+
+    def search_page(query, language='en', num=None, start=0, pause=2):
+        &quot;&quot;&quot;
+        Google search
+        :param query: Keyword
+        :param language: Language
+        :return: result
+        &quot;&quot;&quot;
+        time.sleep(pause)
+        domain = self.get_random_domain()
+        if num is None:
+            url = URL_SEARCH
+            url = url.format(
+                domain=domain, language=language, query=quote_plus(query))
+        else:
+            url = URL_NUM
+            url = url.format(
+                domain=domain, language=language, query=quote_plus(query), num=num)
+        try:
+            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+            r = requests.get(url=url,
+                             allow_redirects=False,
+                             verify=False,
+                             timeout=30)
+            charset = chardet.detect(r.content)
+            content = r.content.decode(charset['encoding'])
+            return content
+        except Exception as e:
+            logging.error(e)
+            return None
+</code></pre>
+
+<p>到了这里，问题才刚开始，你可以做个实验，我假设你是使用代理进行谷歌搜索，如果你连续不断无间隔使用谷歌搜索某一关键字二三十下，不出意外你会被要求进行这样的验证：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9y3qs2nj30n807wq3a.jpg" alt="" /></p>
+
+<p>这个问题可真是让人十分厌恶，我并没有很好的解决办法，能做的唯有尽量避免：
+&gt;1.ip轮询
+2.每次结果爬取增加休眠
+3.随机user_agent是必备</p>
+
+<p>第一点和第三点不必多说，对于第二点增加休眠时间则需要我们好好地进行检测。
+假设在单ip随机ua情况下：</p>
+
+<ul>
+<li>1.这种情况下不休眠的话请求个两三次就会直接被封（第二天会被解封）</li>
+<li>2.个人觉得这不是个解决办法，因为对休眠时间把控不好的话就会造成封ip，如果不想被封，我测试的话需要休眠60s浮动，这没什么意义</li>
+<li>3.而且这种情况下发现是直接封ip，对开发者太不友好</li>
+</ul>
+
+<p>对于这种情况，受同事神来一句，发现一个暂时的解决办法，请看下图：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9ydijibj30rb0jmn24.jpg" alt="" /></p>
+
+<p>单一ip不停地访问统一谷歌域名自然很容易被察觉，谷歌全球190+的域名，难道都在实时的统计ip么，可能有，但绝对不会像单域名那样严格，来做个测试。</p>
+
+<p>我将全球190+谷歌域名集中起来，像ua一样随机轮换，然后进行测试(单ip)，结果还不错：</p>
+
+<ul>
+<li>1.首先没有出现被封ip，只会提示流量异常</li>
+<li>2.还是需要休眠，本人休眠5~15s没有被封过，可根据自身情况来，如果想稳妥点就5~30s吧</li>
+</ul>
+
+<p>我将这些写成了一个项目，<a href="https://github.com/howie6879/magic_google">magic_google-python</a>，若你是phper，可以看看我写的php版本<a href="https://github.com/howie6879/php-google">php-google</a>，具体代码可以看这里，对应的功能很简单：</p>
+
+<pre><code class="language-python">from magic_google import MagicGoogle
+import pprint
+
+# Or PROXIES = None
+PROXIES = [{
+    'http': 'http://192.168.2.207:1080',
+    'https': 'http://192.168.2.207:1080'
+}]
+
+# Or MagicGoogle()
+mg = MagicGoogle(PROXIES)
+
+#  Crawling the whole page
+result = mg.search_page(query='python')
+
+# Crawling url
+for url in mg.search_url(query='python'):
+    pprint.pprint(url)
+
+# Output
+# 'https://www.python.org/'
+# 'https://www.python.org/downloads/'
+# 'https://www.python.org/about/gettingstarted/'
+# 'https://docs.python.org/2/tutorial/'
+# 'https://docs.python.org/'
+# 'https://en.wikipedia.org/wiki/Python_(programming_language)'
+# 'https://www.codecademy.com/courses/introduction-to-python-6WeG3/0?curriculum_id=4f89dab3d788890003000096'
+# 'https://www.codecademy.com/learn/python'
+# 'https://developers.google.com/edu/python/'
+# 'https://learnpythonthehardway.org/book/'
+# 'https://www.continuum.io/downloads'
+
+# Get {'title','url','text'}
+for i in mg.search(query='python', num=1):
+    pprint.pprint(i)
+
+# Output
+# {'text': 'The official home of the Python Programming Language.',
+# 'title': 'Welcome to Python .org',
+# 'url': 'https://www.python.org/'}
+</code></pre>
+
+<h2 id="3-总结">3.总结</h2>
+
+<p>对google搜索结果的爬取，有以下建议：</p>
+
+<ul>
+<li>1.ip轮询</li>
+<li>2.ua随机</li>
+<li>3.domain随机</li>
+<li>4.休眠</li>
+</ul>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+                
+                刷新可加载文末评论 
+                
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f&text=%e5%af%b9%e4%ba%8epython%e6%8a%93%e5%8f%96google%e6%90%9c%e7%b4%a2%e7%bb%93%e6%9e%9c%e7%9a%84%e4%b8%80%e4%ba%9b%e4%ba%86%e8%a7%a3" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f&amp;title=%e5%af%b9%e4%ba%8epython%e6%8a%93%e5%8f%96google%e6%90%9c%e7%b4%a2%e7%bb%93%e6%9e%9c%e7%9a%84%e4%b8%80%e4%ba%9b%e4%ba%86%e8%a7%a3" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/15/" title="ITBooks—简单的书籍下载小工具">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2016/13/" title="Mastering Pandas 01">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+
+<div class="comment-container main-content page-page">
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <div id="gitalk-container" class="clearfix">
+        <script>
+            var gitalk = new Gitalk({
+                clientID: 'c7c56d99651604d9f431',
+                clientSecret: 'c7ed7b7e268fb3fb3d8bc8ec68efa3510e7430d6',
+                repo: 'howie6879.github.io',
+                owner: 'howie6879',
+                admin: ['howie6879'],
+                id: location.pathname, 
+                distractionFreeMode: false 
+            })
+
+            gitalk.render('gitalk-container')
+        </script>
+    </div>
+</div>
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(24)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>

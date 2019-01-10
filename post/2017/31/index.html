@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        谈谈对Python爬虫的理解 - howie6879
+        Sanic 源码阅读 - 基于0.1.2 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -64,10 +64,10 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                谈谈对Python爬虫的理解
+                Sanic 源码阅读 - 基于0.1.2
             </h1>
             <div class="post-data">
-                Published on Jan 10, 2019 ,2 min reading time
+                Published on Dec 20, 2017 ,2 min reading time
             </div>
         </div>
         <div id="post-content" class="post-content">
@@ -76,297 +76,273 @@
 	
 	<a href="https://www.howie6879.cn/tags/python">python</a>
 	
+	<a href="https://www.howie6879.cn/tags/sanic">sanic</a>
+	
 </p>
 
  
 
-<blockquote>
-<p>爬虫也可以称为Python爬虫</p>
-</blockquote>
+<p><code>Sanic</code>是一个可以使用<code>async/await</code>语法编写项目的异步非阻塞框架，它写法类似于<code>Flask</code>，但使用了异步特性，而且还使用<code>uvloop</code>作为事件循环，其底层使用的是<code>libuv</code>，从而使 <code>Sanic</code>的速度优势更加明显。</p>
 
-<p>不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫</p>
-
-<p>所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：</p>
+<p>如果你：</p>
 
 <ul>
-<li>Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大</li>
-<li>Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）</li>
+<li>想深入了解Sanic，迫切想知道它的运行机制</li>
+<li>直接阅读源码，做一些定制</li>
+<li>学习</li>
 </ul>
 
-<p>任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过</p>
-
-<h3 id="什么是爬虫">什么是爬虫</h3>
-
-<p>爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyzio0y1hlj32aq1hq4p4.jpg" alt="" /></p>
-
-<p>看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～</p>
-
-<p>爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：</p>
+<p>将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：</p>
 
 <ul>
-<li>通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事</li>
-<li>垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫</li>
-<li>增量网络爬虫：对已经抓取的网页进行实时更新</li>
-<li>深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面</li>
+<li>理解<a href="http://blog.howie6879.cn/2016/09/28/04/">装饰器</a></li>
+<li>理解协程</li>
 </ul>
 
-<p>不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：</p>
+<!--- more --->
 
-<ul>
-<li>模拟请求网页资源</li>
-<li>从HTML提取目标元素</li>
-<li>数据持久化</li>
-</ul>
+<p>Sanic-0.1.2 的核心文件如下：</p>
 
-<p>什么是爬虫，这就是爬虫：</p>
+<pre><code class="language-shell">.
+├── __init__.py
+├── blueprints.py
+├── config.py
+├── exceptions.py
+├── log.py
+├── request.py
+├── response.py
+├── router.py
+├── sanic.py
+├── server.py
+└── utils.py
 
-<pre><code class="language-python">&quot;&quot;&quot;让我们根据上面说的步骤来完成一个简单的爬虫程序&quot;&quot;&quot;
-import requests
-
-from bs4 import BeautifulSoup
-
-target_url = 'http://www.baidu.com/s?wd=爬虫'
-
-# 第一步 发起一个GET请求
-res = requests.get(target_url)
-
-# 第二步 提取HTML并解析想获取的数据 比如获取 title
-soup = BeautifulSoup(res.text, &quot;lxml&quot;)
-# 输出 soup.title.text
-title = soup.title.text
-
-# 第三步 持久化 比如保存到本地
-with open('title.txt', 'w') as fp:
-    fp.write(title)
 </code></pre>
 
-<p>加上注释不到20行代码，你就完成了一个爬虫，简单吧</p>
+<p>通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。</p>
 
-<h3 id="怎么写爬虫">怎么写爬虫</h3>
+<h3 id="simple-server-py">simple_server.py</h3>
 
-<p>网页世界多姿多彩、亿万网页资源供你选择，面对不同的页面，怎么使自己编写的爬虫程序够稳健、持久，这是一个值得讨论的问题</p>
+<p>让我们从<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/examples/simple_server.py">simple_server</a>开始吧，代码如下：</p>
 
-<p>俗话说，磨刀不误砍柴工，在开始编写爬虫之前，很有必要掌握一些基本知识：</p>
+<pre><code class="language-python">
+from sanic_0_1_2.src import Sanic
+from sanic_0_1_2.src.response import json
 
-<ul>
-<li>网页的结构是HTML，爬虫的目标就是解析HTML，获取目标字段并保存</li>
-<li>客户端展现的网页由浏览器渲染，客户端和服务端的信息交互依靠HTTP协议</li>
-</ul>
+app = Sanic(__name__)
 
-<p>这两句描述体现了一名爬虫开发人员需要掌握的基本知识，不过一名基本的后端或者前端工程师都会这些哈哈，这也说明了爬虫的入门难度极低，从这两句话，你能思考出哪些爬虫必备的知识点呢？</p>
 
-<ul>
-<li>基本的HTML知识，了解HTML才方便目标信息提取</li>
-<li>基本的JS知识 ，JS可以异步加载HTML</li>
-<li>了解CSS Selector、XPath以及正则，目的是为了提取数据</li>
-<li>了解HTTP协议，为后面的反爬虫斗争打下基础</li>
-<li>了解基本的数据库操作，为了数据持久化</li>
-</ul>
+@app.route(&quot;/&quot;)
+async def test(request):
+    return json({&quot;test&quot;: True})
 
-<p>有了这些知识储备，接下来就可以选择一门语言，开始编写自己的爬虫程序了，还是按照上一节说的三个步骤，然后以Python为例，说一说要在编程语言方面做那些准备：</p>
 
-<ul>
-<li>网页请求：内置有urllib库，第三方库的话，同步请求可以使用requests，异步请求使用aiohttp</li>
-<li>分析HTML结构并提取目标元素：CSS Selector和XPath是目前主流的提取方式，第三方库可以使用Beautiful Soup或者PyQuery</li>
-<li>数据持久化：目标数据提取之后，可以将数据保存到数据库中进行持久化，MySQL、MongoDB等，这些都有对应的库支持，当然你也可以保存在硬盘，谁硬盘没点东西对吧（滑稽脸）</li>
-</ul>
+app.run(host=&quot;0.0.0.0&quot;, port=8000)
 
-<p>掌握了上面这些，你大可放开手脚大干一场，万维网就是你的名利场，去吧～</p>
-
-<p>我觉得对于一个目标网站的网页，可以分下面四个类型：</p>
-
-<ul>
-<li>单页面单目标</li>
-<li>单页面多目标</li>
-<li>多页面单目标</li>
-<li>多页面多目标</li>
-</ul>
-
-<p>具体是什么意思呢，可能看起来有点绕，但明白这些，你之后写爬虫，只要在脑子里面过一遍着网页对应什么类型，然后套上对应类型的程序（写多了都应该有一套自己的常用代码库），那写爬虫的速度，自然不会慢</p>
-
-<blockquote>
-<p>单页面单目标</p>
-</blockquote>
-
-<p>通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 <a href="https://movie.douban.com/subject/1292052/">电影-肖申克的救赎</a> 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmwhbmzekj31hb0lkdnx.jpg" alt="" /></p>
-
-<p>在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：<code>#content &gt; h1 &gt; span:nth-child(1)</code>，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：</p>
-
-<pre><code class="language-python">import asyncio
-
-from ruia import Item, TextField
-
-class DoubanItem(Item):
-    title = TextField(css_select='#content &gt; h1 &gt; span:nth-child(1)')
-
-async_func = DoubanItem.get_item(url=&quot;https://movie.douban.com/subject/1292052/&quot;)
-item = asyncio.get_event_loop().run_until_complete(async_func)
-print(item.title)
 </code></pre>
 
-<p>多页面多目标就是此情况下多个url的衍生情况</p>
+<p>或许你直接把<a href="https://github.com/howie6879/sanic_annotation">sanic_annotation</a>项目直接clone到本地比较方便调试+理解：</p>
 
-<blockquote>
-<p>单页面多目标</p>
-</blockquote>
-
-<p>假设现在的需求是抓取 <a href="https://movie.douban.com/top250">豆瓣电影250</a> 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，因此目标需要循环获取，这就是所谓的单页面多目标了：</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxeit345j30ln0pyjxx.jpg" alt="" /></p>
-
-<pre><code class="language-python">import asyncio
-
-from ruia import Item, TextField
-
-class DoubanItem(Item):
-    target_item = TextField(css_select='div.item')
-    title = TextField(css_select='span.title')
-
-    async def clean_title(self, title):
-        if isinstance(title, str):
-            return title
-        else:
-            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
-
-
-async_func = DoubanItem.get_items(url=&quot;https://movie.douban.com/top250&quot;)
-items = asyncio.get_event_loop().run_until_complete(async_func)
-for item in items:
-    print(item)
+<pre><code class="language-shell">git clone https://github.com/howie6879/sanic_annotation
+cd sanic_annotation/sanic_0_1_2/examples/
 </code></pre>
 
-<blockquote>
-<p>多页面多目标</p>
-</blockquote>
+<p>那么，现在一切准备就绪，开始阅读吧。</p>
 
-<p>多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称</p>
+<p>前两行代码导入包：
+- <code>Sanic</code>：构建一个 Sanic 服务必须要实例化的类
+- <code>json</code>：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：
+    - <code>text</code>：<code>content_type=&quot;text/plain; charset=utf-8&quot;</code>
+    - <code>html</code>：<code>content_type=&quot;text/html; charset=utf-8&quot;</code></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxjpbouqj30wr0pnwlp.jpg" alt="" /></p>
+<p>实例化一个<code>Sanic</code>对象，<code>app = Sanic(__name__)</code>，可见<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py">sanic.py</a>，我已经在这个文件里面做了一些注释，这里也详细说下<code>Sanic</code>类：</p>
 
-<pre><code class="language-python">from ruia import TextField, Item, Request, Spider
+<ul>
+<li><p>route()：装饰器，构建uri和视图函数的映射关系，调用Router().add()方法</p></li>
 
+<li><p>exception()：装饰器，和上面差不多，不过针对的是错误处理类Handler</p></li>
 
-class DoubanItem(Item):
-    &quot;&quot;&quot;
-    定义爬虫的目标字段
-    &quot;&quot;&quot;
-    target_item = TextField(css_select='div.item')
-    title = TextField(css_select='span.title')
+<li><p>middleware()：装饰器，针对中间件</p></li>
 
-    async def clean_title(self, title):
-        if isinstance(title, str):
-            return title
-        else:
-            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
+<li><p>register_blueprint()：注册视图的函数，接受第一个参数是视图类<code>blueprint</code>，再调用该类下的<code>register</code>方法实现将此蓝图下的<code>route、exception、middleware</code>统一注册到<code>app.route、app.exception、app.exception</code></p></li>
 
+<li><p>handle_request()：这是一个很重要的异步函数，当服务启动后，如果客户端发来一个有效的请求，会自动执行 <code>on_message_complete</code>函数，该函数的目的是异步调用 <code>handle_request</code>函数，<code>handle_request</code>函数会回调<code>write_response</code>函数，<code>write_response</code>接受的参数是此uri请求对应的视图函数，比如上面demo中，如果客户端请求&rsquo;/&lsquo;，那么这里<code>write_response</code>就会接受<code>json({&quot;test&quot;: True})</code>，然后进一步处理，再返回给客户端</p></li>
 
-class DoubanSpider(Spider):
-    start_urls = ['https://movie.douban.com/top250']
-    concurrency = 10
+<li><p>run()：Sanic服务的启动函数，必须执行，实际上会继续调用<code>server.serve</code>函数，详情下面会详细讲</p></li>
 
-    async def parse(self, res):
-        etree = res.html_etree
-        pages = ['?start=0&amp;filter='] + [i.get('href') for i in etree.cssselect('.paginator&gt;a')]
+<li><p>stop()：终止服务</p></li>
+</ul>
 
-        for index, page in enumerate(pages):
-            url = self.start_urls[0] + page
-            yield Request(
-                url,
-                callback=self.parse_item,
-                metadata={'index': index},
-                request_config=self.request_config
-            )
+<p>其实上面这部分介绍已经讲了Sanic基本的运行逻辑，如果你理解了，那下面的讲解对你来说是轻轻松松，如果不怎么明白，也不要紧，这是只是一个大体的介绍，跟着步骤来，也很容易理解，继续看代码：</p>
 
-    async def parse_item(self, res):
-        items_data = await DoubanItem.get_items(html=res.html)
-        res_list = []
-        for item in items_data:
-            res_list.append(item.title)
-        return res_list
+<pre><code class="language-python"># 此处将路由 / 与视图函数 test 关联起来
+@app.route(&quot;/&quot;)
+async def test(request):
+    return json({&quot;test&quot;: True})
 
-
-if __name__ == '__main__':
-    DoubanSpider.start()
 </code></pre>
 
-<p>如果网络没问题的话，会得到如下输出：</p>
+<p><code>app.route</code>，上面介绍过，随着Sanic服务的启动而启动，可定义参数<code>uri, methods</code></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fx9nqjuoznj30yb0azqeh.jpg" alt="" /></p>
+<p>目的是为<code>url</code>的<code>path</code>和视图函数对应起来，构建一对映射关系，本例中<code>Sanic.router</code>类下的<code>Router.routes = []</code></p>
 
-<p>注意爬虫运行时间，1s不到，这就是异步的魅力</p>
+<p>会增加一个名为<code>Route</code>的<code>namedtuple</code>，如下：</p>
 
-<p>用Python写爬虫，就是这么简单优雅，诸位，看着网页就思考下：</p>
+<pre><code class="language-python">[Route(handler=&lt;function test at 0x10a0f6488&gt;, methods=None, pattern=re.compile('^/$'), parameters=[])]
+</code></pre>
 
-<ul>
-<li>是什么类型的目标类型</li>
-<li>用什么库模拟请求</li>
-<li>怎么解析目标字段</li>
-<li>怎么存储</li>
-</ul>
+<p>看到没，<code>uri '/'</code> 和视图函数<code>test</code>对应起来了，如果客户端请求<code>'/'</code>，当服务器监听到这个请求的时候,<code>handle_request</code>可以通过参数中的<code>request.url</code>来找到视图函数<code>test</code>并且执行，随即生成视图返回</p>
 
-<p>一个爬虫程序就成型了，顺便一提，爬虫这东西，可以说是防君子不防小人，<code>robots.txt</code>大部分网站都有（它的目的是告诉爬虫什么可以爬取什么不可以爬取，比如：<code>https://www.baidu.com/robots.txt</code>），各位想怎么爬取，自己衡量</p>
+<p>那么这里<code>write_response</code>就会接受视图函数test返回的<code>json({&quot;test&quot;: True})</code></p>
 
-<h3 id="如何进阶">如何进阶</h3>
-
-<p>不要以为写好一个爬虫程序就可以出师了，此时还有更多的问题在前面等着你，你要含情脉脉地看着你的爬虫程序，问自己三个问题：</p>
+<p>说下<code>Router</code>类，这个类的目的就是添加和获取路由对应的视图函数，把它想象成<code>dict</code>或许更容易理解：</p>
 
 <ul>
-<li>爬虫抓取数据后是正当用途么？</li>
-<li>爬虫会把目标网站干掉么？</li>
-<li>爬虫会被反爬虫干掉么？</li>
+<li>add(self, uri, methods, handler)：添加一个映射关系到self.routes</li>
+<li>get(self, request)：获取request.url对应的视图函数</li>
 </ul>
 
-<p>前两个关于人性的问题在此不做过多叙述，因此跳过，但你们如果作为爬虫工程师的话，切不可跳过</p>
+<p>最后一行，<code>app.run(host=&quot;0.0.0.0&quot;, port=8000)</code>，Sanic 下的<code>run</code>函数，启动一个<code>http server</code>，主要是启动<code>run</code>里面的<code>serve</code>函数，参数如下：</p>
 
-<blockquote>
-<p>会被反爬虫干掉么？</p>
-</blockquote>
+<pre><code class="language-python">
+try:
+    serve(
+        host=host,
+        port=port,
+        debug=debug,
+        # 服务开始后启动的函数
+        after_start=after_start,
+        # 在服务关闭前启动的函数
+        before_stop=before_stop,
+        # Sanic(__name__).handle_request()
+        request_handler=self.handle_request,
+        # 默认读取Config
+        request_timeout=self.config.REQUEST_TIMEOUT,
+        request_max_size=self.config.REQUEST_MAX_SIZE,
+    )
+except:
+    pass
 
-<p>最后关于反爬虫的问题才是你爬虫程序强壮与否的关键因素，什么是反爬虫？</p>
+</code></pre>
 
-<p>当越来越多的爬虫在互联网上横冲直撞后，网页资源维护者为了防止自身数据被抓取，开始进行一系列的措施来使得自身数据不易被别的程序爬取，这些措施就是反爬虫</p>
-
-<p>比如检测IP访问频率、资源访问速度、链接是否带有关键参数、验证码检测机器人、ajax混淆、js加密等等</p>
-
-<p>对于目前市场上的反爬虫，爬虫工程师常有的反反爬虫方案是下面这样的：</p>
+<p>让我们将目光投向<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a>，这也是Sanic框架的核心代码：</p>
 
 <ul>
-<li>不断试探目标底线，试出单IP下最优的访问频率</li>
-<li>构建自己的IP代理池</li>
-<li>维护一份自己常用的UA库</li>
-<li>针对目标网页的Cookie池</li>
-<li>需要JS渲染的网页使用无头浏览器进行代码渲染再抓取</li>
-<li>一套破解验证码程序</li>
-<li>扎实的JS知识来破解混淆函数</li>
+<li><p>serve()：里面会创建一个TCP服务的协程，然后通过<code>loop.run_forever()</code>运行这个事件循环，以便接收客户端请求以及处理相关事件，每当一个新的客户端建立连接服务就会创建一个新的<code>Protocol</code>实例，接受请求与返回响应离不开其中的<code>HttpProtocol</code>，里面的函数支持接受数据、处理数据、执行视图函数、构建响应数据并返回给客户端</p></li>
+
+<li><p>HttpProtocol：<code>asyncio.Protocol</code>的子类，用来处理与客户端的通信，我在<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a>里写了对应的注释</p></li>
 </ul>
 
-<p>爬虫工程师的进阶之路其实就是不断反反爬虫，可谓艰辛，但换个角度想也是乐趣所在</p>
+<p>至此，Sanic 服务启动了</p>
 
-<blockquote>
-<p>关于框架</p>
-</blockquote>
-
-<p>爬虫有自己的编写流程和标准，有了标准，自然就有了框架，像Python这种生态强大的语言，框架自然是多不胜数，目前世面上用的比较多的有：</p>
+<p>不要小看这一个小小的demo，执行一下，竟然涉及到下面这么多个文件，让我们总结一下：</p>
 
 <ul>
-<li>Scrapy</li>
-<li>PySpider</li>
-<li>Portia</li>
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py">sanic.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/router.py">router.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/request.py">request.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/response.py">response.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/exceptions.py">exceptions.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/config.py">config.py</a></p></li>
+
+<li><p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/log.py">log.py</a></p></li>
 </ul>
 
-<p>这里不过多介绍，框架只是工具，是一种提升效率的方式，看你选择</p>
+<p>除去<code>__init__.py</code>，<code>Sanic</code>项目一共就10个文件，这个小demo不显山不露水地竟然用到了8个，虽然其中几个没有怎么用到，但也足够说明，你如果理解了这个demo，<code>Sanic</code>的运行逻辑以及框架代码你已经了解地很深入了</p>
 
-<h3 id="说明">说明</h3>
+<h3 id="blueprints-py">blueprints.py</h3>
 
-<p>任何事物都有两面性，爬虫自然也不例外，因此我送诸位一张图，关键时刻好好想想</p>
+<p>这个例子看完，我们就能轻易地明白什么是<code>blueprints</code>，以及<code>blueprints</code>的运行方式，代码如下：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyzjixe8dsj316a0pudj3.jpg" alt="" /></p>
+<pre><code class="language-python">
+from sanic_0_1_2.src import Sanic
+# 引入Blueprint
+from sanic_0_1_2.src import Blueprint
+from sanic_0_1_2.src.response import json, text
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyjvmwzoq2j30p00dwmzl.jpg" alt="" /></p>
+app = Sanic(__name__)
+blueprint = Blueprint('name', url_prefix='/my_blueprint')
+blueprint2 = Blueprint('name2', url_prefix='/my_blueprint2')
+
+
+@blueprint.route('/foo')
+async def foo(request):
+    return json({'msg': 'hi from blueprint'})
+
+
+@blueprint2.route('/foo')
+async def foo2(request):
+    return json({'msg': 'hi from blueprint2'})
+
+
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+
+app.run(host=&quot;0.0.0.0&quot;, port=8000, debug=True)
+
+</code></pre>
+
+<p>让我们从这两行开始：</p>
+
+<pre><code class="language-python">
+blueprint = Blueprint('name', url_prefix='/my_blueprint')
+blueprint2 = Blueprint('name2', url_prefix='/my_blueprint2')
+</code></pre>
+
+<p>显然，<code>blueprint</code>以及<code>blueprint2</code>是<code>Blueprint</code>根据不同的参数生成的不同的实例对象，接下来要干嘛？没错，分析<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/blueprints.py">blueprints.py</a>:</p>
+
+<ul>
+<li>BlueprintSetup：蓝图注册类
+
+<ul>
+<li>add_route：添加路由到app</li>
+<li>add_exception：添加对应抛出的错误到app</li>
+<li>add_middleware：添加中间件到app</li>
+</ul></li>
+<li>Blueprint：蓝图类，接收两个参数：name(蓝图名称) url_prefix 该蓝图的url前缀
+
+<ul>
+<li>route：路由装饰器，将会生成一个匿名函数到self.deferred_functions列表里稍后一起处理注册到app里</li>
+<li>middleware：同上</li>
+<li>exception：同上</li>
+<li>record：注册一个回调函数到self.deferred_functions列表里面，</li>
+<li>make_setup_state：实例化BlueprintSetup</li>
+<li>register：注册视图，实际就是注册route、middleware、exception到app，此时会利用make_setup<em>state返回的BlueprintSetup示例进行对于的add</em>***一系列操作，相当于Sanic().route()效果</li>
+</ul></li>
+</ul>
+
+<p>请看下<code>route</code>和<code>register</code>函数，然后再看下面的代码：</p>
+
+<pre><code class="language-python"># 生成一个匿名函数到self.deferred_functions列表里 包含三个参数 handler(foo), uri, methods
+@blueprint.route('/foo')
+async def foo(request):
+    return json({'msg': 'hi from blueprint'})
+
+
+@blueprint2.route('/foo')
+async def foo2(request):
+    return json({'msg': 'hi from blueprint2'})
+
+# 上一个例子说过这个函数，Sanic().register_blueprint() 注册蓝图
+app.register_blueprint(blueprint)
+app.register_blueprint(blueprint2)
+</code></pre>
+
+<p>怎么样，现在来看，是不是很轻松，这一行<code>app.run(host=&quot;0.0.0.0&quot;, port=8000, debug=True)</code>服务启动代码不用多说吧？</p>
+
+<h3 id="总结">总结</h3>
+
+<p>看到这里，相信你已经完全理解了Sanic的运行机制，虽然还有<code>middleware&amp;exception</code>的注册以及调用机制没讲，但这和<code>route</code>的运行机制一样，如果你懂了<code>route</code>那么这两个也很简单</p>
+
+<p>本人技术微末，若有错误，请指出，不胜感激</p>
+
+<p>注解地址：<a href="https://github.com/howie6879/sanic_annotation">sanic_annotation</a></p>
 
             <p class="post-info">
                 本文由
@@ -390,16 +366,17 @@ if __name__ == '__main__':
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-%25E8%25B0%2588%25E8%25B0%2588%25E5%25AF%25B9python%25E7%2588%25AC%25E8%2599%25AB%25E7%259A%2584%25E7%2590%2586%25E8%25A7%25A3%2f" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-%25E8%25B0%2588%25E8%25B0%2588%25E5%25AF%25B9python%25E7%2588%25AC%25E8%2599%25AB%25E7%259A%2584%25E7%2590%2586%25E8%25A7%25A3%2f&text=%e8%b0%88%e8%b0%88%e5%af%b9Python%e7%88%ac%e8%99%ab%e7%9a%84%e7%90%86%e8%a7%a3" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-%25E8%25B0%2588%25E8%25B0%2588%25E5%25AF%25B9python%25E7%2588%25AC%25E8%2599%25AB%25E7%259A%2584%25E7%2590%2586%25E8%25A7%25A3%2f&amp;title=%e8%b0%88%e8%b0%88%e5%af%b9Python%e7%88%ac%e8%99%ab%e7%9a%84%e7%90%86%e8%a7%a3" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-%25E8%25B0%2588%25E8%25B0%2588%25E5%25AF%25B9python%25E7%2588%25AC%25E8%2599%25AB%25E7%259A%2584%25E7%2590%2586%25E8%25A7%25A3%2f" target="_blank" rel="nofollow">QRcode</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f31%2f" target="_blank" title="Sanic 源码阅读 - 基于0.1.2" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f31%2f&text=Sanic%20%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%20-%20%e5%9f%ba%e4%ba%8e0.1.2" target="_blank" title="Sanic 源码阅读 - 基于0.1.2" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f31%2f&amp;title=Sanic%20%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%20-%20%e5%9f%ba%e4%ba%8e0.1.2" target="_blank" title="Sanic 源码阅读 - 基于0.1.2" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f31%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2018/32/" title="Sanic 使用教程 - 4.展示一个页面">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/01-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" title="神经网络基础">→</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/30/" title="Sanic 使用教程 - 3.项目结构">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>
@@ -478,21 +455,21 @@ if __name__ == '__main__':
             <div class="meta-item meta-posts">
                 <h3 class="meta-title">RECENT POSTS</h3>
                  
-                <li><a href="https://www.howie6879.cn/post/2019/02-%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/">谈谈对Python爬虫的理解</a></li>
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/2019/01-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/">神经网络基础</a></li>
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/40/">如何用Python创建一个简单的神经网络</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/39/">统计学习方法笔记：3.k近邻法</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/38/">统计学习方法笔记：2.感知机</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
                   
-                <li><a href="https://www.howie6879.cn/post/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
                  
 
             </div>

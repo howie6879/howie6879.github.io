@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        Sanic 使用教程 - 4.展示一个页面 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                Sanic 使用教程 - 4.展示一个页面
+            </h1>
+            <div class="post-data">
+                Published on Jan 5, 2018 ,2 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/python">python</a>
+	
+	<a href="https://www.howie6879.cn/tags/sanic">sanic</a>
+	
+</p>
+
+ 
+
+<p>前面一节介绍<a href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md">项目结构</a>的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。</p>
+
+<p>相信你应该已经了解清楚，<code>sanic</code>是怎么接收请求并返回被请求的资源的，简单来说概括如下：</p>
+
+<ul>
+<li>接收请求</li>
+<li>找到对应的路由并执行路由对应的视图函数</li>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">Jinja2</a>模板渲染返回视图</li>
+</ul>
+
+<!--- more --->
+
+<h3 id="路由和视图函数">路由和视图函数</h3>
+
+<p>在此我假设你理解 <code>python</code> 中的装饰器，如果你并不清楚，可以看我另写的关于<a href="http://blog.howie6879.cn/2016/09/28/04/">装饰器</a>的介绍，回归正题，还记得第一节中的代码实例么？</p>
+
+<pre><code class="language-python">#!/usr/bin/env python
+from sanic import Sanic
+from sanic.response import text
+
+app = Sanic()
+
+# 此处将路由 / 与视图函数 test 关联起来
+@app.route(&quot;/&quot;)
+async def test(request):
+    return text('Hello World!')
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=8000)
+</code></pre>
+
+<p>在前言介绍里，出现这几个名词 <strong>路由 视图函数 视图</strong> ,在上面那段代码中，<code>test</code> 就是视图函数。</p>
+
+<p>这是一段执行逻辑，比如客户端请求 <code>0.0.0.0:8000/</code> 此时返回的内容就是由<code>test</code> 这个视图函数提供的。</p>
+
+<p>在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(<a href="https://github.com/howie6879/Sanic-For-Pythoner/blob/master/docs/part2/1.Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2.md">sanic0.1.2源码</a>)来分析下：</p>
+
+<pre><code class="language-python">
+@app.route(&quot;/&quot;)
+async def test(request):
+    return text('Hello World!')
+
+</code></pre>
+
+<p>这个路由装饰器的作用很简单，就是将 <code>/</code> 这个 <code>uri</code> 与视图函数<code>test</code>关联起来，或许你可以将路由想象成一个 <code>dict</code>，当客户端若请求 <code>0.0.0.0:8000/</code>，路由就会<code>get</code> <code>/</code> 对应的视图函数<code>test</code>，然后执行。</p>
+
+<p>其实真实情况和我们想象的差不多，请看 <code>sanic.py</code> 中的第三十行:</p>
+
+<pre><code class="language-python">
+# Decorator
+def route(self, uri, methods=None):
+
+    def response(handler):
+        # 路由类的add 方法将视图函数handler 与uri 关联起来
+        # 然后整个路由列表会新增一个 namedtuple 如下：
+        # Route(handler=handler, methods=methods_dict, pattern=pattern, parameters=parameters)
+        self.router.add(uri=uri, methods=methods, handler=handler)
+        return handler
+
+    return response
+
+</code></pre>
+
+<p>此时，路由就和 <code>uri</code> 对应的视图函数关联起来了，这就是承上，路由和视图函数就是这样对应的关系。
+103行有个<code>handle_request</code>函数：</p>
+
+<pre><code class="language-python">
+async def handle_request(self, request, response_callback):
+    &quot;&quot;&quot;
+    Takes a request from the HTTP Server and returns a response object to be sent back
+    The HTTP Server only expects a response object, so exception handling must be done here
+    :param request: HTTP Request object
+    :param response_callback: Response function to be called with the response as the only argument
+    :return: Nothing
+    &quot;&quot;&quot;
+
+</code></pre>
+
+<p>当服务器监听到某个请求的时候，<code>handle_request</code>可以通过参数中的<code>request.url</code> 来找到视图函数并且执行，随即生成视图返回，这便是所谓的启下。</p>
+
+<p>其实浏览器显示的内容就是我们所谓的视图，视图是视图函数生成的，其中Jinja2起到模板渲染的作用。</p>
+
+<h3 id="蓝图">蓝图</h3>
+
+<p>到这里，你一定已经很明白sanic框架是怎么处理一个请求并将视图返回给客户端，然后也掌握了如何编写自己定义的模板(html)以及样式(css)，通过前面一节<a href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.md">项目结构</a>的介绍，我们可以总结出如下经验：</p>
+
+<ul>
+<li>对于css、js等静态文件，常规操作是将其放在自己建立的statics下面</li>
+<li>对于html模板，常规操作是将其放在自己建立的templates下面</li>
+<li>视图函数(即服务的逻辑实现)放在自己建立的views下面</li>
+</ul>
+
+<p>是时候考虑以下这种情况了，你需要编写一个比较复杂的http服务，你需要定义几百个路由，在编写过程中你会发现有许多不顺心的地方：</p>
+
+<ul>
+<li>各种不同类型的路由互相交杂在一起，命名困难，管理困难</li>
+<li>不同页面的css文件同样堆积在一起，html也是如此</li>
+<li>&hellip;</li>
+</ul>
+
+<p>实在是令人烦恼，可能你想要一个模块化的编写方式，一个文件编写后台，url统一是<code>/admin/***</code>，一个文件编写发帖，<code>/post/***</code> 等等，各个文件下面url自动会带上自定义的前缀，不用考虑命名问题，不用重复写url前缀，多么美好</p>
+
+<p><strong>Blueprint</strong>，就是sanic为你提供的解决方案，依然是上节rss的例子，让我们利用Blueprint来简单实现一下我们的需求，比如我们要构建的网站分为两个部分：</p>
+
+<ul>
+<li><code>/json/index</code> 返回json格式的数据</li>
+<li><code>/html/index</code> 返回html视图</li>
+</ul>
+
+<p>我们在上节代码的基础上添加Blueprint，先看看定好的项目结构：</p>
+
+<pre><code class="language-shell">
+.
+├── __init__.py
+├── config
+│   ├── __init__.py
+│   ├── config.py
+│   ├── dev_config.py
+│   └── pro_config.py
+├── run.py
+├── statics
+│   ├── rss_html # rss_html蓝图的 css js 文件存放目录
+│   │   ├── css
+│   │   │   └── main.css
+│   │   └── js
+│   └── rss_json # rss_json蓝图的 css js 文件存放目录
+├── templates
+│   ├── rss_html # rss_html蓝图的 html 文件存放目录
+│   │   ├── index.html
+│   │   └── rss.html
+│   └── rss_json # rss_json蓝图的 html 文件存放目录
+│       └── index.html
+└── views
+    ├── __init__.py
+    ├── rss_html.py # rss_html 蓝图
+    └── rss_json.py # rss_json 蓝图
+
+</code></pre>
+
+<p>蓝图的目的就是让我们构建的项目灵活，可扩展，容易阅读，方便管理，一个个小的蓝图就构建了一个大型的项目，run.py里面可以随意组合注册蓝图，可抽插式的构建我们的服务，<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/sample01">sample01</a>里是本次示例的代码，建议先读一遍，十分简单，主要就是讲路由根据你自己定义的特性分割成一个个蓝图，比如这里的<code>rss_html</code>和<code>rss_json</code>:</p>
+
+<pre><code class="language-python">
+#!/usr/bin/env python
+# 部分代码
+# rss_html.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+html_bp = Blueprint('rss_html', url_prefix='html')
+html_bp.static('/statics/rss_html', CONFIG.BASE_DIR + '/statics/rss_html')
+
+@html_bp.route(&quot;/&quot;)
+async def index(request):
+    return await template('index.html')
+
+#!/usr/bin/env python
+# 部分代码
+# rss_json.py
+import sys
+
+from sanic import Blueprint
+from sanic.response import html
+
+from src.config import CONFIG
+
+
+json_bp = Blueprint('rss_json', url_prefix='json')
+json_bp.static('/statics/rss_json', CONFIG.BASE_DIR + '/statics/rss_json')
+
+@json_bp.route(&quot;/&quot;)
+async def index(request):
+    return await template('index.html')
+
+</code></pre>
+
+<p>不知你是否感受到这样编写服务的好处，让我们列举下：</p>
+
+<ul>
+<li>每个蓝图都有其自己定义的前缀，如 /html/ /json/</li>
+<li>不同蓝图下面route可相同</li>
+<li>html以及css等 根据蓝图名称目录引用</li>
+<li>模块化</li>
+<li>&hellip;</li>
+</ul>
+
+<p>不多说，看运行效果：</p>
+
+<pre><code class="language-shell">
+cd /Sanic-For-Pythoneer/examples/demo04/sample01/src
+python run.py
+
+</code></pre>
+
+<p>现在，请访问：</p>
+
+<ul>
+<li><a href="http://0.0.0.0:8000/html/">http://0.0.0.0:8000/html/</a></li>
+<li><a href="http://0.0.0.0:8000/json/">http://0.0.0.0:8000/json/</a></li>
+<li><a href="http://0.0.0.0:8000/html/index">http://0.0.0.0:8000/html/index</a></li>
+<li><a href="http://0.0.0.0:8000/json/index">http://0.0.0.0:8000/json/index</a></li>
+</ul>
+
+<p>感觉这个设计方便了全世界^_^</p>
+
+<h3 id="说明">说明</h3>
+
+<p>代码地址：<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo04/">demo04</a></p>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+                
+                刷新可加载文末评论 
+                
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f32%2f" target="_blank" title="Sanic 使用教程 - 4.展示一个页面" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f32%2f&text=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%204.%e5%b1%95%e7%a4%ba%e4%b8%80%e4%b8%aa%e9%a1%b5%e9%9d%a2" target="_blank" title="Sanic 使用教程 - 4.展示一个页面" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f32%2f&amp;title=Sanic%20%e4%bd%bf%e7%94%a8%e6%95%99%e7%a8%8b%20-%204.%e5%b1%95%e7%a4%ba%e4%b8%80%e4%b8%aa%e9%a1%b5%e9%9d%a2" target="_blank" title="Sanic 使用教程 - 4.展示一个页面" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f32%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/friend/" title="友链">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/31/" title="Sanic 源码阅读 - 基于0.1.2">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+
+<div class="comment-container main-content page-page">
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <div id="gitalk-container" class="clearfix">
+        <script>
+            var gitalk = new Gitalk({
+                clientID: 'c7c56d99651604d9f431',
+                clientSecret: 'c7ed7b7e268fb3fb3d8bc8ec68efa3510e7430d6',
+                repo: 'howie6879.github.io',
+                owner: 'howie6879',
+                admin: ['howie6879'],
+                id: location.pathname, 
+                distractionFreeMode: false 
+            })
+
+            gitalk.render('gitalk-container')
+        </script>
+    </div>
+</div>
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(24)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>

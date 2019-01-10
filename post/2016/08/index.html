@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        Python之朴素贝叶斯对展会数据分类 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                Python之朴素贝叶斯对展会数据分类
+            </h1>
+            <div class="post-data">
+                Published on Sep 28, 2016 ,3 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/python">python</a>
+	
+	<a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">机器学习</a>
+	
+</p>
+
+ 
+
+<h2 id="目的">目的</h2>
+
+<p>在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/01.png" alt="01.png" /></p>
+
+<p>国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/02.png" alt="02.png" /></p>
+
+<p>国外网站展会数据将近五万多条，跟分类有关的只有<code>categories</code>这一列数据，都是一些标签词，还偏少。</p>
+
+<p>现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个<strong>朴素贝叶斯分类器</strong>。</p>
+
+<h2 id="数据">数据</h2>
+
+<p>朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。</p>
+
+<h3 id="数据的准备">数据的准备</h3>
+
+<p>获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/03.png" alt="03.png" /></p>
+
+<p>训练数据主要是这两列，<strong>所属行业</strong>以及<strong>展会范围</strong>，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为<strong>训练集</strong>。</p>
+
+<p>那么相对应，国外待分类的展会数据便是<strong>测试集</strong>。</p>
+
+<p>我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。</p>
+
+<p>可是现在有个问题，作为<strong>训练集</strong>的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终<strong>训练集</strong>达到了<code>39555</code>条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？</p>
+
+<h3 id="分词-提取">分词&amp;&amp;提取</h3>
+
+<p>不积小流，无以成江海，以小见大，咱们看这样一条数据:</p>
+
+<pre><code>所属行业：建材五金
+展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等
+</code></pre>
+
+<p>思考一下，这一条数据的<strong>所属行业</strong>和<strong>展会范围</strong>有什么关系，我们将从这里得到编写分类器的出发点。</p>
+
+<p>在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。</p>
+
+<p>那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。</p>
+
+<pre><code class="language-python"># 可以利用结巴分词
+import jieba.analyse
+con = &quot;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&quot;
+feature = jieba.analyse.extract_tags(con, 8)
+print(feature)
+# output：['配件', '各类', '家具', '五金', '照明', '浴室', '淋浴房', '浴缸']
+</code></pre>
+
+<p>那么刚刚那条数据可以这样看：</p>
+
+<pre><code># data_01
+所属行业：建材五金
+描述关键词：'配件', '各类', '家具', '五金', '照明', '浴室', '淋浴房', '浴缸'
+</code></pre>
+
+<p>以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。</p>
+
+<p>但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：</p>
+
+<pre><code># data_02
+所属行业：未知
+描述关键词：'配件','家具'
+</code></pre>
+
+<p>这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。</p>
+
+<p>大三的时候学过概率统计，也记得一个公式名为<strong>贝叶斯定理</strong>。</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/04.jpg" alt="04.jpg" /></p>
+
+<p>这表示计算条件概率的公式:</p>
+
+<pre><code class="language-python">P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子
+# 这样写会不会更加清晰
+P(category\keywords) = P(category) * P(keywords\category)/ P(keywords)
+## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。
+P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category)...P(keywordn\category)/ P(keywords)
+</code></pre>
+
+<p>总结就是，我们先求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong></p>
+
+<p>再求出一组待分类数据的关键词在各个类别中的概率*P(keywords\category)*——<strong>调整因子</strong></p>
+
+<p>最后<strong>先验概率</strong> <strong>*</strong>  <strong>调整因子</strong>得出<strong>后验概率</strong>，再经过比较，后验概率最大的，便是待分类数据最可能的类别。</p>
+
+<p>我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。</p>
+
+<p>2.2.1.确定训练数据有多少类别</p>
+
+<p>2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为<strong>id:word</strong>的格式存为<em>id_word.txt</em></p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/05.png" alt="05.png" /></p>
+
+<p>2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为<strong>category=id:pro(id)</strong>的格式存为<em>tf_id_word.txt</em></p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9hhcy1cj30yg0ir4qp.jpg" alt="" /></p>
+
+<p>2.2.4.求出样本空间中每个分类的概率*P(category)*——<strong>先验概率</strong>，将其转为<strong>category:pro(category)</strong>的格式存为<em>type_pro.txt</em></p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/07.png" alt="07.png" /></p>
+
+<h2 id="编码">编码</h2>
+
+<p>经过前面的步骤，现在编写代码实在简单，不过有两点要注意。</p>
+
+<p>其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。</p>
+
+<p>其二是若每个调整因子的数值都很小，大家都知道很小的值相乘，会导致结果变得更小，这样子表现出各个分类结果的后验概率便会出现问题，这个问题便是下溢出问题，解决办法便是将其转化为对数，对数相乘便是对数相加，这样便很巧妙的解决了这个问题。</p>
+
+<p>好了，直接上代码，让我们看看分类的结果吧。</p>
+
+<pre><code class="language-python"># -*-coding:utf-8-*-
+__author__ = 'howie'
+
+import jieba.analyse
+import pandas as pd
+import math
+
+
+class Pridict(object):
+    &quot;&quot;&quot;
+    利用txt/中数据进行朴素贝叶斯算法训练
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        # 初始化结果字典
+        self.resultData = {}
+
+    def getKeyword(self, path):
+        &quot;&quot;&quot;
+        通过结巴分词进行关键词提取
+        :param path: 待分词文件路径 相关参数可更改 也可不调用直接写
+        :return: keywordDic = {index:['word1','word2'...]}
+        &quot;&quot;&quot;
+        keywordDic = {}
+        df = pd.read_csv(path)
+        for des in df.values:
+            jieba.analyse.set_idf_path('txt/type_dict.txt')
+            feature = jieba.analyse.extract_tags(des[15], 8)
+            keywordDic[des[16]] = feature
+        return keywordDic
+
+    def idDic(self, keywordDic):
+        &quot;&quot;&quot;
+        将每条待分类关键词替换成对应的单词向量
+        :param keywordDic:格式 keywordDic = {index:['word1','word2'...]}
+        :return: keywordDic = {'1': ['12198', '16311', '6253', '8302']}
+        &quot;&quot;&quot;
+        with open('txt/id_word.txt', 'r', encoding='utf8') as of:
+            lines = of.read().split('\n')
+        for key, values in keywordDic.items():
+            id_word = []
+            for eachValue in values:
+                id_word += [eachLine.split(':')[0] for eachLine in lines if eachValue == eachLine.split(':')[-1]]
+            keywordDic[key] = id_word
+        return keywordDic
+
+    def calPro(self, keywordDic):
+        &quot;&quot;&quot;
+        计算每一组待分类数据关键词对应概率总和
+        :param keywordDic:格式 keywordDic = {'1': ['12198', '16311', '6253', '8302']}
+        :return: result = {'1': {'type1': -33.23204707236557, 'type3': -31.376043125934267, 'type3': -27.385192803356617...}
+        &quot;&quot;&quot;
+        result = {}
+        # print(keywordDic)
+        # 获取每个类别关键词出现概率
+        with open('txt/tf_id_word.txt', 'r', encoding='utf8') as of:
+            lines = of.read().split('\n')[0:-1]
+        # 循环待分类数据
+        for key, values in keywordDic.items():
+            result[key] = {}
+            # 读取分类概率文件中读取每行数据
+            for eachLine in lines:
+                valLen = len(values)
+                valPro = list(map(lambda x: '', [x for x in range(0, valLen)]))
+                laplace = ''
+                # 分类名称 该分类下关键词概率
+                lineData = eachLine.split(&quot;=&quot;)
+                # 该分类下每个关键词概率
+                eachLineData = lineData[-1].split(&quot;#&quot;)
+                # 循环每个待分类字典的关键字向量
+                for index,eachValue in enumerate(values):
+                    # 每个关键词对应的词向量以及词概率 得到所有关键词该分类下的概率列表
+                    resPro = [eachPro.split(':')[1] for eachPro in eachLineData if eachValue == eachPro.split(':')[0]]
+                    # 防止待分类关键词概率为0，添加拉普拉斯平滑
+                    laplace = str(1 / (valLen + len(eachLineData)))
+                    valPro[index] = (resPro[0] if resPro else laplace)
+                valPrlLen = int(valLen / 2)
+                # 处理关键词为空 增加限制条件，排除小概率分类影响后验概率大小
+                if valPro:
+                    if valPro.count(laplace) &lt;= valPrlLen:
+                        # 防止下溢出转化为对数相加
+                        typePro = sum([math.log(float(x)) for x in valPro])
+                        result[key][lineData[0]] = typePro
+                else:
+                    # 将该待分类数据标记为None
+                    result[key] = None
+        return result
+
+    def resPro(self, result):
+        &quot;&quot;&quot;
+        为各个分类乘上先验概率 提高分类成功率
+        :param result: 格式 result = {'1': {'type1': -33.23204707236557, 'type3': -31.376043125934267, 'type3': -27.385192803356617...}
+        :return: resultData = {'1': {'type': -28.135469210164924}}
+        &quot;&quot;&quot;
+        for eachKey, eachVal in result.items():
+            # 初始化每个待分类数据字典 储存最可能分类的概率
+            self.resultData[eachKey] = {}
+            # 初始化最终分类结果概率
+            allPro = {}
+            if eachVal:
+                # print(eachVal)
+                with open('txt/type_pro.txt', 'r', encoding='utf8') as of:
+                    lines = of.read().split('\n')
+                for line in lines:
+                    lineData = line.split(':')
+                    # 乘上该分类概率 即先验概率
+                    allPro = dict(allPro,**{key:(value + math.log(float(lineData[1]))) for key, value in eachVal.items() if key == lineData[0]})
+                    # 返回各个分类对应后验概率最大值
+                    largest = max(zip(allPro.values(),allPro.keys()))
+                    self.resultData[eachKey][largest[1]] = largest[0]
+            else:
+                # 无法分类
+                self.resultData[eachKey] = {'failed': None}
+        return self.resultData
+
+
+def mainPri(keywordDic):
+    pri = Pridict()
+    dic = pri.idDic(keywordDic)
+    result = pri.calPro(dic)
+    resultData = pri.resPro(result)
+    return resultData
+
+</code></pre>
+
+<p>初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。</p>
+
+<p>让我们看看分类器的分类效果：</p>
+
+<p><img src="https://www.howie6879.cn/images/post/08/08.png" alt="08.png" /></p>
+
+<p>可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。</p>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+                
+                刷新可加载文末评论 
+                
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2016%2f08%2f" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2016%2f08%2f&text=Python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2016%2f08%2f&amp;title=Python%e4%b9%8b%e6%9c%b4%e7%b4%a0%e8%b4%9d%e5%8f%b6%e6%96%af%e5%af%b9%e5%b1%95%e4%bc%9a%e6%95%b0%e6%8d%ae%e5%88%86%e7%b1%bb" target="_blank" title="Python之朴素贝叶斯对展会数据分类" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2016%2f08%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2016/09/" title="Python之由公司名推算出公司官网(余弦相似度)">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2016/07/" title="PythonTip">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+
+<div class="comment-container main-content page-page">
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <div id="gitalk-container" class="clearfix">
+        <script>
+            var gitalk = new Gitalk({
+                clientID: 'c7c56d99651604d9f431',
+                clientSecret: 'c7ed7b7e268fb3fb3d8bc8ec68efa3510e7430d6',
+                repo: 'howie6879.github.io',
+                owner: 'howie6879',
+                admin: ['howie6879'],
+                id: location.pathname, 
+                distractionFreeMode: false 
+            })
+
+            gitalk.render('gitalk-container')
+        </script>
+    </div>
+</div>
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(24)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>

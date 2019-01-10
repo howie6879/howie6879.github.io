@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        sanic使用记录 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                sanic使用记录
+            </h1>
+            <div class="post-data">
+                Published on Feb 28, 2017 ,3 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/python">python</a>
+	
+	<a href="https://www.howie6879.cn/tags/sanic">sanic</a>
+	
+</p>
+
+ <p>在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的<code>async/await</code>来编写无阻塞的异步程序。
+于是我利用业余时间使用<a href="https://github.com/channelcat/sanic">sanic</a>编写了这个项目。</p>
+
+<h2 id="前言">前言</h2>
+
+<p>在使用过程中，我尽量将程序编写成异步的，首先进行安装：</p>
+
+<pre><code class="language-python">python -m pip install sanic
+</code></pre>
+
+<p>sanic的<a href="http://sanic.readthedocs.io/en/latest/index.html">文档</a>写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：</p>
+
+<ul>
+<li>1.blueprint</li>
+<li>2.html templates编写（引入jinja2）</li>
+<li>3.session（引入sanic_session）</li>
+<li>4.缓存（引入aiocache）</li>
+<li>5.api接口验证（自定义一个装饰器）</li>
+<li>6.恶意将其他域名绑定到你的网站独立ip</li>
+<li>7.注意</li>
+</ul>
+
+<h2 id="问题记录">问题记录</h2>
+
+<h3 id="blueprint">blueprint</h3>
+
+<p>借用官方文档的例子，一个简单的sanic服务就搭好了：</p>
+
+<pre><code class="language-python"># main.py
+from sanic import Sanic
+from sanic.response import json
+
+app = Sanic()
+
+@app.route(&quot;/&quot;)
+async def test(request):
+    return json({&quot;hello&quot;: &quot;world&quot;})
+
+#访问http://0.0.0.0:8000/即可
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=8000)
+</code></pre>
+
+<p>上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：</p>
+
+<pre><code class="language-shell">├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   ├── chapter.css
+│       │   ├── content.css
+│       │   ├── index.css
+│       │   ├── main.css
+│       │   └── result.css
+│       ├── img
+│       │   ├── bookMark.png
+│       │   ├── favicon.ico
+│       │   ├── read_bg.png
+│       │   └── read_content.png
+│       └── js
+│           ├── list.js
+│           └── main.js
+├── template
+│   └── novels
+│       ├── chapter.html
+│       ├── content.html
+│       ├── donate.html
+│       ├── feedback.html
+│       ├── index.html
+│       ├── main.html
+│       └── result.html
+└── views
+    └── novels_blueprint.py
+</code></pre>
+
+<p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：</p>
+
+<pre><code class="language-python"># server.py
+#!/usr/bin/env python
+from sanic import Sanic
+from novels_search.views.novels_blueprint import bp
+
+app = Sanic(__name__)
+app.blueprint(bp)
+
+app.run(host=&quot;0.0.0.0&quot;, port=8000, debug=True)
+</code></pre>
+
+<p>具体的<code>novels_blueprint.py</code>请点击<a href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py">这里</a></p>
+
+<h3 id="html-templates编写">html templates编写</h3>
+
+<p>编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：</p>
+
+<pre><code class="language-python"># novels_blueprint.py片段
+from sanic import Blueprint
+from jinja2 import Environment, PackageLoader, select_autoescape
+
+# 初始化blueprint并定义静态文件夹路径
+bp = Blueprint('novels_blueprint')
+bp.static('/static', './static/novels')
+
+# jinjia2 config
+env = Environment(
+    loader=PackageLoader('views.novels_blueprint', '../templates/novels'),
+    autoescape=select_autoescape(['html', 'xml', 'tpl']))
+
+def template(tpl, **kwargs):
+    template = env.get_template(tpl)
+    return html(template.render(kwargs))
+    
+@bp.route(&quot;/&quot;)
+async def index(request):
+    return template('index.html', title='index')
+</code></pre>
+
+<p>这样，就实现了jinja2 的引入。</p>
+
+<p>=========05-02===========
+在官方文档发现了已经加入了如何引入jinja2，具体见：<a href="https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py">https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py</a></p>
+
+<h3 id="session">session</h3>
+
+<p>sanic对此有一个第三方插件<a href="https://github.com/subyraman/sanic_session"><code>sanic_session</code></a>，用法非常简单，见官方例子如下：</p>
+
+<pre><code class="language-python">import asyncio_redis
+
+from sanic import Sanic
+from sanic.response import text
+from sanic_session import RedisSessionInterface
+
+app = Sanic()
+
+
+# Token from https://github.com/subyraman/sanic_session
+
+class Redis:
+    &quot;&quot;&quot;
+    A simple wrapper class that allows you to share a connection
+    pool across your application.
+    &quot;&quot;&quot;
+    _pool = None
+
+    async def get_redis_pool(self):
+        if not self._pool:
+            self._pool = await asyncio_redis.Pool.create(
+                host='localhost', port=6379, poolsize=10
+            )
+
+        return self._pool
+
+
+redis = Redis()
+
+# pass the getter method for the connection pool into the session
+session_interface = RedisSessionInterface(redis.get_redis_pool, expiry=604800)
+
+
+@app.middleware('request')
+async def add_session_to_request(request):
+    # before each request initialize a session
+    # using the client's request
+    await session_interface.open(request)
+
+
+@app.middleware('response')
+async def save_session(request, response):
+    # after each request save the session,
+    # pass the response to set client cookies
+    await session_interface.save(request, response)
+
+
+@app.route(&quot;/&quot;)
+async def test(request):
+    # interact with the session like a normal dict
+    if not request['session'].get('foo'):
+        request['session']['foo'] = 0
+
+    request['session']['foo'] += 1
+
+    response = text(request['session']['foo'])
+
+    return response
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=8888, debug=True)
+</code></pre>
+
+<h3 id="缓存">缓存</h3>
+
+<p>我在项目中主要使用redis作为缓存，使用<a href="https://github.com/argaen/aiocache">aiocache</a>很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。</p>
+
+<pre><code class="language-python">@cached(ttl=1800, cache=RedisCache, key_from_attr='url', serializer=PickleSerializer(),
+        endpoint=REDIS_DICT.get('REDIS_ENDPOINT', None), port=REDIS_DICT.get('REDIS_PORT', None), namespace=&quot;main&quot;)
+async def cache_owllook_novels_chapter(url, netloc):
+    async with aiohttp.ClientSession() as client:
+        html = await target_fetch(client=client, url=url)
+        if html:
+            soup = BeautifulSoup(html, 'html5lib')
+            selector = RULES[netloc].chapter_selector
+            if selector.get('id', None):
+                content = soup.find_all(id=selector['id'])
+            elif selector.get('class', None):
+                content = soup.find_all(class_=selector['class'])
+            else:
+                content = soup.find_all(selector.get('tag'))
+            return str(content) if content else None
+        return None
+
+</code></pre>
+
+<p>带上装饰器，什么都解决了。</p>
+
+<h3 id="api接口验证">api接口验证</h3>
+
+<p>在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：</p>
+
+<pre><code class="language-python"># 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好
+from functools import wraps
+from sanic.response import json
+from novels_search.config import AUTH
+
+def authenticator(key):
+    &quot;&quot;&quot;
+    
+    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
+    :return: 返回值
+    &quot;&quot;&quot;
+
+    def wrapper(func):
+        @wraps(func)
+        async def authenticate(request, *args, **kwargs):
+            value = request.headers.get(key, None)
+            if value and AUTH[key] == value:
+                response = await func(request, *args, **kwargs)
+                return response
+            else:
+                return json({'msg': 'not_authorized', 'status': 403})
+
+        return authenticate
+
+    return wrapper
+</code></pre>
+
+<p>至于使用</p>
+
+<pre><code class="language-python">@api_bp.route(&quot;/bd_novels/&lt;name&gt;&quot;)
+@authenticator('Owllook-Api-Key')
+async def bd_novels(request, name):
+    pass
+</code></pre>
+
+<p>具体见<a href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py">例子</a></p>
+
+<h3 id="恶意将其他域名绑定到你的网站独立ip">恶意将其他域名绑定到你的网站独立ip</h3>
+
+<p>前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。</p>
+
+<p>首先，定义你允许访问的HOST，再获取访问时获取的host，比如：</p>
+
+<pre><code class="language-python"># config.py
+HOST = ['127.0.0.1:8001']
+
+# sanic获取host
+host = request.headers.get('host', None)
+</code></pre>
+
+<p>那么就可以在sanic中间件中定义：</p>
+
+<pre><code class="language-python"># 当host不满足条件就调到baidu
+@app.middleware('request')
+async def add_session_to_request(request):
+    host = request.headers.get('host', None)
+    if not host or host not in HOST:
+        return redirect('http://www.baidu.com')
+</code></pre>
+
+<h3 id="注意">注意</h3>
+
+<p>sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见<a href="https://github.com/channelcat/sanic/issues/633。">https://github.com/channelcat/sanic/issues/633。</a>
+sanic更新换代还是很快的。</p>
+
+<h2 id="说明">说明</h2>
+
+<p>遇到什么想到什么就继续更新，具体代码<a href="https://github.com/howie6879/novels-search">地址</a></p>
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+                
+                刷新可加载文末评论 
+                
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f21%2f" target="_blank" title="sanic使用记录" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f21%2f&text=sanic%e4%bd%bf%e7%94%a8%e8%ae%b0%e5%bd%95" target="_blank" title="sanic使用记录" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f21%2f&amp;title=sanic%e4%bd%bf%e7%94%a8%e8%ae%b0%e5%bd%95" target="_blank" title="sanic使用记录" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f21%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/22/" title="owllook -- 一个简洁的网络小说搜索引擎">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/20/" title="--1.vscode搭建haskell环境">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+
+<div class="comment-container main-content page-page">
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <div id="gitalk-container" class="clearfix">
+        <script>
+            var gitalk = new Gitalk({
+                clientID: 'c7c56d99651604d9f431',
+                clientSecret: 'c7ed7b7e268fb3fb3d8bc8ec68efa3510e7430d6',
+                repo: 'howie6879.github.io',
+                owner: 'howie6879',
+                admin: ['howie6879'],
+                id: location.pathname, 
+                distractionFreeMode: false 
+            })
+
+            gitalk.render('gitalk-container')
+        </script>
+    </div>
+</div>
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(24)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        统计学习方法笔记：3.k近邻法 - howie6879
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">howie6879</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                统计学习方法笔记：3.k近邻法
+            </h1>
+            <div class="post-data">
+                Published on Sep 29, 2018 ,1 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95">统计学习方法</a>
+	
+	<a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">机器学习</a>
+	
+	<a href="https://www.howie6879.cn/tags/mlhub123">mlhub123</a>
+	
+</p>
+
+ 
+
+<p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
+
+<ul>
+<li>阅读章节：第三章：k近邻法</li>
+<li>开始时间：2018-09-29</li>
+<li>结束时间：2018-10-23（比较忙）</li>
+<li>目标：读完第三章，掌握基本概念，产出一篇笔记</li>
+<li><a href="https://www.howie6879.cn/post/39/">博客地址</a></li>
+</ul>
+
+<p>k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：</p>
+
+<ul>
+<li>k近邻算法</li>
+<li>k近邻模型</li>
+<li>k近邻法的实现：kd树</li>
+</ul>
+
+<h2 id="k近邻算法">k近邻算法</h2>
+
+<p><strong>什么是k近邻算法？</strong></p>
+
+<p>给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,&hellip;,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$</p>
+
+<p>关键点在于是如何进行类别的判断，描述如下：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvroehv4vej30yo09w44m.jpg" alt="" /></p>
+
+<p>思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类</p>
+
+<p>上面<code>3.1</code>的公式这里解释一下：随着变量<code>j</code>的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功</p>
+
+<h2 id="k近邻模型">k近邻模型</h2>
+
+<p>k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定</p>
+
+<h3 id="模型">模型</h3>
+
+<p>通过上面的叙述，当我们知道：</p>
+
+<ul>
+<li>训练集</li>
+<li>距离度量（明可夫斯基距离）</li>
+<li>k值</li>
+<li>分类决策规则（多数表决）</li>
+</ul>
+
+<p>此时对于任何一个新的输入实例，都可以确定其所属的类</p>
+
+<p><strong>什么是单元？</strong></p>
+
+<p>特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元<code>（cell）</code>，最终会将特征空间划分为下图所示：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwdo9ddtq4j30mm0gytc7.jpg" alt="" /></p>
+
+<h3 id="距离度量">距离度量</h3>
+
+<p>特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwdogsqjgyj310w0ikagg.jpg" alt="" /></p>
+
+<h3 id="k值的选择">k值的选择</h3>
+
+<p>k值的选择会对k近邻法的结果产生重大影响：</p>
+
+<ul>
+<li>如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合</li>
+<li>如果较大：k值的增大就意味着整体的模型变得简单</li>
+</ul>
+
+<h3 id="分类决策规则">分类决策规则</h3>
+
+<p>k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化</p>
+
+<h2 id="k近邻法的实现-kd树">k近邻法的实现：kd树</h2>
+
+<p>实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索</p>
+
+<p>k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的</p>
+
+<p>为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法</p>
+
+<h3 id="构造kd树">构造kd树</h3>
+
+<p>k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）</p>
+
+<p>k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi6yaofqzj30ze0uuwqq.jpg" alt="" /></p>
+
+<p>实际做一道例题有助于对算法的理解：</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi711siqbj30zw03q408.jpg" alt="" /></p>
+
+<ul>
+<li>首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2)</li>
+<li>根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树</li>
+<li>构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树</li>
+<li>构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面</li>
+<li>无法继续划分，k-d tree构建完成</li>
+</ul>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7auqqs6j30yk0xmwld.jpg" alt="" /></p>
+
+<h3 id="搜索kd树">搜索kd树</h3>
+
+<p>给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fwi7oqbc9dj312i0wktlt.jpg" alt="" /></p>
+
+<h2 id="说明">说明</h2>
+
+<p>有助于理解kd树的博客文章：</p>
+
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/23966698">数学】kd 树算法之详细篇</a></li>
+<li><a href="https://leileiluoluo.com/posts/kdtree-algorithm-and-implementation.html">K-D TREE算法原理及实现</a></li>
+</ul>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+                
+                刷新可加载文末评论 
+                
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f39%2f" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f39%2f&text=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a3.k%e8%bf%91%e9%82%bb%e6%b3%95" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f39%2f&amp;title=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a3.k%e8%bf%91%e9%82%bb%e6%b3%95" target="_blank" title="统计学习方法笔记：3.k近邻法" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2018%2f39%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2018/40/" title="如何用Python创建一个简单的神经网络">←</a></span> 
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2018/38/" title="统计学习方法笔记：2.感知机">→</a></span> 
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+
+<div class="comment-container main-content page-page">
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <div id="gitalk-container" class="clearfix">
+        <script>
+            var gitalk = new Gitalk({
+                clientID: 'c7c56d99651604d9f431',
+                clientSecret: 'c7ed7b7e268fb3fb3d8bc8ec68efa3510e7430d6',
+                repo: 'howie6879.github.io',
+                owner: 'howie6879',
+                admin: ['howie6879'],
+                id: location.pathname, 
+                distractionFreeMode: false 
+            })
+
+            gitalk.render('gitalk-container')
+        </script>
+    </div>
+</div>
+
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 150px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(24)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                 
+                <li><a href="https://www.howie6879.cn/post/2019/02-talk-about-python-spider/">谈谈对Python爬虫的理解</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/">神经网络基础</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/42/">读 - Character-level Convolutional Networks for Text Classiﬁcation</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/38/">统计学习方法笔记：2.感知机</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2018/37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>
