@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        统计学习方法笔记：2.感知机 - howie6879
+        谈谈对Python爬虫的理解 - howie6879
         
     </title>
     <meta name="keywords" content=" " />
@@ -64,293 +64,309 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                统计学习方法笔记：2.感知机
+                谈谈对Python爬虫的理解
             </h1>
             <div class="post-data">
-                Published on Sep 18, 2018 ,3 min reading time
+                Published on Jan 10, 2019 ,2 min reading time
             </div>
         </div>
         <div id="post-content" class="post-content">
             
 <p class="post-tags"> 
 	
-	<a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95">统计学习方法</a>
-	
-	<a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">机器学习</a>
-	
-	<a href="https://www.howie6879.cn/tags/mlhub123">mlhub123</a>
+	<a href="https://www.howie6879.cn/tags/python">python</a>
 	
 </p>
 
  
 
-<p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
+<blockquote>
+<p>爬虫也可以称为Python爬虫</p>
+</blockquote>
+
+<p>不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫</p>
+
+<p>所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：</p>
 
 <ul>
-<li>阅读章节：第二章：感知机</li>
-<li>开始时间：2018-09-18</li>
-<li>结束时间：2018-09-21</li>
-<li>目标：读完第二章，掌握基本概念，产出一篇笔记</li>
-<li><a href="https://www.howie6879.cn/post/38/">博客地址</a></li>
+<li>Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大</li>
+<li>Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）</li>
 </ul>
 
-<p>本章主要介绍了二类分类的线性分类模型：感知机：</p>
+<p>任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过</p>
+
+<h3 id="什么是爬虫">什么是爬虫</h3>
+
+<p>爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyzio0y1hlj32aq1hq4p4.jpg" alt="" /></p>
+
+<p>看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～</p>
+
+<p>爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：</p>
 
 <ul>
-<li>感知机模型</li>
-<li>感知机学习策略</li>
-<li>感知机学习算法</li>
+<li>通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事</li>
+<li>垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫</li>
+<li>增量网络爬虫：对已经抓取的网页进行实时更新</li>
+<li>深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面</li>
 </ul>
 
-<p>说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见<a href="https://www.howie6879.cn/post/33/">这里</a></p>
-
-<h2 id="感知机模型">感知机模型</h2>
-
-<p>感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取<code>+1</code>和<code>–1</code>值，属于判别模型</p>
-
-<p>注：<code>+1 -1 分别代表正负类，有的可能用 1 0 表示</code></p>
-
-<p>在介绍感知机定义之前，下面几个概念需要说明一下：</p>
+<p>不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：</p>
 
 <ul>
-<li>输入空间：输入所有可能取值的集合</li>
-<li>输出空间：输出所有可能取值的集合</li>
-<li>特征空间：每个具体的输入是一个实例，由特征向量表示</li>
+<li>模拟请求网页资源</li>
+<li>从HTML提取目标元素</li>
+<li>数据持久化</li>
 </ul>
 
-<p>所以对于一个感知机模型，可以这样表示：</p>
+<p>什么是爬虫，这就是爬虫：</p>
+
+<pre><code class="language-python">&quot;&quot;&quot;让我们根据上面说的步骤来完成一个简单的爬虫程序&quot;&quot;&quot;
+import requests
+
+from bs4 import BeautifulSoup
+
+target_url = 'http://www.baidu.com/s?wd=爬虫'
+
+# 第一步 发起一个GET请求
+res = requests.get(target_url)
+
+# 第二步 提取HTML并解析想获取的数据 比如获取 title
+soup = BeautifulSoup(res.text, &quot;lxml&quot;)
+# 输出 soup.title.text
+title = soup.title.text
+
+# 第三步 持久化 比如保存到本地
+with open('title.txt', 'w') as fp:
+    fp.write(title)
+</code></pre>
+
+<p>加上注释不到20行代码，你就完成了一个爬虫，简单吧</p>
+
+<h3 id="怎么写爬虫">怎么写爬虫</h3>
+
+<p>网页世界多姿多彩、亿万网页资源供你选择，面对不同的页面，怎么使自己编写的爬虫程序够稳健、持久，这是一个值得讨论的问题</p>
+
+<p>俗话说，磨刀不误砍柴工，在开始编写爬虫之前，很有必要掌握一些基本知识：</p>
 
 <ul>
-<li>输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$</li>
-<li>输出空间：$\gamma = \{+1,-1 \}$</li>
+<li>网页的结构是HTML，爬虫的目标就是解析HTML，获取目标字段并保存</li>
+<li>客户端展现的网页由浏览器渲染，客户端和服务端的信息交互依靠HTTP协议</li>
 </ul>
 
-<p>那么感知机就是由输入空间到输出空间的函数：</p>
-
-<p>$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$</p>
-
-<p>其中：</p>
+<p>这两句描述体现了一名爬虫开发人员需要掌握的基本知识，不过一名基本的后端或者前端工程师都会这些哈哈，这也说明了爬虫的入门难度极低，从这两句话，你能思考出哪些爬虫必备的知识点呢？</p>
 
 <ul>
-<li>$sign$: 符号函数</li>
-<li>$w$: 权值（weight）或权值向量（weight vector）</li>
-<li>$b$: 偏置（bias）</li>
+<li>基本的HTML知识，了解HTML才方便目标信息提取</li>
+<li>基本的JS知识 ，JS可以异步加载HTML</li>
+<li>了解CSS Selector、XPath以及正则，目的是为了提取数据</li>
+<li>了解HTTP协议，为后面的反爬虫斗争打下基础</li>
+<li>了解基本的数据库操作，为了数据持久化</li>
 </ul>
 
-<p>感知机的几何解释如下：线性方程</p>
-
-<p>$$w\cdot x + b =0$$</p>
-
-<p>如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：</p>
+<p>有了这些知识储备，接下来就可以选择一门语言，开始编写自己的爬虫程序了，还是按照上一节说的三个步骤，然后以Python为例，说一说要在编程语言方面做那些准备：</p>
 
 <ul>
-<li>$w$: 超平面的法向量</li>
-<li>$b$: 超平面的截距</li>
+<li>网页请求：内置有urllib库，第三方库的话，同步请求可以使用requests，异步请求使用aiohttp</li>
+<li>分析HTML结构并提取目标元素：CSS Selector和XPath是目前主流的提取方式，第三方库可以使用Beautiful Soup或者PyQuery</li>
+<li>数据持久化：目标数据提取之后，可以将数据保存到数据库中进行持久化，MySQL、MongoDB等，这些都有对应的库支持，当然你也可以保存在硬盘，谁硬盘没点东西对吧（滑稽脸）</li>
 </ul>
 
-<h2 id="感知机学习策略">感知机学习策略</h2>
+<p>掌握了上面这些，你大可放开手脚大干一场，万维网就是你的名利场，去吧～</p>
 
-<h3 id="数据集的线性可分性">数据集的线性可分性</h3>
+<p>我觉得对于一个目标网站的网页，可以分下面四个类型：</p>
 
-<p>什么是数据集的线性可分性，很简单，对于一个数据集：</p>
+<ul>
+<li>单页面单目标</li>
+<li>单页面多目标</li>
+<li>多页面单目标</li>
+<li>多页面多目标</li>
+</ul>
 
-<p>$$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$$</p>
+<p>具体是什么意思呢，可能看起来有点绕，但明白这些，你之后写爬虫，只要在脑子里面过一遍着网页对应什么类型，然后套上对应类型的程序（写多了都应该有一套自己的常用代码库），那写爬虫的速度，自然不会慢</p>
 
-<p>如果存在上面一节说的超平面$S$：$w\cdot x + b =0$，能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，则称数据集T为线性可分数据集（linearly separable data set），否则，称数据集T线性不可分</p>
+<blockquote>
+<p>单页面单目标</p>
+</blockquote>
 
-<h3 id="感知机学习策略-1">感知机学习策略</h3>
+<p>通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 <a href="https://movie.douban.com/subject/1292052/">电影-肖申克的救赎</a> 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：</p>
 
-<p>找出超平面$S$，其实就是确定感知机模型参数：$w b$，根据统计学习方法三要素，此时我们需要确定一个学习策略，比如前面所说的损失函数（经验函数），并使其最小化（猜也猜得到策略讲完，后面就是说学习算法了哈哈）</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmwhbmzekj31hb0lkdnx.jpg" alt="" /></p>
 
-<p>上一章以线性代数为例子，用损失函数来度量预测错误的程度，这里的损失函数可以用误分类点到超平面$S$的总距离，输入空间$\mathbb{R} ^n$中任一点$x_0$到超平面$S$的距离：</p>
+<p>在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：<code>#content &gt; h1 &gt; span:nth-child(1)</code>，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：</p>
 
-<p>$$\frac{1}{||w||}|w\cdot x_0+b|$$</p>
+<pre><code class="language-python">import asyncio
 
-<p>其中，$||w||$是$w$的$L_2$范数，假设超平面S的误分类点集合为$M$，那么所有误分类点到超平面$S$的总距离为：</p>
+from ruia import Item, TextField
 
-<p>$$-\frac{1}{||w||}\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+class DoubanItem(Item):
+    title = TextField(css_select='#content &gt; h1 &gt; span:nth-child(1)')
 
-<p>最终推导出感知机学习的损失函数：</p>
+async_func = DoubanItem.get_item(url=&quot;https://movie.douban.com/subject/1292052/&quot;)
+item = asyncio.get_event_loop().run_until_complete(async_func)
+print(item.title)
+</code></pre>
 
-<p>$$L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+<p>多页面多目标就是此情况下多个url的衍生情况</p>
 
-<h2 id="感知机学习算法">感知机学习算法</h2>
+<blockquote>
+<p>单页面多目标</p>
+</blockquote>
 
-<p>上面一节已经确定了学习策略，按照统计学习方法三要素，目前需要一个算法来求解，目前最优化的方法是随机梯度下降法</p>
+<p>假设现在的需求是抓取 <a href="https://movie.douban.com/top250">豆瓣电影250</a> 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，因此目标需要循环获取，这就是所谓的单页面多目标了：</p>
 
-<h3 id="感知机学习算法的原始形式">感知机学习算法的原始形式</h3>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxeit345j30ln0pyjxx.jpg" alt="" /></p>
 
-<p>现在感知机学习算法就是对下面最优化问题的算法：</p>
+<pre><code class="language-python">import asyncio
 
-<p>$$ \min_{w,b} L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b) $$</p>
+from ruia import Item, TextField
 
-<p>现在的问题就转化成，求出参数$w$和$b$，使得上列损失函数达到极小化，这里我直接贴出书中的算法，后面的例子我会用<code>Python</code>代码实现：</p>
+class DoubanItem(Item):
+    target_item = TextField(css_select='div.item')
+    title = TextField(css_select='span.title')
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvgcb5sc33j30ye0g0gul.jpg" alt="" /></p>
-
-<p>有了解题方法怎么能没有题目呢？李杭老师自然是考虑到了，请听题：</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvgccchxw7j30yg03mgnl.jpg" alt="" />
-<img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvgccr7zbwj30z80j20vb.jpg" alt="" /></p>
-
-<p>借用<code>Linus Torvalds</code>大佬的一句话：<strong>Talk less, show me your code</strong>，所以直接看代码吧：</p>
-
-<pre><code class="language-python">#!/usr/bin/env python
-&quot;&quot;&quot;
- Created by howie.hu at 2018/9/20.
-&quot;&quot;&quot;
-import numpy as np
+    async def clean_title(self, title):
+        if isinstance(title, str):
+            return title
+        else:
+            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
 
 
-class Perceptron:
+async_func = DoubanItem.get_items(url=&quot;https://movie.douban.com/top250&quot;)
+items = asyncio.get_event_loop().run_until_complete(async_func)
+for item in items:
+    print(item)
+</code></pre>
+
+<blockquote>
+<p>多页面多目标</p>
+</blockquote>
+
+<p>多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxjpbouqj30wr0pnwlp.jpg" alt="" /></p>
+
+<pre><code class="language-python">from ruia import TextField, Item, Request, Spider
+
+
+class DoubanItem(Item):
     &quot;&quot;&quot;
-    李航老师统计学习方法第二章感知机例2.1代码实现
+    定义爬虫的目标字段
     &quot;&quot;&quot;
+    target_item = TextField(css_select='div.item')
+    title = TextField(css_select='span.title')
 
-    def __init__(self, input_nums=2):
-        # 权重 已经确定只会有两个二进制输入
-        self.w = np.zeros(input_nums)
-        # 偏置项
-        self.b = 0.0
+    async def clean_title(self, title):
+        if isinstance(title, str):
+            return title
+        else:
+            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
 
-    def fit(self, input_vectors, labels, learn_nums=10, rate=1):
-        &quot;&quot;&quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        :param rate: 学习率
-        &quot;&quot;&quot;
-        for i in range(learn_nums):
-            for index, input_vector in enumerate(input_vectors):
-                label = labels[index]
-                delta = label * (sum(self.w * input_vector) + self.b)
-                if delta &lt;= 0:
-                    self.w += label * input_vector * rate
-                    self.b += rate * label
-                    break
-        print(&quot;最终结果：此时感知器权重为{0}，偏置项为{1}&quot;.format(self.w, self.b))
-        return self
 
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &gt; 0 else -1
+class DoubanSpider(Spider):
+    start_urls = ['https://movie.douban.com/top250']
+    concurrency = 10
+
+    async def parse(self, res):
+        etree = res.html_etree
+        pages = ['?start=0&amp;filter='] + [i.get('href') for i in etree.cssselect('.paginator&gt;a')]
+
+        for index, page in enumerate(pages):
+            url = self.start_urls[0] + page
+            yield Request(
+                url,
+                callback=self.parse_item,
+                metadata={'index': index},
+                request_config=self.request_config
+            )
+
+    async def parse_item(self, res):
+        items_data = await DoubanItem.get_items(html=res.html)
+        res_list = []
+        for item in items_data:
+            res_list.append(item.title)
+        return res_list
 
 
 if __name__ == '__main__':
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-
+    DoubanSpider.start()
 </code></pre>
 
-<p>输出如下：</p>
+<p>如果网络没问题的话，会得到如下输出：</p>
 
-<pre><code class="language-shell">最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-</code></pre>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fx9nqjuoznj30yb0azqeh.jpg" alt="" /></p>
 
-<h3 id="算法的收敛性">算法的收敛性</h3>
+<p>注意爬虫运行时间，1s不到，这就是异步的魅力</p>
 
-<p>对于线性可分数据集感知机学习算法原始形式收敛，即经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型，定理<code>2.1</code>如下：</p>
-
-<p>假设训练数据集$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$是线性可分的，其中$x_i\in \chi  =\mathbb{R} ^n$，$y_i \in \gamma =\{-1, 1\}$，$i=1,2,&hellip;,N$，则有：</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvhig4ajx8j30yk090gpp.jpg" alt="" /></p>
-
-<h3 id="感知机学习算法的对偶形式">感知机学习算法的对偶形式</h3>
-
-<p>为什么要介绍感知机学习算法的对偶形式，主要目的就是减少运算量，这里一个<a href="https://www.zhihu.com/question/26526858">知乎回答</a>得挺好：</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvhinlwq26j312y0uoqdj.jpg" alt="" /></p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fvhiosgpfij30yu0gin5p.jpg" alt="" /></p>
-
-<p>代码实现如下：</p>
-
-<pre><code class="language-python">#!/usr/bin/env python
-&quot;&quot;&quot;
- Created by howie.hu at 2018/9/21.
-&quot;&quot;&quot;
-
-import numpy as np
-
-
-class Perceptron:
-    &quot;&quot;&quot;
-    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
-    &quot;&quot;&quot;
-
-    def __init__(self, alpha_length=3):
-        self.alpha = np.zeros(alpha_length)
-        # 权重
-        self.w = np.zeros(2)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=7):
-        &quot;&quot;&quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        &quot;&quot;&quot;
-        gram = np.matmul(input_vectors, input_vectors.T)
-
-        for i in range(learn_nums):
-
-            for input_vector_index, input_vector in enumerate(input_vectors):
-                label = labels[input_vector_index]
-                delta = 0.0
-                for alpha_index, a in enumerate(self.alpha):
-                    delta += a * labels[alpha_index] * gram[input_vector_index][alpha_index]
-                delta = label * delta + self.b
-                if delta &lt;= 0:
-                    self.alpha[input_vector_index] += 1
-                    self.b += label
-                    break
-        self.w = sum([j * input_vectors[i] * labels[i] for i, j in enumerate(self.alpha)])
-        print(&quot;最终结果：此时感知器权重为{0}，偏置项为{1}&quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &gt; 0 else -1
-
-
-if __name__ == '__main__':
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-</code></pre>
-
-<pre><code class="language-shell">最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-</code></pre>
-
-<h2 id="说明">说明</h2>
-
-<p>一些概念的详细解释：</p>
+<p>用Python写爬虫，就是这么简单优雅，诸位，看着网页就思考下：</p>
 
 <ul>
-<li><a href="https://blog.csdn.net/dengheCSDN/article/details/77313758">超平面是什么？</a></li>
+<li>是什么类型的目标类型</li>
+<li>用什么库模拟请求</li>
+<li>怎么解析目标字段</li>
+<li>怎么存储</li>
 </ul>
+
+<p>一个爬虫程序就成型了，顺便一提，爬虫这东西，可以说是防君子不防小人，<code>robots.txt</code>大部分网站都有（它的目的是告诉爬虫什么可以爬取什么不可以爬取，比如：<code>https://www.baidu.com/robots.txt</code>），各位想怎么爬取，自己衡量</p>
+
+<h3 id="如何进阶">如何进阶</h3>
+
+<p>不要以为写好一个爬虫程序就可以出师了，此时还有更多的问题在前面等着你，你要含情脉脉地看着你的爬虫程序，问自己三个问题：</p>
+
+<ul>
+<li>爬虫抓取数据后是正当用途么？</li>
+<li>爬虫会把目标网站干掉么？</li>
+<li>爬虫会被反爬虫干掉么？</li>
+</ul>
+
+<p>前两个关于人性的问题在此不做过多叙述，因此跳过，但你们如果作为爬虫工程师的话，切不可跳过</p>
+
+<blockquote>
+<p>会被反爬虫干掉么？</p>
+</blockquote>
+
+<p>最后关于反爬虫的问题才是你爬虫程序强壮与否的关键因素，什么是反爬虫？</p>
+
+<p>当越来越多的爬虫在互联网上横冲直撞后，网页资源维护者为了防止自身数据被抓取，开始进行一系列的措施来使得自身数据不易被别的程序爬取，这些措施就是反爬虫</p>
+
+<p>比如检测IP访问频率、资源访问速度、链接是否带有关键参数、验证码检测机器人、ajax混淆、js加密等等</p>
+
+<p>对于目前市场上的反爬虫，爬虫工程师常有的反反爬虫方案是下面这样的：</p>
+
+<ul>
+<li>不断试探目标底线，试出单IP下最优的访问频率</li>
+<li>构建自己的IP代理池</li>
+<li>维护一份自己常用的UA库</li>
+<li>针对目标网页的Cookie池</li>
+<li>需要JS渲染的网页使用无头浏览器进行代码渲染再抓取</li>
+<li>一套破解验证码程序</li>
+<li>扎实的JS知识来破解混淆函数</li>
+</ul>
+
+<p>爬虫工程师的进阶之路其实就是不断反反爬虫，可谓艰辛，但换个角度想也是乐趣所在</p>
+
+<blockquote>
+<p>关于框架</p>
+</blockquote>
+
+<p>爬虫有自己的编写流程和标准，有了标准，自然就有了框架，像Python这种生态强大的语言，框架自然是多不胜数，目前世面上用的比较多的有：</p>
+
+<ul>
+<li>Scrapy</li>
+<li>PySpider</li>
+<li>Portia</li>
+</ul>
+
+<p>这里不过多介绍，框架只是工具，是一种提升效率的方式，看你选择</p>
+
+<h3 id="说明">说明</h3>
+
+<p>任何事物都有两面性，爬虫自然也不例外，因此我送诸位一张图，关键时刻好好想想</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyzjixe8dsj316a0pudj3.jpg" alt="" /></p>
+
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyjvmwzoq2j30p00dwmzl.jpg" alt="" /></p>
 
             <p class="post-info">
                 本文由
@@ -374,17 +390,16 @@ if __name__ == '__main__':
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f38%2f" target="_blank" title="统计学习方法笔记：2.感知机" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f38%2f&text=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a2.%e6%84%9f%e7%9f%a5%e6%9c%ba" target="_blank" title="统计学习方法笔记：2.感知机" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f38%2f&amp;title=%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e7%ac%94%e8%ae%b0%ef%bc%9a2.%e6%84%9f%e7%9f%a5%e6%9c%ba" target="_blank" title="统计学习方法笔记：2.感知机" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f38%2f" target="_blank" rel="nofollow">QRcode</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-talk-about-python-spider%2f" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-talk-about-python-spider%2f&text=%e8%b0%88%e8%b0%88%e5%af%b9Python%e7%88%ac%e8%99%ab%e7%9a%84%e7%90%86%e8%a7%a3" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-talk-about-python-spider%2f&amp;title=%e8%b0%88%e8%b0%88%e5%af%b9Python%e7%88%ac%e8%99%ab%e7%9a%84%e7%90%86%e8%a7%a3" target="_blank" title="谈谈对Python爬虫的理解" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f02-talk-about-python-spider%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/39/" title="统计学习方法笔记：3.k近邻法">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/37/" title="统计学习方法笔记：1.统计学习方法概论">→</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/01-neural-network-foundation/" title="神经网络基础">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>
