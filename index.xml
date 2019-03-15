@@ -6,10 +6,428 @@
     <description>Recent content on howie6879</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 10 Jan 2019 08:37:56 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 15 Mar 2019 08:37:56 +0800</lastBuildDate>
     
         <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>如何实现一个Python爬虫框架</title>
+      <link>https://www.howie6879.cn/post/2019/03-how-to-build-a-web-scraping-framework-with-python/</link>
+      <pubDate>Fri, 15 Mar 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2019/03-how-to-build-a-web-scraping-framework-with-python/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/ruia_banner.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架&lt;/p&gt;
+
+&lt;p&gt;2018年到如今，我花精力比较多的一个开源项目算是&lt;code&gt;Ruia&lt;/code&gt;了，这是一个基于&lt;code&gt;Python3.6+&lt;/code&gt;的异步爬虫框架，当时也获得一些推荐，比如&lt;code&gt;Github Trending Python&lt;/code&gt;语言榜单第二，目前&lt;code&gt;Ruia&lt;/code&gt;还在开发中，&lt;code&gt;Star&lt;/code&gt;数目不过&lt;code&gt;700+&lt;/code&gt;，如果各位有兴趣，欢迎一起开发，来波&lt;code&gt;star&lt;/code&gt;我也不会拒绝哈~&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;什么是爬虫框架&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;说这个之前，得先说说什么是&lt;strong&gt;框架&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;是实现业界标准的组件规范：比如众所周知的&lt;code&gt;MVC&lt;/code&gt;开发规范&lt;/li&gt;
+&lt;li&gt;提供规范所要求之基础功能的软件产品：比如&lt;code&gt;Django&lt;/code&gt;框架就是&lt;code&gt;MVC&lt;/code&gt;的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？&lt;/p&gt;
+
+&lt;p&gt;很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章&lt;a href=&#34;https://www.howie6879.cn/post/2019/02-talk-about-python-spider/&#34;&gt;谈谈对Python爬虫的理解&lt;/a&gt;，下面总结一下爬虫流程：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;请求&amp;amp;响应&lt;/li&gt;
+&lt;li&gt;解析&lt;/li&gt;
+&lt;li&gt;持久化&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这三个流程有没有可能以一种优雅的形式串联起来，&lt;code&gt;Ruia&lt;/code&gt;目前是这样实现的，请看代码示例：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fzoxh0ehngj31340fmack.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;可以看到，&lt;code&gt;Item &amp;amp; Field&lt;/code&gt;类结合一起实现了字段的解析提取，&lt;code&gt;Spider&lt;/code&gt;类结合&lt;code&gt;Request * Response&lt;/code&gt;类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的&lt;code&gt;item&lt;/code&gt;可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程&lt;/p&gt;
+
+&lt;p&gt;实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些&lt;code&gt;hook&lt;/code&gt;让用户编写爬虫更方便(比如ruia-motor)&lt;/p&gt;
+
+&lt;p&gt;这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;如何踏出第一步&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;首先，我对Ruia爬虫框架的定位很清楚，基于&lt;code&gt;asyncio &amp;amp; aiohttp&lt;/code&gt;的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;轻量级，专注于抓取、解析和良好的API接口&lt;/li&gt;
+&lt;li&gt;插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件&lt;/li&gt;
+&lt;li&gt;速度，异步无阻塞框架，需要对速度有一定追求&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：&lt;/p&gt;
+
+&lt;p&gt;￼&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fzoyohk60qj30hm09a3yy.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;同时让我们结合上面一节的&lt;code&gt;Ruia&lt;/code&gt;代码来从业务逻辑角度看看这几个模块到底是什么意思：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Request：请求&lt;/li&gt;
+&lt;li&gt;Response：响应&lt;/li&gt;
+&lt;li&gt;Item &amp;amp; Field：解析提取&lt;/li&gt;
+&lt;li&gt;Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆&lt;code&gt;Ruia&lt;/code&gt;框架到本地：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 请确保本地Python环境是3.6+
+git clone https://github.com/howie6879/ruia.git
+# 安装pipenv
+pip install pipenv 
+# 安装依赖包
+pipenv install --dev
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后用&lt;code&gt;PyCharm&lt;/code&gt;打开&lt;code&gt;Ruia&lt;/code&gt;项目：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313142545.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;选择刚刚&lt;code&gt;pipenv&lt;/code&gt;配置好的python解释器：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313142712.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;此时可以完整地看到项目代码：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314093946.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Request &amp;amp; Response&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code&gt;Request&lt;/code&gt;类的目的是对&lt;code&gt;aiohttp&lt;/code&gt;加一层封装进行模拟请求，功能如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;封装GET、POST两种请求方式&lt;/li&gt;
+&lt;li&gt;增加回调机制&lt;/li&gt;
+&lt;li&gt;自定义重试次数、休眠时间、超时、重试解决方案、请求是否成功验证等功能&lt;/li&gt;
+&lt;li&gt;将返回的一系列数据封装成&lt;code&gt;Response&lt;/code&gt;类返回&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;接下来就简单了，不过就是实现上述需求，首先，需要实现一个函数来抓取目标&lt;code&gt;url&lt;/code&gt;，比如命名为&lt;code&gt;fetch&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
+import aiohttp
+import async_timeout
+
+from typing import Coroutine
+
+
+class Request:
+    # Default config
+    REQUEST_CONFIG = {
+        &#39;RETRIES&#39;: 3,
+        &#39;DELAY&#39;: 0,
+        &#39;TIMEOUT&#39;: 10,
+        &#39;RETRY_FUNC&#39;: Coroutine,
+        &#39;VALID&#39;: Coroutine
+    }
+
+    METHOD = [&#39;GET&#39;, &#39;POST&#39;]
+
+    def __init__(self, url, method=&#39;GET&#39;, request_config=None, request_session=None):
+        self.url = url
+        self.method = method.upper()
+        self.request_config = request_config or self.REQUEST_CONFIG
+        self.request_session = request_session
+
+    @property
+    def current_request_session(self):
+        if self.request_session is None:
+            self.request_session = aiohttp.ClientSession()
+            self.close_request_session = True
+        return self.request_session
+
+    async def fetch(self):
+        &amp;quot;&amp;quot;&amp;quot;Fetch all the information by using aiohttp&amp;quot;&amp;quot;&amp;quot;
+        if self.request_config.get(&#39;DELAY&#39;, 0) &amp;gt; 0:
+            await asyncio.sleep(self.request_config[&#39;DELAY&#39;])
+
+        timeout = self.request_config.get(&#39;TIMEOUT&#39;, 10)
+        async with async_timeout.timeout(timeout):
+            resp = await self._make_request()
+        try:
+            resp_data = await resp.text()
+        except UnicodeDecodeError:
+            resp_data = await resp.read()
+        resp_dict = dict(
+            rl=self.url,
+            method=self.method,
+            encoding=resp.get_encoding(),
+            html=resp_data,
+            cookies=resp.cookies,
+            headers=resp.headers,
+            status=resp.status,
+            history=resp.history
+        )
+        await self.request_session.close()
+        return type(&#39;Response&#39;, (), resp_dict)
+
+
+    async def _make_request(self):
+        if self.method == &#39;GET&#39;:
+            request_func = self.current_request_session.get(self.url)
+        else:
+            request_func = self.current_request_session.post(self.url)
+        resp = await request_func
+        return resp
+
+if __name__ == &#39;__main__&#39;:
+    loop = asyncio.get_event_loop()
+    resp = loop.run_until_complete(Request(&#39;https://docs.python-ruia.org/&#39;).fetch())
+    print(resp.status)
+
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;实际运行一下，会输出请求状态&lt;code&gt;200&lt;/code&gt;，就这样简单封装一下，我们已经有了自己的请求类&lt;code&gt;Request&lt;/code&gt;，接下来只需要再完善一下重试机制以及将返回的属性封装一下就基本完成了：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 重试函数
+async def _retry(self):
+    if self.retry_times &amp;gt; 0:
+        retry_times = self.request_config.get(&#39;RETRIES&#39;, 3) - self.retry_times + 1
+        self.retry_times -= 1
+        retry_func = self.request_config.get(&#39;RETRY_FUNC&#39;)
+        if retry_func and iscoroutinefunction(retry_func):
+            request_ins = await retry_func(weakref.proxy(self))
+            if isinstance(request_ins, Request):
+                return await request_ins.fetch()
+        return await self.fetch()
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;最终代码见&lt;code&gt;ruia/request.py&lt;/code&gt;即可，接下来就可以利用&lt;code&gt;Request&lt;/code&gt;来实际请求一个目标网页，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313180601.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这段代码请求了目标网页&lt;code&gt;https://docs.python-ruia.org/&lt;/code&gt;并返回了&lt;code&gt;Response&lt;/code&gt;对象，其中&lt;code&gt;Response&lt;/code&gt;提供属性介绍如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313130731.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Field &amp;amp; Item&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实现了对目标网页的请求，接下来就是对目标网页进行字段提取，我觉得&lt;code&gt;ORM&lt;/code&gt;的思想很适合用在这里，我们只需要定义一个&lt;code&gt;Item&lt;/code&gt;类，类里面每个属性都可以用&lt;code&gt;Field&lt;/code&gt;类来定义，然后只需要传入&lt;code&gt;url&lt;/code&gt;或者&lt;code&gt;html&lt;/code&gt;，执行过后&lt;code&gt;Item&lt;/code&gt;类里面 定义的属性会自动被提取出来变成目标字段值&lt;/p&gt;
+
+&lt;p&gt;可能说起来比较拗口，下面直接演示一下可能你就明白这样写的好，假设你的需求是获取&lt;code&gt;HackerNews&lt;/code&gt;网页的&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;，可以这样实现：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
+
+from ruia import AttrField, TextField, Item
+
+
+class HackerNewsItem(Item):
+    target_item = TextField(css_select=&#39;tr.athing&#39;)
+    title = TextField(css_select=&#39;a.storylink&#39;)
+    url = AttrField(css_select=&#39;a.storylink&#39;, attr=&#39;href&#39;)
+
+async def main():
+    async for item in HackerNewsItem.get_items(url=&amp;quot;https://news.ycombinator.com/&amp;quot;):
+        print(item.title, item.url)
+
+if __name__ == &#39;__main__&#39;:
+     items = asyncio.run(main())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314094841.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;从输出结果可以看到，&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;属性已经被赋与实际的目标值，这样写起来是不是很简洁清晰也很明了呢？&lt;/p&gt;
+
+&lt;p&gt;来看看怎么实现，&lt;code&gt;Field&lt;/code&gt;类的目的是提供多种方式让开发者提取网页字段，比如：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;XPath&lt;/li&gt;
+&lt;li&gt;CSS Selector&lt;/li&gt;
+&lt;li&gt;RE&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;所以我们只需要根据需求，定义父类然后再利用不同的提取方式实现子类即可，代码如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class BaseField(object):
+    &amp;quot;&amp;quot;&amp;quot;
+    BaseField class
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def __init__(self, default: str = &#39;&#39;, many: bool = False):
+        &amp;quot;&amp;quot;&amp;quot;
+        Init BaseField class
+        url: http://lxml.de/index.html
+        :param default: default value
+        :param many: if there are many fields in one page
+        &amp;quot;&amp;quot;&amp;quot;
+        self.default = default
+        self.many = many
+
+    def extract(self, *args, **kwargs):
+        raise NotImplementedError(&#39;extract is not implemented.&#39;)
+
+
+class _LxmlElementField(BaseField):
+    pass
+
+
+class AttrField(_LxmlElementField):
+    &amp;quot;&amp;quot;&amp;quot;
+    This field is used to get  attribute.
+    &amp;quot;&amp;quot;&amp;quot;
+	  pass
+
+
+class HtmlField(_LxmlElementField):
+    &amp;quot;&amp;quot;&amp;quot;
+    This field is used to get raw html data.
+    &amp;quot;&amp;quot;&amp;quot;
+    pass
+
+
+class TextField(_LxmlElementField):
+    &amp;quot;&amp;quot;&amp;quot;
+    This field is used to get text.
+    &amp;quot;&amp;quot;&amp;quot;
+	  pass
+
+
+class RegexField(BaseField):
+    &amp;quot;&amp;quot;&amp;quot;
+    This field is used to get raw html code by regular expression.
+    RegexField uses standard library `re` inner, that is to say it has a better performance than _LxmlElementField.
+    &amp;quot;&amp;quot;&amp;quot;
+    pass
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;核心类就是上面的代码，具体实现请看&lt;code&gt;ruia/field.py&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来继续说&lt;code&gt;Item&lt;/code&gt;部分，这部分实际上是对&lt;code&gt;ORM&lt;/code&gt;那块的实现，用到的知识点是&lt;code&gt;元类&lt;/code&gt;，因为我们需要控制类的创建行为：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class ItemMeta(type):
+    &amp;quot;&amp;quot;&amp;quot;
+    Metaclass for an item
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def __new__(cls, name, bases, attrs):
+        __fields = dict({(field_name, attrs.pop(field_name))
+                         for field_name, object in list(attrs.items())
+                         if isinstance(object, BaseField)})
+        attrs[&#39;__fields&#39;] = __fields
+        new_class = type.__new__(cls, name, bases, attrs)
+        return new_class
+
+
+class Item(metaclass=ItemMeta):
+    &amp;quot;&amp;quot;&amp;quot;
+    Item class for each item
+    &amp;quot;&amp;quot;&amp;quot;
+
+    def __init__(self):
+        self.ignore_item = False
+        self.results = {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这一层弄明白接下来就很简单了，还记得上一篇文章《谈谈对Python爬虫的理解》里面说的四个类型的目标网页么：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;单页面单目标&lt;/li&gt;
+&lt;li&gt;单页面多目标&lt;/li&gt;
+&lt;li&gt;多页面单目标&lt;/li&gt;
+&lt;li&gt;多页面多目标&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本质来说就是要获取网页的单目标以及多目标（多页面可以放在Spider那块实现），&lt;code&gt;Item&lt;/code&gt;类只需要定义两个方法就能实现：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;get_item()：单目标&lt;/li&gt;
+&lt;li&gt;get_items()：多目标，需要定义好&lt;code&gt;target_item&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;具体实现见：&lt;code&gt;ruia/item.py&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Spider&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;在&lt;code&gt;Ruia&lt;/code&gt;框架中，为什么要有&lt;code&gt;Spider&lt;/code&gt;，有以下原因：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;真实世界爬虫是多个页面的（或深度或广度），利用&lt;code&gt;Spider&lt;/code&gt;可以对这些进行 有效的管理&lt;/li&gt;
+&lt;li&gt;制定一套爬虫程序的编写标准，可以让开发者容易理解、交流，能迅速产出高质量爬虫程序&lt;/li&gt;
+&lt;li&gt;自由地定制插件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;接下来说说代码实现，&lt;code&gt;Ruia&lt;/code&gt;框架的&lt;code&gt;API&lt;/code&gt;写法我有参考&lt;code&gt;Scrapy&lt;/code&gt;，各个函数之间的联结也是使用回调，但是你也可以直接使用&lt;code&gt;await&lt;/code&gt;，可以直接看代码示例：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from ruia import AttrField, TextField, Item, Spider
+
+
+class HackerNewsItem(Item):
+    target_item = TextField(css_select=&#39;tr.athing&#39;)
+    title = TextField(css_select=&#39;a.storylink&#39;)
+    url = AttrField(css_select=&#39;a.storylink&#39;, attr=&#39;href&#39;)
+
+
+class HackerNewsSpider(Spider):
+    start_urls = [f&#39;https://news.ycombinator.com/news?p={index}&#39; for index in range(1, 3)]
+
+    async def parse(self, response):
+        async for item in HackerNewsItem.get_items(html=response.html):
+            yield item
+
+
+if __name__ == &#39;__main__&#39;:
+    HackerNewsSpider.start()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;使用起来还是挺简洁的，输出如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;[2019:03:14 10:29:04] INFO  Spider  Spider started!
+[2019:03:14 10:29:04] INFO  Spider  Worker started: 4380434912
+[2019:03:14 10:29:04] INFO  Spider  Worker started: 4380435048
+[2019:03:14 10:29:04] INFO  Request &amp;lt;GET: https://news.ycombinator.com/news?p=1&amp;gt;
+[2019:03:14 10:29:04] INFO  Request &amp;lt;GET: https://news.ycombinator.com/news?p=2&amp;gt;
+[2019:03:14 10:29:08] INFO  Spider  Stopping spider: Ruia
+[2019:03:14 10:29:08] INFO  Spider  Total requests: 2
+[2019:03:14 10:29:08] INFO  Spider  Time usage: 0:00:03.426335
+[2019:03:14 10:29:08] INFO  Spider  Spider finished!
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;Spider&lt;/code&gt;的核心部分在于对请求&lt;code&gt;URL&lt;/code&gt;的请求控制，目前采用的是生产消费者模式来处理，具体函数如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314103244.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;详细代码，见&lt;code&gt;ruia/spider.py&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;更多&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;至此，爬虫框架的核心部分已经实现完毕，基础功能同样一个不落地实现了，接下来要做的就是：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;实现更多优雅地功能&lt;/li&gt;
+&lt;li&gt;实现更多的插件，让生态丰富起来&lt;/li&gt;
+&lt;li&gt;修BUG&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;项目地址点击阅读原文或者在&lt;code&gt;github&lt;/code&gt;搜索&lt;code&gt;ruia&lt;/code&gt;，如果你有兴趣，请参与进来吧！&lt;/p&gt;
+
+&lt;p&gt;如果觉得写得不错，点个好看来个&lt;code&gt;star&lt;/code&gt;呗~&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>谈谈对Python爬虫的理解</title>
@@ -3048,343 +3466,6 @@ stdout_logfile          = ~/supervisor/caddy.log
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;至此，大功告成&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Sanic 使用教程 - 6.常用的技巧</title>
-      <link>https://www.howie6879.cn/post/2018/35/</link>
-      <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
-      
-      <guid>https://www.howie6879.cn/post/2018/35/</guid>
-      <description>
-
-&lt;p&gt;结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白&lt;code&gt;Sanic&lt;/code&gt;框架的重心不会放在诸如&lt;code&gt;session cache reload authorized&lt;/code&gt;这些问题上&lt;/p&gt;
-
-&lt;p&gt;本文最新内容可到github上阅读 &lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part1/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7.md&#34;&gt;6.常用的技巧&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Async Python 3.5+ web server that&amp;rsquo;s written to go fast&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;api请求json参数以及api接口验证&lt;/li&gt;
-&lt;li&gt;gRPC的异步调用方式&lt;/li&gt;
-&lt;li&gt;Blueprint&lt;/li&gt;
-&lt;li&gt;html&amp;amp;templates编写&lt;/li&gt;
-&lt;li&gt;cache&lt;/li&gt;
-&lt;li&gt;热加载&lt;/li&gt;
-&lt;li&gt;session&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;对于一些问题，我将编写一个小服务来演示这些技巧，具体见&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06&#34;&gt;demo06&lt;/a&gt;，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;src
-├── config
-│   ├── __init__.py
-│   ├── config.py
-│   ├── dev_config.py
-│   └── pro_config.py
-├── database
-│   ├── __init__.py
-│   └── redis_base
-├── grpc_service
-│   ├── __init__.py
-│   ├── grpc_asyncio_client.py
-│   ├── grpc_client.py
-│   ├── grpc_server.py
-│   ├── hello_grpc.py
-│   ├── hello_pb2.py
-│   ├── hello_pb2_grpc.py
-│   └── proto
-├── statics
-│   ├── rss_html
-│   │   ├── css
-│   │   └── js
-│   └── rss_json
-│       ├── css
-│       └── js
-├── templates
-│   ├── rss_html
-│   └── rss_json
-├── tools
-│   ├── __init__.py
-│   └── mid_decorator.py
-├── views
-│   ├── __init__.py
-│   ├── rss_api.py
-│   ├── rss_html.py
-│   └── rss_json.py
-└── run.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的&lt;code&gt;database&lt;/code&gt;，以及关于gRPC的&lt;code&gt;grpc_service&lt;/code&gt;，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。&lt;/p&gt;
-
-&lt;p&gt;增加的文件是&lt;code&gt;rss_json.py&lt;/code&gt;，假设这是个接口文件吧，将会根据你的请求参数返回一串json，具体还是建议直接去看代码吧，点这里&lt;a href=&#34;https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample&#34;&gt;sample&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h3 id=&#34;验证问题&#34;&gt;验证问题&lt;/h3&gt;
-
-&lt;p&gt;假设你正在编写一个api服务，比如根据传的blog名字返回其rss数据，比如&lt;code&gt;rss_json.py&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-from feedparser import parse
-from sanic import Blueprint
-from sanic.response import json
-
-api_bp = Blueprint(&#39;rss_api&#39;, url_prefix=&#39;v1&#39;)
-
-
-@api_bp.route(&amp;quot;/get/rss/&amp;lt;param&amp;gt;&amp;quot;)
-async def get_rss_json(request, param):
-    if param == &#39;howie6879&#39;:
-        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-        feed = parse(url)
-        articles = feed[&#39;entries&#39;]
-        data = []
-        for article in articles:
-            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;启动服务后，此时用&lt;code&gt;GET&lt;/code&gt;方式访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
-    &amp;quot;name&amp;quot;: &amp;quot;howie6879&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在&lt;code&gt;rss_json.py&lt;/code&gt;中加入一个新的视图函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
-async def post_rss_json(request, **kwargs):
-    post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
-    name = post_data.get(&#39;name&#39;)
-    if name == &#39;howie6879&#39;:
-        url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-        feed = parse(url)
-        articles = feed[&#39;entries&#39;]
-        data = []
-        for article in articles:
-            data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;参数错误&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;发送post请求到&lt;code&gt;http://0.0.0.0:8000/v1/post/rss/&lt;/code&gt;，依旧和上面的结果一样，代码里面有个问题，我们需要判断&lt;code&gt;name&lt;/code&gt;参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？&lt;/p&gt;
-
-&lt;p&gt;显然并不是的，如果有十个参数呢？然后再增加十几个路由呢？每个路由里有十个参数需要判断，想象一下，这样实施下来，难道要在代码里面堆积满屏幕的判断语句么？这样实在是太可怕了，我们需要更好更通用的解决方案，是时候写个装饰器来验证参数了，打开&lt;code&gt;mid_decorator.py&lt;/code&gt;文件，添加一个验证的装饰器函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def auth_params(*keys):
-    &amp;quot;&amp;quot;&amp;quot;
-    api请求参数验证
-    :param keys: params
-    :return:
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def wrapper(func):
-        @wraps(func)
-        async def auth_param(request=None, rpc_data=None, *args, **kwargs):
-            request_params, params = {}, []
-            if isinstance(request, Request):
-                # sanic request
-                if request.method == &#39;POST&#39;:
-                    try:
-                        post_data = json_loads(str(request.body, encoding=&#39;utf-8&#39;))
-                    except Exception as e:
-                        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-                    else:
-                        request_params.update(post_data)
-                        params = [key for key, value in post_data.items() if value]
-                elif request.method == &#39;GET&#39;:
-                    request_params.update(request.args)
-                    params = [key for key, value in request.args.items() if value]
-                else:
-                    return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-            else:
-                pass
-
-            if set(keys).issubset(set(params)):
-                kwargs[&#39;request_params&#39;] = request_params
-                return await dec_func(func, request, *args, **kwargs)
-            else:
-                return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-
-        return auth_param
-
-    return wrapper
-
-
-async def dec_func(func, request, *args, **kwargs):
-    try:
-        response = await func(request, *args, **kwargs)
-        return response
-    except Exception as e:
-        return response_handle(request, {&#39;info&#39;: &#39;error&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;注意，上面增加的路由函数改为这样：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@api_bp.route(&amp;quot;/post/rss/&amp;quot;, methods=[&#39;POST&#39;])
-@auth_params(&#39;name&#39;)
-async def post_rss_json(request, **kwargs):
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这样么一个请求进来，就会验证name是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。&lt;/p&gt;
-
-&lt;p&gt;对于请求验证的问题，解决方法也是类似，就是利用装饰器来实现，我自己也实现过，在上面的代码链接里面可以找到，不过现在的&lt;code&gt;Sanic&lt;/code&gt;官方已经提供了&lt;code&gt;demo&lt;/code&gt;，见&lt;a href=&#34;https://github.com/channelcat/sanic/blob/master/examples/authorized_sanic.py&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;grpc的异步调用方式&#34;&gt;gRPC的异步调用方式&lt;/h3&gt;
-
-&lt;p&gt;在编写微服务的时候，除了需要支持&lt;code&gt;http&lt;/code&gt;请求外，一般还需要支持&lt;code&gt;gRPC&lt;/code&gt;请求，我在使用&lt;code&gt;Sanic&lt;/code&gt;编写微服务的时候，遇到关于异步请求&lt;code&gt;RPC&lt;/code&gt;的需求，当时确实困扰了我，意外发现了这个库&lt;a href=&#34;https://github.com/vmagamedov/grpclib&#34;&gt;grpclib&lt;/a&gt;，进入&lt;code&gt;src/grpc_service&lt;/code&gt;目录，里面就是解决方案，很简单，这里就不多说了，直接看代码就好。&lt;/p&gt;
-
-&lt;h3 id=&#34;blueprint&#34;&gt;Blueprint&lt;/h3&gt;
-
-&lt;p&gt;Blueprint前面的章节有仔细聊过，这里不多说，借用官方文档的例子，一个简单的sanic服务就搭好了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# main.py
-from sanic import Sanic
-from sanic.response import json
-
-app = Sanic()
-
-@app.route(&amp;quot;/&amp;quot;)
-async def test(request):
-    return json({&amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;})
-
-#访问http://0.0.0.0:8000/即可
-if __name__ == &amp;quot;__main__&amp;quot;:
-    app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
-比如我现在编写的项目，我使用的是功能式架构，具体如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;├── server.py
-├── static
-│   └── novels
-│       ├── css
-│       │   └── result.css
-│       ├── img
-│       │   └── read_content.png
-│       └── js
-│           └── main.js
-├── template
-│   └── novels
-│       └── index.html
-└── views
-    └── novels_blueprint.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
-最后只要将每个单独的blueprint在主启动文件进行注册就好，上面的目录树是我以前的一个项目&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;的，也是用&lt;code&gt;Sanic&lt;/code&gt;编写的，有兴趣可以看看，不过现在结构改变挺大。&lt;/p&gt;
-
-&lt;h3 id=&#34;html-templates编写&#34;&gt;html&amp;amp;templates编写&lt;/h3&gt;
-
-&lt;p&gt;编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
-# 代码片段，明白意思就好
-from sanic import Blueprint
-from jinja2 import Environment, PackageLoader, select_autoescape
-
-# 初始化blueprint并定义静态文件夹路径
-bp = Blueprint(&#39;novels_blueprint&#39;)
-bp.static(&#39;/static&#39;, &#39;./static/novels&#39;)
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.novels_blueprint&#39;, &#39;../templates/novels&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]))
-
-def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    return html(template.render(kwargs))
-    
-@bp.route(&amp;quot;/&amp;quot;)
-async def index(request):
-    return template(&#39;index.html&#39;, title=&#39;index&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果是&lt;code&gt;python3.6&lt;/code&gt;，可以试试下面的写法：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 适用python3.5+
-# 代码片段，明白意思就好
-#!/usr/bin/env python
-import sys
-
-from feedparser import parse
-from jinja2 import Environment, PackageLoader, select_autoescape
-from sanic import Blueprint
-from sanic.response import html
-
-from src.config import CONFIG
-
-# https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py
-# 开启异步特性  要求3.6+
-enable_async = sys.version_info &amp;gt;= (3, 6)
-
-html_bp = Blueprint(&#39;rss_html&#39;, url_prefix=&#39;html&#39;)
-html_bp.static(&#39;/statics/rss_html&#39;, CONFIG.BASE_DIR + &#39;/statics/rss_html&#39;)
-
-# jinjia2 config
-env = Environment(
-    loader=PackageLoader(&#39;views.rss_html&#39;, &#39;../templates/rss_html&#39;),
-    autoescape=select_autoescape([&#39;html&#39;, &#39;xml&#39;, &#39;tpl&#39;]),
-    enable_async=enable_async)
-
-
-async def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    rendered_template = await template.render_async(**kwargs)
-    return html(rendered_template)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;cache&#34;&gt;cache&lt;/h3&gt;
-
-&lt;p&gt;我在项目中主要使用redis作为缓存，使用&lt;a href=&#34;https://github.com/argaen/aiocache&#34;&gt;aiocache&lt;/a&gt;很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。&lt;/p&gt;
-
-&lt;p&gt;比如上面的例子，每次访问&lt;code&gt;http://0.0.0.0:8000/v1/get/rss/howie6879&lt;/code&gt;，都要请求一次对应的rss资源，如果做个缓存那岂不是简单很多？&lt;/p&gt;
-
-&lt;p&gt;改写成这样：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@cached(ttl=1000, cache=RedisCache, key=&amp;quot;rss&amp;quot;, serializer=PickleSerializer(), port=6379, namespace=&amp;quot;main&amp;quot;)
-async def get_rss():
-    print(&amp;quot;第一次请求休眠3秒...&amp;quot;)
-    await asyncio.sleep(3)
-    url = &amp;quot;http://blog.howie6879.cn/atom.xml&amp;quot;
-    feed = parse(url)
-    articles = feed[&#39;entries&#39;]
-    data = []
-    for article in articles:
-        data.append({&amp;quot;title&amp;quot;: article[&amp;quot;title_detail&amp;quot;][&amp;quot;value&amp;quot;], &amp;quot;link&amp;quot;: article[&amp;quot;link&amp;quot;]})
-    return data
-
-
-@api_bp.route(&amp;quot;/get/rss/&amp;lt;name&amp;gt;&amp;quot;)
-async def get_rss_json(request, name):
-    if name == &#39;howie6879&#39;:
-        data = await get_rss()
-        return json(data)
-    else:
-        return json({&#39;info&#39;: &#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。&lt;/p&gt;
-
-&lt;p&gt;带上装饰器，什么都解决了。&lt;/p&gt;
-
-&lt;h3 id=&#34;热加载&#34;&gt;热加载&lt;/h3&gt;
-
-&lt;p&gt;我发现有个pr实现了这个需求，如果你有兴趣，可以看&lt;a href=&#34;https://github.com/channelcat/sanic/pull/1047&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;session&#34;&gt;session&lt;/h3&gt;
-
-&lt;p&gt;sanic对此有一个第三方插件&lt;a href=&#34;https://github.com/subyraman/sanic_session&#34;&gt;&lt;code&gt;sanic_session&lt;/code&gt;&lt;/a&gt;，用法非常简单，有兴趣可以看看&lt;/p&gt;
 </description>
     </item>
     
