@@ -78,9 +78,7 @@
 	
 </p>
 
- 
-
-<blockquote>
+ <blockquote>
 <p>这篇论文提供了一个关于字符级卷积网络(<code>ConvNets</code>)在文本分类中应用实证研究，我们构建了几个大型数据集，以表明字符级卷积网络可以实现最先进的或竞争性的结果，针对传统模型（如词袋，n-gram及其TFIDF变体）和深度学习模型（如基于单词的ConvNets和循环神经网络）进行比较</p>
 </blockquote>
 
@@ -98,7 +96,7 @@
 
 <p>本文是第一篇只将字符应用于<code>ConvNets</code>的文章，我们证明，在大规模数据集上训练时，深度<code>ConvNets</code>不需要词汇知识，此外以前的研究结论认为，<code>ConvNets</code>不需要语言的句法或语义结构知识，这种工程上的简化对于能够适用于不同语言的单一系统来说是至关重要的，因为字符总是构成一个必要的结构，无论能否做到分割成词，仅处理字符还有一个好处，那就是可以自然而然地学会拼写错误和表情符号等不正常的字符组合</p>
 
-<h2 id="character-level-convolutional-networks">Character-level Convolutional Networks</h2>
+<h2 id="characterlevel-convolutional-networks">Character-level Convolutional Networks</h2>
 
 <p>在这部分，我们介绍了用于文本分类的字符级<code>ConvNets</code>的设计，设计是模块化的，其中通过反向传播获得梯度以执行优化</p>
 
@@ -106,21 +104,21 @@
 
 <p>主要组件是简单卷积模块，它简单地计算一维卷积。假设我们有一个离散输入函数：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhuie0ffwj303m00ja9t.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhuie0ffwj303m00ja9t.jpg" alt=""></figure></p>
 
 <p>和一个离散核函数：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhum22ucbj303s00ja9t.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhum22ucbj303s00ja9t.jpg" alt=""></figure></p>
 
 <p>具有步幅d的<code>f(x)</code>和<code>g(y)</code>之间的卷积:</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhuy2yjqwj307600kdfo.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyhuy2yjqwj307600kdfo.jpg" alt=""></figure></p>
 
 <p>被定义为：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld02654sj30j901e745.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld02654sj30j901e745.jpg" alt=""></figure></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld0mj7h8j30jn06labv.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld0mj7h8j30jn06labv.jpg" alt=""></figure></p>
 
 <p>其中<code>c = k - d + 1</code>是偏移常数，这个非常合用的模块使我们能够对 convnet 进行比6层更深的训练，而其他所有层都失败了。 <a href="https://www.di.ens.fr/sierra/pdfs/icml2010b.pdf">A theoretical analysis of feature pooling in visual recognition.</a>的分析可能对这个问题有所帮助</p>
 
@@ -141,13 +139,13 @@
 
 <p>论文中设计了<code>large</code>和<code>small</code>两种卷积网络，都由6个卷积层和3个全连接层共9层神经网络组成</p>
 
-<p><img src="https://www.howie6879.cn/images/thumbs/h_42.jpg" alt="" /></p>
+<p><figure><img src="https://www.howie6879.cn/images/thumbs/h_42.jpg" alt=""></figure></p>
 
 <p>由于字母表长度为70，因此我们的输入特征为70，输入特征长度论文设定为1014，看起来1014个字符已经可以捕获大部分感兴趣的文本，我们还在三个全连接层之间插入两个dropout层以实现模型正则化，dropout概率为0.5，表1列出了卷积层的配置，表2列出了全连接层的配置：</p>
 
 <p>表1：实验中的卷积层，卷积层的步幅为1，并且池化层都是非重叠的，因此我们省略了他们的步幅描述</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld29gcn0j30jd04v74p.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld29gcn0j30jd04v74p.jpg" alt=""></figure></p>
 
 <p>使用<code>Gaussian distribution</code>初始化权重，初始化模型的均值和标准差分别为：</p>
 
@@ -158,7 +156,7 @@
 
 <p>表2：实验中的全连接层，最后一层的输出单元数由问题决定，例如，对于10分类问题将是10</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld2le6wij30j803674f.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld2le6wij30j803674f.jpg" alt=""></figure></p>
 
 <p>对于不同的问题，我们的输入长度可能也是不同的（比如此例子: <code>l0</code>=1014），特征长度也是如此，从我们的模型设计可以很容易地知道，给定输入长度 l0，在最后一个卷积层之后(任何一个完全连接层之前)的特征长度为 <code>l6</code> = (<code>l0</code>-96) / 27，这个数字与第6层的特征大小相乘将给出第一个完全连接的层接受的输入维度</p>
 
@@ -166,7 +164,7 @@
 
 <p>许多研究人员发现，适当的数据扩充技术有助于降低深度学习模型的泛化误差，当我们能够找到模型可能具有的合适的不变性属性时，这些技术通常能够很好地工作。就文本而言，不能像图像或语音识别那样进行数据转换来增加数据，因为字符的顺序具有严格的句法和语义意义，因此最好的数据扩充方式应该是使用人类的重述文本类，但是这样昂贵且不切实际的，因为数据集太庞大了，综上，比较常见的做法是使用词汇和词组的近义词进行替代扩充。</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld4tuovoj30jd03v40e.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld4tuovoj30jd03v40e.jpg" alt=""></figure></p>
 
 <h2 id="comparison-models">Comparison Models</h2>
 
@@ -195,23 +193,23 @@
 
 <p>对于英语字母表，一个明显的选择就是是否要区分大写字母和小写字母，结论发现不区分时候结果比较好，一种可能的解释是语义不会随着不同的字母情况而改变，因此带来了正则化的好处</p>
 
-<h2 id="large-scale-datasets-and-results">Large-scale Datasets and Results</h2>
+<h2 id="largescale-datasets-and-results">Large-scale Datasets and Results</h2>
 
 <p>以前在不同的领域已经证明ConvNets通常能够很好地处理大规模的数据集，特别是在我们的例子中，当模型采用了低层次的原始特征(比如字符)时。然而，大多数用于文本分类的开放数据集都很小，大规模数据集被分割成一个比测试小得多的训练集，因此，我们不是通过使用它们来混淆我们的社区，而是为我们的实验构建了几个大型数据集，范围从数十万到数百万个样本，总结在表3</p>
 
 <p>表3：我们的大型数据集的统计数据，<code>Epoch</code>大小是每次迭代的<code>minibatches</code>数量大小：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld56uee5j30jf061gmu.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld56uee5j30jf061gmu.jpg" alt=""></figure></p>
 
 <p>表4：测试所有模型的错误，以百分比表示，<code>Lg</code>代表<code>大</code>，<code>Sm</code>代表<code>小</code>，<code>w2v</code>是<code>word2vec</code>的缩写形式，<code>Lk</code>表示<code>lookup table</code>，<code>Th</code>代表<code>thesaurus</code>，有<code>Full</code>标签的表示<code>ConvNets</code>区分大小写：</p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld5f1ko0j30k50d2gq3.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld5f1ko0j30k50d2gq3.jpg" alt=""></figure></p>
 
 <p>基于所有合适的模型对数据进行训练，表格4列出来了误差百分比，请注意，由于我们没有中文词库，Sogou News数据集使用词库扩充部分没有任何结果，我们标记蓝色为好的结果，红色为不好的：</p>
 
 <h2 id="discussion">Discussion</h2>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld5la9jhj30jy0a575n.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyld5la9jhj30jy0a575n.jpg" alt=""></figure></p>
 
 <p>为了进一步了解表4中的结果，我们在本节中提供了一些实证分析，为了便于我们的分析，我们在比较模型中给出了图3中的相对误差。每个图都计算自我们的比较的模型和字符级ConvNet模型之间的差异，然后除以比较的模型误差，图中的所有ConvNets分别是具有词库扩充的大型模型。</p>
 
@@ -250,7 +248,7 @@
 
 <p>我参考上面的代码实现在<a href="https://github.com/howie6879/pylab/tree/master/pylab/papers/character_level_convolutional_networks_for_text_classi%EF%AC%81cation">character_level_convolutional_networks_for_text_classiﬁcation</a></p>
 
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyjvmwzoq2j30p00dwmzl.jpg" alt="" /></p>
+<p><figure><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyjvmwzoq2j30p00dwmzl.jpg" alt=""></figure></p>
 
             <p class="post-info">
                 本文由
@@ -352,7 +350,7 @@
                 <li><a href="https://www.howie6879.cn/categories/google">Google</a>(2)</li>
                 <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
                 <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(8)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(9)</li>
                 <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
                 <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
                 <li><a href="https://www.howie6879.cn/categories/python">Python</a>(26)</li>
@@ -363,6 +361,8 @@
             <div class="meta-item meta-posts">
                 <h3 class="meta-title">RECENT POSTS</h3>
                  
+                <li><a href="https://www.howie6879.cn/post/2019/05-char-cnn-text-classification/">字符级CNN分类模型的实现</a></li>
+                  
                 <li><a href="https://www.howie6879.cn/post/2019/04-how-to-use-jupyterlab/">JupyterLab：程序员的笔记本神器</a></li>
                   
                 <li><a href="https://www.howie6879.cn/post/2019/03-how-to-build-a-web-scraping-framework-with-python/">如何实现一个Python爬虫框架</a></li>
@@ -376,8 +376,6 @@
                 <li><a href="https://www.howie6879.cn/post/2018/41/">如何用PEP 8编写优雅的Python代码</a></li>
                   
                 <li><a href="https://www.howie6879.cn/post/2018/40/">如何用Python创建一个简单的神经网络</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2018/39/">统计学习方法笔记：3.k近邻法</a></li>
                  
 
             </div>
@@ -570,7 +568,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0-rc.1/katex.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0-rc.1/katex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0-rc.1/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0-rc.1/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 
 <script>
     renderMathInElement(document.body,
@@ -582,6 +580,9 @@
           }
   );
 </script>
+
+
+
 
 
 <div class="cnzz" style="display: none">
