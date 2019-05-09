@@ -9,7 +9,7 @@ title: "神经网络基础"
 toc: true
 ---
 
-要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如：
+要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，[备份地址](https://mp.weixin.qq.com/s/RdmMvuq8Vj33ggZALjfMLw)：
 
 - 什么是感知器
 - 什么是神经网络
@@ -36,7 +36,7 @@ toc: true
 
 上图：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynopykgrbj3230230415.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/0A0F8531-ACD0-4843-8A4F-F16C82720088.png)
 
 图片生成代码如下：
 
@@ -94,15 +94,15 @@ plt.show()
 
 感知器的工作方式如下所示：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynppb0u8jj30h703v74d.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/2977DAE0-ECE3-4BC5-AF1C-90D51DCBE9AB.png)
 
 左侧三个变量分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynpsklr29j30h203rq32.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5F74C39F-956D-4ABE-B12B-1F1CCABB9F63.png)
 
 此时，output可以表示为：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynpu3rmaxj30d802d0t0.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CD964C69-3677-4B34-8A98-1DAAF45BA6B3.png)
 
 上面右侧的式子是一个阶跃函数，就是和Sigmoid、Relu一样作用的激活函数，然后我们就可以自己实现一个感知器：
 
@@ -200,17 +200,17 @@ if __name__ == '__main__':
 
 神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynqt6prr7j30k808o0ud.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/19333562-3B02-4E17-96C2-5B7D44F99FA5.png)
 
 以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案
 
 所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为σ(w⋅x+b)，而σ就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fynqvmhzahj30ib05q74i.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5E03C070-79F5-48F7-8EFB-A15171C3EF74.png)
 
 ### 神经网络
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fysbho6il2j30g00f547g.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/B1AA88E4-E903-40C6-A345-6A7908238FDD.png)
 
 神经网络其实就是按照一定规则连接起来的多个神经元，一个神经网络由以下组件构成：
 
@@ -257,13 +257,13 @@ network.compile(optimizer='rmsprop',loss='categorical_crossentropy', metrics=['a
 network.fit(train_images, train_labels, epochs=5, batch_size=128)
 ```
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fys2nahzlhj30lr06emy7.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/8FC079F8-7379-479D-A478-6FED187D8A9C.png)
 
 一个隐藏层，激活函数选用`relu`，输出层使用`softmax`返回一个由10个概率值（总和为 1）组成的数组
 
 训练过程中显示了两个数字：一个是网络在训练数据上的损失`loss`，另一个是网络在 训练数据上的精度`acc`
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fys2tblp9jj30ho02c74f.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/0EC7913A-205C-4BF2-BCB6-075411819AA3.png)
 
 很简单，我们构建和训练一个神经网络，就这么几行代码，之所以写的这么剪短，是因为`keras`接接口封装地比较好用，但是里面的理论知识我们还是需要好好研究下
 
@@ -516,7 +516,7 @@ output = relu(dot(W, input_x) + b)
 
 其中模型f(X)关于训练数据集的平均损失，我们称之为：经验风险（empirical risk），上述的权重调整，就是在不断地让经验风险最小，求出最好的模型f(X)，我们暂时不考虑正则化，此时我们经验风险的最优化的目标函数就是：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fys0wmbijnj30w403ejs4.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/142D8E83-65C1-4491-ADCC-EDE7280AD1C1.png)
 
 求解出此目标函数最小时对应的权重值，就是我们感知器里面对应的权重值，在推导之前，我们还得明白两个概念：
 
@@ -539,7 +539,7 @@ output = relu(dot(W, input_x) + b)
 
 推导过程如下：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fys1b8qoatj30ds0jdank.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/sgd.jpg)
 
 感知器代码里面的这段:
 
@@ -596,4 +596,4 @@ print('test_acc:', test_acc)
 - [hands_on_Ml_with_Sklearn_and_TF](https://github.com/apachecn/hands-on-ml-zh)
 - [hanbt零基础入门深度学习系列](https://www.zybuluo.com/hanbingtao/note/448086)
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fyjvmwzoq2j30p00dwmzl.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
