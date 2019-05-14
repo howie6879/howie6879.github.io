@@ -1,12 +1,11 @@
 ---
 categories:
-  - Python
-  - Machine Learning
+  - Deep Learning
 comments: true
 markup: mmark
-date: 2018-01-08T14:57:30+08:00
-image: /images/thumbs/h_06.jpg
-tags: [python,神经网络与深度学习]
+date: 2019-05-08 16:36:44+08:00
+image: /images/thumbs/h_48.png
+tags: [神经网络与深度学习]
 title: "神经网络与深度学习笔记 - 1.识别手写字"
 toc: true
 ---
@@ -52,7 +51,9 @@ $x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一
 
 ![from nndl](/images/post/33/04.jpg)
 
-这就是感知器的数学模型，是不是就像一个逻辑回归模型？它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用`python`写的一个感知器自动学习实现与非门，代码在[nndl_chapter01](https://github.com/howie6879/pylab/blob/master/pylab/nndl/chapter01/chapter01.ipynb)。
+这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
+
+它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用`python`写的一个感知器自动学习实现与非门，代码在**[nndl_chapter01](https://github.com/howie6879/pylab/blob/master/pylab/nndl/chapter01/chapter01.ipynb)**。
 
 说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
 
@@ -85,7 +86,11 @@ $$
 \sigma(z) \equiv \frac{1}{1+e^{-z}}
 $$
 
-这里的$z=\sum _{j} w{_j}x{_j}+b$，那么⼀个具有输⼊$x_{1},x_{2},...,x_{j}$，权重为$w_{1},w_{2},...,w_{j}$，和偏置b的S型神经元的输出是：
+其中$z$表达式为：
+
+$$z=\sum_{j} w{_j}x{_j}+b$$
+
+那么⼀个具有输⼊$x_{1},x_{2},...,x_{j}$，权重为$w_{1},w_{2},...,w_{j}$，和偏置b的S型神经元的输出是：
 
 $$
 \frac{1}{1+\exp(-\sum_j w_j x_j-b)}
@@ -197,6 +202,10 @@ $$
 训练模型的过程就是优化代价函数的过程，*Cost Function(代价函数)* 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，其实这个就是我们平常用来评价回归算法的均方误差，也就是**MSE**。
 
 现在我们的目标很清晰，为了找出合适的权重和偏置值，我们需要让代价函数的值接近于0，在这个条件下我们就可以找出合适的权重和偏置值，我们将采⽤称为**梯度下降**的算法来达到这个⽬的。
+
+下面是我的推导过程：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190513120212.png)
 
 ### 实现数字分类模型
 

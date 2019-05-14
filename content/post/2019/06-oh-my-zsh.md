@@ -5,7 +5,6 @@ date: 2019-04-15 16:16:58+08:00
 image: /images/thumbs/h_47.jpg
 tags: [效率]
 title: "oh-my-zsh：让终端飞"
-markup: mmark
 toc: true
 comments: true
 ---
