@@ -53,7 +53,7 @@ $x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一
 
 这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
 
-它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用`python`写的一个感知器自动学习实现与非门，代码在**[nndl_chapter01](https://github.com/howie6879/pylab/blob/master/pylab/nndl/chapter01/chapter01.ipynb)**。
+它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用`python`写的一个感知器自动学习实现与非门，代码在**[nndl_chapter01](https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb)**。
 
 说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
 
