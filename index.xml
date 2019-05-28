@@ -6,10 +6,646 @@
     <description>Recent content on 老胡的储物柜</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 15 Apr 2019 16:16:58 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 10 May 2019 16:36:44 +0800</lastBuildDate>
     
         <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>神经网络与深度学习笔记 - 2.反向传播算法如何工作</title>
+      <link>https://www.howie6879.cn/post/2019/08-how-does-the-back-propagation-algorithm-work/</link>
+      <pubDate>Fri, 10 May 2019 16:36:44 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2019/08-how-does-the-back-propagation-algorithm-work/</guid>
+      <description>&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$L$ : 表示网络层数&lt;/li&gt;
+&lt;li&gt;$b_j^l$ : 表示第$l$层的第$j$个神经元的偏置&lt;/li&gt;
+&lt;li&gt;$a_j^l$ : 表示第$l$层的第$j$个神经元的激活值&lt;/li&gt;
+&lt;li&gt;$w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重&lt;/li&gt;
+&lt;li&gt;$w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重&lt;/li&gt;
+&lt;li&gt;$b^l$ : 第$l$层神经元的偏置向量&lt;/li&gt;
+&lt;li&gt;$z^l$ : 第$l$层神经元的带权输入向量&lt;/li&gt;
+&lt;li&gt;$a^l$ : 第$l$层每个神经元激活值构成的向量&lt;/li&gt;
+&lt;li&gt;$\delta_{j}^{l}$ : 第$l$层第$j$个神经元的&lt;strong&gt;误差&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;很多看似显而易见的想法只有在事后才变得显而易见。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;热神经络中使矩阵快速计算输出的法&#34;&gt;热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法&lt;/h2&gt;
+
+&lt;p&gt;通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\begin{aligned}
+a_3^2 &amp;= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 )
+\\ &amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2  \right)
+\end{aligned}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;可以看到例子中的结果满足表达式，接下来，让我们将表达式改成向量形式：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\begin{aligned}
+a^{l} &amp;= \sigma\left(w^{l} a^{l-1}+b^{l}\right) 
+\\ &amp;= \sigma\left(z^l \right) 
+\end{aligned}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;这个式子是正确的么，我们实际根据第一层到第二层的计算来看看：&lt;/p&gt;
+
+&lt;p&gt;首先定义第一层的激活函数输出值向量$a^1$:&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+{a^1} = \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right]
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;然后是第一层神经元连接到第二层神经元的权重矩阵：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+{w^2} = \left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right]
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;同理，第二层神经元的偏置向量：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+{b^2} = \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;我们的目标是求得第二层神经元激活值构成的向量$a^2$:&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;激活值计算如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\begin{aligned}
+a^2 &amp;= \sigma(w^2a^1 + b^2)
+\\&amp;= \sigma\left(\left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right] \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right] + \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]\right)
+\end{aligned}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]=\sigma\left(\left[ \begin{array}{c}{w_{1 1}^2 a_1^1+w_{1 2}^2 a_2^1+w_{1 3}^2 a_3^1}+b_1^2 \\ {w_{2 1}^2 a_1^1+w_{2 2}^2 a_2^1+w_{2 3}^2 a_3^1}+b_2^2 \\ {w_{3 1}^2 a_1^1+w_{3 2}^2 a_2^1+w_{3 3}^2 a_3^1}+b_3^2 \\ {w_{4 1}^2 a_1^1+w_{4 2}^2 a_2^1+w_{4 3}^2 a_3^1}+b_4^2 \end{array}\right]\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;可以看到$a_3^2$的值和前面第一次举例子算出来的值一致。&lt;/p&gt;
+
+&lt;h2 id=&#34;关于代价函数的两个假设&#34;&gt;关于代价函数的两个假设&lt;/h2&gt;
+
+&lt;p&gt;我们以均方误差得出的代价函数如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+C=\frac{1}{2 n} \sum_{x}\left\|y(x)-a^{L}(x)\right\|^{2}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;公式说明：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$y(x)$是目标输出&lt;/li&gt;
+&lt;li&gt;$a^{L}(x)$是当输入是$x$时候网络输出的激活值向量&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;好了，为了应⽤反向传播，我们需要对代价函数 $C$ 做出什么样的前提假设呢？&lt;/p&gt;
+
+&lt;p&gt;第一：代价函数可以被写成⼀个在每个训练样本 $x$ 上的代价函数 $C_x$ 的均值:&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+C=\frac{1}{n} \sum_{x} C_{x}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;第⼆：代价可以写成神经⽹络输出的函数：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524120302.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;为对于⼀个单独的训练样本 $x$ 其⼆次代价函数可以写作：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+C=\frac{1}{2}\left\|y-a^{L}\right\|^{2}=\frac{1}{2} \sum_{j}\left(y_{j}-a_{j}^{L}\right)^{2}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;反向传播的四个基本方程&#34;&gt;反向传播的四个基本方程&lt;/h2&gt;
+
+&lt;p&gt;反向传播其实是对权重和偏置变化影响代价函数过程的理解，最终极的含义其实就是计算偏导数 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$。&lt;/p&gt;
+
+&lt;p&gt;为了计算这些值，我们引入一个中间量$\delta_{j}^{l}$ ，其表示的是第$l$层第$j$个神经元的&lt;strong&gt;误差&lt;/strong&gt;，其中$\delta^l$表示第$l$层的误差向量，对于这个误差，我们应该怎样表示呢：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\delta_{j}^{l} \equiv \frac{\partial C}{\partial z_{j}^{l}}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来要做的就是将这些误差和 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$ 联系起来，解决方案就是反向传播基于四个基本⽅程：&lt;/p&gt;
+
+&lt;h3 id=&#34;输出层误差的程&#34;&gt;输出层误差的⽅程&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;输出层误差的⽅程&lt;/strong&gt;，$\delta^L$ ： 每个元素定义如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\delta_{j}^{L}=\frac{\partial C}{\partial a_{j}^{L}} \sigma^{\prime}\left(z_{j}^{L}\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;矩阵形式重写⽅程：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;其中$\nabla_{a}$就是梯度向量，其元素就是偏导数$\partial C / \partial a_{j}^{L}$的所有元素，以上述二次代价函数为例：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+C_{x}=\frac{1}{2}\left\|y-a^{L}\right\|^{2}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;可以得出：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\nabla_{a} C=\left(a^{L}-y\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;因此方程的矩阵形式可以改成：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\delta^{L}=\left(a^{L}-y\right) \odot \sigma^{\prime}\left(z^{L}\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;推导过程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528115627.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;使用下一层的误差表示当前层的误差&#34;&gt;使用下一层的误差表示当前层的误差&lt;/h3&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;推导过程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528120156.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;代价函数关于络中任意偏置的改变率&#34;&gt;代价函数关于⽹络中任意偏置的改变率&lt;/h3&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;推导过程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528140657.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;代价函数关于任何个权重的改变率&#34;&gt;代价函数关于任何⼀个权重的改变率&lt;/h3&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;推导过程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528142309.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;反向传播的四个基本公式，靠着一个链式法则，就全都推下来了，没有什么难度&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524150849.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;反向传播算法&#34;&gt;反向传播算法&lt;/h2&gt;
+
+&lt;p&gt;反向传播算法给出了一种计算代价函数梯度的方法，算法描述如下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;输入特征x：为输⼊层设置对应的激活值$a^1$&lt;/li&gt;
+&lt;li&gt;前向传播：对每个&lt;span  class=&#34;math&#34;&gt;\(l=2,3,...,L\)&lt;/span&gt;计算相应的&lt;span  class=&#34;math&#34;&gt;\(z^l\)&lt;/span&gt;和&lt;span  class=&#34;math&#34;&gt;\(a^l\)&lt;/span&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;span  class=&#34;math&#34;&gt;\(z^l=w^{l} a^{l-1}+b^{l}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span  class=&#34;math&#34;&gt;\(a^l=\sigma(z^l)\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;输出层误差：&lt;span  class=&#34;math&#34;&gt;\(\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;反向误差传播：对每个&lt;span  class=&#34;math&#34;&gt;\(l=L-1,L-2,...,2\)&lt;/span&gt;，计算&lt;span  class=&#34;math&#34;&gt;\(\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;输出：代价函数的梯度由&lt;span  class=&#34;math&#34;&gt;\(\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}\)&lt;/span&gt;和&lt;span  class=&#34;math&#34;&gt;\(\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}\)&lt;/span&gt;得出&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;反向传播全局观&#34;&gt;反向传播：全局观&lt;/h2&gt;
+
+&lt;p&gt;假设我们已经对⼀些⽹络中的 $w_{j k}^l$ 做⼀点⼩⼩的变动 &lt;span  class=&#34;math&#34;&gt;\(\Delta w_{j k}^{l}\)&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150559.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;显然，这样会造成输出激活值的改变：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150804.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;然后，会让下一层所有的激活值产生改变：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150841.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;接着，这些改变都将影响到⼀个个下⼀层，到达输出层，最终影响代价函数：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150904.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;根据求导的思想，我们可以得出下面公式：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;我们知道，&lt;span  class=&#34;math&#34;&gt;\(\Delta w_{j k}^{l}\)&lt;/span&gt;造成了第&lt;span  class=&#34;math&#34;&gt;\(l\)&lt;/span&gt;层的第&lt;span  class=&#34;math&#34;&gt;\(j\)&lt;/span&gt;神经元的激活值的变化&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l}\)&lt;/span&gt;，这个变化由下⾯的公式给出：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l}\)&lt;/span&gt;的变化会造成下一层所有神经元激活值的变化，我们聚焦到其中⼀个激活值上看看影响的情况，不防设&lt;span  class=&#34;math&#34;&gt;\(a_q^{l+1}\)&lt;/span&gt;：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528151606.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;实际上，这会导致下⾯的变化：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \Delta a_{j}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;我们已经知道&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}\)&lt;/span&gt;，我们可以得到：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;就这样一直传播下去，最终将所有的影响汇聚到输出层代价的变化，假设&lt;span  class=&#34;math&#34;&gt;\(a_{j}^{l}, a_{q}^{l+1}, \ldots, a_{n}^{L-1}, a_{m}^{L}\)&lt;/span&gt;，那么结果的表达式就是：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta C \approx \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;影响输出层代价的权重值有很多，所以我们需要进行求和：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta C \approx \sum_{m n p_{\ldots q}} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;因为：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;带入上面式子，得出：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\begin{aligned}
+\frac{\partial C}{\partial w_{j k}^{l}}&amp;=\sum_{m n p \ldots q} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \cdots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}}
+\\&amp;=a_{k}^{l-1} \delta_{j}^{l}
+\end{aligned}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;想起一句歌词，又回到最初的起点，我们竟然就是在做反向传播，神奇。&lt;/p&gt;
+
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/zhanggyb/nndl&#34;&gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/26765585&#34;&gt;知乎上另外一篇笔记&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>神经网络与深度学习笔记 - 1.识别手写字</title>
+      <link>https://www.howie6879.cn/post/2019/07-use-neural-network-recognize-handwriting/</link>
+      <pubDate>Wed, 08 May 2019 16:36:44 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2019/07-use-neural-network-recognize-handwriting/</guid>
+      <description>&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 是由 &lt;a href=&#34;http://michaelnielsen.org/&#34;&gt;Michael Nielsen&lt;/a&gt; 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。&lt;/p&gt;
+
+&lt;p&gt;神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别&lt;/li&gt;
+&lt;li&gt;神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;两个重要的人工神经元：感知器和S型神经元&lt;/li&gt;
+&lt;li&gt;神经⽹络的架构&lt;/li&gt;
+&lt;li&gt;⼀个简单的分类⼿写数字的⽹络&lt;/li&gt;
+&lt;li&gt;标准的神经网络学习算法：随机梯度下降算法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;感知器&#34;&gt;感知器&lt;/h2&gt;
+
+&lt;p&gt;1943年，心理学家McCulloch和数学家Pitts发表了《&lt;a href=&#34;http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf&#34;&gt;A logical calculus of the ideas immanent in nervous activity&lt;/a&gt;》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/02.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。&lt;/p&gt;
+
+&lt;p&gt;对于$x_{1},x_{2},...,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},...,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/03.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$x=(x_{1},x_{2},...,x_{j})$&lt;/li&gt;
+&lt;li&gt;$w=(w_{1},w_{2},...,w_{j})$&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;那么感知器的规则可以重写为:&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/04.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。&lt;/p&gt;
+
+&lt;p&gt;它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用&lt;code&gt;python&lt;/code&gt;写的一个感知器自动学习实现与非门，代码在&lt;strong&gt;&lt;a href=&#34;https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb&#34;&gt;nndl_chapter01&lt;/a&gt;&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$x$&lt;/th&gt;
+&lt;th&gt;$y$&lt;/th&gt;
+&lt;th&gt;$output$&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。&lt;/p&gt;
+
+&lt;p&gt;可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。&lt;/p&gt;
+
+&lt;p&gt;遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。&lt;/p&gt;
+
+&lt;p&gt;感知器，终于可以多层了。&lt;/p&gt;
+
+&lt;h2 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h2&gt;
+
+&lt;p&gt;前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/05.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果&lt;code&gt;9&lt;/code&gt;，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。&lt;/p&gt;
+
+&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\sigma(z) \equiv \frac{1}{1+e^{-z}}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;其中$z$表达式为：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[z=\sum_{j} w{_j}x{_j}+b\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;那么⼀个具有输⼊$x_{1},x_{2},...,x_{j}$，权重为$w_{1},w_{2},...,w_{j}$，和偏置b的S型神经元的输出是：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+\frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;p&gt;上面说过，感知器的激活函数只会输出两个值，分别是&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？&lt;/p&gt;
+
+&lt;p&gt;S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$\sigma(z) \leq 0.5$ 输出0&lt;/li&gt;
+&lt;li&gt;$\sigma(z)&amp;gt;0.5$  输出1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;神经络的架构&#34;&gt;神经⽹络的架构&lt;/h2&gt;
+
+&lt;p&gt;看下面一个四层神经网络，这种类型的多层⽹络有时被称为&lt;strong&gt;多层感知器&lt;/strong&gt;或者&lt;strong&gt;MLP&lt;/strong&gt;，如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/06.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;需要记住以下几个概念：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;⽹络中最左边的称为&lt;strong&gt;输⼊层&lt;/strong&gt;，其中的神经元称为&lt;strong&gt;输⼊神经元&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;中间得称之为&lt;strong&gt;隐藏层&lt;/strong&gt;，图中有两个隐藏层&lt;/li&gt;
+&lt;li&gt;最右边称之为&lt;strong&gt;输出层&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：&lt;strong&gt;前馈神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;有回路，其中反馈环路是可⾏的：&lt;strong&gt;递归神经网络&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;个简单的分类写数字的络&#34;&gt;⼀个简单的分类⼿写数字的⽹络&lt;/h2&gt;
+
+&lt;p&gt;对于这六个数字&lt;code&gt;504192&lt;/code&gt;，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;504192是连续在一起的图像，首先可以将其分割成6个小图像，比如&lt;code&gt;5&lt;/code&gt; &lt;code&gt;0&lt;/code&gt; ...等&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;再对分割开的小图像进行分类，比如识别5
+
+我们将使⽤⼀个三层神经⽹络来识别单个数字：
+&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/07.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;
+由于训练数据由$28*28$的⼿写数字的图像组成，所以:&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个分类⼿写数字的⽹络，大概就可以这样实现。&lt;/p&gt;
+
+&lt;h2 id=&#34;随机梯度下降算法&#34;&gt;随机梯度下降算法&lt;/h2&gt;
+
+&lt;p&gt;分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤&lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST&lt;/a&gt;数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用&lt;code&gt;jupyter notebook&lt;/code&gt;开始吧，如果没有，请自行检索教程安装，代码目录如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;pylab
+└── datasets
+    └── MNIST_data
+        ├── t10k-images-idx3-ubyte.gz
+        ├── t10k-labels-idx1-ubyte.gz
+        ├── train-images-idx3-ubyte.gz
+        └── train-labels-idx1-ubyte.gz
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后使用&lt;code&gt;TensorFlow&lt;/code&gt;来读取数据，看看下载的数据集到底是什么样子，可以在&lt;code&gt;mnist_data.ipynb&lt;/code&gt;中添加如下代码：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from matplotlib import pyplot as plt
+from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
+
+mnist = read_data_sets(&amp;quot;../datasets/MNIST_data/&amp;quot;, one_hot=True)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;查看一些基本信息：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;print(&amp;quot;Training data size: %s&amp;quot; % mnist.train.num_examples)
+print(&amp;quot;Validating data size: %s&amp;quot; % mnist.validation.num_examples)
+print(&amp;quot;Testing data size: %s&amp;quot; % mnist.test.num_examples)
+
+# 每张图片是长度为784的一维数组
+print(len(mnist.train.images[0]))
+
+def display_digit(image):
+    image = image.reshape([28,28])
+    plt.imshow(image, cmap=plt.get_cmap(&#39;gray_r&#39;))
+    plt.show()
+
+print(&amp;quot;样本真实数字为：%s&amp;quot; % list(mnist.train.labels[1]).index(1))
+# 显示图像
+display_digit(mnist.train.images[1])
+
+# Output
+# Training data size: 55000
+# Validating data size: 5000
+# Testing data size: 10000
+# 784
+# 样本真实数字为：3
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以看到显示如下图像：
+&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/08.jpg&#34; alt=&#34;from mnist&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;p&gt;通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。&lt;/p&gt;
+
+&lt;p&gt;感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个&lt;strong&gt;代价函数&lt;/strong&gt;（有时被称为损失或⽬标函数）：&lt;/p&gt;
+
+&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
+C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
+\]&lt;/span&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;w 表⽰所有的⽹络中权重的集合&lt;/li&gt;
+&lt;li&gt;b 是所有的偏置&lt;/li&gt;
+&lt;li&gt;n 是训练输⼊数据的个数&lt;/li&gt;
+&lt;li&gt;a 是表⽰当输⼊为x时输出的向量，可以理解为output&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;训练模型的过程就是优化代价函数的过程，&lt;em&gt;Cost Function(代价函数)&lt;/em&gt; 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，其实这个就是我们平常用来评价回归算法的均方误差，也就是&lt;strong&gt;MSE&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;现在我们的目标很清晰，为了找出合适的权重和偏置值，我们需要让代价函数的值接近于0，在这个条件下我们就可以找出合适的权重和偏置值，我们将采⽤称为&lt;strong&gt;梯度下降&lt;/strong&gt;的算法来达到这个⽬的。&lt;/p&gt;
+
+&lt;p&gt;下面是我的推导过程：&lt;/p&gt;
+
+&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190513120212.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;实现数字分类模型&#34;&gt;实现数字分类模型&lt;/h2&gt;
+
+&lt;p&gt;终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。&lt;/p&gt;
+
+&lt;p&gt;书籍作者很贴心地实现了模型代码，仓库见&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;，接下来我们一起来看看具体的实现代码吧。&lt;/p&gt;
+
+&lt;p&gt;首先是实现一个&lt;code&gt;Network&lt;/code&gt;类，&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
+
+import random
+
+import numpy as np
+
+
+class Network(object):
+
+    def __init__(self, sizes):
+        &amp;quot;&amp;quot;&amp;quot;
+        初始化
+        :param sizes:
+            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
+        &amp;quot;&amp;quot;&amp;quot;
+        self.num_layers = len(sizes)
+        self.sizes = sizes
+        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+        self.weights = [np.random.randn(y, x)
+                        for x, y in zip(sizes[:-1], sizes[1:])]
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py&#34;&gt;network.py&lt;/a&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def sigmoid(z):
+    &amp;quot;&amp;quot;&amp;quot;The sigmoid function.&amp;quot;&amp;quot;&amp;quot;
+    return 1.0/(1.0+np.exp(-z))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;代码已经准备就绪，下面可以开始进行模型训练：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import mnist_loader, network
+
+training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+
+net = network.Network([784, 30, 10])
+net.SGD(list(training_data), 30, 10, 3.0, test_data=list(test_data))
+
+# Output
+Epoch 0: 9023 / 10000
+Epoch 1: 9222 / 10000
+Epoch 2: 9312 / 10000
+Epoch 3: 9312 / 10000
+Epoch 4: 9383 / 10000
+Epoch 5: 9421 / 10000
+Epoch 6: 9432 / 10000
+Epoch 7: 9421 / 10000
+Epoch 8: 9454 / 10000
+Epoch 9: 9447 / 10000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;看结果，十次迭代后，轻轻松松突破94%&lt;/p&gt;
+
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb&#34;&gt;文中涉及代码&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/zhanggyb/nndl&#34;&gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.cnblogs.com/subconscious/p/5058741.html&#34;&gt;神经网络浅讲：从神经元到深度学习&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>oh-my-zsh：让终端飞</title>
@@ -17,11 +653,13 @@
       <pubDate>Mon, 15 Apr 2019 16:16:58 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/06-oh-my-zsh/</guid>
-      <description>&lt;p&gt;上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错&lt;/p&gt;
+      <description>
+
+&lt;p&gt;上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错&lt;/p&gt;
 
 &lt;p&gt;因此我决定再写几篇能提升程序员工作以及学习效率的文章，如果能形成一个系列那是最好~如果你有自己的效率工具以及方案，欢迎留言讨论&lt;/p&gt;
 
-&lt;h2 id=&#34;什么是ohmyzsh&#34;&gt;什么是oh-my-zsh&lt;/h2&gt;
+&lt;h2 id=&#34;什么是oh-my-zsh&#34;&gt;什么是oh-my-zsh&lt;/h2&gt;
 
 &lt;p&gt;诸位大佬都知道，&lt;code&gt;Linux&lt;/code&gt;下&lt;code&gt;shell&lt;/code&gt;默认是&lt;code&gt;bash&lt;/code&gt;，但还有一种&lt;code&gt;shell&lt;/code&gt;，叫做&lt;code&gt;zsh&lt;/code&gt;它比&lt;code&gt;bash&lt;/code&gt;更加强大，功能也更加完善，&lt;code&gt;zsh&lt;/code&gt;虽说功能强大，但是配置比较复杂导致流行度不是很高&lt;/p&gt;
 
@@ -37,9 +675,9 @@
 &lt;li&gt;插件和主题支持（插件能进一步提升效率）&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/zsh_demo.gif&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/zsh_demo.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;安装ohmyzsh&#34;&gt;安装oh-my-zsh&lt;/h2&gt;
+&lt;h2 id=&#34;安装oh-my-zsh&#34;&gt;安装oh-my-zsh&lt;/h2&gt;
 
 &lt;p&gt;在安装oh-my-zsh之前，首先需要安装好&lt;code&gt;zsh&lt;/code&gt;：&lt;/p&gt;
 
@@ -70,9 +708,9 @@ sh -c &amp;quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/
 
 &lt;p&gt;输出如下表示成功：&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415090802.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415090802.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;配置ohmyzsh&#34;&gt;配置oh-my-zsh&lt;/h2&gt;
+&lt;h2 id=&#34;配置oh-my-zsh&#34;&gt;配置oh-my-zsh&lt;/h2&gt;
 
 &lt;p&gt;和&lt;code&gt;bash&lt;/code&gt;不同，&lt;code&gt;zsh&lt;/code&gt;的配置文件是&lt;code&gt;~/.zshrc&lt;/code&gt;，实际上&lt;code&gt;oh-my-zsh&lt;/code&gt;的默认配置也够我们使用了，但是这样其真正的强大之处并不能得到很好的体现，因此我们可以继续看看对应的插件和主题功能&lt;/p&gt;
 
@@ -83,7 +721,7 @@ sh -c &amp;quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/
 &lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ls .oh-my-zsh/themes
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415092612.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415092612.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;个人比较喜欢简单的，因此用了&lt;code&gt;wedisagree&lt;/code&gt;主题，进入&lt;code&gt;.zshrc&lt;/code&gt;配置文件进行修改&lt;/p&gt;
 
@@ -102,7 +740,7 @@ sh -c &amp;quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/
 
 &lt;p&gt;&lt;code&gt;incr&lt;/code&gt;是一款自动提示插件，功能非常强大，官网演示demo，感受一下：&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/incr.gif&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/incr.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;安装：&lt;/p&gt;
 
@@ -129,11 +767,11 @@ source ~/.zshrc
 
 &lt;p&gt;效果如下：&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/autojump01.gif&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/autojump01.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;以前的&lt;code&gt;cd code&lt;/code&gt;现在可以直接&lt;code&gt;j c&lt;/code&gt;，路径越长，该插件效果就越明显&lt;/p&gt;
 
-&lt;h4 id=&#34;zshautosuggestions&#34;&gt;zsh-autosuggestions&lt;/h4&gt;
+&lt;h4 id=&#34;zsh-autosuggestions&#34;&gt;zsh-autosuggestions&lt;/h4&gt;
 
 &lt;p&gt;这是一个命令自动补全插件，当你输入命令的几个字母，它会自动根据历史输入进行自动补全，然后按&lt;code&gt;→&lt;/code&gt;，安装也很简单：&lt;/p&gt;
 
@@ -149,7 +787,7 @@ source ~/.zshrc
 
 &lt;p&gt;该插件已经在第一个动图有演示，这里不再重复&lt;/p&gt;
 
-&lt;h4 id=&#34;autoswitchvirtualenv&#34;&gt;autoswitch_virtualenv&lt;/h4&gt;
+&lt;h4 id=&#34;autoswitch-virtualenv&#34;&gt;autoswitch_virtualenv&lt;/h4&gt;
 
 &lt;p&gt;这个插件对于Python开发者来说可以算是神器了，在实际开发过程中，基本上一个Python项目就对应了一个新的虚拟环境，如果你使用&lt;code&gt;pipenv&lt;/code&gt;，当你需要进入项目的虚拟环境时候，就需要执行&lt;code&gt;pipenv shell&lt;/code&gt;命令，安装&lt;code&gt;autoswitch_virtualenv&lt;/code&gt;后，该插件可以自动地完成这些事情：&lt;/p&gt;
 
@@ -167,7 +805,7 @@ source ~/.zshrc
 
 &lt;p&gt;该插件已经在第一个动图里面体现的很明显，这里不再重复演示&lt;/p&gt;
 
-&lt;h4 id=&#34;zshsyntaxhighlighting&#34;&gt;zsh-syntax-highlighting&lt;/h4&gt;
+&lt;h4 id=&#34;zsh-syntax-highlighting&#34;&gt;zsh-syntax-highlighting&lt;/h4&gt;
 
 &lt;p&gt;这个插件的主要作用就是在提高颜值（高亮你的zsh可用命令），安装如下：&lt;/p&gt;
 
@@ -184,13 +822,13 @@ source ~/.zshrc
 
 &lt;p&gt;效果如下图：&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/1547459A-3EFB-4366-B813-CFDF5BF8A0B0.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/1547459A-3EFB-4366-B813-CFDF5BF8A0B0.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
 
 &lt;p&gt;程序员在开发过程中，效率快慢是个不可忽略的因素，提高效率，能一定程度上节省开发时间，从而形成一系列的正向反馈，何乐而不为？&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
@@ -2884,624 +3522,6 @@ if __name__ == &amp;quot;__main__&amp;quot;:
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/23966698&#34;&gt;数学】kd 树算法之详细篇&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://leileiluoluo.com/posts/kdtree-algorithm-and-implementation.html&#34;&gt;K-D TREE算法原理及实现&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>统计学习方法笔记：2.感知机</title>
-      <link>https://www.howie6879.cn/post/2018/38/</link>
-      <pubDate>Tue, 18 Sep 2018 17:54:42 +0800</pubDate>
-      
-      <guid>https://www.howie6879.cn/post/2018/38/</guid>
-      <description>&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;阅读章节：第二章：感知机&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-18&lt;/li&gt;
-&lt;li&gt;结束时间：2018-09-21&lt;/li&gt;
-&lt;li&gt;目标：读完第二章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.howie6879.cn/post/38/&#34;&gt;博客地址&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本章主要介绍了二类分类的线性分类模型：感知机：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;感知机模型&lt;/li&gt;
-&lt;li&gt;感知机学习策略&lt;/li&gt;
-&lt;li&gt;感知机学习算法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见&lt;a href=&#34;https://www.howie6879.cn/post/33/&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;感知机模型&#34;&gt;感知机模型&lt;/h2&gt;
-
-&lt;p&gt;感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取&lt;code&gt;+1&lt;/code&gt;和&lt;code&gt;–1&lt;/code&gt;值，属于判别模型&lt;/p&gt;
-
-&lt;p&gt;注：&lt;code&gt;+1 -1 分别代表正负类，有的可能用 1 0 表示&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;在介绍感知机定义之前，下面几个概念需要说明一下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间：输入所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;输出空间：输出所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;特征空间：每个具体的输入是一个实例，由特征向量表示&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;所以对于一个感知机模型，可以这样表示：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$&lt;/li&gt;
-&lt;li&gt;输出空间：$\gamma = \{+1,-1 \}$&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;那么感知机就是由输入空间到输出空间的函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[\displaystyle f( x) \ =\ sign( w\cdot x+b)\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;其中：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$sign$: 符号函数&lt;/li&gt;
-&lt;li&gt;$w$: 权值（weight）或权值向量（weight vector）&lt;/li&gt;
-&lt;li&gt;$b$: 偏置（bias）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;感知机的几何解释如下：线性方程&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[w\cdot x + b =0\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$w$: 超平面的法向量&lt;/li&gt;
-&lt;li&gt;$b$: 超平面的截距&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;感知机学习策略&#34;&gt;感知机学习策略&lt;/h2&gt;
-
-&lt;h3 id=&#34;数据集的线性可分性&#34;&gt;数据集的线性可分性&lt;/h3&gt;
-
-&lt;p&gt;什么是数据集的线性可分性，很简单，对于一个数据集：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[T = \{(x_1,y_1),(x_2,y_2),...,(x_n,y_n)\}\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;如果存在上面一节说的超平面$S$：$w\cdot x + b =0$，能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，则称数据集T为线性可分数据集（linearly separable data set），否则，称数据集T线性不可分&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习策略-1&#34;&gt;感知机学习策略&lt;/h3&gt;
-
-&lt;p&gt;找出超平面$S$，其实就是确定感知机模型参数：$w b$，根据统计学习方法三要素，此时我们需要确定一个学习策略，比如前面所说的损失函数（经验函数），并使其最小化（猜也猜得到策略讲完，后面就是说学习算法了哈哈）&lt;/p&gt;
-
-&lt;p&gt;上一章以线性代数为例子，用损失函数来度量预测错误的程度，这里的损失函数可以用误分类点到超平面$S$的总距离，输入空间$\mathbb{R} ^n$中任一点$x_0$到超平面$S$的距离：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[\frac{1}{||w||}|w\cdot x_0+b|\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;其中，$||w||$是$w$的$L_2$范数，假设超平面S的误分类点集合为$M$，那么所有误分类点到超平面$S$的总距离为：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[-\frac{1}{||w||}\sum_{x_i\in M} y_i(w\cdot x_i + b)\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;最终推导出感知机学习的损失函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b)\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;感知机学习算法&#34;&gt;感知机学习算法&lt;/h2&gt;
-
-&lt;p&gt;上面一节已经确定了学习策略，按照统计学习方法三要素，目前需要一个算法来求解，目前最优化的方法是随机梯度下降法&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习算法的原始形式&#34;&gt;感知机学习算法的原始形式&lt;/h3&gt;
-
-&lt;p&gt;现在感知机学习算法就是对下面最优化问题的算法：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[ \min\_{w,b} L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b) \]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;现在的问题就转化成，求出参数$w$和$b$，使得上列损失函数达到极小化，这里我直接贴出书中的算法，后面的例子我会用&lt;code&gt;Python&lt;/code&gt;代码实现：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/2A421204-2A48-44AA-B620-454085EA8691.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;有了解题方法怎么能没有题目呢？李杭老师自然是考虑到了，请听题：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/07B0FED7-DE5B-4C6A-BAD5-37ABE4D6FCA2.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/88041E63-ADBF-4472-8031-C71436DCAA18.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;借用&lt;code&gt;Linus Torvalds&lt;/code&gt;大佬的一句话：&lt;strong&gt;Talk less, show me your code&lt;/strong&gt;，所以直接看代码吧：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-&amp;quot;&amp;quot;&amp;quot;
- Created by howie.hu at 2018/9/20.
-&amp;quot;&amp;quot;&amp;quot;
-import numpy as np
-
-
-class Perceptron:
-    &amp;quot;&amp;quot;&amp;quot;
-    李航老师统计学习方法第二章感知机例2.1代码实现
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, input_nums=2):
-        # 权重 已经确定只会有两个二进制输入
-        self.w = np.zeros(input_nums)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=10, rate=1):
-        &amp;quot;&amp;quot;&amp;quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        :param rate: 学习率
-        &amp;quot;&amp;quot;&amp;quot;
-        for i in range(learn_nums):
-            for index, input_vector in enumerate(input_vectors):
-                label = labels[index]
-                delta = label * (sum(self.w * input_vector) + self.b)
-                if delta &amp;lt;= 0:
-                    self.w += label * input_vector * rate
-                    self.b += rate * label
-                    break
-        print(&amp;quot;最终结果：此时感知器权重为{0}，偏置项为{1}&amp;quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &amp;gt; 0 else -1
-
-
-if __name__ == &#39;__main__&#39;:
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;输出如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;算法的收敛性&#34;&gt;算法的收敛性&lt;/h3&gt;
-
-&lt;p&gt;对于线性可分数据集感知机学习算法原始形式收敛，即经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型，定理&lt;code&gt;2.1&lt;/code&gt;如下：&lt;/p&gt;
-
-&lt;p&gt;假设训练数据集$T = {(x_1,y_1),(x_2,y_2),...,(x_n,y_n)}$是线性可分的，其中$x_i\in \chi  =\mathbb{R} ^n$，$y_i \in \gamma =\{-1, 1\}$，$i=1,2,...,N$，则有：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/C3856950-3573-47A3-86A2-38F9A7B5F422.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;感知机学习算法的对偶形式&#34;&gt;感知机学习算法的对偶形式&lt;/h3&gt;
-
-&lt;p&gt;为什么要介绍感知机学习算法的对偶形式，主要目的就是减少运算量，这里一个&lt;a href=&#34;https://www.zhihu.com/question/26526858&#34;&gt;知乎回答&lt;/a&gt;得挺好：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CAB2C4A8-448A-4A23-9E26-4BEB6699BD3D.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/AC1F9A5E-B472-4E0C-8A15-680A8CAA1D65.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;代码实现如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-&amp;quot;&amp;quot;&amp;quot;
- Created by howie.hu at 2018/9/21.
-&amp;quot;&amp;quot;&amp;quot;
-
-import numpy as np
-
-
-class Perceptron:
-    &amp;quot;&amp;quot;&amp;quot;
-    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, alpha_length=3):
-        self.alpha = np.zeros(alpha_length)
-        # 权重
-        self.w = np.zeros(2)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=7):
-        &amp;quot;&amp;quot;&amp;quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        &amp;quot;&amp;quot;&amp;quot;
-        gram = np.matmul(input_vectors, input_vectors.T)
-
-        for i in range(learn_nums):
-
-            for input_vector_index, input_vector in enumerate(input_vectors):
-                label = labels[input_vector_index]
-                delta = 0.0
-                for alpha_index, a in enumerate(self.alpha):
-                    delta += a * labels[alpha_index] * gram[input_vector_index][alpha_index]
-                delta = label * delta + self.b
-                if delta &amp;lt;= 0:
-                    self.alpha[input_vector_index] += 1
-                    self.b += label
-                    break
-        self.w = sum([j * input_vectors[i] * labels[i] for i, j in enumerate(self.alpha)])
-        print(&amp;quot;最终结果：此时感知器权重为{0}，偏置项为{1}&amp;quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        y = sum(self.w * input_vector) + self.b
-        return 1 if y &amp;gt; 0 else -1
-
-
-if __name__ == &#39;__main__&#39;:
-    input_vectors = np.array([[3, 3], [4, 3], [1, 1]])
-    labels = np.array([1, 1, -1])
-    p = Perceptron()
-    model = p.fit(input_vectors, labels)
-    print(model.predict([3, 3]))
-    print(model.predict([4, 3]))
-    print(model.predict([1, 1]))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;最终结果：此时感知器权重为[ 1.  1.]，偏置项为-3.0
-1
-1
--1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;一些概念的详细解释：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://blog.csdn.net/dengheCSDN/article/details/77313758&#34;&gt;超平面是什么？&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>统计学习方法笔记：1.统计学习方法概论</title>
-      <link>https://www.howie6879.cn/post/2018/37/</link>
-      <pubDate>Sun, 16 Sep 2018 17:54:42 +0800</pubDate>
-      
-      <guid>https://www.howie6879.cn/post/2018/37/</guid>
-      <description>&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;阅读章节：第一章：统计学习方法概论&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-14&lt;/li&gt;
-&lt;li&gt;结束时间：2018-09-16&lt;/li&gt;
-&lt;li&gt;目标：读完第一章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.howie6879.cn/post/37/&#34;&gt;博客地址&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;第一章主要对全书内容做了一个内容的概括：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;统计学习：定义、研究对象和方法&lt;/li&gt;
-&lt;li&gt;监督学习&lt;/li&gt;
-&lt;li&gt;统计学习三要素：模型、策略、算法&lt;/li&gt;
-&lt;li&gt;模型评估与选择：包括正则化、交叉验证与学习的泛化能力&lt;/li&gt;
-&lt;li&gt;生成模型与判别模型&lt;/li&gt;
-&lt;li&gt;分类问题、标注问题与回归问题&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;统计学习&#34;&gt;统计学习&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是统计学习&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的特点&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;统计学习以计算机及网络为平台，是建立在计算机及 网络之上的&lt;/li&gt;
-&lt;li&gt;统计学习以数据为研究对象，是数据驱动的学科&lt;/li&gt;
-&lt;li&gt;统计学习的目的是对数据进行预测与分析&lt;/li&gt;
-&lt;li&gt;统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析&lt;/li&gt;
-&lt;li&gt;统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是机器学习&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;如果&lt;code&gt;一个程序&lt;/code&gt;可以在&lt;code&gt;任务T&lt;/code&gt;上，随着&lt;code&gt;经验E&lt;/code&gt;的增加，&lt;code&gt;效果P&lt;/code&gt;也可以随之增加，则称这个程序可以从经验中学习。 --- 卡内基美隆大学的Tom Michael Mitchell教授&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;如果以垃圾邮件为例，&lt;code&gt;一个程序&lt;/code&gt;指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；&lt;code&gt;任务T&lt;/code&gt;指的是区分垃圾邮件的任务；&lt;code&gt;经验E&lt;/code&gt;为已经区分过是否为垃圾邮件的历史邮件；&lt;code&gt;效果P&lt;/code&gt;为机器学习算法在区分是否为垃圾邮件任务上的准确率&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的目的&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;统计学习的方法&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归&lt;/li&gt;
-&lt;li&gt;非监督学习（unsupervised learning）：聚类、降维&lt;/li&gt;
-&lt;li&gt;半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM）&lt;/li&gt;
-&lt;li&gt;强化学习（reinforcement learning）：蒙特卡洛方法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;监督学习&#34;&gt;监督学习&lt;/h2&gt;
-
-&lt;h3 id=&#34;基本概念&#34;&gt;基本概念&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入空间（input space）：输入所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;输出空间（output space）：输出所有可能取值的集合&lt;/li&gt;
-&lt;li&gt;特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间&lt;/li&gt;
-&lt;li&gt;联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - &lt;a href=&#34;https://blog.csdn.net/tiankong_/article/details/78332666&#34;&gt;机器学习-联合概率分布笔记&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;分类问题：输出变量为有限个离散变量的预测问题&lt;/li&gt;
-&lt;li&gt;回归问题：输入变量与输出变量均为连续变量的预测问题&lt;/li&gt;
-&lt;li&gt;标注问题：输入变量与输出变量均为变量序列的预测问题&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;问题的形式化&#34;&gt;问题的形式化&lt;/h3&gt;
-
-&lt;p&gt;监督学习利用训练数据集学习一个模型，再用模型对测试样本集进行预测 （prediction）：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/72A50DED-998C-4C8F-B20D-3FC2257CE2B4.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;输入训练集 -&amp;gt; 生成模型 -&amp;gt; 预测，由于训练集是人工给出的，所以称之为监督学习&lt;/p&gt;
-
-&lt;h2 id=&#34;统计学习三要素&#34;&gt;统计学习三要素&lt;/h2&gt;
-
-&lt;p&gt;统计学习方法由三要素构成，可以简单地表示为：&lt;strong&gt;方法 = 模型 + 策略 + 算法&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;模型&#34;&gt;模型&lt;/h3&gt;
-
-&lt;p&gt;在监督学习过程中，模型就是所要学习的条件概率分布或决策函数。模型的假设空间（hypothesis space）包含所有可能的条件概率分布或决策函数&lt;/p&gt;
-
-&lt;p&gt;例如，假设决策函数是输入变量的线性函数，那么模型的假设空间就是所有这些线性函数构成的函数集合，假设空间中的模型一般有无穷多个&lt;/p&gt;
-
-&lt;h3 id=&#34;策略&#34;&gt;策略&lt;/h3&gt;
-
-&lt;p&gt;知道模型的交涉空间后，现在的目的就是选择出最优的一个模型出来，而这就是统计学习的目标，这里引入两个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;损失函数（loss function）：用于度量模型一次预测的好坏&lt;/li&gt;
-&lt;li&gt;风险函数（risk function）：度量平均意义下模型预测的好坏&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;损失函数和风险函数&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))&lt;/p&gt;
-
-&lt;p&gt;统计学习中常用的损失函数有如下几种：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;0-1损失函数（0-1 loss function）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/42CD0528-7011-4AA9-A79C-514587FA8DD7.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;li&gt;平方损失函数（quadratic loss function）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5B51ED16-2F58-4CED-B7EA-03CE52ABC835.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;li&gt;绝对损失函数（absolute loss function）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/329F0C27-AE06-4580-BB67-9BA522AA9D33.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;li&gt;对数损失函数（logarithmic loss function）或对数似然损失函数（loglikelihood loss function）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/502CA9B6-2E10-46C6-9F8D-BF8CAA4140C0.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;有了上面概念的铺垫，又可以引入下面两个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;模型f(X)关于联合分布P(X,Y)的平均意义下的损失：风险函数（risk function）或期望损失（expected loss）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/C419536B-5085-4FAD-A822-D9EE9F9C4733.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;li&gt;模型f(X)关于训练数据集的平均损失：经验风险（empirical risk）或经验损失（empirical loss）：
-&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/B39854FF-891B-44A5-9D55-564E049EA825.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;当样本数量足够的情况下，经验风险是趋近于期望风险的，但是现实中样本数量是有限的，，所以用经验风险估计期望风险常常并不理想，要对经验风险进行一定的矫正&lt;/p&gt;
-
-&lt;p&gt;这就关系到监督学习的两个基本策略：&lt;strong&gt;经验风险最小化和结构风险最小化&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;经验风险最小化与结构风险最小化&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;在假设空间、损失函数以及训练数据集确定的情况下，经验风险函数式（1.10）就可以确定，经验风险最小化（empirical risk minimization，ERM）的策略认为，经验风险最小的模型是最优的模型&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/7196AB5B-A29F-4F0B-A92E-1E038E9DA6AF.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;当样本数量过小，可能会出现&lt;strong&gt;过拟合&lt;/strong&gt;问题，结构风险最小化（structural risk minimization，SRM）是为了防止过拟合而提出来的策略&lt;/p&gt;
-
-&lt;p&gt;结构风险最小化等价于正则化（regularization）：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5882A701-300C-4107-8CBC-99658B6D7BEA.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;加上结构风险最小化的策略，此时的最优模型就是下面的最优化问题求解：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/85C6CF7E-ABA1-4DA9-A9D6-8A6F2990355C.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;这样，监督学习问题就变成了经验风险或结构风险函数的最优化问题（1.11）和（1.13），这时经验或结构风险函数是最优化的目标函数&lt;/p&gt;
-
-&lt;h3 id=&#34;算法&#34;&gt;算法&lt;/h3&gt;
-
-&lt;p&gt;统计学习基于训练数据集，根据学习策略，从假设空间中选择最优模型，最后需要考虑用什么样的计算方法求解最优模型，这时，统计学习问题归结为最优化问题，统计学习的算法成为求解最优化问题的算法：&lt;/p&gt;
-
-&lt;h2 id=&#34;模型评估与模型选择&#34;&gt;模型评估与模型选择&lt;/h2&gt;
-
-&lt;h3 id=&#34;训练误差与测试误差&#34;&gt;训练误差与测试误差&lt;/h3&gt;
-
-&lt;p&gt;对于我们利用学习方法通过训练给出的模型，我们希望这个模型能较好的具有以下两点能力：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;拟合能力：已知数据的预测比较合理&lt;/li&gt;
-&lt;li&gt;泛化能力：未知数据的预测比较合理&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;前面说过，损失函数能够度量模型预测的好坏，所以基于损失函数的模型的训练误差（training error）和模型的测试误差（test error）就自然成为学习方法评估的标准：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/D2733ADB-7BDB-4A8D-8F2B-E38E51ABC182.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;过拟合与模型选择&#34;&gt;过拟合与模型选择&lt;/h3&gt;
-
-&lt;p&gt;我们认为在假设空间存在一个真的模型，那么我们选择的模型的目标就是尽量接近这个真模型，假设空间很可能含有不同复杂度的模型，所以此时我们的目标就变成了寻找一个复杂度合适的模型，这里引出一个概念，过拟合（over fitting） - 所选模型的复杂度则比真模型更高&lt;/p&gt;
-
-&lt;p&gt;接下来我们的问题就转接成了需找一个模型复杂度适当的模型，前面一节我们介绍了训练误差与测试误差，那么训练误差与测试误差和模型的复杂度有没有什么关系呢，看下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/57BE978D-6617-4A80-9D2A-937508E6366A.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，训练误差和模型复杂度的关系是：随着模型复杂度的增加，训练误差逐渐递减，趋向于0（此时可能过拟合），但是测试误差会有个最小值（此时才是最合适的复杂度）&lt;/p&gt;
-
-&lt;p&gt;那么我们的学习目的就出来了：选择复杂度适当的模型，以达到使测试误差最小&lt;/p&gt;
-
-&lt;p&gt;现在目的就很明确了，就是需要一个途径比较测试误差，选出最值小的，从而选出我们的模型：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;正则化&lt;/li&gt;
-&lt;li&gt;交叉验证&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;正则化与交叉验证&#34;&gt;正则化与交叉验证&lt;/h2&gt;
-
-&lt;h3 id=&#34;正则化&#34;&gt;正则化&lt;/h3&gt;
-
-&lt;p&gt;在统计学习三要素那一节讲过结构风险最小化策略，此策略的目的就是防止过拟合，正则化是结构风险最小化策略的实现，是在经验风险上加一个正则化项（regularizer）或罚项(penalty term)：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/94BCF3C8-4EF6-4FE3-8E0B-C404E93B55BF.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;正则化的作用是选择经验风险与模型复杂度同时较小的模型&lt;/p&gt;
-
-&lt;h3 id=&#34;交叉验证&#34;&gt;交叉验证&lt;/h3&gt;
-
-&lt;p&gt;交叉验证的基本想法是重复地使用数据，把给定的数据进行切分，将切分的数据集组合为训练集与测试集，在此基础上反复地进行训练、测试以及模型选择，交叉验证有如下三种方式：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;简单交叉验证&lt;/li&gt;
-&lt;li&gt;S折交叉验证&lt;/li&gt;
-&lt;li&gt;留一交叉验证&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;泛化能力&#34;&gt;泛化能力&lt;/h2&gt;
-
-&lt;p&gt;学习方法的泛化能力（generalization  ability）是指由该方法学习到的模型对未知数据的预测能力，是学习方法本质上重要的性质&lt;/p&gt;
-
-&lt;h3 id=&#34;泛化误差&#34;&gt;泛化误差&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;泛化误差的定义&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;对于一个学到的模型，其对未知数的预测就是泛化误差（generalization error），其实就是策略那节讲的风险函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/C0F55EFF-18AE-41DE-A8EE-91112A9047DF.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;泛化误差反映了学习方法的泛化能力，如果一种方法学习的模型比另一种方法学习的模型具有更小的泛化误差，那么这种方法就更有效&lt;/p&gt;
-
-&lt;h3 id=&#34;泛化误差上界&#34;&gt;泛化误差上界&lt;/h3&gt;
-
-&lt;p&gt;学习方法的泛化能力分析往往是通过研究泛化误差的概率上界进行的，简称为泛化误 差上界（generalization error bound）&lt;/p&gt;
-
-&lt;p&gt;泛化误差上界性质如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;它是样本容量的函数，当样本容量增加时，泛化上界趋于0&lt;/li&gt;
-&lt;li&gt;它是假设空间容量（capacity）的函数，假设空间容量越大，模型就越难学，泛化误差上界就越大&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;生成模型与判别模型&#34;&gt;生成模型与判别模型&lt;/h2&gt;
-
-&lt;p&gt;监督学习方法可以分为：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;生成方法（generative approach）：生成方法可以还原出联合概率分布&lt;code&gt;P(X,Y)&lt;/code&gt;，而判别方法则不能；生成方法的学习收敛速度更快，即当样本容量增加的时候，学到的模型可以更快地收敛于真实模型；当存在隐变量时，仍可以用生成方法学习，此时判别方法就不能用&lt;/li&gt;
-&lt;li&gt;判别方法（discriminative approach）：判别方法直接学习的是条件概率&lt;code&gt;P(Y|X)&lt;/code&gt;或决策函数&lt;code&gt;f(X)&lt;/code&gt;，直接面对预测，往往学习的准确率更高；由于直接学习&lt;code&gt;P(Y|X)&lt;/code&gt;或&lt;code&gt;f(X)&lt;/code&gt;，可以对数据进行各种程度上 的抽象、定义特征并使用特征，因此可以简化学习问题&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;所学到的模型分别称为：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;生成模型（generative model）：
-
-&lt;ul&gt;
-&lt;li&gt;朴素贝叶斯法&lt;/li&gt;
-&lt;li&gt;隐马尔可夫模型&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;判别模型（discriminative model）：
-
-&lt;ul&gt;
-&lt;li&gt;k近邻法&lt;/li&gt;
-&lt;li&gt;感知机&lt;/li&gt;
-&lt;li&gt;决策树&lt;/li&gt;
-&lt;li&gt;逻辑斯谛回归模型&lt;/li&gt;
-&lt;li&gt;最大熵模型&lt;/li&gt;
-&lt;li&gt;支持向量机&lt;/li&gt;
-&lt;li&gt;提升方法&lt;/li&gt;
-&lt;li&gt;条件随机场&lt;/li&gt;
-&lt;li&gt;......&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;分类问题&#34;&gt;分类问题&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;在监督学习中，当输出变量Y取有限个离散值时，预测问题便成为分类问题，监督学习从数据中学习一个分类模型或分类决策函数，称为分类器（classifier）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;许多统计学习方法可以用于分类：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;k近邻法&lt;/li&gt;
-&lt;li&gt;感知机&lt;/li&gt;
-&lt;li&gt;朴素贝叶斯法&lt;/li&gt;
-&lt;li&gt;决策树&lt;/li&gt;
-&lt;li&gt;决策列表&lt;/li&gt;
-&lt;li&gt;逻辑斯谛回归模型&lt;/li&gt;
-&lt;li&gt;支持向量机&lt;/li&gt;
-&lt;li&gt;提升方法&lt;/li&gt;
-&lt;li&gt;贝叶斯网络&lt;/li&gt;
-&lt;li&gt;神经网络&lt;/li&gt;
-&lt;li&gt;Winnow&lt;/li&gt;
-&lt;li&gt;......&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;评价分类器性能的指标一般是分类准确率（accuracy）：对于给定的测试数据集，分类器正确分类的样本数与总样本数之比，也就是损失函数是0-1损失时测试数据集上的准确率，见图&lt;code&gt;1.17&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;对于二类分类问题常用的评价指标是精确率（precision）与召回率（recall），因为是二分类，所以一共有四中预测情况：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;TP——将正类预测为正类数&lt;/li&gt;
-&lt;li&gt;FN——将正类预测为负类数&lt;/li&gt;
-&lt;li&gt;FP——将负类预测为正类数&lt;/li&gt;
-&lt;li&gt;TN——将负类预测为负类数&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/F10C9303-79C3-4134-8481-C895631C84CC.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;标注问题&#34;&gt;标注问题&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;标注问题的目标在于学习一个模型， 使它能够对观测序列给出标记序列作为预测&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;许多统计学习方法可以用于标注：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;隐马尔可夫模型&lt;/li&gt;
-&lt;li&gt;条件随机场&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;评价标注模型的指标与评价分类模型的指标一样，常用的有标注准确率、精确率和召回率，其定义与分类模型相同&lt;/p&gt;
-
-&lt;h2 id=&#34;回归问题&#34;&gt;回归问题&lt;/h2&gt;
-
-&lt;p&gt;回归用于预测输入变量（自变量）和输出变量（因变量）之间的关系，特别是当输入变量的值发生变化时，输出变量的值随之发生的变化，回归问题按照输入变量的个数，分为一元回归和多元回归；按照输入变量和输出变量之间关系的类型即模型的类型，分为线性回归和非线性回归&lt;/p&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;一些参考链接：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/WenDesi/lihang_book_algorithm&#34;&gt;致力于将李航博士《统计学习方法》一书中所有算法实现一遍&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/zzqboy/static_study&#34;&gt;《统计学习方法》的读书笔记，重现了大部分的课后题，仅供参考&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://segmentfault.com/a/1190000015561652#articleHeader2&#34;&gt;深度学习中的概率知识详解&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
