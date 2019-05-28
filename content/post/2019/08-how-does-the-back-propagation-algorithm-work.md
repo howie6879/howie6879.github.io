@@ -138,6 +138,8 @@ $$
 
 接下来要做的就是将这些误差和 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$ 联系起来，解决方案就是反向传播基于四个基本⽅程：
 
+### 输出层误差的⽅程
+
 **输出层误差的⽅程**，$\delta^L$ ： 每个元素定义如下：
 
 $$
@@ -168,22 +170,133 @@ $$
 \delta^{L}=\left(a^{L}-y\right) \odot \sigma^{\prime}\left(z^{L}\right)
 $$
 
-**使用下一层的误差表示当前层的误差：**
+推导过程如下：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528115627.png)
+
+### 使用下一层的误差表示当前层的误差
 
 $$
 \delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)
 $$
 
-**代价函数关于⽹络中任意偏置的改变率：**
+推导过程如下：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528120156.png)
+
+### 代价函数关于⽹络中任意偏置的改变率
 
 $$
 \frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}
 $$
 
-**代价函数关于任何⼀个权重的改变率：**
+推导过程如下：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528140657.png)
+
+### 代价函数关于任何⼀个权重的改变率
 
 $$
 \frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}
 $$
 
+推导过程如下：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528142309.png)
+
+反向传播的四个基本公式，靠着一个链式法则，就全都推下来了，没有什么难度
+
 ![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524150849.png)
+
+## 反向传播算法
+
+反向传播算法给出了一种计算代价函数梯度的方法，算法描述如下：
+
+- 输入特征x：为输⼊层设置对应的激活值$a^1$
+- 前向传播：对每个$$l=2,3,...,L$$计算相应的$$z^l$$和$$a^l$$
+  - $$z^l=w^{l} a^{l-1}+b^{l}$$
+  - $$a^l=\sigma(z^l)$$
+- 输出层误差：$$\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)$$
+- 反向误差传播：对每个$$l=L-1,L-2,...,2$$，计算$$\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)$$
+- 输出：代价函数的梯度由$$\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}$$和$$\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}$$得出
+
+## 反向传播：全局观
+
+假设我们已经对⼀些⽹络中的 $w_{j k}^l$ 做⼀点⼩⼩的变动 $$\Delta w_{j k}^{l}$$ 
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150559.png)
+
+显然，这样会造成输出激活值的改变：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150804.png)
+
+然后，会让下一层所有的激活值产生改变：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150841.png)
+
+接着，这些改变都将影响到⼀个个下⼀层，到达输出层，最终影响代价函数：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150904.png)
+
+根据求导的思想，我们可以得出下面公式：
+
+$$
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+我们知道，$$\Delta w_{j k}^{l}$$造成了第$$l$$层的第$$j$$神经元的激活值的变化$$\Delta a_{j}^{l}$$，这个变化由下⾯的公式给出：
+
+$$
+\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+$$\Delta a_{j}^{l}$$的变化会造成下一层所有神经元激活值的变化，我们聚焦到其中⼀个激活值上看看影响的情况，不防设$$a_q^{l+1}$$：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528151606.png)
+
+实际上，这会导致下⾯的变化：
+
+$$
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \Delta a_{j}^{l}
+$$
+
+我们已经知道$$\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}$$，我们可以得到：
+
+$$
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+就这样一直传播下去，最终将所有的影响汇聚到输出层代价的变化，假设$$a_{j}^{l}, a_{q}^{l+1}, \ldots, a_{n}^{L-1}, a_{m}^{L}$$，那么结果的表达式就是：
+
+$$
+\Delta C \approx \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+影响输出层代价的权重值有很多，所以我们需要进行求和：
+
+$$
+\Delta C \approx \sum_{m n p_{\ldots q}} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+因为：
+
+$$
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$
+
+带入上面式子，得出：
+
+$$
+\begin{aligned}
+\frac{\partial C}{\partial w_{j k}^{l}}&=\sum_{m n p \ldots q} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \cdots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}}
+\\&=a_{k}^{l-1} \delta_{j}^{l}
+\end{aligned}
+$$
+
+想起一句歌词，又回到最初的起点，我们竟然就是在做反向传播，神奇。
+
+## 参考
+
+- [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html)
+- [Neural Networks and Deep Learning 中文版](https://github.com/zhanggyb/nndl)
+- [知乎上另外一篇笔记](https://zhuanlan.zhihu.com/p/26765585)
