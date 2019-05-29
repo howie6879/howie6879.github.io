@@ -17,7 +17,6 @@ author : howie6879
 - [**ruia**](https://github.com/howie6879/ruia): [An async web scraping micro-framework based on asyncio](https://github.com/howie6879/aspider)
 - [**mlhub123**](https://github.com/howie6879/mlhub123): [机器学习&深度学习资源交流小组](https://github.com/howie6879/mlhub123)
 - [**Sanic-For-Pythoneer**](https://github.com/howie6879/Sanic-For-Pythoneer): [一份sanic使用教程，开源小书](https://github.com/howie6879/Sanic-For-Pythoneer)
-- [**hproxy**](https://github.com/howie6879/hproxy):  [Asynchronous IP proxy pool, aims to make getting proxy as convenient as possible](https://github.com/howie6879/hproxy)
 
 ### 教程&笔记
 
@@ -29,4 +28,5 @@ author : howie6879
 ### 个人公众号
 
 我的随笔、学习笔记、自己写的原创教程，都会放这里：
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fyamp8ip6cj309k09kdfs.jpg)
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png)
