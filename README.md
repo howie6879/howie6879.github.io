@@ -4,4 +4,4 @@
 
 我的随笔、学习笔记、自己写的原创教程，都会放这里：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fyamp8ip6cj309k09kdfs.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png)
