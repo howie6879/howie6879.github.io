@@ -8,7 +8,7 @@
     <language>en-us</language>
     <lastBuildDate>Fri, 10 May 2019 16:36:44 +0800</lastBuildDate>
     
-        <atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -17,310 +17,13 @@
       <pubDate>Fri, 10 May 2019 16:36:44 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/</guid>
-      <description>&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$L$ : 表示网络层数&lt;/li&gt;
-&lt;li&gt;$b_j^l$ : 表示第$l$层的第$j$个神经元的偏置&lt;/li&gt;
-&lt;li&gt;$a_j^l$ : 表示第$l$层的第$j$个神经元的激活值&lt;/li&gt;
-&lt;li&gt;$w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重&lt;/li&gt;
-&lt;li&gt;$w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重&lt;/li&gt;
-&lt;li&gt;$b^l$ : 第$l$层神经元的偏置向量&lt;/li&gt;
-&lt;li&gt;$z^l$ : 第$l$层神经元的带权输入向量&lt;/li&gt;
-&lt;li&gt;$a^l$ : 第$l$层每个神经元激活值构成的向量&lt;/li&gt;
-&lt;li&gt;$\delta_{j}^{l}$ : 第$l$层第$j$个神经元的&lt;strong&gt;误差&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;很多看似显而易见的想法只有在事后才变得显而易见。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&#34;热神经络中使矩阵快速计算输出的法&#34;&gt;热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法&lt;/h2&gt;
-
-&lt;p&gt;通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\begin{aligned}
-a_3^2 &amp;= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 )
-\\ &amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2  \right)
-\end{aligned}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到例子中的结果满足表达式，接下来，让我们将表达式改成向量形式：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\begin{aligned}
-a^{l} &amp;= \sigma\left(w^{l} a^{l-1}+b^{l}\right) 
-\\ &amp;= \sigma\left(z^l \right) 
-\end{aligned}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;这个式子是正确的么，我们实际根据第一层到第二层的计算来看看：&lt;/p&gt;
-
-&lt;p&gt;首先定义第一层的激活函数输出值向量$a^1$:&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-{a^1} = \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right]
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;然后是第一层神经元连接到第二层神经元的权重矩阵：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-{w^2} = \left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right]
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;同理，第二层神经元的偏置向量：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-{b^2} = \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;我们的目标是求得第二层神经元激活值构成的向量$a^2$:&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;激活值计算如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\begin{aligned}
-a^2 &amp;= \sigma(w^2a^1 + b^2)
-\\&amp;= \sigma\left(\left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right] \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right] + \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]\right)
-\end{aligned}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]=\sigma\left(\left[ \begin{array}{c}{w_{1 1}^2 a_1^1+w_{1 2}^2 a_2^1+w_{1 3}^2 a_3^1}+b_1^2 \\ {w_{2 1}^2 a_1^1+w_{2 2}^2 a_2^1+w_{2 3}^2 a_3^1}+b_2^2 \\ {w_{3 1}^2 a_1^1+w_{3 2}^2 a_2^1+w_{3 3}^2 a_3^1}+b_3^2 \\ {w_{4 1}^2 a_1^1+w_{4 2}^2 a_2^1+w_{4 3}^2 a_3^1}+b_4^2 \end{array}\right]\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到$a_3^2$的值和前面第一次举例子算出来的值一致。&lt;/p&gt;
-
-&lt;h2 id=&#34;关于代价函数的两个假设&#34;&gt;关于代价函数的两个假设&lt;/h2&gt;
-
-&lt;p&gt;我们以均方误差得出的代价函数如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-C=\frac{1}{2 n} \sum_{x}\left\|y(x)-a^{L}(x)\right\|^{2}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;公式说明：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$y(x)$是目标输出&lt;/li&gt;
-&lt;li&gt;$a^{L}(x)$是当输入是$x$时候网络输出的激活值向量&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;好了，为了应⽤反向传播，我们需要对代价函数 $C$ 做出什么样的前提假设呢？&lt;/p&gt;
-
-&lt;p&gt;第一：代价函数可以被写成⼀个在每个训练样本 $x$ 上的代价函数 $C_x$ 的均值:&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-C=\frac{1}{n} \sum_{x} C_{x}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;第⼆：代价可以写成神经⽹络输出的函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524120302.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;为对于⼀个单独的训练样本 $x$ 其⼆次代价函数可以写作：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-C=\frac{1}{2}\left\|y-a^{L}\right\|^{2}=\frac{1}{2} \sum_{j}\left(y_{j}-a_{j}^{L}\right)^{2}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;反向传播的四个基本方程&#34;&gt;反向传播的四个基本方程&lt;/h2&gt;
-
-&lt;p&gt;反向传播其实是对权重和偏置变化影响代价函数过程的理解，最终极的含义其实就是计算偏导数 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$。&lt;/p&gt;
-
-&lt;p&gt;为了计算这些值，我们引入一个中间量$\delta_{j}^{l}$ ，其表示的是第$l$层第$j$个神经元的&lt;strong&gt;误差&lt;/strong&gt;，其中$\delta^l$表示第$l$层的误差向量，对于这个误差，我们应该怎样表示呢：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\delta_{j}^{l} \equiv \frac{\partial C}{\partial z_{j}^{l}}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;接下来要做的就是将这些误差和 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$ 联系起来，解决方案就是反向传播基于四个基本⽅程：&lt;/p&gt;
-
-&lt;h3 id=&#34;输出层误差的程&#34;&gt;输出层误差的⽅程&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;输出层误差的⽅程&lt;/strong&gt;，$\delta^L$ ： 每个元素定义如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\delta_{j}^{L}=\frac{\partial C}{\partial a_{j}^{L}} \sigma^{\prime}\left(z_{j}^{L}\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;矩阵形式重写⽅程：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;其中$\nabla_{a}$就是梯度向量，其元素就是偏导数$\partial C / \partial a_{j}^{L}$的所有元素，以上述二次代价函数为例：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-C_{x}=\frac{1}{2}\left\|y-a^{L}\right\|^{2}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;可以得出：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\nabla_{a} C=\left(a^{L}-y\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;因此方程的矩阵形式可以改成：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\delta^{L}=\left(a^{L}-y\right) \odot \sigma^{\prime}\left(z^{L}\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528115627.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;使用下一层的误差表示当前层的误差&#34;&gt;使用下一层的误差表示当前层的误差&lt;/h3&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528120156.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;代价函数关于络中任意偏置的改变率&#34;&gt;代价函数关于⽹络中任意偏置的改变率&lt;/h3&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528140657.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;代价函数关于任何个权重的改变率&#34;&gt;代价函数关于任何⼀个权重的改变率&lt;/h3&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528142309.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;反向传播的四个基本公式，靠着一个链式法则，就全都推下来了，没有什么难度&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524150849.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;反向传播算法&#34;&gt;反向传播算法&lt;/h2&gt;
-
-&lt;p&gt;反向传播算法给出了一种计算代价函数梯度的方法，算法描述如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入特征x：为输⼊层设置对应的激活值$a^1$&lt;/li&gt;
-&lt;li&gt;前向传播：对每个&lt;span  class=&#34;math&#34;&gt;\(l=2,3,...,L\)&lt;/span&gt;计算相应的&lt;span  class=&#34;math&#34;&gt;\(z^l\)&lt;/span&gt;和&lt;span  class=&#34;math&#34;&gt;\(a^l\)&lt;/span&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;span  class=&#34;math&#34;&gt;\(z^l=w^{l} a^{l-1}+b^{l}\)&lt;/span&gt;&lt;/li&gt;
-&lt;li&gt;&lt;span  class=&#34;math&#34;&gt;\(a^l=\sigma(z^l)\)&lt;/span&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;输出层误差：&lt;span  class=&#34;math&#34;&gt;\(\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)\)&lt;/span&gt;&lt;/li&gt;
-&lt;li&gt;反向误差传播：对每个&lt;span  class=&#34;math&#34;&gt;\(l=L-1,L-2,...,2\)&lt;/span&gt;，计算&lt;span  class=&#34;math&#34;&gt;\(\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)\)&lt;/span&gt;&lt;/li&gt;
-&lt;li&gt;输出：代价函数的梯度由&lt;span  class=&#34;math&#34;&gt;\(\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}\)&lt;/span&gt;和&lt;span  class=&#34;math&#34;&gt;\(\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}\)&lt;/span&gt;得出&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;反向传播全局观&#34;&gt;反向传播：全局观&lt;/h2&gt;
-
-&lt;p&gt;假设我们已经对⼀些⽹络中的 $w_{j k}^l$ 做⼀点⼩⼩的变动 &lt;span  class=&#34;math&#34;&gt;\(\Delta w_{j k}^{l}\)&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150559.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;显然，这样会造成输出激活值的改变：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150804.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;然后，会让下一层所有的激活值产生改变：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150841.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;接着，这些改变都将影响到⼀个个下⼀层，到达输出层，最终影响代价函数：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150904.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;根据求导的思想，我们可以得出下面公式：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;我们知道，&lt;span  class=&#34;math&#34;&gt;\(\Delta w_{j k}^{l}\)&lt;/span&gt;造成了第&lt;span  class=&#34;math&#34;&gt;\(l\)&lt;/span&gt;层的第&lt;span  class=&#34;math&#34;&gt;\(j\)&lt;/span&gt;神经元的激活值的变化&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l}\)&lt;/span&gt;，这个变化由下⾯的公式给出：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l}\)&lt;/span&gt;的变化会造成下一层所有神经元激活值的变化，我们聚焦到其中⼀个激活值上看看影响的情况，不防设&lt;span  class=&#34;math&#34;&gt;\(a_q^{l+1}\)&lt;/span&gt;：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528151606.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;实际上，这会导致下⾯的变化：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \Delta a_{j}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;我们已经知道&lt;span  class=&#34;math&#34;&gt;\(\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}\)&lt;/span&gt;，我们可以得到：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;就这样一直传播下去，最终将所有的影响汇聚到输出层代价的变化，假设&lt;span  class=&#34;math&#34;&gt;\(a_{j}^{l}, a_{q}^{l+1}, \ldots, a_{n}^{L-1}, a_{m}^{L}\)&lt;/span&gt;，那么结果的表达式就是：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta C \approx \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;影响输出层代价的权重值有很多，所以我们需要进行求和：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta C \approx \sum_{m n p_{\ldots q}} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;因为：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;带入上面式子，得出：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\begin{aligned}
-\frac{\partial C}{\partial w_{j k}^{l}}&amp;=\sum_{m n p \ldots q} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \cdots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}}
-\\&amp;=a_{k}^{l-1} \delta_{j}^{l}
-\end{aligned}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;想起一句歌词，又回到最初的起点，我们竟然就是在做反向传播，神奇。&lt;/p&gt;
-
-&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/zhanggyb/nndl&#34;&gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/26765585&#34;&gt;知乎上另外一篇笔记&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：
+ $L$ : 表示网络层数 $b_j^l$ : 表示第$l$层的第$j$个神经元的偏置 $a_j^l$ : 表示第$l$层的第$j$个神经元的激活值 $w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重 $w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重 $b^l$ : 第$l$层神经元的偏置向量 $z^l$ : 第$l$层神经元的带权输入向量 $a^l$ : 第$l$层每个神经元激活值构成的向量 $\delta_{j}^{l}$ : 第$l$层第$j$个神经元的误差  本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：
+ 很多看似显而易见的想法只有在事后才变得显而易见。
+ 热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：
+\[ a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right) \]
+举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：
+\[ \begin{aligned} a_3^2 &amp;= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 ) \\ &amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2 \right) \end{aligned} \]</description>
     </item>
     
     <item>
@@ -329,322 +32,23 @@ C_{x}=\frac{1}{2}\left\|y-a^{L}\right\|^{2}
       <pubDate>Wed, 08 May 2019 16:36:44 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/</guid>
-      <description>&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 是由 &lt;a href=&#34;http://michaelnielsen.org/&#34;&gt;Michael Nielsen&lt;/a&gt; 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。&lt;/p&gt;
-
-&lt;p&gt;神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别&lt;/li&gt;
-&lt;li&gt;神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;两个重要的人工神经元：感知器和S型神经元&lt;/li&gt;
-&lt;li&gt;神经⽹络的架构&lt;/li&gt;
-&lt;li&gt;⼀个简单的分类⼿写数字的⽹络&lt;/li&gt;
-&lt;li&gt;标准的神经网络学习算法：随机梯度下降算法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;感知器&#34;&gt;感知器&lt;/h2&gt;
-
-&lt;p&gt;1943年，心理学家McCulloch和数学家Pitts发表了《&lt;a href=&#34;http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf&#34;&gt;A logical calculus of the ideas immanent in nervous activity&lt;/a&gt;》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/02.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。&lt;/p&gt;
-
-&lt;p&gt;对于$x_{1},x_{2},...,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},...,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/03.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$x=(x_{1},x_{2},...,x_{j})$&lt;/li&gt;
-&lt;li&gt;$w=(w_{1},w_{2},...,w_{j})$&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;那么感知器的规则可以重写为:&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/04.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。&lt;/p&gt;
-
-&lt;p&gt;它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用&lt;code&gt;python&lt;/code&gt;写的一个感知器自动学习实现与非门，代码在&lt;strong&gt;&lt;a href=&#34;https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb&#34;&gt;nndl_chapter01&lt;/a&gt;&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;$x$&lt;/th&gt;
-&lt;th&gt;$y$&lt;/th&gt;
-&lt;th&gt;$output$&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。&lt;/p&gt;
-
-&lt;p&gt;可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。&lt;/p&gt;
-
-&lt;p&gt;遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。&lt;/p&gt;
-
-&lt;p&gt;感知器，终于可以多层了。&lt;/p&gt;
-
-&lt;h2 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h2&gt;
-
-&lt;p&gt;前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/05.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果&lt;code&gt;9&lt;/code&gt;，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把&lt;code&gt;9&lt;/code&gt;的图像分类为&lt;code&gt;8&lt;/code&gt;调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。&lt;/p&gt;
-
-&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\sigma(z) \equiv \frac{1}{1+e^{-z}}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;其中$z$表达式为：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[z=\sum_{j} w{_j}x{_j}+b\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;那么⼀个具有输⼊$x_{1},x_{2},...,x_{j}$，权重为$w_{1},w_{2},...,w_{j}$，和偏置b的S型神经元的输出是：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-\frac{1}{1+\exp(-\sum_j w_j x_j-b)}
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;p&gt;上面说过，感知器的激活函数只会输出两个值，分别是&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？&lt;/p&gt;
-
-&lt;p&gt;S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;$\sigma(z) \leq 0.5$ 输出0&lt;/li&gt;
-&lt;li&gt;$\sigma(z)&amp;gt;0.5$  输出1&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;神经络的架构&#34;&gt;神经⽹络的架构&lt;/h2&gt;
-
-&lt;p&gt;看下面一个四层神经网络，这种类型的多层⽹络有时被称为&lt;strong&gt;多层感知器&lt;/strong&gt;或者&lt;strong&gt;MLP&lt;/strong&gt;，如下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/06.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;需要记住以下几个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;⽹络中最左边的称为&lt;strong&gt;输⼊层&lt;/strong&gt;，其中的神经元称为&lt;strong&gt;输⼊神经元&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;中间得称之为&lt;strong&gt;隐藏层&lt;/strong&gt;，图中有两个隐藏层&lt;/li&gt;
-&lt;li&gt;最右边称之为&lt;strong&gt;输出层&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：&lt;strong&gt;前馈神经网络&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;有回路，其中反馈环路是可⾏的：&lt;strong&gt;递归神经网络&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;个简单的分类写数字的络&#34;&gt;⼀个简单的分类⼿写数字的⽹络&lt;/h2&gt;
-
-&lt;p&gt;对于这六个数字&lt;code&gt;504192&lt;/code&gt;，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;504192是连续在一起的图像，首先可以将其分割成6个小图像，比如&lt;code&gt;5&lt;/code&gt; &lt;code&gt;0&lt;/code&gt; ...等&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;再对分割开的小图像进行分类，比如识别5
-
-我们将使⽤⼀个三层神经⽹络来识别单个数字：
-&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/07.jpg&#34; alt=&#34;from nndl&#34;&gt;&lt;/figure&gt;
-由于训练数据由$28*28$的⼿写数字的图像组成，所以:&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;一个分类⼿写数字的⽹络，大概就可以这样实现。&lt;/p&gt;
-
-&lt;h2 id=&#34;随机梯度下降算法&#34;&gt;随机梯度下降算法&lt;/h2&gt;
-
-&lt;p&gt;分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤&lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST&lt;/a&gt;数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用&lt;code&gt;jupyter notebook&lt;/code&gt;开始吧，如果没有，请自行检索教程安装，代码目录如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;pylab
-└── datasets
-    └── MNIST_data
-        ├── t10k-images-idx3-ubyte.gz
-        ├── t10k-labels-idx1-ubyte.gz
-        ├── train-images-idx3-ubyte.gz
-        └── train-labels-idx1-ubyte.gz
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后使用&lt;code&gt;TensorFlow&lt;/code&gt;来读取数据，看看下载的数据集到底是什么样子，可以在&lt;code&gt;mnist_data.ipynb&lt;/code&gt;中添加如下代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from matplotlib import pyplot as plt
-from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
-
-mnist = read_data_sets(&amp;quot;../datasets/MNIST_data/&amp;quot;, one_hot=True)
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;查看一些基本信息：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;print(&amp;quot;Training data size: %s&amp;quot; % mnist.train.num_examples)
-print(&amp;quot;Validating data size: %s&amp;quot; % mnist.validation.num_examples)
-print(&amp;quot;Testing data size: %s&amp;quot; % mnist.test.num_examples)
-
-# 每张图片是长度为784的一维数组
-print(len(mnist.train.images[0]))
-
-def display_digit(image):
-    image = image.reshape([28,28])
-    plt.imshow(image, cmap=plt.get_cmap(&#39;gray_r&#39;))
-    plt.show()
-
-print(&amp;quot;样本真实数字为：%s&amp;quot; % list(mnist.train.labels[1]).index(1))
-# 显示图像
-display_digit(mnist.train.images[1])
-
-# Output
-# Training data size: 55000
-# Validating data size: 5000
-# Testing data size: 10000
-# 784
-# 样本真实数字为：3
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以看到显示如下图像：
-&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/08.jpg&#34; alt=&#34;from mnist&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。&lt;/p&gt;
-
-&lt;p&gt;感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个&lt;strong&gt;代价函数&lt;/strong&gt;（有时被称为损失或⽬标函数）：&lt;/p&gt;
-
-&lt;p&gt;&lt;span  class=&#34;math&#34;&gt;\[
-C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
-\]&lt;/span&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;w 表⽰所有的⽹络中权重的集合&lt;/li&gt;
-&lt;li&gt;b 是所有的偏置&lt;/li&gt;
-&lt;li&gt;n 是训练输⼊数据的个数&lt;/li&gt;
-&lt;li&gt;a 是表⽰当输⼊为x时输出的向量，可以理解为output&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;训练模型的过程就是优化代价函数的过程，&lt;em&gt;Cost Function(代价函数)&lt;/em&gt; 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，其实这个就是我们平常用来评价回归算法的均方误差，也就是&lt;strong&gt;MSE&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;现在我们的目标很清晰，为了找出合适的权重和偏置值，我们需要让代价函数的值接近于0，在这个条件下我们就可以找出合适的权重和偏置值，我们将采⽤称为&lt;strong&gt;梯度下降&lt;/strong&gt;的算法来达到这个⽬的。&lt;/p&gt;
-
-&lt;p&gt;下面是我的推导过程：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190513120212.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;实现数字分类模型&#34;&gt;实现数字分类模型&lt;/h2&gt;
-
-&lt;p&gt;终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。&lt;/p&gt;
-
-&lt;p&gt;书籍作者很贴心地实现了模型代码，仓库见&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;，接下来我们一起来看看具体的实现代码吧。&lt;/p&gt;
-
-&lt;p&gt;首先是实现一个&lt;code&gt;Network&lt;/code&gt;类，&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env python
-
-import random
-
-import numpy as np
-
-
-class Network(object):
-
-    def __init__(self, sizes):
-        &amp;quot;&amp;quot;&amp;quot;
-        初始化
-        :param sizes:
-            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
-        &amp;quot;&amp;quot;&amp;quot;
-        self.num_layers = len(sizes)
-        self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
-                        for x, y in zip(sizes[:-1], sizes[1:])]
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py&#34;&gt;network.py&lt;/a&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def sigmoid(z):
-    &amp;quot;&amp;quot;&amp;quot;The sigmoid function.&amp;quot;&amp;quot;&amp;quot;
-    return 1.0/(1.0+np.exp(-z))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;代码已经准备就绪，下面可以开始进行模型训练：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import mnist_loader, network
-
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
-
-net = network.Network([784, 30, 10])
-net.SGD(list(training_data), 30, 10, 3.0, test_data=list(test_data))
-
-# Output
-Epoch 0: 9023 / 10000
-Epoch 1: 9222 / 10000
-Epoch 2: 9312 / 10000
-Epoch 3: 9312 / 10000
-Epoch 4: 9383 / 10000
-Epoch 5: 9421 / 10000
-Epoch 6: 9432 / 10000
-Epoch 7: 9421 / 10000
-Epoch 8: 9454 / 10000
-Epoch 9: 9447 / 10000
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;看结果，十次迭代后，轻轻松松突破94%&lt;/p&gt;
-
-&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb&#34;&gt;文中涉及代码&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/zhanggyb/nndl&#34;&gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.cnblogs.com/subconscious/p/5058741.html&#34;&gt;神经网络浅讲：从神经元到深度学习&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/mnielsen/neural-networks-and-deep-learning&#34;&gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
+神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？
+ 人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准  本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
+ 两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法  感知器 1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
+ 感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
+ 感知器的工作方式如下所示：
+
+$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。
+对于$x_{1},x_{2},...,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},...,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：
+
+假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：
+ $x=(x_{1},x_{2},...,x_{j})$ $w=(w_{1},w_{2},...,w_{j})$  那么感知器的规则可以重写为:
+
+这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
+它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用python写的一个感知器自动学习实现与非门，代码在nndl_chapter01。
+说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
+   $x$ $y$ $output$     0 0 0   0 1 1   1 0 1   1 1 0    可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。</description>
     </item>
     
     <item>
@@ -653,183 +57,23 @@ Epoch 9: 9447 / 10000
       <pubDate>Mon, 15 Apr 2019 16:16:58 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/06_oh_my_zsh/</guid>
-      <description>
-
-&lt;p&gt;上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错&lt;/p&gt;
-
-&lt;p&gt;因此我决定再写几篇能提升程序员工作以及学习效率的文章，如果能形成一个系列那是最好~如果你有自己的效率工具以及方案，欢迎留言讨论&lt;/p&gt;
-
-&lt;h2 id=&#34;什么是oh-my-zsh&#34;&gt;什么是oh-my-zsh&lt;/h2&gt;
-
-&lt;p&gt;诸位大佬都知道，&lt;code&gt;Linux&lt;/code&gt;下&lt;code&gt;shell&lt;/code&gt;默认是&lt;code&gt;bash&lt;/code&gt;，但还有一种&lt;code&gt;shell&lt;/code&gt;，叫做&lt;code&gt;zsh&lt;/code&gt;它比&lt;code&gt;bash&lt;/code&gt;更加强大，功能也更加完善，&lt;code&gt;zsh&lt;/code&gt;虽说功能强大，但是配置比较复杂导致流行度不是很高&lt;/p&gt;
-
-&lt;p&gt;但是好东西终究是好东西，开源界的大佬们是不会让明珠蒙尘，我等伸手党也是可以直接搭顺风车的，感谢&lt;code&gt;robbyrussell&lt;/code&gt;大佬的开源项目 &lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh&#34;&gt;oh-my-zsh&lt;/a&gt; 吧，从此使用&lt;code&gt;zsh&lt;/code&gt;也就几行命令的事情&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt;项目目前有&lt;code&gt;80k+star&lt;/code&gt;，贡献者超过&lt;code&gt;1300&lt;/code&gt;，并且提供了200多个可选插件（rails，git，OSX，hub，capistrano，brew，ant，php，python等），以及超过140个主题供你选择，安装后你将享受以下特性：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;首先兼容bash&lt;/li&gt;
-&lt;li&gt;自动cd：只需输入目录的名称即可&lt;/li&gt;
-&lt;li&gt;命令选项补齐，比如输入&lt;code&gt;git&lt;/code&gt;，然后按&lt;code&gt;Tab&lt;/code&gt;，即可显示出&lt;code&gt;git&lt;/code&gt;都有哪些命令&lt;/li&gt;
-&lt;li&gt;目录一次性补全：比如输入&lt;code&gt;Doc/doc&lt;/code&gt;按&lt;code&gt;Tab&lt;/code&gt;键会自动变成&lt;code&gt;Documents/document/&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;插件和主题支持（插件能进一步提升效率）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/zsh_demo.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;安装oh-my-zsh&#34;&gt;安装oh-my-zsh&lt;/h2&gt;
-
-&lt;p&gt;在安装oh-my-zsh之前，首先需要安装好&lt;code&gt;zsh&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install -y zsh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;切换shell为zsh：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;chsh -s /bin/zsh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;重启终端：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 查看当前shell
-echo $SHELL
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;输出&lt;code&gt;/bin/zsh&lt;/code&gt;表示成功&lt;/p&gt;
-
-&lt;p&gt;oh-my-zsh的安装非常简单，参考官网，执行如下命令即可：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# curl
-sh -c &amp;quot;$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&amp;quot;
-
-# wegt 
-sh -c &amp;quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;输出如下表示成功：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415090802.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;配置oh-my-zsh&#34;&gt;配置oh-my-zsh&lt;/h2&gt;
-
-&lt;p&gt;和&lt;code&gt;bash&lt;/code&gt;不同，&lt;code&gt;zsh&lt;/code&gt;的配置文件是&lt;code&gt;~/.zshrc&lt;/code&gt;，实际上&lt;code&gt;oh-my-zsh&lt;/code&gt;的默认配置也够我们使用了，但是这样其真正的强大之处并不能得到很好的体现，因此我们可以继续看看对应的插件和主题功能&lt;/p&gt;
-
-&lt;h3 id=&#34;关于主题&#34;&gt;关于主题&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt;的主题非常丰富，可以用如下命令查看已有主题：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;ls .oh-my-zsh/themes
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190415092612.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;个人比较喜欢简单的，因此用了&lt;code&gt;wedisagree&lt;/code&gt;主题，进入&lt;code&gt;.zshrc&lt;/code&gt;配置文件进行修改&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;vim ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;将第11行改为&lt;code&gt;ZSH_THEME=&amp;quot;wedisagree&amp;quot;&lt;/code&gt;，然后&lt;code&gt;:wq&lt;/code&gt;保存退出，主题就自动生效&lt;/p&gt;
-
-&lt;h3 id=&#34;关于插件&#34;&gt;关于插件&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt;的插件生态非常丰富，下面列出来的是我个人比较常用的插件，如果你有兴趣，可以取发掘能提高自身效率的插件~&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：如果操作过程中出现&lt;code&gt;_arguments:448: _vim_files: function definition file not found&lt;/code&gt;错误，请执行：&lt;code&gt;rm -f ~/.zcompdump&lt;/code&gt;即可&lt;/p&gt;
-
-&lt;h4 id=&#34;incr&#34;&gt;incr&lt;/h4&gt;
-
-&lt;p&gt;&lt;code&gt;incr&lt;/code&gt;是一款自动提示插件，功能非常强大，官网演示demo，感受一下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/incr.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;安装：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;wget http://mimosa-pudica.net/src/incr-0.2.zsh
-mkdir ~/.oh-my-zsh/plugins/incr
-mv incr-0.2.zsh ~/.oh-my-zsh/plugins/incr
-echo &#39;source ~/.oh-my-zsh/plugins/incr/incr*.zsh&#39; &amp;gt;&amp;gt; ~/.zshrc
-source ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;可以开心的敲命令行了~&lt;/p&gt;
-
-&lt;h4 id=&#34;autojump&#34;&gt;autojump&lt;/h4&gt;
-
-&lt;p&gt;这款插件基本上算是必备插件了，在终端操作里面比较常用的算是文件夹之间的切换，这款插件极大地简化了路径跳转的操作，在一键直达的功能下，自动补全也就一般般了哈&lt;/p&gt;
-
-&lt;p&gt;先安装：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;yum install autojump-zsh
-chmod 777 /usr/share/autojump/autojump.bash
-echo &amp;quot;/usr/share/autojump/autojump.bash&amp;quot; &amp;gt;&amp;gt; ~/.zshrc
-source ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;效果如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/autojump01.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;以前的&lt;code&gt;cd code&lt;/code&gt;现在可以直接&lt;code&gt;j c&lt;/code&gt;，路径越长，该插件效果就越明显&lt;/p&gt;
-
-&lt;h4 id=&#34;zsh-autosuggestions&#34;&gt;zsh-autosuggestions&lt;/h4&gt;
-
-&lt;p&gt;这是一个命令自动补全插件，当你输入命令的几个字母，它会自动根据历史输入进行自动补全，然后按&lt;code&gt;→&lt;/code&gt;，安装也很简单：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
-vim ~/.zshrc
-# 加入插件列表
-plugins=(
-  git
-  zsh-autosuggestions
-)
-source ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;该插件已经在第一个动图有演示，这里不再重复&lt;/p&gt;
-
-&lt;h4 id=&#34;autoswitch-virtualenv&#34;&gt;autoswitch_virtualenv&lt;/h4&gt;
-
-&lt;p&gt;这个插件对于Python开发者来说可以算是神器了，在实际开发过程中，基本上一个Python项目就对应了一个新的虚拟环境，如果你使用&lt;code&gt;pipenv&lt;/code&gt;，当你需要进入项目的虚拟环境时候，就需要执行&lt;code&gt;pipenv shell&lt;/code&gt;命令，安装&lt;code&gt;autoswitch_virtualenv&lt;/code&gt;后，该插件可以自动地完成这些事情：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone &amp;quot;https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv.git&amp;quot; &amp;quot;$ZSH_CUSTOM/plugins/autoswitch_virtualenv&amp;quot;
-
-vim ~/.zshrc
-# 加入插件列表
-plugins=(
-  git
-  zsh-autosuggestions
-	autoswitch_virtualenv
-)
-source ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;该插件已经在第一个动图里面体现的很明显，这里不再重复演示&lt;/p&gt;
-
-&lt;h4 id=&#34;zsh-syntax-highlighting&#34;&gt;zsh-syntax-highlighting&lt;/h4&gt;
-
-&lt;p&gt;这个插件的主要作用就是在提高颜值（高亮你的zsh可用命令），安装如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-vim ~/.zshrc
-# 加入插件列表
-plugins=(
-  git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-)
-source ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;效果如下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/1547459A-3EFB-4366-B813-CFDF5BF8A0B0.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
-
-&lt;p&gt;程序员在开发过程中，效率快慢是个不可忽略的因素，提高效率，能一定程度上节省开发时间，从而形成一系列的正向反馈，何乐而不为？&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
+      <description>上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错
+因此我决定再写几篇能提升程序员工作以及学习效率的文章，如果能形成一个系列那是最好~如果你有自己的效率工具以及方案，欢迎留言讨论
+什么是oh-my-zsh 诸位大佬都知道，Linux下shell默认是bash，但还有一种shell，叫做zsh它比bash更加强大，功能也更加完善，zsh虽说功能强大，但是配置比较复杂导致流行度不是很高
+但是好东西终究是好东西，开源界的大佬们是不会让明珠蒙尘，我等伸手党也是可以直接搭顺风车的，感谢robbyrussell大佬的开源项目 oh-my-zsh 吧，从此使用zsh也就几行命令的事情
+oh-my-zsh项目目前有80k+star，贡献者超过1300，并且提供了200多个可选插件（rails，git，OSX，hub，capistrano，brew，ant，php，python等），以及超过140个主题供你选择，安装后你将享受以下特性：
+ 首先兼容bash 自动cd：只需输入目录的名称即可 命令选项补齐，比如输入git，然后按Tab，即可显示出git都有哪些命令 目录一次性补全：比如输入Doc/doc按Tab键会自动变成Documents/document/ 插件和主题支持（插件能进一步提升效率）  安装oh-my-zsh 在安装oh-my-zsh之前，首先需要安装好zsh：
+yum install -y zsh  切换shell为zsh：
+chsh -s /bin/zsh  重启终端：
+# 查看当前shell echo $SHELL  输出/bin/zsh表示成功
+oh-my-zsh的安装非常简单，参考官网，执行如下命令即可：
+# curl sh -c &amp;quot;$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&amp;quot; # wegt sh -c &amp;quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)&amp;quot;  输出如下表示成功：
+配置oh-my-zsh 和bash不同，zsh的配置文件是~/.zshrc，实际上oh-my-zsh的默认配置也够我们使用了，但是这样其真正的强大之处并不能得到很好的体现，因此我们可以继续看看对应的插件和主题功能
+关于主题 oh-my-zsh的主题非常丰富，可以用如下命令查看已有主题：
+ls .oh-my-zsh/themes  个人比较喜欢简单的，因此用了wedisagree主题，进入.zshrc配置文件进行修改
+vim ~/.zshrc  将第11行改为ZSH_THEME=&amp;quot;wedisagree&amp;quot;，然后:wq保存退出，主题就自动生效
+关于插件 oh-my-zsh的插件生态非常丰富，下面列出来的是我个人比较常用的插件，如果你有兴趣，可以取发掘能提高自身效率的插件~
+注意：如果操作过程中出现_arguments:448: _vim_files: function definition file not found错误，请执行：rm -f ~/.</description>
     </item>
     
     <item>
@@ -838,151 +82,18 @@ source ~/.zshrc
       <pubDate>Wed, 20 Mar 2019 13:37:56 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/04_how_to_use_jupyterlab/</guid>
-      <description>&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320100202.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;JupyterLab对于Jupyter Notebook有着完全的支持&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;JupyterLab&lt;/code&gt;是一个交互式的开发环境，是&lt;code&gt;jupyter notebook&lt;/code&gt;的下一代产品，集成了更多的功能，等其正式版发布，相信那时就是&lt;code&gt;jupyter notebook&lt;/code&gt;被取代的时候&lt;/p&gt;
-
-&lt;p&gt;通过使用&lt;code&gt;JupyterLab&lt;/code&gt;，能够以灵活，集成和可扩展的方式处理文档和活动：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;可以开启终端，用于交互式运行代码，完全支持丰富的输出&lt;/li&gt;
-&lt;li&gt;支持&lt;code&gt;Markdown，Python，R，LaTeX&lt;/code&gt;等任何文本文件&lt;/li&gt;
-&lt;li&gt;增强notebook功能&lt;/li&gt;
-&lt;li&gt;更多插件支持&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;如果你在日常生活中，有以下需求，我觉得你可以安装一个&lt;code&gt;JupyterLab&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;随时随地希望试验一些代码片段&lt;/li&gt;
-&lt;li&gt;多语言、多文档支持&lt;/li&gt;
-&lt;li&gt;有记笔记需求（文本+代码）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;安装&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;接下来，我将以Python为默认语言来搭建&lt;code&gt;JupyterLab&lt;/code&gt;，首先确认你安装好了&lt;code&gt;Python&lt;/code&gt;基本环境：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 一行命令搞定
-pip install jupyterlab
-# 安装ipython
-pip install ipython
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果在服务器使用的话，个人建议还是设置一下密码，配置过程如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 进入ipython交互环境
-ipython
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;生成密码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from notebook.auth import passwd
-passwd()
-# 输入你自己设置登录JupyterLab界面的密码 然后会有一串输出，记得复制下来，等会配置需要使用
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;修改&lt;code&gt;JupyterLab&lt;/code&gt; 配置文件：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;jupyter lab --generate-config
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;修改以下配置：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-txt&#34;&gt;c.NotebookApp.allow_root = True
-c.NotebookApp.open_browser = False
-c.NotebookApp.password = &#39;刚才复制的一串数字粘贴到这里&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;为了后续能够方便地安装插件，请先安装好&lt;code&gt;node&lt;/code&gt;环境，假设你安装好，接下来演示一下怎么安装插件：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 以安装一个生成目录的插件为例
-jupyter labextension install @jupyterlab/toc
-# 查看安装的插件
-jupyter labextension list
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;安装完毕后，打开&lt;code&gt;JupyterLab&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;jupyter-lab --ip=0.0.0.0 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;点击&lt;code&gt;Settings-&amp;gt;Advanced Settings Editor&lt;/code&gt;，将&lt;code&gt;false&lt;/code&gt;改成&lt;code&gt;true&lt;/code&gt;，如下图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320113152.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;此时在界面左侧应该可以看到一个插件管理的图标，点击就可以看到刚才安装的插件&lt;/p&gt;
-
-&lt;p&gt;通过这个插件查询功能，你可以很方便的安装插件，安装完成后可以直接热更新，看一下我的&lt;code&gt;JupyterLab&lt;/code&gt;首页：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320114243.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;画流程图、写代码、写文档，各种文档渲染、多语言支持，怎么样，有兴趣你也可以搭建一个~&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;插件&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;JupyterLab&lt;/code&gt;目前的插件也算丰富，我目前使用的插件如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320123219.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;功能&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;代码提示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320124326.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;使用文档提示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320124408.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;支持&lt;code&gt;vim emacs&lt;/code&gt;等按键风格：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320123958.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;文档查看特别方便：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320123935.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;代码以及界面主题设置：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320123535.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;文档多窗口：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320123455.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;cell&lt;/code&gt;可以拖拽且输出可以新窗口显示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320124146.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;随时启动新的终端交互：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190320124245.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这里只是捡了一些常见的功能说说，更多功能可以查看官方文档来发现，如果你有更好的使用技巧，欢迎交流~&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;更多&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-&lt;li&gt;官方地址：&lt;a href=&#34;https://github.com/jupyterlab&#34;&gt;https://github.com/jupyterlab&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;文档：&lt;a href=&#34;https://jupyterlab.readthedocs.io/en/stable/&#34;&gt;https://jupyterlab.readthedocs.io/en/stable/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;插件：&lt;a href=&#34;https://github.com/topics/jupyterlab-extension&#34;&gt;https://github.com/topics/jupyterlab-extension&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
+      <description>JupyterLab对于Jupyter Notebook有着完全的支持
+ JupyterLab是一个交互式的开发环境，是jupyter notebook的下一代产品，集成了更多的功能，等其正式版发布，相信那时就是jupyter notebook被取代的时候
+通过使用JupyterLab，能够以灵活，集成和可扩展的方式处理文档和活动：
+ 可以开启终端，用于交互式运行代码，完全支持丰富的输出 支持Markdown，Python，R，LaTeX等任何文本文件 增强notebook功能 更多插件支持  如果你在日常生活中，有以下需求，我觉得你可以安装一个JupyterLab
+ 随时随地希望试验一些代码片段 多语言、多文档支持 有记笔记需求（文本+代码）   安装
+ 接下来，我将以Python为默认语言来搭建JupyterLab，首先确认你安装好了Python基本环境：
+# 一行命令搞定 pip install jupyterlab # 安装ipython pip install ipython  如果在服务器使用的话，个人建议还是设置一下密码，配置过程如下：
+# 进入ipython交互环境 ipython  生成密码：
+from notebook.auth import passwd passwd() # 输入你自己设置登录JupyterLab界面的密码 然后会有一串输出，记得复制下来，等会配置需要使用  修改JupyterLab 配置文件：
+jupyter lab --generate-config  修改以下配置：
+c.NotebookApp.allow_root = True c.NotebookApp.open_browser = False c.NotebookApp.password = &#39;刚才复制的一串数字粘贴到这里&#39;  为了后续能够方便地安装插件，请先安装好node环境，假设你安装好，接下来演示一下怎么安装插件：
+# 以安装一个生成目录的插件为例 jupyter labextension install @jupyterlab/toc # 查看安装的插件 jupyter labextension list  安装完毕后，打开JupyterLab：</description>
     </item>
     
     <item>
@@ -991,416 +102,26 @@ jupyter labextension list
       <pubDate>Fri, 15 Mar 2019 08:37:56 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/</guid>
-      <description>&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/ruia_banner.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架&lt;/p&gt;
-
-&lt;p&gt;2018年到如今，我花精力比较多的一个开源项目算是&lt;code&gt;Ruia&lt;/code&gt;了，这是一个基于&lt;code&gt;Python3.6+&lt;/code&gt;的异步爬虫框架，当时也获得一些推荐，比如&lt;code&gt;Github Trending Python&lt;/code&gt;语言榜单第二，目前&lt;code&gt;Ruia&lt;/code&gt;还在开发中，&lt;code&gt;Star&lt;/code&gt;数目不过&lt;code&gt;700+&lt;/code&gt;，如果各位有兴趣，欢迎一起开发，来波&lt;code&gt;star&lt;/code&gt;我也不会拒绝哈~&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;什么是爬虫框架&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;说这个之前，得先说说什么是&lt;strong&gt;框架&lt;/strong&gt;：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;是实现业界标准的组件规范：比如众所周知的&lt;code&gt;MVC&lt;/code&gt;开发规范&lt;/li&gt;
-&lt;li&gt;提供规范所要求之基础功能的软件产品：比如&lt;code&gt;Django&lt;/code&gt;框架就是&lt;code&gt;MVC&lt;/code&gt;的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？&lt;/p&gt;
-
-&lt;p&gt;很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章&lt;a href=&#34;https://www.howie6879.cn/post/2019/02-talk-about-python-spider/&#34;&gt;谈谈对Python爬虫的理解&lt;/a&gt;，下面总结一下爬虫流程：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;请求&amp;amp;响应&lt;/li&gt;
-&lt;li&gt;解析&lt;/li&gt;
-&lt;li&gt;持久化&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这三个流程有没有可能以一种优雅的形式串联起来，&lt;code&gt;Ruia&lt;/code&gt;目前是这样实现的，请看代码示例：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fzoxh0ehngj31340fmack.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，&lt;code&gt;Item &amp;amp; Field&lt;/code&gt;类结合一起实现了字段的解析提取，&lt;code&gt;Spider&lt;/code&gt;类结合&lt;code&gt;Request * Response&lt;/code&gt;类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的&lt;code&gt;item&lt;/code&gt;可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程&lt;/p&gt;
-
-&lt;p&gt;实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些&lt;code&gt;hook&lt;/code&gt;让用户编写爬虫更方便(比如ruia-motor)&lt;/p&gt;
-
-&lt;p&gt;这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;如何踏出第一步&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;首先，我对Ruia爬虫框架的定位很清楚，基于&lt;code&gt;asyncio &amp;amp; aiohttp&lt;/code&gt;的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;轻量级，专注于抓取、解析和良好的API接口&lt;/li&gt;
-&lt;li&gt;插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件&lt;/li&gt;
-&lt;li&gt;速度，异步无阻塞框架，需要对速度有一定追求&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：&lt;/p&gt;
-
-&lt;p&gt;￼&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fzoyohk60qj30hm09a3yy.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;同时让我们结合上面一节的&lt;code&gt;Ruia&lt;/code&gt;代码来从业务逻辑角度看看这几个模块到底是什么意思：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Request：请求&lt;/li&gt;
-&lt;li&gt;Response：响应&lt;/li&gt;
-&lt;li&gt;Item &amp;amp; Field：解析提取&lt;/li&gt;
-&lt;li&gt;Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆&lt;code&gt;Ruia&lt;/code&gt;框架到本地：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 请确保本地Python环境是3.6+
-git clone https://github.com/howie6879/ruia.git
-# 安装pipenv
-pip install pipenv 
-# 安装依赖包
-pipenv install --dev
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后用&lt;code&gt;PyCharm&lt;/code&gt;打开&lt;code&gt;Ruia&lt;/code&gt;项目：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313142545.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;选择刚刚&lt;code&gt;pipenv&lt;/code&gt;配置好的python解释器：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313142712.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;此时可以完整地看到项目代码：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314093946.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Request &amp;amp; Response&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;Request&lt;/code&gt;类的目的是对&lt;code&gt;aiohttp&lt;/code&gt;加一层封装进行模拟请求，功能如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;封装GET、POST两种请求方式&lt;/li&gt;
-&lt;li&gt;增加回调机制&lt;/li&gt;
-&lt;li&gt;自定义重试次数、休眠时间、超时、重试解决方案、请求是否成功验证等功能&lt;/li&gt;
-&lt;li&gt;将返回的一系列数据封装成&lt;code&gt;Response&lt;/code&gt;类返回&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;接下来就简单了，不过就是实现上述需求，首先，需要实现一个函数来抓取目标&lt;code&gt;url&lt;/code&gt;，比如命名为&lt;code&gt;fetch&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
-import aiohttp
-import async_timeout
-
-from typing import Coroutine
-
-
-class Request:
-    # Default config
-    REQUEST_CONFIG = {
-        &#39;RETRIES&#39;: 3,
-        &#39;DELAY&#39;: 0,
-        &#39;TIMEOUT&#39;: 10,
-        &#39;RETRY_FUNC&#39;: Coroutine,
-        &#39;VALID&#39;: Coroutine
-    }
-
-    METHOD = [&#39;GET&#39;, &#39;POST&#39;]
-
-    def __init__(self, url, method=&#39;GET&#39;, request_config=None, request_session=None):
-        self.url = url
-        self.method = method.upper()
-        self.request_config = request_config or self.REQUEST_CONFIG
-        self.request_session = request_session
-
-    @property
-    def current_request_session(self):
-        if self.request_session is None:
-            self.request_session = aiohttp.ClientSession()
-            self.close_request_session = True
-        return self.request_session
-
-    async def fetch(self):
-        &amp;quot;&amp;quot;&amp;quot;Fetch all the information by using aiohttp&amp;quot;&amp;quot;&amp;quot;
-        if self.request_config.get(&#39;DELAY&#39;, 0) &amp;gt; 0:
-            await asyncio.sleep(self.request_config[&#39;DELAY&#39;])
-
-        timeout = self.request_config.get(&#39;TIMEOUT&#39;, 10)
-        async with async_timeout.timeout(timeout):
-            resp = await self._make_request()
-        try:
-            resp_data = await resp.text()
-        except UnicodeDecodeError:
-            resp_data = await resp.read()
-        resp_dict = dict(
-            rl=self.url,
-            method=self.method,
-            encoding=resp.get_encoding(),
-            html=resp_data,
-            cookies=resp.cookies,
-            headers=resp.headers,
-            status=resp.status,
-            history=resp.history
-        )
-        await self.request_session.close()
-        return type(&#39;Response&#39;, (), resp_dict)
-
-
-    async def _make_request(self):
-        if self.method == &#39;GET&#39;:
-            request_func = self.current_request_session.get(self.url)
-        else:
-            request_func = self.current_request_session.post(self.url)
-        resp = await request_func
-        return resp
-
-if __name__ == &#39;__main__&#39;:
-    loop = asyncio.get_event_loop()
-    resp = loop.run_until_complete(Request(&#39;https://docs.python-ruia.org/&#39;).fetch())
-    print(resp.status)
-
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;实际运行一下，会输出请求状态&lt;code&gt;200&lt;/code&gt;，就这样简单封装一下，我们已经有了自己的请求类&lt;code&gt;Request&lt;/code&gt;，接下来只需要再完善一下重试机制以及将返回的属性封装一下就基本完成了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 重试函数
-async def _retry(self):
-    if self.retry_times &amp;gt; 0:
-        retry_times = self.request_config.get(&#39;RETRIES&#39;, 3) - self.retry_times + 1
-        self.retry_times -= 1
-        retry_func = self.request_config.get(&#39;RETRY_FUNC&#39;)
-        if retry_func and iscoroutinefunction(retry_func):
-            request_ins = await retry_func(weakref.proxy(self))
-            if isinstance(request_ins, Request):
-                return await request_ins.fetch()
-        return await self.fetch()
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;最终代码见&lt;code&gt;ruia/request.py&lt;/code&gt;即可，接下来就可以利用&lt;code&gt;Request&lt;/code&gt;来实际请求一个目标网页，如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313180601.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这段代码请求了目标网页&lt;code&gt;https://docs.python-ruia.org/&lt;/code&gt;并返回了&lt;code&gt;Response&lt;/code&gt;对象，其中&lt;code&gt;Response&lt;/code&gt;提供属性介绍如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190313130731.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Field &amp;amp; Item&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;实现了对目标网页的请求，接下来就是对目标网页进行字段提取，我觉得&lt;code&gt;ORM&lt;/code&gt;的思想很适合用在这里，我们只需要定义一个&lt;code&gt;Item&lt;/code&gt;类，类里面每个属性都可以用&lt;code&gt;Field&lt;/code&gt;类来定义，然后只需要传入&lt;code&gt;url&lt;/code&gt;或者&lt;code&gt;html&lt;/code&gt;，执行过后&lt;code&gt;Item&lt;/code&gt;类里面 定义的属性会自动被提取出来变成目标字段值&lt;/p&gt;
-
-&lt;p&gt;可能说起来比较拗口，下面直接演示一下可能你就明白这样写的好，假设你的需求是获取&lt;code&gt;HackerNews&lt;/code&gt;网页的&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;，可以这样实现：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
-
-from ruia import AttrField, TextField, Item
-
-
-class HackerNewsItem(Item):
-    target_item = TextField(css_select=&#39;tr.athing&#39;)
-    title = TextField(css_select=&#39;a.storylink&#39;)
-    url = AttrField(css_select=&#39;a.storylink&#39;, attr=&#39;href&#39;)
-
-async def main():
-    async for item in HackerNewsItem.get_items(url=&amp;quot;https://news.ycombinator.com/&amp;quot;):
-        print(item.title, item.url)
-
-if __name__ == &#39;__main__&#39;:
-     items = asyncio.run(main())
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314094841.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;从输出结果可以看到，&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;属性已经被赋与实际的目标值，这样写起来是不是很简洁清晰也很明了呢？&lt;/p&gt;
-
-&lt;p&gt;来看看怎么实现，&lt;code&gt;Field&lt;/code&gt;类的目的是提供多种方式让开发者提取网页字段，比如：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;XPath&lt;/li&gt;
-&lt;li&gt;CSS Selector&lt;/li&gt;
-&lt;li&gt;RE&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;所以我们只需要根据需求，定义父类然后再利用不同的提取方式实现子类即可，代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class BaseField(object):
-    &amp;quot;&amp;quot;&amp;quot;
-    BaseField class
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, default: str = &#39;&#39;, many: bool = False):
-        &amp;quot;&amp;quot;&amp;quot;
-        Init BaseField class
-        url: http://lxml.de/index.html
-        :param default: default value
-        :param many: if there are many fields in one page
-        &amp;quot;&amp;quot;&amp;quot;
-        self.default = default
-        self.many = many
-
-    def extract(self, *args, **kwargs):
-        raise NotImplementedError(&#39;extract is not implemented.&#39;)
-
-
-class _LxmlElementField(BaseField):
-    pass
-
-
-class AttrField(_LxmlElementField):
-    &amp;quot;&amp;quot;&amp;quot;
-    This field is used to get  attribute.
-    &amp;quot;&amp;quot;&amp;quot;
-	  pass
-
-
-class HtmlField(_LxmlElementField):
-    &amp;quot;&amp;quot;&amp;quot;
-    This field is used to get raw html data.
-    &amp;quot;&amp;quot;&amp;quot;
-    pass
-
-
-class TextField(_LxmlElementField):
-    &amp;quot;&amp;quot;&amp;quot;
-    This field is used to get text.
-    &amp;quot;&amp;quot;&amp;quot;
-	  pass
-
-
-class RegexField(BaseField):
-    &amp;quot;&amp;quot;&amp;quot;
-    This field is used to get raw html code by regular expression.
-    RegexField uses standard library `re` inner, that is to say it has a better performance than _LxmlElementField.
-    &amp;quot;&amp;quot;&amp;quot;
-    pass
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;核心类就是上面的代码，具体实现请看&lt;code&gt;ruia/field.py&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;接下来继续说&lt;code&gt;Item&lt;/code&gt;部分，这部分实际上是对&lt;code&gt;ORM&lt;/code&gt;那块的实现，用到的知识点是&lt;code&gt;元类&lt;/code&gt;，因为我们需要控制类的创建行为：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class ItemMeta(type):
-    &amp;quot;&amp;quot;&amp;quot;
-    Metaclass for an item
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __new__(cls, name, bases, attrs):
-        __fields = dict({(field_name, attrs.pop(field_name))
-                         for field_name, object in list(attrs.items())
-                         if isinstance(object, BaseField)})
-        attrs[&#39;__fields&#39;] = __fields
-        new_class = type.__new__(cls, name, bases, attrs)
-        return new_class
-
-
-class Item(metaclass=ItemMeta):
-    &amp;quot;&amp;quot;&amp;quot;
-    Item class for each item
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self):
-        self.ignore_item = False
-        self.results = {}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这一层弄明白接下来就很简单了，还记得上一篇文章《谈谈对Python爬虫的理解》里面说的四个类型的目标网页么：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;单页面单目标&lt;/li&gt;
-&lt;li&gt;单页面多目标&lt;/li&gt;
-&lt;li&gt;多页面单目标&lt;/li&gt;
-&lt;li&gt;多页面多目标&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;本质来说就是要获取网页的单目标以及多目标（多页面可以放在Spider那块实现），&lt;code&gt;Item&lt;/code&gt;类只需要定义两个方法就能实现：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;get_item()：单目标&lt;/li&gt;
-&lt;li&gt;get_items()：多目标，需要定义好&lt;code&gt;target_item&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;具体实现见：&lt;code&gt;ruia/item.py&lt;/code&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Spider&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;在&lt;code&gt;Ruia&lt;/code&gt;框架中，为什么要有&lt;code&gt;Spider&lt;/code&gt;，有以下原因：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;真实世界爬虫是多个页面的（或深度或广度），利用&lt;code&gt;Spider&lt;/code&gt;可以对这些进行 有效的管理&lt;/li&gt;
-&lt;li&gt;制定一套爬虫程序的编写标准，可以让开发者容易理解、交流，能迅速产出高质量爬虫程序&lt;/li&gt;
-&lt;li&gt;自由地定制插件&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;接下来说说代码实现，&lt;code&gt;Ruia&lt;/code&gt;框架的&lt;code&gt;API&lt;/code&gt;写法我有参考&lt;code&gt;Scrapy&lt;/code&gt;，各个函数之间的联结也是使用回调，但是你也可以直接使用&lt;code&gt;await&lt;/code&gt;，可以直接看代码示例：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from ruia import AttrField, TextField, Item, Spider
-
-
-class HackerNewsItem(Item):
-    target_item = TextField(css_select=&#39;tr.athing&#39;)
-    title = TextField(css_select=&#39;a.storylink&#39;)
-    url = AttrField(css_select=&#39;a.storylink&#39;, attr=&#39;href&#39;)
-
-
-class HackerNewsSpider(Spider):
-    start_urls = [f&#39;https://news.ycombinator.com/news?p={index}&#39; for index in range(1, 3)]
-
-    async def parse(self, response):
-        async for item in HackerNewsItem.get_items(html=response.html):
-            yield item
-
-
-if __name__ == &#39;__main__&#39;:
-    HackerNewsSpider.start()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;使用起来还是挺简洁的，输出如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;[2019:03:14 10:29:04] INFO  Spider  Spider started!
-[2019:03:14 10:29:04] INFO  Spider  Worker started: 4380434912
-[2019:03:14 10:29:04] INFO  Spider  Worker started: 4380435048
-[2019:03:14 10:29:04] INFO  Request &amp;lt;GET: https://news.ycombinator.com/news?p=1&amp;gt;
-[2019:03:14 10:29:04] INFO  Request &amp;lt;GET: https://news.ycombinator.com/news?p=2&amp;gt;
-[2019:03:14 10:29:08] INFO  Spider  Stopping spider: Ruia
-[2019:03:14 10:29:08] INFO  Spider  Total requests: 2
-[2019:03:14 10:29:08] INFO  Spider  Time usage: 0:00:03.426335
-[2019:03:14 10:29:08] INFO  Spider  Spider finished!
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;Spider&lt;/code&gt;的核心部分在于对请求&lt;code&gt;URL&lt;/code&gt;的请求控制，目前采用的是生产消费者模式来处理，具体函数如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190314103244.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;详细代码，见&lt;code&gt;ruia/spider.py&lt;/code&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;更多&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;至此，爬虫框架的核心部分已经实现完毕，基础功能同样一个不落地实现了，接下来要做的就是：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;实现更多优雅地功能&lt;/li&gt;
-&lt;li&gt;实现更多的插件，让生态丰富起来&lt;/li&gt;
-&lt;li&gt;修BUG&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;项目地址点击阅读原文或者在&lt;code&gt;github&lt;/code&gt;搜索&lt;code&gt;ruia&lt;/code&gt;，如果你有兴趣，请参与进来吧！&lt;/p&gt;
-
-&lt;p&gt;如果觉得写得不错，点个好看来个&lt;code&gt;star&lt;/code&gt;呗~&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
+      <description>这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架
+2018年到如今，我花精力比较多的一个开源项目算是Ruia了，这是一个基于Python3.6+的异步爬虫框架，当时也获得一些推荐，比如Github Trending Python语言榜单第二，目前Ruia还在开发中，Star数目不过700+，如果各位有兴趣，欢迎一起开发，来波star我也不会拒绝哈~
+ 什么是爬虫框架
+ 说这个之前，得先说说什么是框架：
+ 是实现业界标准的组件规范：比如众所周知的MVC开发规范 提供规范所要求之基础功能的软件产品：比如Django框架就是MVC的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等  框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？
+很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章谈谈对Python爬虫的理解，下面总结一下爬虫流程：
+ 请求&amp;amp;响应 解析 持久化  这三个流程有没有可能以一种优雅的形式串联起来，Ruia目前是这样实现的，请看代码示例：
+可以看到，Item &amp;amp; Field类结合一起实现了字段的解析提取，Spider类结合Request * Response类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的item可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程
+实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些hook让用户编写爬虫更方便(比如ruia-motor)
+这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了
+ 如何踏出第一步
+ 首先，我对Ruia爬虫框架的定位很清楚，基于asyncio &amp;amp; aiohttp的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：
+ 轻量级，专注于抓取、解析和良好的API接口 插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件 速度，异步无阻塞框架，需要对速度有一定追求  什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：
+￼同时让我们结合上面一节的Ruia代码来从业务逻辑角度看看这几个模块到底是什么意思：
+ Request：请求 Response：响应 Item &amp;amp; Field：解析提取 Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来  这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆Ruia框架到本地：
+# 请确保本地Python环境是3.6+ git clone https://github.com/howie6879/ruia.git # 安装pipenv pip install pipenv # 安装依赖包 pipenv install --dev  然后用PyCharm打开Ruia项目：
+选择刚刚pipenv配置好的python解释器：
+此时可以完整地看到项目代码：
+好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程
+ Request &amp;amp; Response</description>
     </item>
     
     <item>
@@ -1409,296 +130,16 @@ if __name__ == &#39;__main__&#39;:
       <pubDate>Thu, 10 Jan 2019 08:37:56 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/02_talk_about_python_spider/</guid>
-      <description>
-
-&lt;blockquote&gt;
-&lt;p&gt;爬虫也可以称为Python爬虫&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫&lt;/p&gt;
-
-&lt;p&gt;所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大&lt;/li&gt;
-&lt;li&gt;Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过&lt;/p&gt;
-
-&lt;h3 id=&#34;什么是爬虫&#34;&gt;什么是爬虫&lt;/h3&gt;
-
-&lt;p&gt;爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fyzio0y1hlj32aq1hq4p4.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～&lt;/p&gt;
-
-&lt;p&gt;爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事&lt;/li&gt;
-&lt;li&gt;垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫&lt;/li&gt;
-&lt;li&gt;增量网络爬虫：对已经抓取的网页进行实时更新&lt;/li&gt;
-&lt;li&gt;深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;模拟请求网页资源&lt;/li&gt;
-&lt;li&gt;从HTML提取目标元素&lt;/li&gt;
-&lt;li&gt;数据持久化&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;什么是爬虫，这就是爬虫：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;&amp;quot;&amp;quot;&amp;quot;让我们根据上面说的步骤来完成一个简单的爬虫程序&amp;quot;&amp;quot;&amp;quot;
-import requests
-
-from bs4 import BeautifulSoup
-
-target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39;
-
-# 第一步 发起一个GET请求
-res = requests.get(target_url)
-
-# 第二步 提取HTML并解析想获取的数据 比如获取 title
-soup = BeautifulSoup(res.text, &amp;quot;lxml&amp;quot;)
-# 输出 soup.title.text
-title = soup.title.text
-
-# 第三步 持久化 比如保存到本地
-with open(&#39;title.txt&#39;, &#39;w&#39;) as fp:
-    fp.write(title)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;加上注释不到20行代码，你就完成了一个爬虫，简单吧&lt;/p&gt;
-
-&lt;h3 id=&#34;怎么写爬虫&#34;&gt;怎么写爬虫&lt;/h3&gt;
-
-&lt;p&gt;网页世界多姿多彩、亿万网页资源供你选择，面对不同的页面，怎么使自己编写的爬虫程序够稳健、持久，这是一个值得讨论的问题&lt;/p&gt;
-
-&lt;p&gt;俗话说，磨刀不误砍柴工，在开始编写爬虫之前，很有必要掌握一些基本知识：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;网页的结构是HTML，爬虫的目标就是解析HTML，获取目标字段并保存&lt;/li&gt;
-&lt;li&gt;客户端展现的网页由浏览器渲染，客户端和服务端的信息交互依靠HTTP协议&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这两句描述体现了一名爬虫开发人员需要掌握的基本知识，不过一名基本的后端或者前端工程师都会这些哈哈，这也说明了爬虫的入门难度极低，从这两句话，你能思考出哪些爬虫必备的知识点呢？&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;基本的HTML知识，了解HTML才方便目标信息提取&lt;/li&gt;
-&lt;li&gt;基本的JS知识 ，JS可以异步加载HTML&lt;/li&gt;
-&lt;li&gt;了解CSS Selector、XPath以及正则，目的是为了提取数据&lt;/li&gt;
-&lt;li&gt;了解HTTP协议，为后面的反爬虫斗争打下基础&lt;/li&gt;
-&lt;li&gt;了解基本的数据库操作，为了数据持久化&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;有了这些知识储备，接下来就可以选择一门语言，开始编写自己的爬虫程序了，还是按照上一节说的三个步骤，然后以Python为例，说一说要在编程语言方面做那些准备：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;网页请求：内置有urllib库，第三方库的话，同步请求可以使用requests，异步请求使用aiohttp&lt;/li&gt;
-&lt;li&gt;分析HTML结构并提取目标元素：CSS Selector和XPath是目前主流的提取方式，第三方库可以使用Beautiful Soup或者PyQuery&lt;/li&gt;
-&lt;li&gt;数据持久化：目标数据提取之后，可以将数据保存到数据库中进行持久化，MySQL、MongoDB等，这些都有对应的库支持，当然你也可以保存在硬盘，谁硬盘没点东西对吧（滑稽脸）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;掌握了上面这些，你大可放开手脚大干一场，万维网就是你的名利场，去吧～&lt;/p&gt;
-
-&lt;p&gt;我觉得对于一个目标网站的网页，可以分下面四个类型：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;单页面单目标&lt;/li&gt;
-&lt;li&gt;单页面多目标&lt;/li&gt;
-&lt;li&gt;多页面单目标&lt;/li&gt;
-&lt;li&gt;多页面多目标&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;具体是什么意思呢，可能看起来有点绕，但明白这些，你之后写爬虫，只要在脑子里面过一遍着网页对应什么类型，然后套上对应类型的程序（写多了都应该有一套自己的常用代码库），那写爬虫的速度，自然不会慢&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;单页面单目标&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 &lt;a href=&#34;https://movie.douban.com/subject/1292052/&#34;&gt;电影-肖申克的救赎&lt;/a&gt; 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvmwhbmzekj31hb0lkdnx.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：&lt;code&gt;#content &amp;gt; h1 &amp;gt; span:nth-child(1)&lt;/code&gt;，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
-
-from ruia import Item, TextField
-
-class DoubanItem(Item):
-    title = TextField(css_select=&#39;#content &amp;gt; h1 &amp;gt; span:nth-child(1)&#39;)
-
-async_func = DoubanItem.get_item(url=&amp;quot;https://movie.douban.com/subject/1292052/&amp;quot;)
-item = asyncio.get_event_loop().run_until_complete(async_func)
-print(item.title)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;多页面多目标就是此情况下多个url的衍生情况&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;单页面多目标&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;假设现在的需求是抓取 &lt;a href=&#34;https://movie.douban.com/top250&#34;&gt;豆瓣电影250&lt;/a&gt; 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，因此目标需要循环获取，这就是所谓的单页面多目标了：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxeit345j30ln0pyjxx.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import asyncio
-
-from ruia import Item, TextField
-
-class DoubanItem(Item):
-    target_item = TextField(css_select=&#39;div.item&#39;)
-    title = TextField(css_select=&#39;span.title&#39;)
-
-    async def clean_title(self, title):
-        if isinstance(title, str):
-            return title
-        else:
-            return &#39;&#39;.join([i.text.strip().replace(&#39;\xa0&#39;, &#39;&#39;) for i in title])
-
-
-async_func = DoubanItem.get_items(url=&amp;quot;https://movie.douban.com/top250&amp;quot;)
-items = asyncio.get_event_loop().run_until_complete(async_func)
-for item in items:
-    print(item)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;多页面多目标&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxjpbouqj30wr0pnwlp.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from ruia import TextField, Item, Request, Spider
-
-
-class DoubanItem(Item):
-    &amp;quot;&amp;quot;&amp;quot;
-    定义爬虫的目标字段
-    &amp;quot;&amp;quot;&amp;quot;
-    target_item = TextField(css_select=&#39;div.item&#39;)
-    title = TextField(css_select=&#39;span.title&#39;)
-
-    async def clean_title(self, title):
-        if isinstance(title, str):
-            return title
-        else:
-            return &#39;&#39;.join([i.text.strip().replace(&#39;\xa0&#39;, &#39;&#39;) for i in title])
-
-
-class DoubanSpider(Spider):
-    start_urls = [&#39;https://movie.douban.com/top250&#39;]
-    concurrency = 10
-
-    async def parse(self, res):
-        etree = res.html_etree
-        pages = [&#39;?start=0&amp;amp;filter=&#39;] + [i.get(&#39;href&#39;) for i in etree.cssselect(&#39;.paginator&amp;gt;a&#39;)]
-
-        for index, page in enumerate(pages):
-            url = self.start_urls[0] + page
-            yield Request(
-                url,
-                callback=self.parse_item,
-                metadata={&#39;index&#39;: index},
-                request_config=self.request_config
-            )
-
-    async def parse_item(self, res):
-        items_data = await DoubanItem.get_items(html=res.html)
-        res_list = []
-        for item in items_data:
-            res_list.append(item.title)
-        return res_list
-
-
-if __name__ == &#39;__main__&#39;:
-    DoubanSpider.start()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果网络没问题的话，会得到如下输出：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fx9nqjuoznj30yb0azqeh.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;注意爬虫运行时间，1s不到，这就是异步的魅力&lt;/p&gt;
-
-&lt;p&gt;用Python写爬虫，就是这么简单优雅，诸位，看着网页就思考下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;是什么类型的目标类型&lt;/li&gt;
-&lt;li&gt;用什么库模拟请求&lt;/li&gt;
-&lt;li&gt;怎么解析目标字段&lt;/li&gt;
-&lt;li&gt;怎么存储&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;一个爬虫程序就成型了，顺便一提，爬虫这东西，可以说是防君子不防小人，&lt;code&gt;robots.txt&lt;/code&gt;大部分网站都有（它的目的是告诉爬虫什么可以爬取什么不可以爬取，比如：&lt;code&gt;https://www.baidu.com/robots.txt&lt;/code&gt;），各位想怎么爬取，自己衡量&lt;/p&gt;
-
-&lt;h3 id=&#34;如何进阶&#34;&gt;如何进阶&lt;/h3&gt;
-
-&lt;p&gt;不要以为写好一个爬虫程序就可以出师了，此时还有更多的问题在前面等着你，你要含情脉脉地看着你的爬虫程序，问自己三个问题：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;爬虫抓取数据后是正当用途么？&lt;/li&gt;
-&lt;li&gt;爬虫会把目标网站干掉么？&lt;/li&gt;
-&lt;li&gt;爬虫会被反爬虫干掉么？&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;前两个关于人性的问题在此不做过多叙述，因此跳过，但你们如果作为爬虫工程师的话，切不可跳过&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;会被反爬虫干掉么？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;最后关于反爬虫的问题才是你爬虫程序强壮与否的关键因素，什么是反爬虫？&lt;/p&gt;
-
-&lt;p&gt;当越来越多的爬虫在互联网上横冲直撞后，网页资源维护者为了防止自身数据被抓取，开始进行一系列的措施来使得自身数据不易被别的程序爬取，这些措施就是反爬虫&lt;/p&gt;
-
-&lt;p&gt;比如检测IP访问频率、资源访问速度、链接是否带有关键参数、验证码检测机器人、ajax混淆、js加密等等&lt;/p&gt;
-
-&lt;p&gt;对于目前市场上的反爬虫，爬虫工程师常有的反反爬虫方案是下面这样的：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;不断试探目标底线，试出单IP下最优的访问频率&lt;/li&gt;
-&lt;li&gt;构建自己的IP代理池&lt;/li&gt;
-&lt;li&gt;维护一份自己常用的UA库&lt;/li&gt;
-&lt;li&gt;针对目标网页的Cookie池&lt;/li&gt;
-&lt;li&gt;需要JS渲染的网页使用无头浏览器进行代码渲染再抓取&lt;/li&gt;
-&lt;li&gt;一套破解验证码程序&lt;/li&gt;
-&lt;li&gt;扎实的JS知识来破解混淆函数&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;爬虫工程师的进阶之路其实就是不断反反爬虫，可谓艰辛，但换个角度想也是乐趣所在&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;关于框架&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;爬虫有自己的编写流程和标准，有了标准，自然就有了框架，像Python这种生态强大的语言，框架自然是多不胜数，目前世面上用的比较多的有：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Scrapy&lt;/li&gt;
-&lt;li&gt;PySpider&lt;/li&gt;
-&lt;li&gt;Portia&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这里不过多介绍，框架只是工具，是一种提升效率的方式，看你选择&lt;/p&gt;
-
-&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
-
-&lt;p&gt;任何事物都有两面性，爬虫自然也不例外，因此我送诸位一张图，关键时刻好好想想&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://ws1.sinaimg.cn/large/007i3XCUgy1fyzjixe8dsj316a0pudj3.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
+      <description>爬虫也可以称为Python爬虫
+ 不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
+所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：
+ Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）  任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
+什么是爬虫 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
+看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
+爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：
+ 通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面  不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
+ 模拟请求网页资源 从HTML提取目标元素 数据持久化  什么是爬虫，这就是爬虫：
+&amp;quot;&amp;quot;&amp;quot;让我们根据上面说的步骤来完成一个简单的爬虫程序&amp;quot;&amp;quot;&amp;quot; import requests from bs4 import BeautifulSoup target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &amp;quot;lxml&amp;quot;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&#39;title.</description>
     </item>
     
     <item>
@@ -1707,596 +148,13 @@ if __name__ == &#39;__main__&#39;:
       <pubDate>Thu, 03 Jan 2019 08:37:56 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2019/01_neural_network_foundation/</guid>
-      <description>
-
-&lt;p&gt;要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，&lt;a href=&#34;https://mp.weixin.qq.com/s/RdmMvuq8Vj33ggZALjfMLw&#34;&gt;备份地址&lt;/a&gt;：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;什么是感知器&lt;/li&gt;
-&lt;li&gt;什么是神经网络&lt;/li&gt;
-&lt;li&gt;张量以及运算&lt;/li&gt;
-&lt;li&gt;微分&lt;/li&gt;
-&lt;li&gt;梯度下降&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;带着问题出发&#34;&gt;带着问题出发&lt;/h3&gt;
-
-&lt;p&gt;在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对&lt;code&gt;MNIST数据集&lt;/code&gt;进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;MNIST数据集&lt;/code&gt;是一份手写字训练集，出自&lt;code&gt;MNIST&lt;/code&gt;，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;拥有60,000个示例的训练集，以及10,000个示例的测试集&lt;/li&gt;
-&lt;li&gt;图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示&lt;/li&gt;
-&lt;li&gt;图片分为10类， 分别对应从0～9，共10个阿拉伯数字&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;压缩包内容如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;train-images-idx3-ubyte.gz:  training set images (9912422 bytes)&lt;/li&gt;
-&lt;li&gt;train-labels-idx1-ubyte.gz:  training set labels (28881 bytes)&lt;/li&gt;
-&lt;li&gt;t10k-images-idx3-ubyte.gz:   test set images (1648877 bytes)&lt;/li&gt;
-&lt;li&gt;t10k-labels-idx1-ubyte.gz:   test set labels (4542 bytes)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;上图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/0A0F8531-ACD0-4843-8A4F-F16C82720088.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;图片生成代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;%matplotlib inline
-
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-
-from keras.datasets import mnist
-
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-
-def plot_digits(instances, images_per_row=10, **options):
-    size = 28
-    images_per_row = min(len(instances), images_per_row)
-    images = instances
-    n_rows = (len(instances) - 1) // images_per_row + 1
-    row_images = []
-    n_empty = n_rows * images_per_row - len(instances)
-    images.append(np.zeros((size, size * n_empty)))
-    for row in range(n_rows):
-        rimages = images[row * images_per_row : (row + 1) * images_per_row]
-        row_images.append(np.concatenate(rimages, axis=1))
-    image = np.concatenate(row_images, axis=0)
-    plt.imshow(image, cmap = matplotlib.cm.binary, **options)
-    plt.axis(&amp;quot;off&amp;quot;)
-
-plt.figure(figsize=(9,9))
-plot_digits(train_images[:100], images_per_row=10)
-plt.show()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;不过你不用急着尝试，接下来我们可以一步一步慢慢来分析手写字训练集&lt;/p&gt;
-
-&lt;p&gt;看这一行代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;MNIST数据集&lt;/code&gt;通过&lt;code&gt;keras.datasets&lt;/code&gt;加载，其中&lt;code&gt;train_images&lt;/code&gt;和&lt;code&gt;train_labels&lt;/code&gt;构成了训练集，另外两个则是测试集：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;train_images.shape: (60000, 28, 28)&lt;/li&gt;
-&lt;li&gt;train_labels.shape: (60000,)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;我们要做的事情很简单，将训练集丢到神经网络里面去，训练后生成了我们期望的神经网络模型，然后模型再对测试集进行预测，我们只需要判断预测的数字是不是正确的即可&lt;/p&gt;
-
-&lt;p&gt;在用代码构建一个神经网络之前，我先简单介绍一下到底什么是神经网络，让我们从感知器开始&lt;/p&gt;
-
-&lt;h3 id=&#34;感知器&#34;&gt;感知器&lt;/h3&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;感知器的工作方式如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/2977DAE0-ECE3-4BC5-AF1C-90D51DCBE9AB.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;左侧三个变量分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5F74C39F-956D-4ABE-B12B-1F1CCABB9F63.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;此时，output可以表示为：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CD964C69-3677-4B34-8A98-1DAAF45BA6B3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;上面右侧的式子是一个阶跃函数，就是和Sigmoid、Relu一样作用的激活函数，然后我们就可以自己实现一个感知器：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
-import numpy as np
-
-
-class Perceptron:
-    &amp;quot;&amp;quot;&amp;quot;
-    代码实现 Frank Rosenblatt 提出的感知器的与非门，加深对感知器的理解
-    blog: https://www.howie6879.cn/post/33/
-    &amp;quot;&amp;quot;&amp;quot;
-
-    def __init__(self, act_func, input_nums=2):
-        &amp;quot;&amp;quot;&amp;quot;
-        实例化一些基本参数
-        :param act_func: 激活函数
-        &amp;quot;&amp;quot;&amp;quot;
-        # 激活函数
-        self.act_func = act_func
-        # 权重 已经确定只会有两个二进制输入
-        self.w = np.zeros(input_nums)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=10, rate=0.1):
-        &amp;quot;&amp;quot;&amp;quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        :param rate: 学习率
-        &amp;quot;&amp;quot;&amp;quot;
-        for i in range(learn_nums):
-            for index, input_vector in enumerate(input_vectors):
-                label = labels[index]
-                output = self.predict(input_vector)
-                delta = label - output
-                self.w += input_vector * rate * delta
-                self.b += rate * delta
-        print(&amp;quot;此时感知器权重为{0}，偏置项为{1}&amp;quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        return self.act_func(sum(self.w * input_vector) + self.b)
-
-
-def f(z):
-    &amp;quot;&amp;quot;&amp;quot;
-    激活函数
-    :param z: (w1*x1+w2*x2+...+wj*xj) + b
-    :return: 1 or 0
-    &amp;quot;&amp;quot;&amp;quot;
-    return 1 if z &amp;gt; 0 else 0
-
-def get_and_gate_training_data():
-    &#39;&#39;&#39;
-    AND 训练数据集
-    &#39;&#39;&#39;
-    input_vectors = np.array([[1, 1], [1, 0], [0, 1], [0, 0]])
-    labels = np.array([1, 0, 0, 0])
-    return input_vectors, labels
-
-
-if __name__ == &#39;__main__&#39;:
-    &amp;quot;&amp;quot;&amp;quot;
-    输出如下：
-        此时感知器权重为[ 0.1  0.2]，偏置项为-0.2 与门
-        1 and 1 = 1
-        1 and 0 = 0
-        0 and 1 = 0
-        0 and 0 = 0
-    &amp;quot;&amp;quot;&amp;quot;
-    # 获取样本数据
-    and_input_vectors, and_labels = get_and_gate_training_data()
-    # 实例化感知器模型
-    p = Perceptron(f)
-    # 开始学习 AND
-    p_and = p.fit(and_input_vectors, and_labels)
-    # 开始预测 AND
-    print(&#39;1 and 1 = %d&#39; % p_and.predict([1, 1]))
-    print(&#39;1 and 0 = %d&#39; % p_and.predict([1, 0]))
-    print(&#39;0 and 1 = %d&#39; % p_and.predict([0, 1]))
-    print(&#39;0 and 0 = %d&#39; % p_and.predict([0, 0]))
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;s型神经元&#34;&gt;S型神经元&lt;/h3&gt;
-
-&lt;p&gt;神经元和感知器本质上是一样的，他们的区别在于激活函数不同，比如跃迁函数改为Sigmoid函数&lt;/p&gt;
-
-&lt;p&gt;神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/19333562-3B02-4E17-96C2-5B7D44F99FA5.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案&lt;/p&gt;
-
-&lt;p&gt;所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为σ(w⋅x+b)，而σ就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/5E03C070-79F5-48F7-8EFB-A15171C3EF74.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;神经网络&#34;&gt;神经网络&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/B1AA88E4-E903-40C6-A345-6A7908238FDD.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;神经网络其实就是按照一定规则连接起来的多个神经元，一个神经网络由以下组件构成：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入层：接受传递数据，这里应该是 784 个神经元&lt;/li&gt;
-&lt;li&gt;隐藏层：发掘出特征&lt;/li&gt;
-&lt;li&gt;各层之间的权重：自动学习出来&lt;/li&gt;
-&lt;li&gt;每个隐藏层都会有一个精心设计的激活函数，比如Sigmoid、Relu激活函数&lt;/li&gt;
-&lt;li&gt;输出层，10个输出&lt;/li&gt;
-&lt;li&gt;上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：前馈神经网络&lt;/li&gt;
-&lt;li&gt;有回路，其中反馈环路是可⾏的：递归神经网络&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;从输入层传入&lt;code&gt;手写字训练集&lt;/code&gt;，然后通过隐藏层向前传递训练集数据，最后输出层会输出10个概率值，总和为1。现在，我们可以看看&lt;code&gt;Keras&lt;/code&gt;代码:&lt;/p&gt;
-
-&lt;p&gt;第一步，对数据进行预处理，我们知道，原本数据形状是&lt;code&gt;(60000, 28, 28)&lt;/code&gt;，取值区间为&lt;code&gt;[0, 255]&lt;/code&gt;，现在改为&lt;code&gt;[0, 1]&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype(&#39;float32&#39;) / 255
-
-test_images = test_images.reshape((10000, 28 * 28)) 
-test_images = test_images.astype(&#39;float32&#39;) / 255
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然后对标签进行分类编码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from keras.utils import to_categorical
-
-train_labels = to_categorical(train_labels) 
-test_labels = to_categorical(test_labels)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;第二步，编写模型：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from keras import models 
-from keras import layers
-
-network = models.Sequential() 
-network.add(layers.Dense(512, activation=&#39;relu&#39;, input_shape=(28 * 28,))) 
-network.add(layers.Dense(10, activation=&#39;softmax&#39;)
-            
-network.compile(optimizer=&#39;rmsprop&#39;,loss=&#39;categorical_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
-network.fit(train_images, train_labels, epochs=5, batch_size=128)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/8FC079F8-7379-479D-A478-6FED187D8A9C.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;一个隐藏层，激活函数选用&lt;code&gt;relu&lt;/code&gt;，输出层使用&lt;code&gt;softmax&lt;/code&gt;返回一个由10个概率值（总和为 1）组成的数组&lt;/p&gt;
-
-&lt;p&gt;训练过程中显示了两个数字：一个是网络在训练数据上的损失&lt;code&gt;loss&lt;/code&gt;，另一个是网络在 训练数据上的精度&lt;code&gt;acc&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/0EC7913A-205C-4BF2-BCB6-075411819AA3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;很简单，我们构建和训练一个神经网络，就这么几行代码，之所以写的这么剪短，是因为&lt;code&gt;keras&lt;/code&gt;接接口封装地比较好用，但是里面的理论知识我们还是需要好好研究下&lt;/p&gt;
-
-&lt;h3 id=&#34;神经网络的数据表示&#34;&gt;神经网络的数据表示&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;TensorFlow&lt;/code&gt;里面的&lt;code&gt;Tensor&lt;/code&gt;是张量的意思，上面例子里面存储在多维Numpy数组中的数据就是张量：张量是数据容器，矩阵就是二维张量，张量是矩阵向任意维度的推广，张量的维度称为轴&lt;/p&gt;
-
-&lt;h4 id=&#34;标量&#34;&gt;标量&lt;/h4&gt;
-
-&lt;p&gt;包含一个数字的张量叫做标量（0D张量），如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = np.array(12)
-print(x, x.ndim)
-# 12, 0
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;张量轴的个数也叫做阶(rank)&lt;/p&gt;
-
-&lt;h4 id=&#34;向量&#34;&gt;向量&lt;/h4&gt;
-
-&lt;p&gt;数字组成的数组叫做向量（1D张量），如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = np.array([12, 3, 6, 14, 7])
-print(x, x.ndim)
-# [12  3  6 14  7] 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;矩阵&#34;&gt;矩阵&lt;/h4&gt;
-
-&lt;p&gt;向量组成的数组叫做矩阵（2D张量），如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = np.array([[5, 78, 2, 34, 0], [6, 79, 3, 35, 1], [7, 80, 4, 36, 2]])
-print(x, x.ndim)
-# [[ 5 78  2 34  0]
-# [ 6 79  3 35  1]
-# [ 7 80  4 36  2]] 2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;3d张量与更高维张量&#34;&gt;3D张量与更高维张量&lt;/h4&gt;
-
-&lt;p&gt;将多个矩阵组合成一个新的数组就是一个3D张量，如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = np.array([[[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]], [[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]], [[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]]])
-print(x, x.ndim)
-# (array([[[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]],
-#  
-#         [[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]],
-#  
-#         [[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]]]), 3)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;将多个3D张量组合成一个数组，可以创建一个4D张量&lt;/p&gt;
-
-&lt;h4 id=&#34;关键属性&#34;&gt;关键属性&lt;/h4&gt;
-
-&lt;p&gt;张量是由以下三个关键属性来定义：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;轴的个数：3D张量三个轴，矩阵两个轴&lt;/li&gt;
-&lt;li&gt;形状：是一个整数元祖，比如前面矩阵为(3, 5)，向量(5,)，3D张量为(3, 2, 5)&lt;/li&gt;
-&lt;li&gt;数据类型&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&#34;在numpy中操作张量&#34;&gt;在Numpy中操作张量&lt;/h4&gt;
-
-&lt;p&gt;以前面加载的&lt;code&gt;train_images&lt;/code&gt;为：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;比如进行切片选择&lt;code&gt;10~100&lt;/code&gt;个数字：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;train_images[10:100].shape
-# (90, 28, 28)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;数据批量的概念&#34;&gt;数据批量的概念&lt;/h4&gt;
-
-&lt;p&gt;深度学习模型会将数据集随机分割成小批量进行处理，比如：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;batch = train_images[:128]
-batch.shape
-# (128, 28, 28)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;现实世界的数据张量&#34;&gt;现实世界的数据张量&lt;/h4&gt;
-
-&lt;p&gt;下面将介绍下现实世界中数据的形状：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;向量数据：2D张量，(samples, features)&lt;/li&gt;
-&lt;li&gt;时间序列数据或者序列数据：3D张量，(samples, timesteps, features)&lt;/li&gt;
-&lt;li&gt;图像：4D张量，(samples, height, width, channels) 或 (samples, channels, height, width)&lt;/li&gt;
-&lt;li&gt;视频：5D张量，(samples, frames, height, width, channels) 或 (samples, frames, channels, height, width)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;张量运算&#34;&gt;张量运算&lt;/h3&gt;
-
-&lt;p&gt;类似于计算机程序的计算可以转化为二进制计算，深度学习计算可以转化为数值数据张量上的一些&lt;strong&gt;张量运算&lt;/strong&gt;(tensor operation)&lt;/p&gt;
-
-&lt;p&gt;上面模型的隐藏层代码如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;keras.layers.Dense(512, activation=&#39;relu&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这一层可以理解为一个函数，输入一个2D张量，输出一个2D张量，就如同上面感知机那一节最后输出的计算函数：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-txt&#34;&gt;output = relu(dot(W, input) + b)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;逐元素计算&#34;&gt;逐元素计算&lt;/h4&gt;
-
-&lt;p&gt;Relu 和加法运算都是逐元素的运算，比如：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 输入示例
-input_x = np.array([[2], [3], [1]])
-# 权重
-W = np.array([[5, 6, 1], [7, 8, 1]])
-# 计算输出 z
-z = np.dot(W, input_x)
-
-# 实现激活函数
-def naive_relu(x):
-    assert len(x.shape) == 2
-    x = x.copy()
-    for i in range(x.shape[0]):
-        for j in range(x.shape[1]):
-            x[i, j] = max(x[i, j], 0) 
-    return x
-
-# 激活函数对应的输出
-output = naive_relu(z)
-output
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;广播&#34;&gt;广播&lt;/h4&gt;
-
-&lt;p&gt;张量运算那节中，有这样一段代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;output = relu(dot(W, input) + b)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;dot(W, input)&lt;/code&gt;是2D张量，&lt;code&gt;b&lt;/code&gt;是向量，两个形状不同的张量相加，会发生什么？&lt;/p&gt;
-
-&lt;p&gt;如果没有歧义的话，较小的张量会被广播，用来匹配较大张量的形状：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;input_x = np.array([[1], [3]])
-# 权重
-W = np.array([[5, 6], [7, 8]])
-b = np.array([1])
-# 计算输出 z
-z = np.dot(W, input_x) + b
-# array([[24],
-#        [32]])
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;张量点积&#34;&gt;张量点积&lt;/h4&gt;
-
-&lt;p&gt;点积运算，也叫张量积，如：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
-
-# 输入示例
-input_x = np.array([[2], [3], [1]])
-# 权重
-W = np.array([[5, 6, 1], [7, 8, 1]])
-np.dot(W, input_x)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;两个向量之间的点积是一个标量：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def naive_vector_dot(x, y):
-    assert len(x.shape) == 1
-    assert len(y.shape) == 1 
-    assert x.shape[0] == y.shape[0]
-    z = 0.
-    for i in range(x.shape[0]):
-        z += x[i] * y[i] 
-    return z
-
-x = np.array([1,2])
-y = np.array([1,2])
-
-naive_vector_dot(x, y)
-
-# 5.0
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;矩阵和向量点积后是一个向量：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;np.dot(W, [1, 2, 3])
-# array([20, 26])
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;张量变形&#34;&gt;张量变形&lt;/h4&gt;
-
-&lt;p&gt;前面对数据进行预处理的时候：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype(&#39;float32&#39;) / 255
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面的例子将输入数据的shape变成了(60000, 784)，张量变形指的就是改变张量的行和列，得到想要的形状，前后数据集个数不变，经常遇到一个特殊的张量变形是转置(transposition)，如下：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = np.zeros((300, 20))
-x = np.transpose(x)
-x.shape
-# (20, 300)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;梯度优化&#34;&gt;梯度优化&lt;/h3&gt;
-
-&lt;p&gt;针对每个输入，神经网络都会通过下面的函数对输入数据进行变换：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;output = relu(dot(W, input_x) + b)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;其中：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;relu：激活函数&lt;/li&gt;
-&lt;li&gt;W：是一个张量，表示权重，第一步可以取较小的随机值进行随机初始化&lt;/li&gt;
-&lt;li&gt;b：是一个张量，表示偏置&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;现在我们需要一个算法来让我们找到权重和偏置，从而使得y=y(x)可以拟合样本输入的x&lt;/p&gt;
-
-&lt;h4 id=&#34;再回到感知器&#34;&gt;再回到感知器&lt;/h4&gt;
-
-&lt;p&gt;感知器学习的过程就是其中权重和偏置不断调优更新的过程，其中的偏置可以理解成输入为1的权重值，那么权重是怎么更新的呢？&lt;/p&gt;
-
-&lt;p&gt;首先，介绍一个概念，损失函数，引用李航老师统计学习方法书中的一个解释：&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;其中模型f(X)关于训练数据集的平均损失，我们称之为：经验风险（empirical risk），上述的权重调整，就是在不断地让经验风险最小，求出最好的模型f(X)，我们暂时不考虑正则化，此时我们经验风险的最优化的目标函数就是：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/142D8E83-65C1-4491-ADCC-EDE7280AD1C1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;求解出此目标函数最小时对应的权重值，就是我们感知器里面对应的权重值，在推导之前，我们还得明白两个概念：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;什么是导数&lt;/li&gt;
-&lt;li&gt;什么是梯度&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&#34;什么是导数&#34;&gt;什么是导数&lt;/h4&gt;
-
-&lt;p&gt;假设有一个连续的光滑函数&lt;code&gt;f(x) = y&lt;/code&gt;，什么是函数连续性？指的是x的微小变化只能导致y的微小变化。&lt;/p&gt;
-
-&lt;p&gt;假设f(x)上的两点&lt;code&gt;a,b&lt;/code&gt;足够接近，那么&lt;code&gt;a,b&lt;/code&gt;可以近似为一个线性函数，此时他们斜率为&lt;code&gt;k&lt;/code&gt;，那么可以说斜率k是f在b点的&lt;strong&gt;导数&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;总之，导数描述了改变x后f(x)会如何变化，如果你希望减小f(x)的值，只需要将x沿着导数的反方向移动一小步即可，反之亦然&lt;/p&gt;
-
-&lt;h4 id=&#34;什么是梯度&#34;&gt;什么是梯度&lt;/h4&gt;
-
-&lt;p&gt;梯度是张量运算的导数，是导数这一概念向多元函数导数的推广，它指向函数值上升最快的方向，函数值下降最快的方向自然就是梯度的反方向&lt;/p&gt;
-
-&lt;h4 id=&#34;随机梯度下降&#34;&gt;随机梯度下降&lt;/h4&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/sgd.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;感知器代码里面的这段:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;self.w += input_vector * rate * delta
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;就对应上面式子里面推导出来的规则&lt;/p&gt;
-
-&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
-
-&lt;p&gt;再来看看全部的手写字识别模型代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from keras import models 
-from keras import layers
-from keras.utils import to_categorical
-
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-
-train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype(&#39;float32&#39;) / 255
-
-test_images = test_images.reshape((10000, 28 * 28)) 
-test_images = test_images.astype(&#39;float32&#39;) / 255
-
-train_labels = to_categorical(train_labels) 
-test_labels = to_categorical(test_labels)
-
-
-network = models.Sequential() 
-network.add(layers.Dense(512, activation=&#39;relu&#39;, input_shape=(28 * 28,))) 
-network.add(layers.Dense(10, activation=&#39;softmax&#39;))
-
-network.compile(optimizer=&#39;rmsprop&#39;,loss=&#39;categorical_crossentropy&#39;, metrics=[&#39;accuracy&#39;])
-network.fit(train_images, train_labels, epochs=5, batch_size=128)
-
-test_loss, test_acc = network.evaluate(test_images, test_labels)
-print(&#39;test_acc:&#39;, test_acc)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入数据保存在&lt;code&gt;float32&lt;/code&gt;格式的&lt;code&gt;Numpy&lt;/code&gt;张量中，形状分别是(60000, 784)和(10000, 784)&lt;/li&gt;
-&lt;li&gt;神经网络结构为：1个输入层、一个隐藏层、一个输出层&lt;/li&gt;
-&lt;li&gt;categorical_crossentropy是针对分类模型的损失函数&lt;/li&gt;
-&lt;li&gt;每批128个样本，共迭代5次，一共更新(469 * 5) = 2345次&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;说明&#34;&gt;说明&lt;/h3&gt;
-
-&lt;p&gt;对本文有影响的书籍文章如下，感谢他们的付出：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;[统计学习方法] 第一章&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://neuralnetworksanddeeplearning.com/chap1.html&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; 第一章&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/Deep-Learning-Python-Francois-Chollet/dp/1617294438&#34;&gt;Deep Learning with Python&lt;/a&gt; 第二章&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/apachecn/hands-on-ml-zh&#34;&gt;hands_on_Ml_with_Sklearn_and_TF&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.zybuluo.com/hanbingtao/note/448086&#34;&gt;hanbt零基础入门深度学习系列&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-</description>
+      <description>要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址：
+ 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降  带着问题出发 在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对MNIST数据集进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念
+MNIST数据集是一份手写字训练集，出自MNIST，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：
+ 拥有60,000个示例的训练集，以及10,000个示例的测试集 图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示 图片分为10类， 分别对应从0～9，共10个阿拉伯数字  压缩包内容如下：
+ train-images-idx3-ubyte.gz: training set images (9912422 bytes) train-labels-idx1-ubyte.gz: training set labels (28881 bytes) t10k-images-idx3-ubyte.gz: test set images (1648877 bytes) t10k-labels-idx1-ubyte.gz: test set labels (4542 bytes)  上图：
+图片生成代码如下：
+%matplotlib inline import matplotlib import matplotlib.pyplot as plt import numpy as np from keras.datasets import mnist (train_images, train_labels), (test_images, test_labels) = mnist.</description>
     </item>
     
     <item>
@@ -2305,889 +163,17 @@ print(&#39;test_acc:&#39;, test_acc)
       <pubDate>Wed, 26 Dec 2018 09:07:56 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2018/41/</guid>
-      <description>&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://www.howie6879.cn/images/thumbs/h_41.jpg&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;原文地址：&lt;a href=&#34;https://realpython.com/python-pep8/&#34;&gt;How to Write Beautiful Python Code With PEP 8&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;作者：&lt;a href=&#34;https://realpython.com/team/jfiner/&#34;&gt;Jasmine Finer &lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;翻译：&lt;a href=&#34;https://github.com/howie6879&#34;&gt;howie6879&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;code&gt;PEP 8&lt;/code&gt;有时候读作&lt;code&gt;PEP8&lt;/code&gt;或者&lt;code&gt;PEP-8&lt;/code&gt;，是一份提供如何编写Python代码指南和最佳实践的文档，由&lt;code&gt;Guido van Rossum, Barry Warsaw, Nick Coghlan&lt;/code&gt;在2001年完成。&lt;code&gt;PEP 8&lt;/code&gt;主要注重于提高 Python 代码的可读性和一致性。&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;PEP&lt;/code&gt;全称为：&lt;code&gt;Python Enhancement Proposal&lt;/code&gt;，一个PEP是一份文档，它描述了为Python提出的新特性以及为社区编写的Python方面的文档，比如设计和风格。&lt;/p&gt;
-
-&lt;p&gt;本教程概述了&lt;code&gt;PEP 8&lt;/code&gt;中列出的关键指南，它的目标读者是初级到中级程序员，因此我没有涉及一些最高级的主题。不过你可以通过阅读完整的&lt;a href=&#34;https://www.python.org/dev/peps/pep-0008/&#34;&gt;PEP 8 — Style Guide for Python Code | Python.org&lt;/a&gt;文档来学习高级主题。&lt;/p&gt;
-
-&lt;p&gt;在本教程结束时，你将能够：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;编写遵从&lt;code&gt;PEP 8&lt;/code&gt;规范的代码&lt;/li&gt;
-&lt;li&gt;理解&lt;code&gt;PEP 8&lt;/code&gt;中列出的指导原则背后的原因&lt;/li&gt;
-&lt;li&gt;设置你的开发环境，以便开始编写符合&lt;code&gt;PEP 8&lt;/code&gt;标准的Python代码&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;why-we-need-pep-8&#34;&gt;Why We Need PEP 8&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;可读性很重要&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;PEP 8&lt;/code&gt;规范存在的目的在于提高Python代码的可读性，但为什么可读性如此重要？为什么编写具有可读性的代码是Python语言的指导原则之一？&lt;/p&gt;
-
-&lt;p&gt;正如&lt;code&gt;Guido van Rossum&lt;/code&gt;所说：”代码阅读的频率远远高于编写的频率“。你可能花费几分钟或一整天时间编写一段代码来处理用户身份验证，一旦你写完它，你就再也不会重写一次，但是你肯定会再读一次，这段代码可能仍然是你正在进行的项目的一部分。每次你回到那个代码文件，你必须要记住那部分代码是做什么的以及你为什么要写它，所以可读性很重要。&lt;/p&gt;
-
-&lt;p&gt;如果你是Python新手，在你编写代码之后的几天或几周内还要你记住代码片段的含义可能有点困难。如果你遵循&lt;code&gt;PEP 8&lt;/code&gt;标准，你可以很确定你对你的变量命名得很好，你会知道你添加了足够的空格，因此更容易遵循代码中的逻辑步骤，你还可以对你的代码进行很好的注释，所有的这些都意味着你的代码具有更高的可读性，也更容易再次阅读。作为初学者，遵循&lt;code&gt;PEP 8&lt;/code&gt;的规则可以使学习Python成为更愉快的任务。&lt;/p&gt;
-
-&lt;p&gt;如果你正在找工作，那么遵循&lt;code&gt;PEP 8&lt;/code&gt;标准尤为重要，编写清晰可读性高的代码更会突出你的专业性，这将会侧面告诉你的老板，你了解怎么很好地构建你的代码。&lt;/p&gt;
-
-&lt;p&gt;如果你拥有很多编写Python代码的经验，然后你可能需要和其他人协作开发，编写可读性高的代码在这里至关重要，其他人可能此前从未看过你这样风格的代码，他必须重新阅读且理解你的代码风格，如果拥有你遵循和认可的指南将使其他人更容易阅读你的代码。&lt;/p&gt;
-
-&lt;h2 id=&#34;naming-conventions&#34;&gt;Naming Conventions&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;明了胜于晦涩&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;当你编写Python代码的时候，你必须对很多东西命名：变量、函数、类、包等等，选择合理的名字将为你节省时间和精力。你将能够从名称中找出某个变量，函数或类所代表的含义。你还要避免使用不恰当的名称，因为这样可能会导致难以调试的错误。&lt;/p&gt;
-
-&lt;p&gt;::Note: 永远不要使用 i，o，或 I 单字母名称，因为这些名称可能会被误认为1和0，具体取决于字体:::&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# 这可能看起来像你试图将2重新分配给零
-0 = 2 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;naming-styles&#34;&gt;Naming Styles&lt;/h3&gt;
-
-&lt;p&gt;下表概述了Python代码中的一些常见命名风格以及何时应该使用它们：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/EA017D35-813C-4339-BC62-0DF6D2B7E5E6.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;这些是一些常见的命名约定以及如何使用它们的示例，但是为了编写高可读性代码，你仍然需要谨慎选择字母和单词。除了在代码中选择正确的命名风格外，还必须仔细选择名称，以下是有关如何尽可能有效地执行此操作的一些指示。&lt;/p&gt;
-
-&lt;h3 id=&#34;how-to-choose-names&#34;&gt;How to Choose Names&lt;/h3&gt;
-
-&lt;p&gt;为变量、函数、类等选择名称是一项挑战，在编写代码时，你应该在命名选择中加入相当多的思考，因为这样可以使代码更具可读性。在Python中为对象命名的最佳方法是使用描述性名称来清楚表明对象所代表的内容。&lt;/p&gt;
-
-&lt;p&gt;对变量进行命名时，你可能会选择简单的单字母小写名称，例如x。但是，除非你使用x作为数学函数的参数，否则并不清楚x代表什么。想象下你正在将一个人的名字保存为字符串，并且你希望使用字符串切片来格式化其名称。你最终会得到这样的东西：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-x = &#39;John Smith&#39;
-y, z = x.split()
-print(z, y, sep=&#39;, &#39;)
-# &#39;Smith, John&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面代码可以很好的运行，但是你必须追踪&lt;code&gt;x,y,z&lt;/code&gt;表示的含义，这样也会让你的代码协作者产生困扰，更明确的名称选择将是这样的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-name = &#39;John Smith&#39;
-first_name, last_name = name.split()
-print(last_name, first_name, sep=&#39;, &#39;)
-# &#39;Smith, John&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;同样，为了减少输入的数量，在选择名称时使用单词缩写也是很有诱惑力的，在下面的例子中，我定义了一个函数&lt;code&gt;db()&lt;/code&gt;，它接受一个参数x并将其加倍返回：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-def db(x):
-    return x * 2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;乍一看，这似乎是一个明智的选择。 &lt;code&gt;db()&lt;/code&gt;很容易看成是&lt;code&gt;double&lt;/code&gt;的缩写，但想象一下，几天后再看这段代码，你可能已经忘记了你试图通过这个函数实现的目标是什么，这将使猜测它原本的含义变得困难。&lt;/p&gt;
-
-&lt;p&gt;下面的例子就比较清晰，如果你几天后再看这段代码，你仍然可以阅读并理解此函数的目标：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-def multiply_by_two(x):
-    return x * 2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;同样的理念适用于Python中的所有其他数据类型和对象，尽量一直使用最简洁且最具描述性的名称。&lt;/p&gt;
-
-&lt;h2 id=&#34;code-layout&#34;&gt;Code Layout&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;优美胜于丑陋&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;如何对代码布局对于提升它的可读性有很大的作用。在本节中，你将学习如何添加垂直空格以提高代码的可读性。你还将学习如何处理&lt;code&gt;PEP 8&lt;/code&gt;中建议的79字符行限制。&lt;/p&gt;
-
-&lt;h3 id=&#34;blank-lines&#34;&gt;Blank Lines&lt;/h3&gt;
-
-&lt;p&gt;垂直空格或空行可以极大地提高代码的可读性，聚集在一起的代码可能是压倒性的且难以阅读，同样，代码中的空行太多会使其看起来非常稀疏，读者可能需要进行没必要的滚动，以下是关于如何使用垂直空白的三个关键指南。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;用两个空行包围顶级函数和类&lt;/strong&gt;，顶级函数和类应该是完全自包含的，并处理单独的功能，在它们周围放置额外的垂直空间是有意义的，因此很明显它们是分开的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class MyFirstClass:
-    pass
-
-
-class MySecondClass:
-    pass
-
-
-def top_level_function():
-    return None
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;用一个空行包围类中的方法定义&lt;/strong&gt;，在一个类中，函数都彼此有联系，最好只在它们之间留一行：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class MyClass:
-    def first_method(self):
-        return None
-
-    def second_method(self):
-        return None
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;在函数内部谨慎地使用空行，以显示清晰的步骤&lt;/strong&gt;，有时候一个复杂的函数必须在return语句之前完成好几个步骤，为了帮助阅读者理解函数里面的逻辑，在每个步骤之间留一个空行会很有帮助。&lt;/p&gt;
-
-&lt;p&gt;在下面的示例中，有一个计算列表方差的函数，这个问题可以分为两个步骤，所以我在每个步骤之间留下了一个空行，在return语句之前还有一个空行。这有助于读者清楚地看到返回的内容：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def calculate_variance(number_list):
-    sum_list = 0
-    for number in number_list:
-        sum_list = sum_list + number
-    mean = sum_list / len(number_list)
-
-    sum_squares = 0
-    for number in number_list:
-        sum_squares = sum_squares + number**2
-    mean_squares = sum_squares / len(number_list)
-
-    return mean_squares - mean**2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果仔细地使用垂直空格，可以大大提高代码的可读性，它有助于读者直观地理解你的代码如何分成几个部分，以及这些部分如何相互关联。&lt;/p&gt;
-
-&lt;h3 id=&#34;maximum-line-length-and-line-breaking&#34;&gt;Maximum Line Length and Line Breaking&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;PEP 8&lt;/code&gt;建议每行代码限制在79个字符以内，这是因为它允许多个文件并排打开，同时也避免了换行，当然，将语句保持在79个字符以内并不总是可行的。&lt;code&gt;PEP 8&lt;/code&gt;概述了允许语句在多行上运行的方法。&lt;/p&gt;
-
-&lt;p&gt;如果代码包含在括号、方括号或大括号中，Python将会认为代码是一行的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def function(arg_one, arg_two,
-             arg_three, arg_four):
-    return arg_one
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果不能用上述的方式进行每行代码延续，那么可以使用反斜杠代替换行：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from mypkg import example1, \
-    example2, example3
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;但是，如果可以使用第一个方案，那么就应该尽量这样做。&lt;/p&gt;
-
-&lt;p&gt;如果需要在二元运算符周围做换行操作，例如&lt;code&gt;+&lt;/code&gt;和&lt;code&gt;*&lt;/code&gt;，那么需要将换行操作放在前面，这条规则源于数学，数学家同意在二元运算符之前换行以可提高可读性，比较以下两个例子。&lt;/p&gt;
-
-&lt;p&gt;下面是在二元运算符之前换行的示例：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-total = (first_variable
-         + second_variable
-         - third_variable)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;你可以马上反应过来哪些变量正在相加后者相减，因为操作符紧邻着变量。&lt;/p&gt;
-
-&lt;p&gt;现在，让我们看一个在二元运算符之后换行的示例：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not Recommended
-total = (first_variable +
-         second_variable -
-         third_variable)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在这里，很难看出哪个变量被加，哪个变量被减。&lt;/p&gt;
-
-&lt;p&gt;在二元运算符之前换行可以让代码更加具有可读性，所&lt;code&gt;PEP 8&lt;/code&gt;鼓励这种方式。在二元运算符之后换行的代码仍然符合&lt;code&gt;PEP 8&lt;/code&gt;，但是，我们鼓励你在二元运算符之前换行。&lt;/p&gt;
-
-&lt;h2 id=&#34;indentation&#34;&gt;Indentation&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;当存在多种可能，不要尝试去猜测&lt;br&gt;
-而是尽量找一种，最好是唯一一种明显的解决方案（如果不确定，就用穷举法）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;缩进，即前导空格，在Python中非常重要。Python中代码行的缩进级别决定了语句如何组合在一起。&lt;/p&gt;
-
-&lt;p&gt;思考下面的例子：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 3
-if x &amp;gt; 5:
-    print(&#39;x is larger than 5&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;缩进的print语句使得Python明白只有if语句返回True才能继续执行它，同样的缩进适用于告诉 Python 在调用函数时要执行哪些代码，或者哪些代码属于给定的类。&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;PEP 8&lt;/code&gt;制定的关键缩进规则如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;使用4个连续的空格来表示缩进。&lt;/li&gt;
-&lt;li&gt;选择空格而不是制表符(Tab)。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;tabs-vs-spaces&#34;&gt;Tabs vs. Spaces&lt;/h3&gt;
-
-&lt;p&gt;如同上述所说，当你进行缩进的时候，你最好用空格代替制表符，你可以直接对文本编辑器的设置进行调整，当你按&lt;code&gt;Tab&lt;/code&gt;的时候转换为4个空格的输出&lt;/p&gt;
-
-&lt;p&gt;如果你使用的是Python 2并且混合使用了制表符和空格来缩进代码，当你运行的时候可能不会看见错误。为了帮助你检查一致性，可以在从命令行运行Python 2代码时添加&lt;code&gt;-t&lt;/code&gt;标志。当你不一致地使用制表符和空格时，解释器将会发出警告：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;python2 -t code.py
-code.py: inconsistent use of tabs and spaces in indentation
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;相反，如果你使用&lt;code&gt;-tt&lt;/code&gt;标志，解释器将发出错误而不是警告，使用此方法的好处是解释器会告诉你缩进不一致的位置在哪里：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;python2 -tt code.py
-File &amp;quot;code.py&amp;quot;, line 3
-    print(i, j)
-             ^
-TabError: inconsistent use of tabs and spaces in indentation
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Python 3不允许制表符和空格混合使用，因此，如果你使用的是Python3，解释器将会自动报错：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python3 code.py
-File &amp;quot;code.py&amp;quot;, line 3
-    print(i, j)
-              ^
-TabError: inconsistent use of tabs and spaces in indentation
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;你可以在编写Python代码中使用制表符或空格来表示缩进，但是，如果你使用的是Python 3，则必须与你的选择保持一致，否则你的代码将不能运行。&lt;code&gt;PEP 8&lt;/code&gt;推荐你总是使用4个连续的空格来表示缩进。&lt;/p&gt;
-
-&lt;h3 id=&#34;indentation-following-line-breaks&#34;&gt;Indentation Following Line Breaks&lt;/h3&gt;
-
-&lt;p&gt;当你为了保证每行在79个字符以下而进行换行时，使用缩进来提高代码可读性是很有用的，它允许读者区分两行代码和跨越两行的单行代码，这里有两种缩进风格供你选择。&lt;/p&gt;
-
-&lt;p&gt;第一个是将缩进块与开始的分隔符对齐:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def function(arg_one, arg_two,
-             arg_three, arg_four):
-    return arg_one
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;有时你会发现只需要4个空格就可以与开口分隔符对齐，这种情况经常发生在 if 语句中，如果跨多行的&lt;code&gt;if+ +(&lt;/code&gt;构成4个字符，那么就会发生这种情况，在这种情况下，很难确定 if 语句中嵌套的代码块从哪里开始:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 5
-if (x &amp;gt; 3 and
-    x &amp;lt; 10):
-    print(x)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在这种情况下，&lt;code&gt;PEP 8&lt;/code&gt;提供了两种替代方案来帮助你提高代码可读性：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在最后的条件后添加注释，由于大多数编辑器中有语法高亮显示，这可以将条件与嵌套代码分开：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 5
-if (x &amp;gt; 3 and
-    x &amp;lt; 10):
-    # Both conditions satisfied
-    print(x)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在换行中添加额外的缩进：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 5
-if (x &amp;gt; 3 and
-        x &amp;lt; 10):
-    print(x)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;换行符后的另一种缩进方式是&lt;strong&gt;悬挂缩进(hanging indent)&lt;/strong&gt;，这是一个印刷术语，意思是段落或语句中除第一行以外的每一行都缩进，可以使用悬挂缩进直观地表示一行代码的延续。下面是一个例子:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;var = function(
-    arg_one, arg_two,
-    arg_three, arg_four)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;::Note：当你正在使用hanging indent时，第一行不得有任何参数。以下示例不符合PEP 8::&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not Recommended
-var = function(arg_one, arg_two,
-    arg_three, arg_four)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;使用&lt;strong&gt;hanging indent&lt;/strong&gt;时，可以添加额外的缩进以区分连续行与函数内包含的代码。下面是一个难以阅读的例子，因为函数里面的代码和连续行的缩进等级是相同的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not Recommended
-def function(
-    arg_one, arg_two,
-    arg_three, arg_four):
-    return arg_one
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;相反，最好在一行代码换行后使用双缩进，这有助于你区分函数参数和函数内部构造，从而提高可读性：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def function(
-        arg_one, arg_two,
-        arg_three, arg_four):
-    return arg_one
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;当你编写遵循&lt;code&gt;PEP 8&lt;/code&gt;规范代码的时候，每行字符在79之内的规则使你必须强制换行，为了提高可读性，你应该缩进一行，以表明它是一个连续的行。做到这一点有两种方法，第一种是将缩进的块与开始的分隔符对齐，第二种是使用悬挂缩进，在换行之后，你可以自由选择使用哪种方法进行缩进。&lt;/p&gt;
-
-&lt;h3 id=&#34;where-to-put-the-closing-brace&#34;&gt;Where to Put the Closing Brace&lt;/h3&gt;
-
-&lt;p&gt;一行代码的换行操作允许你在括号、方括号或大括号后面断开一行，这会造成一个问题，就是很容易忘记关闭括号，但重要的是要把它放在合理的地方，否则，它会使读者感到困惑，&lt;code&gt;Pep 8&lt;/code&gt;为隐含的行延续中的结束括号的位置提供了两个选项:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;使用前一行的第一个非空白字符排列右括号：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;list_of_numbers = [
-    1, 2, 3,
-    4, 5, 6,
-    7, 8, 9
-    ]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;将结束括号与声明行的第一个字符对齐:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;list_of_numbers = [
-    1, 2, 3,
-    4, 5, 6,
-    7, 8, 9
-]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;你可以自由地选择任何一种方式，但是，和之前说的一样，一致性是关键，所以之后的代码就要坚持使用你选择的某一个方案以保持代码一致性。&lt;/p&gt;
-
-&lt;h2 id=&#34;comments&#34;&gt;Comments&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;如果你无法向人描述你的方案，那肯定不是一个好方案；反之亦然&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;你应该使用注释来说明编写的代码，这对记录你的代码非常重要，这样你的任何协作者都可以理解它。当你或者其他人阅读代码注释，他们应该能够很容易地理解注释所应用的代码，以及它如何与代码的其余部分相匹配。&lt;/p&gt;
-
-&lt;p&gt;下面是一些你为你代码作注释时候需要注意的关键点：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;将注释和文档字符串的行长限制为72个字符&lt;/li&gt;
-&lt;li&gt;使用完整的句子，以大写字母开头&lt;/li&gt;
-&lt;li&gt;注释随着代码的更新而更新&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;block-comments&#34;&gt;Block Comments&lt;/h3&gt;
-
-&lt;p&gt;使用块注释来记录一小部分代码，当你必须编写几行代码来执行单个操作时，它们非常有用，例如从文件导入数据或更新数据库记录。其重要性在于它们可以帮助其他人理解给定代码块的用途和功能。&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;PEP 8&lt;/code&gt;提供以下规则来编写注释：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;将块注释缩进到其描述代码的相同级别&lt;/li&gt;
-&lt;li&gt;用#加上一个空格开始每一行的注释&lt;/li&gt;
-&lt;li&gt;用包含单个＃的行分隔段落&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这是一个解释for循环功能的块注释，请注意，句子为了每行保留79个字符行限制进行了换行：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;for i in range(0, 10):
-    # Loop over i ten times and print out the value of i, followed by a
-    # new line character
-    print(i, &#39;\n&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;有时，如果代码技术性较强，那么有必要在块注释中使用多个段落：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def quadratic(a, b, c, x):
-    # Calculate the solution to a quadratic equation using the quadratic
-    # formula.
-    #
-    # There are always two solutions to a quadratic equation, x_1 and x_2.
-    x_1 = (- b+(b**2-4*a*c)**(1/2)) / (2*a)
-    x_2 = (- b-(b**2-4*a*c)**(1/2)) / (2*a)
-    return x_1, x_2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果你不确定什么样的注释类型是合适的，那么块注释通常是正确的选择。请尽量在你的代码中添加注释，一旦你对代码进行了更新也请务必对注释进行更新！&lt;/p&gt;
-
-&lt;h3 id=&#34;inline-comments&#34;&gt;Inline Comments&lt;/h3&gt;
-
-&lt;p&gt;行内注释对单个语句中的一段代码进行了解释，这有助于提醒你或者其他人为什么某行代码是必须的，以下是 &lt;code&gt;PEP 8&lt;/code&gt;对他们的评价:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;谨慎使用行内注释&lt;/li&gt;
-&lt;li&gt;在与它们引用的语句相同的行上写入行内注释&lt;/li&gt;
-&lt;li&gt;从语句中用两个或多个空格分隔行内注释&lt;/li&gt;
-&lt;li&gt;像块注释那样，用#加上一个空格开始每一行的注释&lt;/li&gt;
-&lt;li&gt;不要用它们来解释明显的问题&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;下面是一个行内注释的例子：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 5  # This is an inline comment
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;有时，行内注释似乎是必要的，但是你可以使用更好的命名约定，下面是一个例子:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = &#39;John Smith&#39;  # Student Name
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这里，行内注释为变量提供了额外的说明信息，然而用&lt;code&gt;x&lt;/code&gt;作为一个人名的变量名不是很好的做法，如果你对变量重命名，是可以不用使用行内注释的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;student_name = &#39;John Smith&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;最后，像这样的行内注释是不好的做法，因为它们陈述了显而易见且杂乱的代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;empty_list = []  # Initialize empty list
-
-x = 5
-x = x * 5  # Multiply x by 5
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;行内注释比块注释更具体，并且容易在非必要时候添加它们，这会导致代码混乱。除非你确定需要行内注释，不然使用块注释避免代码混乱的问题比较好，坚持使用块注释，可以让你的代码更加符合&lt;code&gt;PEP8&lt;/code&gt;的标准。&lt;/p&gt;
-
-&lt;h3 id=&#34;documentation-strings&#34;&gt;Documentation Strings&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;Documentation strings&lt;/code&gt; 或者说&lt;code&gt;docstrings&lt;/code&gt;， 是用双引号（”””）或单引号（’’’）括起来的字符串，它们出现在任何函数，类，方法或模块的第一行，你可以使用它们来解释和记录特定的代码块。这里有一个对应的&lt;code&gt;PEP&lt;/code&gt;，见&lt;a href=&#34;https://www.python.org/dev/peps/pep-0257/&#34;&gt;PEP 257&lt;/a&gt;，但你可以从本节阅读总结的经验：&lt;/p&gt;
-
-&lt;p&gt;使用文档字符串的重要规则如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;文档字符串两边都有三个双引号环绕，比如：&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;This is a docstring&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;为所有公共模块，函数，类和方法编写&lt;code&gt;docstrings&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;使用单行&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;结束多行&lt;code&gt;docstring&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def quadratic(a, b, c, x):
-    &amp;quot;&amp;quot;&amp;quot;Solve quadratic equation via the quadratic formula.
-
-    A quadratic equation has the following form:
-    ax**2 + bx + c = 0
-
-    There always two solutions to a quadratic equation: x_1 &amp;amp; x_2.
-    &amp;quot;&amp;quot;&amp;quot;
-    x_1 = (- b+(b**2-4*a*c)**(1/2)) / (2*a)
-    x_2 = (- b-(b**2-4*a*c)**(1/2)) / (2*a)
-
-    return x_1, x_2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;对于单行&lt;code&gt;docstrings&lt;/code&gt;，保持&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;在同一行：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def quadratic(a, b, c, x):
-    &amp;quot;&amp;quot;&amp;quot;Use the quadratic formula&amp;quot;&amp;quot;&amp;quot;
-    x_1 = (- b+(b**2-4*a*c)**(1/2)) / (2*a)
-    x_2 = (- b-(b**2-4*a*c)**(1/2)) / (2*a)
-
-    return x_1, x_2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;想要了解更多，请阅读&lt;a href=&#34;https://realpython.com/documenting-python-code/#docstrings-background&#34;&gt;Documenting Python Code: A Complete Guide – Real Python&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;whitespace-in-expressions-and-statements&#34;&gt;Whitespace in Expressions and Statements&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;间隔胜于紧凑&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;正确使用空格在表达式和语句中非常有用，如果代码中没有足够的空格，那么代码应该很难阅读，因为他们都凑在一起，如果空格太多，又会难以在视觉上将完整的语句联系出来。&lt;/p&gt;
-
-&lt;h3 id=&#34;whitespace-around-binary-operators&#34;&gt;Whitespace Around Binary Operators&lt;/h3&gt;
-
-&lt;p&gt;在进行以下二元操作的时候，应该在其两边加上空格：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;分配操作（=, +=, -=, 等等）&lt;/li&gt;
-&lt;li&gt;比较（==, !=, &amp;gt;, &amp;lt;. &amp;gt;=, &amp;lt;=）和 （is, is not, in, not in）&lt;/li&gt;
-&lt;li&gt;布尔（and, not, or）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;::Note：当&lt;code&gt;=&lt;/code&gt;是为一个函数的参数赋值时候就不用在两边加空格::&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-def function(default_parameter=5):
-    # ...
-
-
-# Not recommended
-def function(default_parameter = 5):
-    # ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果语句中有多个运算符，则在每个运算符前后添加单个空格可能会让人感到困惑，相反，最好只在优先级最低的运算符周围添加空格，尤其是在执行数学运算时。以下是几个例子：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-y = x**2 + 5
-z = (x+y) * (x-y)
-
-# Not Recommended
-y = x ** 2 + 5
-z = (x + y) * (x - y)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;还可以将此应用于有多个条件的if语句：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-if x &amp;gt; 5 and x % 2 == 0:
-    print(&#39;x is larger than 5 and divisible by 2!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在上面的示例中，&lt;code&gt;and&lt;/code&gt;操作具有最低优先级，因此，可以下面这样更清楚地表达if语句：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if x&amp;gt;5 and x%2==0:
-    print(&#39;x is larger than 5 and divisible by 2!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;你可以自由选择哪个方式更清晰，但需要注意的是你必须在运算符的任何一侧使用相同数量的空格。&lt;/p&gt;
-
-&lt;p&gt;下面的例子是不被允许的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Definitely do not do this!
-if x &amp;gt;5 and x% 2== 0:
-    print(&#39;x is larger than 5 and divisible by 2!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;在切片中，冒号作为二元运算符。因此，上一节中概述的规则也适用于此，并且其任何一方都应该有相同数量的空白，以下列表切片示例是合法的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;list[3:4]
-
-# Treat the colon as the operator with lowest priority
-list[x+1 : x+2]
-
-# In an extended slice, both colons must be
-# surrounded by the same amount of whitespace
-list[3:4:5]
-list[x+1 : x+2 : x+3]
-
-# The space is omitted if a slice parameter is omitted
-list[x+1 : x+2 :]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;总之，你应该使用空格包围大多数运算符，但是，此规则有一些注意事项，例如在函数参数中或在一个语句中组合多个运算符时。&lt;/p&gt;
-
-&lt;h3 id=&#34;when-to-avoid-adding-whitespace&#34;&gt;When to Avoid Adding Whitespace&lt;/h3&gt;
-
-&lt;p&gt;在某些情况下，添加空格可能会使代码难以阅读，太多的空格会使代码过于稀疏而难以理解。 &lt;code&gt;PEP 8&lt;/code&gt;概述了一些非常明显的例子应当不使用空格&lt;/p&gt;
-
-&lt;p&gt;在一行的末尾避免添加空格是最重要的地方，这称为&lt;code&gt;trailing whitespace&lt;/code&gt;，它是不可见的，可能产生难以追踪的错误。&lt;/p&gt;
-
-&lt;p&gt;以下列表概述了一些应避免添加空格的情况：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;直接放在括号、方括号或大括号内:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-my_list = [1, 2, 3]
-
-# Not recommended
-my_list = [ 1, 2, 3, ]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在逗号，分号或冒号之前：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;x = 5
-y = 6
-
-# Recommended
-print(x, y)
-
-# Not recommended
-print(x , y)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在打开函数调用的参数列表的开括号之前：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def double(x):
-    return x * 2
-
-# Recommended
-double(3)
-
-# Not recommended
-double (3)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在开始索引或切片的开括号之前:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-list[3]
-
-# Not recommended
-list [3]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;在尾随逗号和右括号之间：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-tuple = (1,)
-
-# Not recommended
-tuple = (1, )
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;对齐赋值运算符：&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-var1 = 5
-var2 = 6
-some_long_var = 7
-
-# Not recommended
-var1          = 5
-var2          = 6
-some_long_var = 7
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;确保你的代码中没有尾随空格。 在其他情况下，&lt;code&gt;PEP 8&lt;/code&gt;不鼓励添加额外的空格，例如立直接放在括号、方括号或大括号内，以及逗号和冒号之前。 为了对齐操作符，也不应该添加额外的空格。&lt;/p&gt;
-
-&lt;h2 id=&#34;programming-recommendations&#34;&gt;Programming Recommendations&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;简洁胜于复杂&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;你经常会发现有几种方法可以在 Python (以及任何其他编程语言)中执行类似的操作。在本节中，你将看到&lt;code&gt;PEP 8&lt;/code&gt;提供的一些建议用来消除这种歧义并且保持一致性。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;不要使用等价运算符将布尔值与True或False进行比较&lt;/strong&gt;，你经常需要检查布尔值是True还是False，当这样操作时，请使用如下所示的语句直观地执行此操作：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-my_bool = 6 &amp;gt; 5
-if my_bool == True:
-    return &#39;6 is bigger than 5&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这里不需要使用等价运算符&lt;code&gt;==&lt;/code&gt;， bool只能取值True或False，按照下面这样写就行了：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if my_bool:
-    return &#39;6 is bigger than 5&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这种在if语句中使用bool的方式可以写更少的代码并且更加简单，因此&lt;code&gt;PEP 8&lt;/code&gt;鼓励使用这种方式。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;在if语句中判断列表是否为空&lt;/strong&gt;，当你希望确定列表是否为空时，你通常会判断列表的长度，如果列表为空，那么长度为0，在if语句中使用时等于False，这里有一个例子：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-my_list = []
-if not len(my_list):
-    print(&#39;List is empty!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;但是，在Python中，任何空列表，字符串或元组都可以当为False的。因此，我们可以提出一个更简单的替代方案：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-my_list = []
-if not my_list:
-    print(&#39;List is empty!&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;两种方法都可以判断列表是否为空，但是第二种方式更加简洁，因此&lt;code&gt;PEP 8&lt;/code&gt;鼓励使用这种方式。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;在if语句中，使用 is not 比 no ... is in 好&lt;/strong&gt;，当你需要确定一个变量是否被赋值，这里有两种方法，第一种是评估if语句中的x是不是为非&lt;code&gt;None&lt;/code&gt;，如下所示：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if x is not None:
-    return &#39;x exists!&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;第二种方案是现在if语句中判断x是不是&lt;code&gt;None&lt;/code&gt;，再进行&lt;code&gt;not&lt;/code&gt;操作：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-if not x is None:
-    return &#39;x exists!&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;两种方法都可以判断x是否为&lt;code&gt;None&lt;/code&gt;，但是第一种方式更加简单，因此&lt;code&gt;PEP 8&lt;/code&gt;鼓励使用这种方式。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;当你想表达if x is not None时，不要使用if x&lt;/strong&gt;，有时候，你可能拥有一个函数带有默认值为&lt;code&gt;None&lt;/code&gt;的参数，当对参数&lt;code&gt;arg&lt;/code&gt;检查是否带有不同的值的时候经常会犯下面这样的错误：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not Recommended
-if arg:
-    # Do something with arg...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;此代码检查的是&lt;code&gt;arg&lt;/code&gt;是否为真，但相对的你要的是检查是否为&lt;code&gt;None&lt;/code&gt;，所以下面这样写比较好：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if arg is not None:
-    # Do something with arg...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面的错误会使得判断是否为真和&lt;code&gt;not None&lt;/code&gt;相等，你可以设置&lt;code&gt;arg = []&lt;/code&gt;，如上所述，空列表在Python中被认为是&lt;code&gt;False&lt;/code&gt;，因此，尽管参数被声明为&lt;code&gt;[]&lt;/code&gt;，但条件并没有满足，因此函数里面的代码&lt;code&gt;if&lt;/code&gt;声明并不能被执行。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;用.startswith() 和.endswith()代替切片&lt;/strong&gt;，如果你想检查一段字符串的前缀或者后缀是否带有字符串&lt;code&gt;cat&lt;/code&gt;，这看起来使用列表切片似乎比较明智，但是，列表切片容易出错，您必须对前缀或后缀中的字符数进行硬编码，对于那些不太熟悉Python列表切片的人来说很难看清楚你想要实现的目的：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-if word[:3] == &#39;cat&#39;:
-    print(&#39;The word starts with &amp;quot;cat&amp;quot;&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;然而，还是使用&lt;code&gt;.startswith():&lt;/code&gt;可读性比较高：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if word.startswith(&#39;cat&#39;):
-    print(&#39;The word starts with &amp;quot;cat&amp;quot;&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;同样的，当你想检查字符串后缀也是同样的原理，下面的示例概述了如何检查字符串是否以jpg结尾：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Not recommended
-if file_name[-3:] == &#39;jpg&#39;:
-    print(&#39;The file is a JPEG&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;虽然结果是正确的，但是符号有点复杂且难以阅读，与之相对的，你可以用&lt;code&gt;.endswith()&lt;/code&gt;实现，看下面例子：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# Recommended
-if file_name.endswith(&#39;jpg&#39;):
-    print(&#39;The file is a JPEG&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;就像上面的列出的编程建议，我们目标是编写清晰以及可读性较高的代码，在Python中，有许多不同的方法可以实现相同的结果，因此有关选择哪种方法的指南很有帮助。&lt;/p&gt;
-
-&lt;h2 id=&#34;when-to-ignore-pep-8&#34;&gt;When to Ignore PEP 8&lt;/h2&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;什么时候忽略PEP 8？对于这个问题有个简短的答案，那就是永远不会&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;如果你严格遵循 PEP 8，就可以保证您拥有干净、专业和可读的代码。 这对你以及合作者和潜在雇主都有好处。&lt;/p&gt;
-
-&lt;p&gt;但是，PEP 8中的一些指导方针在以下实例中不适用：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;如果遵守PEP 8将破坏与现有软件的兼容性&lt;/li&gt;
-&lt;li&gt;如果你正在从事的工作的代码与 PEP 8不一致&lt;/li&gt;
-&lt;li&gt;如果代码需要与旧版本的Python版本保持兼容&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;tips-and-tricks-to-help-ensure-your-code-follows-pep-8&#34;&gt;Tips and Tricks to Help Ensure Your Code Follows PEP 8&lt;/h2&gt;
-
-&lt;p&gt;想要你的代码兼容&lt;code&gt;PEP 8&lt;/code&gt;，那你得记住不少规范，在开发代码时，记住所有这些规则可能是一项艰巨的任务。特别是对老项目进行更新以兼容&lt;code&gt;PEP 8&lt;/code&gt;时，幸运的是，有些工具可以帮助你加快这一过程，这里有两个工具可以帮你强制兼容&lt;code&gt;PEP 8&lt;/code&gt;规范：&lt;code&gt;linters&lt;/code&gt;和&lt;code&gt;autoformatters&lt;/code&gt;。&lt;/p&gt;
-
-&lt;h3 id=&#34;linters&#34;&gt;Linters&lt;/h3&gt;
-
-&lt;p&gt;Linters是分析代码和标记错误的程序，他们可以为你如何修复错误提供建议，在作为文本编辑器的扩展安装时，Linters特别有用，因为它们标记了你编程时的错误和格式问题。在本节中，您将看到Linters程序是如何工作的大纲，最后还有文本编辑器扩展的链接。&lt;/p&gt;
-
-&lt;p&gt;对于Python代码，最好的linters如下：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;[pycodestyle · PyPI](https://pypi.org/project/pycodestyle/)&#34;&gt;pycodestyle&lt;/a&gt;是一个根据&lt;code&gt;PEP 8&lt;/code&gt;中的某些风格约定来检查Python代码的工具&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 使用pip安装pycodestyle
-pip install pycodestyle
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;使用以下命令在终端中使用&lt;code&gt;pycodestyle&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;pycodestyle code.py
-code.py:1:17: E231 missing whitespace after &#39;,&#39;
-code.py:2:21: E231 missing whitespace after &#39;,&#39;
-code.py:6:19: E711 comparison to None should be &#39;if cond is None:&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;flake8&#34;&gt;flake8&lt;/a&gt;是一个结合了调试器，&lt;code&gt;pyflakes&lt;/code&gt;和&lt;code&gt;pycodestyle&lt;/code&gt;的工具&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;# 使用pip安装flake8
-pip install flake8
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;使用以下命令在终端中使用&lt;code&gt;pycodestyle&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;flake8 code.py
-code.py:1:17: E231 missing whitespace after &#39;,&#39;
-code.py:2:21: E231 missing whitespace after &#39;,&#39;
-code.py:3:17: E999 SyntaxError: invalid syntax
-code.py:6:19: E711 comparison to None should be &#39;if cond is None:&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;还显示了输出的示例。&lt;/p&gt;
-
-&lt;p&gt;::Note：额外输出的一行表示语法错误。::&lt;/p&gt;
-
-&lt;p&gt;这些也可用作Atom，Sublime Text，Visual Studio Code和VIM的扩展。您还可以找到有关为Python开发设置Sublime Text和VIM的指南，以及Real Python中一些流行的文本编辑器的概述。&lt;/p&gt;
-
-&lt;h3 id=&#34;autoformatters&#34;&gt;Autoformatters&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;Autoformatters&lt;/code&gt;可以重构你的代码以使其符合&lt;code&gt;PEP 8&lt;/code&gt;规范，像&lt;a href=&#34;black&#34;&gt;black&lt;/a&gt;程序就可以根据&lt;code&gt;PEP 8&lt;/code&gt;规范重新格式化你的代码，一个很大的区别是它将行长度限制为88个字符，而不是79个字符。但是，您可以通过添加命令行标志来覆盖它，如下面的示例所示。&lt;/p&gt;
-
-&lt;p&gt;可以使用pip安装black，它需要&lt;code&gt;Python 3.6+&lt;/code&gt;：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;pip install black
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;它可以通过命令行运行，就像Linters一样。假设你从名为code.py里面不符合PEP 8规范的代码开始：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;for i in range(0,3):
-    for j in range(0,3):
-        if (i==2):
-            print(i,j)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;你可以在命令行中运行如下代码：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;black code.py
-reformatted code.py
-All done!
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;code.py&lt;/code&gt;将会被重新格式化为如下所示：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;for i in range(0, 3):
-    for j in range(0, 3):
-        if i == 2:
-            print(i, j)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;如果你想要更改行长度限制，则可以使用&lt;code&gt;—line-length&lt;/code&gt;标志：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;black --line-length=79 code.py
-reformatted code.py
-All done!
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;另外两个&lt;code&gt;autoformatters&lt;/code&gt;分别为&lt;code&gt;autopep8&lt;/code&gt;和&lt;code&gt;yapf&lt;/code&gt;，它们和&lt;code&gt;black&lt;/code&gt;操作类似。&lt;/p&gt;
-
-&lt;p&gt;另一个&lt;code&gt;Real Python&lt;/code&gt;教程，由&lt;code&gt;Alexander van Tol&lt;/code&gt;编写的&lt;a href=&#34;https://realpython.com/python-code-quality/&#34;&gt;Python Code Quality: Tools &amp;amp; Best Practices&lt;/a&gt;详细解释了如何使用这些工具。&lt;/p&gt;
-
-&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;你现在已经知道如何使用&lt;code&gt;PEP 8&lt;/code&gt;中的指南编写高质量，可读高的Python代码，虽然指南看起来很迂腐，但遵循它们可以真正改善你的代码，特别是在与潜在雇主或合作者共享代码时。&lt;/p&gt;
-
-&lt;p&gt;在本教程中你了解到：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;什么是&lt;code&gt;PEP 8&lt;/code&gt;以及其存在的原因&lt;/li&gt;
-&lt;li&gt;为什么你应该编写符合&lt;code&gt;PEP 8&lt;/code&gt;标准的代码&lt;/li&gt;
-&lt;li&gt;如何编写符合&lt;code&gt;PEP 8&lt;/code&gt;的代码&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;除此之外，您还了解了如何使用linters和autoformatters根据&lt;code&gt;PEP 8&lt;/code&gt;指南检查代码。&lt;/p&gt;
-
-&lt;p&gt;如果你想了解更多，可以阅读&lt;a href=&#34;[PEP 8 — Style Guide for Python Code | Python.org](https://www.python.org/dev/peps/pep-0008/)&#34;&gt;full documentation&lt;/a&gt;或者浏览&lt;a href=&#34;https://pep8.org/&#34;&gt;pep8.org&lt;/a&gt;，这些教程不仅提供了类似的信息同时也提供了很好的格式让你阅读，在这些文档中，您将找到本教程未涉及的其余&lt;code&gt;PEP 8&lt;/code&gt;指南。&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-</description>
+      <description>原文地址：How to Write Beautiful Python Code With PEP 8 作者：Jasmine Finer  翻译：howie6879  PEP 8有时候读作PEP8或者PEP-8，是一份提供如何编写Python代码指南和最佳实践的文档，由Guido van Rossum, Barry Warsaw, Nick Coghlan在2001年完成。PEP 8主要注重于提高 Python 代码的可读性和一致性。
+PEP全称为：Python Enhancement Proposal，一个PEP是一份文档，它描述了为Python提出的新特性以及为社区编写的Python方面的文档，比如设计和风格。
+本教程概述了PEP 8中列出的关键指南，它的目标读者是初级到中级程序员，因此我没有涉及一些最高级的主题。不过你可以通过阅读完整的PEP 8 — Style Guide for Python Code | Python.org文档来学习高级主题。
+在本教程结束时，你将能够：
+ 编写遵从PEP 8规范的代码 理解PEP 8中列出的指导原则背后的原因 设置你的开发环境，以便开始编写符合PEP 8标准的Python代码  Why We Need PEP 8  可读性很重要
+ PEP 8规范存在的目的在于提高Python代码的可读性，但为什么可读性如此重要？为什么编写具有可读性的代码是Python语言的指导原则之一？
+正如Guido van Rossum所说：”代码阅读的频率远远高于编写的频率“。你可能花费几分钟或一整天时间编写一段代码来处理用户身份验证，一旦你写完它，你就再也不会重写一次，但是你肯定会再读一次，这段代码可能仍然是你正在进行的项目的一部分。每次你回到那个代码文件，你必须要记住那部分代码是做什么的以及你为什么要写它，所以可读性很重要。
+如果你是Python新手，在你编写代码之后的几天或几周内还要你记住代码片段的含义可能有点困难。如果你遵循PEP 8标准，你可以很确定你对你的变量命名得很好，你会知道你添加了足够的空格，因此更容易遵循代码中的逻辑步骤，你还可以对你的代码进行很好的注释，所有的这些都意味着你的代码具有更高的可读性，也更容易再次阅读。作为初学者，遵循PEP 8的规则可以使学习Python成为更愉快的任务。
+如果你正在找工作，那么遵循PEP 8标准尤为重要，编写清晰可读性高的代码更会突出你的专业性，这将会侧面告诉你的老板，你了解怎么很好地构建你的代码。
+如果你拥有很多编写Python代码的经验，然后你可能需要和其他人协作开发，编写可读性高的代码在这里至关重要，其他人可能此前从未看过你这样风格的代码，他必须重新阅读且理解你的代码风格，如果拥有你遵循和认可的指南将使其他人更容易阅读你的代码。
+Naming Conventions  明了胜于晦涩</description>
     </item>
     
     <item>
@@ -3196,207 +182,32 @@ All done!
       <pubDate>Thu, 13 Dec 2018 16:03:05 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2018/40/</guid>
-      <description>&lt;h2 id=&#34;如何用python创建一个简单的神经网络&#34;&gt;如何用Python创建一个简单的神经网络&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;原文地址：&lt;a href=&#34;https://www.kdnuggets.com/2018/10/simple-neural-network-python.html&#34;&gt;How to Create a Simple Neural Network in Python&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;作者：&lt;a href=&#34;https://www.linkedin.com/in/garbade&#34;&gt;Dr. Michael J. Garbade&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;翻译：&lt;a href=&#34;https://github.com/howie6879&#34;&gt;howie6879&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。&lt;/p&gt;
-
-&lt;p&gt;拥有五年以上经验的德国机器学习专家&lt;a href=&#34;https://www.education-ecosystem.com/andreybu/REaxr-machine-learning-model-python-sklearn-kera/oPGdP-machine-learning-model-python-sklearn-kera/&#34;&gt;Andrey Bulezyuk&lt;/a&gt;说过：&lt;strong&gt;神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;基本上，一个ANN由以下组件构成：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;输入层：接受传递数据&lt;/li&gt;
-&lt;li&gt;隐藏层&lt;/li&gt;
-&lt;li&gt;输出层&lt;/li&gt;
-&lt;li&gt;各层之间的权重&lt;/li&gt;
-&lt;li&gt;每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用&lt;code&gt;Sigmoid&lt;/code&gt;激活函数&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据&lt;/p&gt;
-
-&lt;p&gt;训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出&lt;/p&gt;
-
-&lt;p&gt;下面展示了一个简单的神经网络结构图：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/1A5B0640-9C9D-4DE6-B15D-249B9A77DC3E.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。&lt;/p&gt;
-
-&lt;p&gt;在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。&lt;/p&gt;
-
-&lt;h3 id=&#34;问题&#34;&gt;问题&lt;/h3&gt;
-
-&lt;p&gt;这里用表格列出了我们需要解决的问题：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CD5280AA-A4F7-4994-8AB5-13A5B9E60248.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。&lt;/p&gt;
-
-&lt;p&gt;如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。&lt;/p&gt;
-
-&lt;p&gt;让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)&lt;/p&gt;
-
-&lt;h3 id=&#34;创建一个神经网络类&#34;&gt;创建一个神经网络类&lt;/h3&gt;
-
-&lt;p&gt;我们将在Python中创建一个&lt;code&gt;NeuralNetwork&lt;/code&gt;类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数&lt;/p&gt;
-
-&lt;p&gt;尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入&lt;code&gt;numpy&lt;/code&gt;包来协助计算。&lt;/p&gt;
-
-&lt;p&gt;该库带有以下四个重要方法：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;exp：用于生成自然指数&lt;/li&gt;
-&lt;li&gt;array：用于生成矩阵&lt;/li&gt;
-&lt;li&gt;dot：用于乘法矩阵&lt;/li&gt;
-&lt;li&gt;random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&#34;应用-sigmoid-激活函数&#34;&gt;应用 Sigmoid 激活函数&lt;/h4&gt;
-
-&lt;p&gt;该神经网络将使用&lt;a href=&#34;https://en.wikipedia.org/wiki/Sigmoid_function&#34;&gt;Sigmoid function&lt;/a&gt;作为激活函数，其绘制了一个典型的&lt;code&gt;S&lt;/code&gt;形曲线：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/A7595F2F-C760-4FCC-8653-62D3EC408632.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。&lt;/p&gt;
-
-&lt;p&gt;随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。&lt;/p&gt;
-
-&lt;p&gt;一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是&lt;code&gt;X&lt;/code&gt;，那么它的导数将是&lt;code&gt;x * (1-x)&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;推导过程如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/112BFD8F-A294-4C1E-BC7A-673D6E3D7BDB.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h4 id=&#34;训练模型&#34;&gt;训练模型&lt;/h4&gt;
-
-&lt;p&gt;在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。&lt;/p&gt;
-
-&lt;p&gt;这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值&lt;/p&gt;
-
-&lt;p&gt;请记住，在最开始阶段我们会对每个权重分配一个随机值&lt;/p&gt;
-
-&lt;p&gt;下面是我们在这个神经网络示例问题中使用的训练过程:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来&lt;/li&gt;
-&lt;li&gt;我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异&lt;/li&gt;
-&lt;li&gt;根据误差程度，我们利用&lt;a href=&#34;https://en.wikipedia.org/wiki/Backpropagation#Finding_the_derivative_of_the_error&#34;&gt;Error Weighted Derivative formula&lt;/a&gt;对权重进行微调&lt;/li&gt;
-&lt;li&gt;我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;我们使用&lt;code&gt;.T&lt;/code&gt;函数将矩阵从水平位置转换到垂直位置，因此数据会被这样排序：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/B1600115-CEA5-4729-8025-73D503B485D1.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;最终，神经元的权重将会被提供的训练集优化，因此，如果神经元被要求去思考一个新的情况，而这个情况和前面的情况是一样的，那么神经元就可以做出准确的预测，这就是反向传播的发生方式。&lt;/p&gt;
-
-&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
-
-&lt;p&gt;最终我们初始化了&lt;code&gt;NeuralNetwork&lt;/code&gt;类并且运行代码&lt;/p&gt;
-
-&lt;p&gt;下面就是整体的项目代码，如何在Python项目中创建神经网络：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
-
-class NeuralNetwork():
-    
-    def __init__(self):
-        # seeding for random number generation
-        np.random.seed(1)
-        
-        # converting weights to a 3 by 1 matrix with values from -1 to 1 and mean of 0
-        self.synaptic_weights = 2 * np.random.random((3, 1)) - 1
-
-    def sigmoid(self, x):
-        #applying the sigmoid function
-        return 1 / (1 + np.exp(-x))
-
-    def sigmoid_derivative(self, x):
-        #computing derivative to the Sigmoid function
-        return x * (1 - x)
-
-    def train(self, training_inputs, training_outputs, training_iterations):
-        
-        #training the model to make accurate predictions while adjusting weights continually
-        for iteration in range(training_iterations):
-            #siphon the training data via  the neuron
-            output = self.think(training_inputs)
-
-            #computing error rate for back-propagation
-            error = training_outputs - output
-            
-            #performing weight adjustments
-            adjustments = np.dot(training_inputs.T, error * self.sigmoid_derivative(output))
-
-            self.synaptic_weights += adjustments
-
-    def think(self, inputs):
-        #passing the inputs via the neuron to get output   
-        #converting values to floats
-        
-        inputs = inputs.astype(float)
-        output = self.sigmoid(np.dot(inputs, self.synaptic_weights))
-        return output
-
-
-if __name__ == &amp;quot;__main__&amp;quot;:
-
-    #initializing the neuron class
-    neural_network = NeuralNetwork()
-
-    print(&amp;quot;Beginning Randomly Generated Weights: &amp;quot;)
-    print(neural_network.synaptic_weights)
-
-    #training data consisting of 4 examples--3 input values and 1 output
-    training_inputs = np.array([[0,0,1],
-                                [1,1,1],
-                                [1,0,1],
-                                [0,1,1]])
-
-    training_outputs = np.array([[0,1,1,0]]).T
-
-    #training taking place
-    neural_network.train(training_inputs, training_outputs, 15000)
-
-    print(&amp;quot;Ending Weights After Training: &amp;quot;)
-    print(neural_network.synaptic_weights)
-
-    user_input_one = str(input(&amp;quot;User Input One: &amp;quot;))
-    user_input_two = str(input(&amp;quot;User Input Two: &amp;quot;))
-    user_input_three = str(input(&amp;quot;User Input Three: &amp;quot;))
-    
-    print(&amp;quot;Considering New Situation: &amp;quot;, user_input_one, user_input_two, user_input_three)
-    print(&amp;quot;New Output data: &amp;quot;)
-    print(neural_network.think(np.array([user_input_one, user_input_two, user_input_three])))
-    print(&amp;quot;Wow, we did it!&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;我们设法创建了一个简单的神经网络。&lt;/p&gt;
-
-&lt;p&gt;这个神经网络开始于自己给自己分配了一些随机的权重，此后，它使用训练数据训练自己。&lt;/p&gt;
-
-&lt;p&gt;因此，如果出现新情况[1,0,0]，则其值为0.9999584。&lt;/p&gt;
-
-&lt;p&gt;你记得我们想要的正确答案是1吗？&lt;/p&gt;
-
-&lt;p&gt;那么，这就非常接近了 —— 思考下&lt;code&gt;S&lt;/code&gt;形函数的输出值在0到1之间。&lt;/p&gt;
-
-&lt;p&gt;当然，我们只使用一个神经网络来执行这个简单的任务，如果我们连接数千个人工神经网络起来会怎样？我们能否100% 地模仿人类大脑的工作方式么？&lt;/p&gt;
-
-&lt;p&gt;如果你有任何疑问，请留言&lt;/p&gt;
-
-&lt;p&gt;个人简历：&lt;a href=&#34;https://www.linkedin.com/in/garbade&#34;&gt;Dr. Michael J. Garbade&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>如何用Python创建一个简单的神经网络  原文地址：How to Create a Simple Neural Network in Python 作者：Dr. Michael J. Garbade 翻译：howie6879   理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点
+ 神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。
+拥有五年以上经验的德国机器学习专家Andrey Bulezyuk说过：神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。
+基本上，一个ANN由以下组件构成：
+ 输入层：接受传递数据 隐藏层 输出层 各层之间的权重 每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用Sigmoid激活函数  神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据
+训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出
+下面展示了一个简单的神经网络结构图：
+
+而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。
+在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。
+问题 这里用表格列出了我们需要解决的问题：
+
+我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。
+如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。
+让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)
+创建一个神经网络类 我们将在Python中创建一个NeuralNetwork类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数
+尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入numpy包来协助计算。
+该库带有以下四个重要方法：
+ exp：用于生成自然指数 array：用于生成矩阵 dot：用于乘法矩阵 random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)  应用 Sigmoid 激活函数 该神经网络将使用Sigmoid function作为激活函数，其绘制了一个典型的S形曲线：
+
+此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。
+随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。
+一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是X，那么它的导数将是x * (1-x)。
+推导过程如下：
+
+训练模型 在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。</description>
     </item>
     
     <item>
@@ -3405,125 +216,625 @@ if __name__ == &amp;quot;__main__&amp;quot;:
       <pubDate>Sat, 29 Sep 2018 17:54:42 +0800</pubDate>
       
       <guid>https://www.howie6879.cn/post/2018/39/</guid>
-      <description>&lt;p&gt;这是我参加&lt;a href=&#34;https://www.mlhub123.com/&#34;&gt;mlhub123&lt;/a&gt;组织的书籍共读计划的读书笔记，活动见&lt;a href=&#34;https://www.mlhub123.com/read_plan/20180913.html&#34;&gt;mlhub第一期读书计划&lt;/a&gt;&lt;/p&gt;
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第三章：k近邻法 开始时间：2018-09-29 结束时间：2018-10-23（比较忙） 目标：读完第三章，掌握基本概念，产出一篇笔记 博客地址  k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：
+ k近邻算法 k近邻模型 k近邻法的实现：kd树  k近邻算法 什么是k近邻算法？
+给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),...,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,...,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$
+关键点在于是如何进行类别的判断，描述如下：
+
+思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类
+上面3.1的公式这里解释一下：随着变量j的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功
+k近邻模型 k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定
+模型 通过上面的叙述，当我们知道：
+ 训练集 距离度量（明可夫斯基距离） k值 分类决策规则（多数表决）  此时对于任何一个新的输入实例，都可以确定其所属的类
+什么是单元？
+特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元（cell），最终会将特征空间划分为下图所示：
+
+距离度量 特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）
+
+k值的选择 k值的选择会对k近邻法的结果产生重大影响：
+ 如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合 如果较大：k值的增大就意味着整体的模型变得简单  分类决策规则 k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化
+k近邻法的实现：kd树 实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索
+k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的
+为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法
+构造kd树 k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）
+k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树
+
+实际做一道例题有助于对算法的理解：
+
+ 首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2) 根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树 构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树 构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面 无法继续划分，k-d tree构建完成</description>
+    </item>
+    
+    <item>
+      <title>统计学习方法笔记：2.感知机</title>
+      <link>https://www.howie6879.cn/post/2018/38/</link>
+      <pubDate>Tue, 18 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/38/</guid>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第二章：感知机 开始时间：2018-09-18 结束时间：2018-09-21 目标：读完第二章，掌握基本概念，产出一篇笔记 博客地址  本章主要介绍了二类分类的线性分类模型：感知机：
+ 感知机模型 感知机学习策略 感知机学习算法  说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见这里
+感知机模型 感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取+1和–1值，属于判别模型
+注：+1 -1 分别代表正负类，有的可能用 1 0 表示
+在介绍感知机定义之前，下面几个概念需要说明一下：
+ 输入空间：输入所有可能取值的集合 输出空间：输出所有可能取值的集合 特征空间：每个具体的输入是一个实例，由特征向量表示  所以对于一个感知机模型，可以这样表示：
+ 输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$ 输出空间：$\gamma = \{+1,-1 \}$  那么感知机就是由输入空间到输出空间的函数：
+\[\displaystyle f( x) \ =\ sign( w\cdot x+b)\]
+其中：
+ $sign$: 符号函数 $w$: 权值（weight）或权值向量（weight vector） $b$: 偏置（bias）  感知机的几何解释如下：线性方程
+\[w\cdot x + b =0\]
+如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：
+ $w$: 超平面的法向量 $b$: 超平面的截距  感知机学习策略 数据集的线性可分性 什么是数据集的线性可分性，很简单，对于一个数据集：</description>
+    </item>
+    
+    <item>
+      <title>统计学习方法笔记：1.统计学习方法概论</title>
+      <link>https://www.howie6879.cn/post/2018/37/</link>
+      <pubDate>Sun, 16 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/37/</guid>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第一章：统计学习方法概论 开始时间：2018-09-14 结束时间：2018-09-16 目标：读完第一章，掌握基本概念，产出一篇笔记 博客地址  第一章主要对全书内容做了一个内容的概括：
+ 统计学习：定义、研究对象和方法 监督学习 统计学习三要素：模型、策略、算法 模型评估与选择：包括正则化、交叉验证与学习的泛化能力 生成模型与判别模型 分类问题、标注问题与回归问题  统计学习 什么是统计学习
+统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习
+统计学习的特点
+ 统计学习以计算机及网络为平台，是建立在计算机及 网络之上的 统计学习以数据为研究对象，是数据驱动的学科 统计学习的目的是对数据进行预测与分析 统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析 统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论  什么是机器学习
+如果一个程序可以在任务T上，随着经验E的增加，效果P也可以随之增加，则称这个程序可以从经验中学习。 --- 卡内基美隆大学的Tom Michael Mitchell教授
+ 如果以垃圾邮件为例，一个程序指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；任务T指的是区分垃圾邮件的任务；经验E为已经区分过是否为垃圾邮件的历史邮件；效果P为机器学习算法在区分是否为垃圾邮件任务上的准确率
+ 统计学习的目的
+统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析
+统计学习的方法
+ 监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归 非监督学习（unsupervised learning）：聚类、降维 半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM） 强化学习（reinforcement learning）：蒙特卡洛方法  监督学习 基本概念  输入空间（input space）：输入所有可能取值的集合 输出空间（output space）：输出所有可能取值的集合 特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间 联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - 机器学习-联合概率分布笔记 假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）  人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：</description>
+    </item>
+    
+    <item>
+      <title>博客升级HTTPS方案</title>
+      <link>https://www.howie6879.cn/post/2018/36/</link>
+      <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/36/</guid>
+      <description>很早就想将博客升级为HTTPS，在心中也确立了方案，步骤也很简单：
+ 博文上传至Git Caddy结合Webhook自动更新，顺便上HTTPS  流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用搬瓦工的年付19.9$方案，购买之后，选择CentOS7，安装后进入shell：
+yum install git vim wget # 创建用户 useradd howie # 设定密码 passwd username # 添加 sudo 权限 visudo # 找到 root ALL=(ALL) ALL # 添加 howie ALL=(ALL) ALL # 用刚创建的用户名登录 # 安装Caddy以及插件，这里我列出了我需要的插件 各位酌情选择 curl https://getcaddy.com | bash -s personal http.git,http.realip,http.ratelimit,http.ipfilter  首先是从git拉取代码，因为我们还是希望服务器可以自动从git远程拉取代码并且自动更新：
+mkdir git cd git git clone https://github.com/howie6879/howie6879.github.io.git  然后是编写Caddyfile，这是Caddy的配置文件，我将配置文件写在/etc/caddy/Caddyfile，贴上我的配置内容：
+cd ~ mkdir /etc/caddy/ vim /etc/caddy/Caddyfile # 输入 www.howie6879.cn { root /home/howie/git/howie6879.github.io tls xiaozizayang@gmail.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 6.常用的技巧</title>
+      <link>https://www.howie6879.cn/post/2018/35/</link>
+      <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/35/</guid>
+      <description>结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上
+本文最新内容可到github上阅读 6.常用的技巧
+ Async Python 3.5+ web server that&amp;rsquo;s written to go fast
+ 此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
+ api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 5.数据库使用</title>
+      <link>https://www.howie6879.cn/post/2018/34/</link>
+      <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/34/</guid>
+      <description>介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键  下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt  建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL );  一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &#39;user&#39;, metadata, sa.Column(&#39;id&#39;, sa.Integer, autoincrement=True, primary_key=True), sa.</description>
+    </item>
+    
+    <item>
+      <title>Hello World</title>
+      <link>https://www.howie6879.cn/about/</link>
+      <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/about/</guid>
+      <description>介绍 努力的程序员：
+ Github : howie6879 Email : howie6879@gmail.com  开源项目  owllook: 在线网络小说阅读网站&amp;amp;小说搜索引擎&amp;amp;小说推荐系统搜索、追书、收藏、追更、小说API ruia: An async web scraping micro-framework based on asyncio mlhub123: 机器学习&amp;amp;深度学习资源交流小组 Sanic-For-Pythoneer: 一份sanic使用教程，开源小书  教程&amp;amp;笔记  Sanic教程：Sanic-For-Pythoneer 神经网络与深度学习：神经网络与深度学习笔记 统计学习方法：统计学习方法笔记 学习记录：pylab  个人公众号 我的随笔、学习笔记、自己写的原创教程，都会放这里：</description>
+    </item>
+    
+    <item>
+      <title>友链</title>
+      <link>https://www.howie6879.cn/friend/</link>
+      <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/friend/</guid>
+      <description>下面是我的朋友：
+ elfgzp: 一个兴趣使然的程序员，Python工程师 Ruter: Python工程师，擅长Odoo  </description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 4.展示一个页面</title>
+      <link>https://www.howie6879.cn/post/2018/32/</link>
+      <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2018/32/</guid>
+      <description>前面一节介绍项目结构的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。
+相信你应该已经了解清楚，sanic是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+ 接收请求 找到对应的路由并执行路由对应的视图函数 Jinja2模板渲染返回视图  路由和视图函数 在此我假设你理解 python 中的装饰器，如果你并不清楚，可以看我另写的关于装饰器的介绍，回归正题，还记得第一节中的代码实例么？
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() # 此处将路由 / 与视图函数 test 关联起来 @app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;) if __name__ == &amp;quot;__main__&amp;quot;: app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)  在前言介绍里，出现这几个名词 路由 视图函数 视图 ,在上面那段代码中，test 就是视图函数。
+这是一段执行逻辑，比如客户端请求 0.0.0.0:8000/ 此时返回的内容就是由test 这个视图函数提供的。
+在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(sanic0.1.2源码)来分析下：
+@app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;)  这个路由装饰器的作用很简单，就是将 / 这个 uri 与视图函数test关联起来，或许你可以将路由想象成一个 dict，当客户端若请求 0.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 源码阅读 - 基于0.1.2</title>
+      <link>https://www.howie6879.cn/post/2017/31/</link>
+      <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/31/</guid>
+      <description>Sanic是一个可以使用async/await语法编写项目的异步非阻塞框架，它写法类似于Flask，但使用了异步特性，而且还使用uvloop作为事件循环，其底层使用的是libuv，从而使 Sanic的速度优势更加明显。
+如果你：
+ 想深入了解Sanic，迫切想知道它的运行机制 直接阅读源码，做一些定制 学习  将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：
+ 理解装饰器 理解协程  Sanic-0.1.2 的核心文件如下：
+. ├── __init__.py ├── blueprints.py ├── config.py ├── exceptions.py ├── log.py ├── request.py ├── response.py ├── router.py ├── sanic.py ├── server.py └── utils.py  通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。
+simple_server.py 让我们从simple_server开始吧，代码如下：
+from sanic_0_1_2.src import Sanic from sanic_0_1_2.src.response import json app = Sanic(__name__) @app.route(&amp;quot;/&amp;quot;) async def test(request): return json({&amp;quot;test&amp;quot;: True}) app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000)  或许你直接把sanic_annotation项目直接clone到本地比较方便调试+理解：
+git clone https://github.com/howie6879/sanic_annotation cd sanic_annotation/sanic_0_1_2/examples/  那么，现在一切准备就绪，开始阅读吧。</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 3.项目结构</title>
+      <link>https://www.howie6879.cn/post/2017/30/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/30/</guid>
+      <description>一个项目，在最外层他们应该是一样的，至少需要有:
+   文件夹 说明     docs 项目文档说明   src/pro_name 项目名称   tests 测试用例   README.md 项目介绍   requirements.txt 该项目依赖的第三方库   …&amp;hellip; …&amp;hellip;    那接下来需要讨论的，就是 src 的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+2.1.普通的项目结构 一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 2.配置</title>
+      <link>https://www.howie6879.cn/post/2017/29/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/29/</guid>
+      <description>对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。
+新建文件夹 demo2 ，内部建立这样的文件结构：
+demo02 ├── config │ ├── __init__.py │ └── config.py └── run.py  其中 run.py 内容如下：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() @app.route(&amp;quot;/&amp;quot;) async def test(request): return text(&#39;Hello World!&#39;) if __name__ == &amp;quot;__main__&amp;quot;: app.run(host=&amp;quot;0.0.0.0&amp;quot;, port=8000, debug=True)  代码示例中开启了 debug 模式，假设我们需要通过 config.py 配置文件来实现控制服务的 debug 模式开启与否，那该怎么实现呢。
+在 config.py 中添加一行：DEBUG=True ，然后 run.py 内容改为：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text from config import DEBUG app = Sanic() @app.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 1.初使用</title>
+      <link>https://www.howie6879.cn/post/2017/28/</link>
+      <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/28/</guid>
+      <description>在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36  若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic  通过上面的命令，你就可以在 python3.</description>
+    </item>
+    
+    <item>
+      <title>2.Docker - 实例演示 - owllook</title>
+      <link>https://www.howie6879.cn/post/2017/27/</link>
+      <pubDate>Tue, 22 Aug 2017 20:18:06 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/27/</guid>
+      <description>上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;quot;help&amp;quot;, &amp;quot;copyright&amp;quot;, &amp;quot;credits&amp;quot; or &amp;quot;license&amp;quot; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6  有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像 FROM python:3.6 MAINTAINER howie6879 &amp;lt;howie6879@gmail.</description>
+    </item>
+    
+    <item>
+      <title>1.Docker - 初使用</title>
+      <link>https://www.howie6879.cn/post/2017/26/</link>
+      <pubDate>Tue, 15 Aug 2017 20:13:30 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/26/</guid>
+      <description>自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。
+1.准备  系统：ubuntu16.04 or centos &amp;hellip;
+ 1.1.安装 1.1.1.ubuntu16.04 首先安装依赖包，在终端输入：
+sudo apt-get update sudo apt-get install apt-transport-https ca-certificates  安装Docker，自动安装脚本提供了非常简洁的安装方式：
+# 官方下载方式 curl -sSL https://get.docker.com/ | sh # 镜像站会提升下载速度 # 阿里云的安装脚本 curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh - # DaoCloud 的安装脚本 curl -sSL https://get.daocloud.io/docker | sh  安装完成后，输入sudo service docker status 可见Docker已经启动:
+● docker.service - Docker Application Container Engine Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled) Active: active (running) since 二 2017-08-15 15:34:46 CST; 26min ago Docs: https://docs.</description>
+    </item>
+    
+    <item>
+      <title>gRPC使用初试</title>
+      <link>https://www.howie6879.cn/post/2017/25/</link>
+      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/25/</guid>
+      <description>1.前言 gRPC是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用protocol buffer:
+protocol buffer是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用protocol buffer(proto3)来进行定义，即根据protocol buffer language来定义你的protocol buffer data
+最后再利用protocol buffer编译定义的 .proto 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码
+２.实践 假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：
+demo └── proto └── lower.proto  接下来将编写proto文件，本例使用proto3语法进行编写，protobuf定义的语法请看这里
+lower.proto文件内容如下：
+syntax = &amp;quot;proto3&amp;quot;; package lower; service Lower { rpc Lower (LowerRequest) returns (LowerResult) { } } message LowerRequest { string message = 1; } message LowerResult { string lower_message = 1; }  定义一个服务Lower，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件proto_compile.py，并安装相关的包：
+pip install grpcio pip install grpcio-tools  # script proto_compile.py from grpc_tools import protoc # 或者在项目根目录运行： # python -m grpc_tools.</description>
+    </item>
+    
+    <item>
+      <title>talospider - 简单的爬虫框架</title>
+      <link>https://www.howie6879.cn/post/2017/24/</link>
+      <pubDate>Wed, 07 Jun 2017 23:56:08 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/24/</guid>
+      <description>&lt;h3 id=&#34;为什么写这个&#34;&gt;为什么写这个？&lt;/h3&gt;
+
+&lt;p&gt;一些简单的页面，无需用比较大的框架来进行爬取，自己纯手写又比较麻烦&lt;/p&gt;
+
+&lt;p&gt;因此针对这个需求写了&lt;a href=&#34;https://github.com/howie6879/talospider&#34;&gt;talospider&lt;/a&gt;:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;阅读章节：第三章：k近邻法&lt;/li&gt;
-&lt;li&gt;开始时间：2018-09-29&lt;/li&gt;
-&lt;li&gt;结束时间：2018-10-23（比较忙）&lt;/li&gt;
-&lt;li&gt;目标：读完第三章，掌握基本概念，产出一篇笔记&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.howie6879.cn/post/39/&#34;&gt;博客地址&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;1.针对单页面的item提取 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talospider/blob/master/docs/item.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2.spider模块 - 具体介绍点&lt;a href=&#34;https://github.com/howie6879/talospider/blob/master/docs/spider.md&#34;&gt;这里&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：&lt;/p&gt;
+&lt;h3 id=&#34;介绍-使用&#34;&gt;介绍&amp;amp;&amp;amp;使用&lt;/h3&gt;
+
+&lt;h4 id=&#34;item&#34;&gt;item&lt;/h4&gt;
+
+&lt;p&gt;这个模块是可以独立使用的，对于一些请求比较简单的网站（比如只需要&lt;code&gt;get&lt;/code&gt;请求），单单只用这个模块就可以快速地编写出你想要的爬虫，比如(以下使用python3，python2见examples目录)：&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>https://www.howie6879.cn/post/2017/22/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/22/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a href=&#34;https://github.com/howie6879/owllook&#34;&gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a href=&#34;https://www.owllook.net/&#34;&gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>https://www.howie6879.cn/post/2017/21/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/21/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a href=&#34;https://github.com/channelcat/sanic&#34;&gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
+
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;python -m pip install sanic
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;sanic的&lt;a href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;&gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;k近邻算法&lt;/li&gt;
-&lt;li&gt;k近邻模型&lt;/li&gt;
-&lt;li&gt;k近邻法的实现：kd树&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;k近邻算法&#34;&gt;k近邻算法&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是k近邻算法？&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),...,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,...,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$&lt;/p&gt;
-
-&lt;p&gt;关键点在于是如何进行类别的判断，描述如下：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/2D377775-7D34-4B36-B0B8-8A190F41EA99.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类&lt;/p&gt;
-
-&lt;p&gt;上面&lt;code&gt;3.1&lt;/code&gt;的公式这里解释一下：随着变量&lt;code&gt;j&lt;/code&gt;的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功&lt;/p&gt;
-
-&lt;h2 id=&#34;k近邻模型&#34;&gt;k近邻模型&lt;/h2&gt;
-
-&lt;p&gt;k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定&lt;/p&gt;
-
-&lt;h3 id=&#34;模型&#34;&gt;模型&lt;/h3&gt;
-
-&lt;p&gt;通过上面的叙述，当我们知道：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;训练集&lt;/li&gt;
-&lt;li&gt;距离度量（明可夫斯基距离）&lt;/li&gt;
-&lt;li&gt;k值&lt;/li&gt;
-&lt;li&gt;分类决策规则（多数表决）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;此时对于任何一个新的输入实例，都可以确定其所属的类&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;什么是单元？&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元&lt;code&gt;（cell）&lt;/code&gt;，最终会将特征空间划分为下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/3A3A8915-DD18-4982-91A7-1C3A74C30275.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;距离度量&#34;&gt;距离度量&lt;/h3&gt;
-
-&lt;p&gt;特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/413FE0B8-A1A9-474B-98FC-87CCFC61FB58.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;k值的选择&#34;&gt;k值的选择&lt;/h3&gt;
-
-&lt;p&gt;k值的选择会对k近邻法的结果产生重大影响：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合&lt;/li&gt;
-&lt;li&gt;如果较大：k值的增大就意味着整体的模型变得简单&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;分类决策规则&#34;&gt;分类决策规则&lt;/h3&gt;
-
-&lt;p&gt;k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化&lt;/p&gt;
-
-&lt;h2 id=&#34;k近邻法的实现kd树&#34;&gt;k近邻法的实现：kd树&lt;/h2&gt;
-
-&lt;p&gt;实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索&lt;/p&gt;
-
-&lt;p&gt;k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的&lt;/p&gt;
-
-&lt;p&gt;为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法&lt;/p&gt;
-
-&lt;h3 id=&#34;构造kd树&#34;&gt;构造kd树&lt;/h3&gt;
-
-&lt;p&gt;k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）&lt;/p&gt;
-
-&lt;p&gt;k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/31B87797-49F0-432E-9E1C-23AC8865CB60.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;p&gt;实际做一道例题有助于对算法的理解：&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/2C531AEF-6F29-4719-81CA-904D80CA3EF9.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2)&lt;/li&gt;
-&lt;li&gt;根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树&lt;/li&gt;
-&lt;li&gt;构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树&lt;/li&gt;
-&lt;li&gt;构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面&lt;/li&gt;
-&lt;li&gt;无法继续划分，k-d tree构建完成&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/3A657941-5E1B-432A-88E6-1FEFF02F6CC2.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;搜索kd树&#34;&gt;搜索kd树&lt;/h3&gt;
-
-&lt;p&gt;给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高&lt;/p&gt;
-
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CEA2F87F-1F54-4632-A343-8FF013A22602.png&#34; alt=&#34;&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
-
-&lt;p&gt;有助于理解kd树的博客文章：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/23966698&#34;&gt;数学】kd 树算法之详细篇&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://leileiluoluo.com/posts/kdtree-algorithm-and-implementation.html&#34;&gt;K-D TREE算法原理及实现&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>--1.vscode搭建haskell环境</title>
+      <link>https://www.howie6879.cn/post/2017/20/</link>
+      <pubDate>Sat, 11 Feb 2017 14:58:20 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/20/</guid>
+      <description>前言  An advanced, purely functional programming language
+ 为什么学习这门语言，现在我也讲不清楚，但如官网所说：这个是一门高级的纯函数式编程语言，本人也是刚刚接触，在此记录下使用vscode搭建环境的过程。
+安装 具体安装的话看这里就好，本人使用mac，经过后面的折腾，我建议直接安装stack，这个一些特性可以看下面： &amp;gt; Installing GHC automatically, in an isolated location. &amp;gt; Installing packages needed for your project. &amp;gt; Building your project. &amp;gt; Testing your project. &amp;gt; Benchmarking your project.
+安装的话很简单：brew install haskell-stack，虽然花的时间略长，但是好用又方便啊，如果不想使用satck，那么可以直接安装：
+brew install ghc brew install cabal-install  个人推荐使用stack，具体安装以及介绍可以看这里。 毕竟源在国外，所以我们首先必须要进行换源，幸好清华大学开源网站镜像站有提供，更具体一点可以看Stackage 镜像使用说明，这里记录下：
+vim ~/.stack/config.yaml # add package-indices: - name: Tsinghua download-prefix: https://mirrors.tuna.tsinghua.edu.cn/hackage/package/ http: https://mirrors.tuna.tsinghua.edu.cn/hackage/00-index.tar.gz setup-info: &amp;quot;http://mirrors.tuna.tsinghua.edu.cn/stackage/stack-setup.yaml&amp;quot; urls: latest-snapshot: http://mirrors.tuna.tsinghua.edu.cn/stackage/snapshots.json lts-build-plans: http://mirrors.</description>
+    </item>
+    
+    <item>
+      <title>CentOS7下使用Privoxy将socket5转http代理</title>
+      <link>https://www.howie6879.cn/post/2017/19/</link>
+      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/19/</guid>
+      <description>shadowsocks是一个socket5的服务，对此，可以使用Privoxy将其转化为http
+部署shadowsocks # 安装 pip install shadowsocks # 创建配置文件 vim /etc/shadowsocks.json # 输入 { &amp;quot;server&amp;quot;: &amp;quot;*.*.*.*&amp;quot;, &amp;quot;server_port&amp;quot;: 443, &amp;quot;password&amp;quot;: &amp;quot;***&amp;quot;, &amp;quot;method&amp;quot;: &amp;quot;aes-256-cfb&amp;quot;, &amp;quot;local_address&amp;quot;: &amp;quot;0.0.0.0&amp;quot;, &amp;quot;local_port&amp;quot;: 1080, &amp;quot;workers&amp;quot;: 1 } # 运行 sslocal -c /etc/shadowsocks.json # 测试当前ip curl --socks5 127.0.0.1:1080 http://httpbin.org/ip #返回结果 { &amp;quot;origin&amp;quot;: &amp;quot;*.*.*.*&amp;quot; }  说明代理成功，接下来安装Privoxy：
+socket5转http yum install -y privoxy # 编辑配置文件 vim /etc/privoxy/config # 添加 forward-socks5 / 127.0.0.1:1080 . systemctl restart privoxy systemctl status privoxy  若果需要在外网访问，则需在/etc/privoxy/config添加listen-address 0.</description>
+    </item>
+    
+    <item>
+      <title>Google Custom Search</title>
+      <link>https://www.howie6879.cn/post/2017/18/</link>
+      <pubDate>Tue, 31 Jan 2017 15:59:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/18/</guid>
+      <description>google自定义搜索，网址参见custom-search，本文记录关于key的申请以及使用方式。
+申请key 首先进入网址custom-search，这里的作用是申请cse搜索网站，填好会生成一个值，具体见cse，然后在console，生成对应的key。
+ 1.点击启用api 2.点击Custom Search API 3.点击创建项目 4.创建好之后点击启用 5.点击创建凭据
+ 最后会生成一个密钥，至此，我们需要的cse以及密钥全部获取完毕。
+使用 官方提供api的接口如下： GET
+https://www.googleapis.com/customsearch/v1?key=INSERT_YOUR_API_KEY&amp;amp;cx=017576662512468239146:omuauf_lfve&amp;amp;q=lectures  api具体参数参考此处</description>
+    </item>
+    
+    <item>
+      <title>如今的生活—2017</title>
+      <link>https://www.howie6879.cn/post/2017/17/</link>
+      <pubDate>Sun, 29 Jan 2017 21:03:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/17/</guid>
+      <description>高三时候，为了写作文 背了这么一句话 生活如同一朵玫瑰，每瓣花代表一根梦想，每根刺代表一个现实 差不多已是三年过去 刺不多，花香犹存
+2017年对我来说是具有挑战的一年 我即将毕业 有以下愿景我希望能实现 温饱、进步、健康、爱 读书、代码、拿得出手的东西
+16年大三暑假我就从学校跑了出来，毕业照回去了一次 工作半年有余，体会不少 总感慨自己就像波涛上的浮萍 身不由己、随波逐流
+女朋友过来跟我一起生活 在一起，知道了责任有多重 我会对她好
+我是一个即将起程的士兵 还没出发，就想回家 但我不是逃兵，我并不害怕 我只是不想长大 但是，面对现实吧，拔掉那些刺 因为我知道自己的能力有多强！</description>
+    </item>
+    
+    <item>
+      <title>Mastering Python 01</title>
+      <link>https://www.howie6879.cn/post/2017/16/</link>
+      <pubDate>Fri, 27 Jan 2017 10:20:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/16/</guid>
+      <description>1.准备  1.说明：《Mastering Python》读书笔记
+2.要求：首先，希望你是处在python3版本，然后拥有一个干净的虚拟环境更是必要。
+3.virtualenv或者anaconda都是不错的选择
+ 2.Pythonic Syntax, Common Pitfalls, and Style Guide 2.1.Pythonic code 对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：
+- Clean - Simple - Beautiful - Explicit - Readable  具体的话请打开你的python解释器：
+import this  细细感受吧。
+2.1.2.Differences between value and identity comparisons 对于下面这个例子：
+a1 = 200 + 56 a2 = 256 b1 = -4 - 1 b2 = -5 c1 = 200 + 57 c2 = 257 d1 = -4 - 2 d2 = -6 print(&#39;%r == %r: %r&#39; % (a1, a2, a1 == a2)) print(&#39;%r is %r: %r&#39; % (a1, a2, a1 is a2)) print(&#39;%r == %r: %r&#39; % (b1, b2, b1 == b2)) print(&#39;%r is %r: %r&#39; % (b1, b2, b1 is b2)) print(&#39;%r == %r: %r&#39; % (c1, c2, c1 == c2)) print(&#39;%r is %r: %r&#39; % (c1, c2, c1 is c2)) print(&#39;%r == %r: %r&#39; % (d1, d2, d1 == d2)) print(&#39;%r is %r: %r&#39; % (d1, d2, d1 is d2))  256 == 256: True 256 is 256: True -5 == -5: True -5 is -5: True 257 == 257: True 257 is 257: False -6 == -6: True -6 is -6: False  可以看到，在值相同的情况下，使用==比较都返回True自不必说，为何有的id相同有的id却不同？</description>
+    </item>
+    
+    <item>
+      <title>ITBooks—简单的书籍下载小工具</title>
+      <link>https://www.howie6879.cn/post/2017/15/</link>
+      <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/15/</guid>
+      <description>1.前言 我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。
+很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。
+下面展示下0.1版本的成果，比如说检索Mastering python，空格用+代替。 python abook.py search Mastering+python Hattem
+2.说明 项目名称叫做ITBooks，当然不准备只做IT方面书籍，文学名著也是可以的。
+ITBooks，是一个查询和下载书籍的python脚本。 目前只存储了allitebooks blah网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用 scrapy爬取信息，具体看ITBooks/spider/allitebooks，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。 添加爬虫只需要在ITBooks/spider/allitebooks/spider，下新建一个scrapy的爬虫脚本即可，对于数据的存储，具体在ITBooks/database ，当然，你可以直接新建一个库。 这里放个allitebooks的爬虫脚本，这里说明下，这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完。
+# -*- coding: utf-8 -*- import datetime import sys import scrapy from scrapy.loader import ItemLoader from scrapy.loader.processors import MapCompose, TakeFirst, Join from scrapy.http import Request from allitebooks.items import AllitebooksItem from allitebooks.pipelines import AllitebooksPipeline if sys.version_info[0] &amp;gt; 2: from urllib.parse import urljoin else: from urlparse import urljoin class AllitebooksSpider(scrapy.Spider): name = &amp;quot;allitebooks&amp;quot; allowed_domains = [&amp;quot;allitebooks.</description>
+    </item>
+    
+    <item>
+      <title>对于python抓取google搜索结果的一些了解</title>
+      <link>https://www.howie6879.cn/post/2017/14/</link>
+      <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2017/14/</guid>
+      <description>大学时期博文
+ 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉
+本人前段时间有个脚本用到了谷歌搜索，具体见python之由公司名推算出公司官网(余弦相似度)当时直接使用的是一个python开源项目
+但在使用过程中，单ip的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进
+说一说爬取谷歌搜索结果的问题：
+ 1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。 2.访问过快就会出现流量异常  2.如何解决 对于第一个问题：
+应该有看到审查元素出来的都是js，然后检索的url是这样的：
+https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT
+这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：
+然后再看url： https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1
+对于这个url，相信机智的你应该会明白些什么
+这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的html，简单写下：
+URL_SEARCH = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;quot; URL_NUM = &amp;quot;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;quot; def search_page(query, language=&#39;en&#39;, num=None, start=0, pause=2): &amp;quot;&amp;quot;&amp;quot; Google search :param query: Keyword :param language: Language :return: result &amp;quot;&amp;quot;&amp;quot; time.sleep(pause) domain = self.get_random_domain() if num is None: url = URL_SEARCH url = url.format( domain=domain, language=language, query=quote_plus(query)) else: url = URL_NUM url = url.format( domain=domain, language=language, query=quote_plus(query), num=num) try: requests.</description>
+    </item>
+    
+    <item>
+      <title>Mastering Pandas 01</title>
+      <link>https://www.howie6879.cn/post/2016/13/</link>
+      <pubDate>Mon, 21 Nov 2016 14:23:27 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/13/</guid>
+      <description>1.pandas特性 对于python开发者来说，在面对海量数据时，pandas可谓是数据分析的首选，以下关键特性是它如此热门的原因： 1. 可以处理各种不同格式的数据集：时间序列，表格，矩阵数据 2. 促进csv、DB/SQL等来源数据的加载/导入 3. 可以在很大数据集的基础上进行一些过滤、合并、切片等一系列操作 4. 可以根据使用的自定义的规则来处理缺失数据 &amp;hellip; 更多信息可移步pandas进一步了解。
+1.1.安装 # 可使用 anaconda 集成环境 自带科学计算包 pip install pandas  1.2.说明 建议使用ipython，本人使用jupyter notebook
+2.pandas 数据结构 看完本篇文章后，您将了解以下数据结构： 1. pandas是基于NumPy构建的，所以numpy.ndarray数据结构必不可少 2. pandas.Series：一维数据结构 3. pandas.DataFrame：二维数据结构 4. pandas.Panel：三维数据结构 2.1.NumPy ndarray 在数值计算中，NumPy非常重要，其中最重要的数据结构便是ndarray多维数组对象，NumPy提供了许多方法来创造数组。
+首先导入numpy模块
+import numpy as np  2.1.1.numpy.array data_01 = [0, 1, 2, 3] data_02 = [-1, -2, 5.5, 6] # 一维数组 arr_01 = np.array(data_01) arr_01  out: array([0, 1, 2, 3])  # 二维数组 arr_02 = np.</description>
+    </item>
+    
+    <item>
+      <title>HTTP之旅</title>
+      <link>https://www.howie6879.cn/post/2016/12/</link>
+      <pubDate>Fri, 21 Oct 2016 21:53:07 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/12/</guid>
+      <description>读书笔记，参考：《HTTP权威指南》 《图解HTTP》
+ World Wide Web世界 如果说万维网是一棵大树，那么其中一片片脉络鲜明的绿叶便是一个个web站点。
+我们靠近它、欣赏它、甚至创造它。
+1从打开页面开始 某一刻，我们打开浏览器，弹指间输入一串url，按下Enter键，长吁一口气，世界便在眼前缤纷多彩起来，对此，八九年前的我感慨一番后会继续玩我的暴力摩托，如今，我想尝试着解释一下。
+刚刚说到打开url，那便从这里开始吧。
+问：什么是url
+*答：www.jianshu.com 这就是一个url（统一资源定位符），是URI的一个子集。*
+问：什么是URI
+*答：任意一个服务器资源都有名字，即URI（统一资源标识符）*
+问：什么是服务器资源
+*答：一个丰富的页面通过web浏览器发布一系列事务获取并显示，页面资源存放于服务器，这就是服务器资源*
+问：什么是事务</description>
+    </item>
+    
+    <item>
+      <title>CentOS7分布式部署pyspider</title>
+      <link>https://www.howie6879.cn/post/2016/11/</link>
+      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/11/</guid>
+      <description>搭建环境：  系统版本：Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+python版本：Python 3.5.1
+ 搭建python3环境： 本人在尝试过后选择集成环境Anaconda
+编译 # 下载依赖 yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve # 下载python版本 wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz # 或者使用国内源 wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src # 解压 tar -zxf Python-3.5.1.tgz;cd Python-3.5.1 # 编译安装 ./configure --prefix=/usr/local/python3.5 --enable-shared make &amp;amp;&amp;amp; make install # 建立软链接 ln -s /usr/local/python3.</description>
+    </item>
+    
+    <item>
+      <title>祝你生日快乐</title>
+      <link>https://www.howie6879.cn/post/2016/10/</link>
+      <pubDate>Wed, 28 Sep 2016 22:28:16 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/10/</guid>
+      <description>2016-09-29 很荣幸，能将你写到我的生命里
+生命不过百年，你我相识六年有余
+记忆中我为你过了四次生日，高一、大一、大二、大三
+第五次，祝你生日快乐
+这次却有些不同，因为我们相爱了，我可以加上一句，我爱你
+或许有些矫情，可在这夜晚中我毫不介意
+我爱你
+如果把生命想象成一条线，我们早已经在某个点相交，然后相互环绕
+越来越乱，直至一团，哪怕是世界上最好的手艺人
+这两条交织在一起的线，是怎样也无法被分开的
+不论过去或未来
+忘不了16年，初牵着你手的心动
+看电影，压马路，鼓浪屿
+很抱歉没能好好带你去玩
+还记得年后情人节的美人鱼
+开学前期四月一日的愚人节
+每次见面，都是纪念日
+暑假上海宾馆的蜗居
+南京古城的鸭血粉丝汤
+你念念叨叨的老冰棍
+总统府、中山路、那所大学的典礼
+我们的回忆有很多
+今天，你生日，我会亲口对你说
+亲爱的，生日快乐，我爱你
+一直爱到
+未来的某天，我们老眼昏花
+你依旧读着我写的这些话</description>
+    </item>
+    
+    <item>
+      <title>Python之由公司名推算出公司官网(余弦相似度)</title>
+      <link>https://www.howie6879.cn/post/2016/09/</link>
+      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/09/</guid>
+      <description>1.问题 对展会数据分类后，我的新任务是如何通过公司名、公司地址、国家等海关数据推断出该公司的官网网站（若官网不存在则不考虑） 以下数据仅供参考：
+   公司名 国家 地址     JPW INDUSTRIES INC  427 NEW SANFORD RD LAVERGNE TN 37086 US   Fujian Xishi Co., Ltd CN, CHINA    BusinessPartner Co.,ltd     BENKAI Co.,Ltd     GOLD INC  18245 E 40TH AVE AURORA CO 80011 US    需要得到结果：
+   公司名 官方网站     JPW INDUSTRIES INC http://http://www.</description>
+    </item>
+    
+    <item>
+      <title>Python之朴素贝叶斯对展会数据分类</title>
+      <link>https://www.howie6879.cn/post/2016/08/</link>
+      <pubDate>Wed, 28 Sep 2016 20:34:40 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/08/</guid>
+      <description>目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等  思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;quot;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;quot; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;]  那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;  以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39;  这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).</description>
+    </item>
+    
+    <item>
+      <title>PythonTip</title>
+      <link>https://www.howie6879.cn/post/2016/07/</link>
+      <pubDate>Wed, 28 Sep 2016 20:32:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/07/</guid>
+      <description>给你一个list L, 如 L=[2,8,3,50], 对L进行升序排序并输出,如样例L的结果为[2,3,8,50]
+ L.sort() print(L)   给你一个字符串 a， 如a=‘12345’，对a进行逆序输出a。
+ print(a[::-1])   给你一字典a，如a={1:1,2:2,3:3}，输出字典a的key，以&amp;rsquo;,&amp;lsquo;链接，如‘1,2,3&amp;rsquo;。
+ print(&#39;,&#39;.join(str(i) for i in a.keys()))   给你一个字符串 a， 输出字符奇数位置的字符串。如a=‘12345’，则输出135。
+ print(a[::2])   输出100以内的所有素数，素数之间以一个空格区分
+ def prime(num): for i in range(2,num): if not num%i:return num print(&#39; &#39;.join(str(i) for i in set(range(2,101))-set(map(prime,range(2,101)))))   已知矩形长a,宽b,输出其面积和周长，面积和周长以一个空格隔开
+ print(&amp;quot;%d %d&amp;quot;%(a*b,(a+b)*2))   给你一个list L, 如 L=[0,1,2,3,4], 输出L的中位数（若结果为小数，则保留一位小数）。
+ L.sort() if len(L)%2==0: print(sum(L[int((len(L))/2-1):int((len(L))/2+1)])/2.0) else: print(L[int((len(L)-1)/2)])   给你两个正整数a和b， 输出它们的最大公约数</description>
+    </item>
+    
+    <item>
+      <title>cx_Freeze打包py文件</title>
+      <link>https://www.howie6879.cn/post/2016/06/</link>
+      <pubDate>Wed, 28 Sep 2016 20:30:57 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/06/</guid>
+      <description>最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist  如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;quot;packages&amp;quot;: [&amp;quot;os&amp;quot;], &amp;quot;excludes&amp;quot;: [&amp;quot;tkinter&amp;quot;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;quot;win32&amp;quot;: base = &amp;quot;Win32GUI&amp;quot; setup( name = &amp;quot;guifoo&amp;quot;, version = &amp;quot;0.1&amp;quot;, description = &amp;quot;My GUI application!</description>
+    </item>
+    
+    <item>
+      <title>Markdown简明教程</title>
+      <link>https://www.howie6879.cn/post/2016/05/</link>
+      <pubDate>Wed, 28 Sep 2016 20:27:02 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/05/</guid>
+      <description>## 概述 ## 基本语法  分级标题 粗体和斜体 链接和图像 列表 文字引用 代码块 下划线 表格 反斜杠  说明 1.概述 本教程的目的是让你读完本教程后，能够使用Markdown来应付一些日常的书写；Markdown的目标是实现易读易写，在这里我觉得还要加上一点，那就是易学，既然易学，那为什么还要写教程呢？因为我必须让我女朋友也学会Markdown啊，哈哈。
+   参考： Markdown 语法说明
+使用环境：可以自己下载Markdown编辑器，也可以使用简书，设置方式如下：设置-&amp;gt;基础设置-&amp;gt;选择常用的编辑器切换到Markdown，然后在编辑文章时候就默认是Markdown。
+阅读：本篇教程一共九个 Markdown的基本语法，看完后足够你应付日常书写，Markdown语法和显示效果一一对应，可以使用简书自带的编辑器进行练习。
+ 2.基本语法 2-1.分级标题 为什么叫做分级标题呢？因为标题可以分为数个等级，一种是用#... title表示，注意那个#的省略号代表#的个数可以为1~6个，如# title表示一级标题， ## title表示二级标题，以此类推;还有一种是用任何数量的=和-具体效果如下所示： Markdown语法：
+# 一级标题 ## 二级标题 ### 三级标题 #### 四级标题 ##### 五级标题 ###### 六级标题 这也是一级标题 ====== 这也是二级标题 ------  显示效果：
+一级标题 二级标题 三级标题 四级标题 五级标题 六级标题 这也是一级标题 这也是二级标题 2-2.粗体和斜体 使用**和*表示粗体和斜体,还可以用__和_表示，具体效果如下：
+Markdown语法：
+**我是粗体** *我是斜体* __我也是粗体__ _我也是斜体_  显示效果：</description>
+    </item>
+    
+    <item>
+      <title>python之装饰器</title>
+      <link>https://www.howie6879.cn/post/2016/04/</link>
+      <pubDate>Wed, 28 Sep 2016 20:24:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/04/</guid>
+      <description>认识装饰器 在python中，对于一个函数，若想在其运行前后做点什么，那么装饰器是再好不过的选择，话不多说，上代码。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 01.py __author__ = &#39;howie&#39; from functools import wraps def decorator(func): @wraps(func) def wrapper(*args, **kwargs): print(&amp;quot;%s was called&amp;quot; % func.__name__) func(*args, **kwargs) return wrapper @decorator def hello(name=&amp;quot;howie&amp;quot;): print(&amp;quot;Hello %s!&amp;quot; % name) hello()  outputs: hello was called Hello howie!  这段代码，初看之下，确实不是很理解，接下来一步一步分析，看看装饰器到底是怎么工作的。 装饰器原理 在python中，方法允许作为参数传递，想在某个函数执行前后加点料，也可以这样简单实现。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 02-1.py __author__ = &#39;howie&#39; def decorator(func): print(&amp;quot;%s was called&amp;quot; % func.__name__) func() def hello(name=&amp;quot;howie&amp;quot;): print(&amp;quot;Hello %s!</description>
+    </item>
+    
+    <item>
+      <title>mysql基本操作命令汇总--笔记</title>
+      <link>https://www.howie6879.cn/post/2016/03/</link>
+      <pubDate>Wed, 28 Sep 2016 20:21:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/post/2016/03/</guid>
+      <description>一、基本操作  对数据库以及表的一些基本操作
+ 1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student;  1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.</description>
     </item>
     
   </channel>
