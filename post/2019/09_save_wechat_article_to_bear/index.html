@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
     <title>
         
-        2.Docker - 实例演示 - owllook - 老胡的储物柜
+        利用微信同步文章到Bear - 老胡的储物柜
         
     </title>
     <meta name="keywords" content=" " />
@@ -67,108 +67,254 @@
     <article class="main-content page-page">
         <div class="post-header">
             <h1 class="post-title" itemprop="name headline">
-                2.Docker - 实例演示 - owllook
+                利用微信同步文章到Bear
             </h1>
             <div class="post-data">
-                Published on Aug 22, 2017 ,1 min reading time
+                Published on Sep 16, 2019 ,2 min reading time
             </div>
         </div>
         <div id="post-content" class="post-content">
             
 <p class="post-tags"> 
 	
-	<a href="https://www.howie6879.cn/tags/docker">Docker</a>
+	<a href="https://www.howie6879.cn/tags/python">python</a>
+	
+	<a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87">效率</a>
 	
 </p>
 
  
 
-<p>上一篇笔记<a href="http://blog.howie6879.cn/2017/08/15/26/">1.Docker - 初使用</a> 主要介绍了<code>Docker</code>的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些<code>Docker</code>镜像以及容器的基本操作</p>
+<blockquote>
+<p>如果图片失效：见<a href="https://mp.weixin.qq.com/s/qRQO9xMvGTQL-ysolXJAxQ">【教程&amp;工具】微信同步文章到Bear</a></p>
+</blockquote>
 
-<h3 id="1-目标">1.目标</h3>
+<p>在我日常工作中，我会将各种互联网以及生活中产出的信息汇总到Bear，再通过Bear的云同步使我各个终端的信息保持一致。</p>
 
-<p>之前的毕设<a href="https://github.com/howie6879/owllook">owllook</a>是用<code>python</code>编写的，我将它开源在<code>github</code>上，正借此机会，将其制作成<code>Docker</code>镜像，以便部署</p>
+<p>以前在使用有道云笔记的时候，有个功能我很喜欢，就是当看到一篇想收藏的文章的话，就可以直接右上角发送到有道云笔记，如下图：</p>
 
-<p>本次笔记就以此项目为中心，目标是将该项目制作成<code>Docker</code>镜像，并从过程中一步步熟悉<code>Docker</code></p>
+<p><img src="https://i.loli.net/2019/09/16/uA24OnZWtjodC69.png" alt="" /></p>
 
-<h3 id="2-定制镜像">2.定制镜像</h3>
+<blockquote>
+<p>顺便一提：熊掌记是一款优雅、灵活的写作笔记应用。<br />
+回到正题，我现在面临的需求是能不能在看到喜欢的文章的时候，也通过类似于右上角<code>分享一下</code>就可以直接将文章同步到我各个终端上的<code>Bear</code>，最终成果如下：</p>
+</blockquote>
 
-<p>上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如<code>owllook</code>基于<code>python3.6</code>，那么我第一步便是从镜像仓库获取<code>python</code>镜像</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/w2b/master/images/w2b_demo.gif" alt="" /></p>
 
-<!-- more -->
+<h2 id="解决方案">解决方案</h2>
 
-<p>运行命令：<code>docker pull python:3.6</code></p>
+<p>要实现上述的需求，我大概思考了如下的解决方案：</p>
 
-<p>稍等片刻，就会拉取一个<code>python3.6</code>的镜像下来，让我们以这个镜像为基础来启动一个容器：</p>
+<ol>
+<li>准备一个微信号（这里直接称作小号）专门接收待收藏到Bear的文章</li>
+<li>编写一个服务监控小号的消息，比如收到推文类型的消息就进行内容提取</li>
+<li>监控服务将提取后的内容发送到Bear（这里要求服务运行在Mac OS上）</li>
+</ol>
 
-<pre><code class="language-shell"># 具体可参考 dcker run --help 来了解详细命令
-docker run -it --rm python:3.6 python
-
-# 终端会有如下输出 此时进入了容器中的3.6环境
-Python 3.6.2 (default, Jul 24 2017, 19:47:39) 
-[GCC 4.9.2] on linux
-Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
-&gt;&gt;&gt; 
-
-#　也可以直接进入容器
-docker run -it --rm python:3.6 
-</code></pre>
-
-<p>有了基础镜像，下面我们有两种方案构建<code>owllook</code>镜像：</p>
+<p>所以在继续之前，你需要有以下条件：</p>
 
 <ul>
-<li>使用<code>docker commit</code> 命令</li>
-<li><code>Dockerfile</code>(使用此方案)</li>
+<li>基本的Python基础知识（写小脚本Python真的很方便）</li>
+<li>一台装有Bear的Mac OS</li>
 </ul>
 
-<p>Dockerfile内容如下：</p>
+<h2 id="方案调研">方案调研</h2>
 
-<pre><code class="language-dockerfile"># 基于python3.6镜像来构建owllook镜像
-FROM python:3.6
-MAINTAINER howie6879 &lt;howie6879@gmail.com&gt;
-RUN apt update -y &amp;&amp; apt-get install -y net-tools
-# 设置环境变量
-ENV APP_ROOT /opt
-WORKDIR ${APP_ROOT}/
-COPY requirements.txt ${APP_ROOT}/
-# 安装依赖
-RUN pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
-COPY . ${APP_ROOT}
-WORKDIR ${APP_ROOT}/owllook/
-RUN find . -name &quot;*.pyc&quot; -delete
-# 启动
-CMD [&quot;gunicorn&quot;,&quot;-c&quot;,&quot;config/dev_gunicorn.py&quot;,&quot;--worker-class&quot;,&quot;sanic.worker.GunicornWorker&quot;,&quot;server:app&quot;]
+<p>上面的解决方案看起来还是挺好实现，第一步不用多说，这年头谁没个小号，第二点的话，我印象中Python是有个第三方库可以直接监听微信对应账号的消息。</p>
+
+<p>因为这些第三方库都是基于<code>Web</code>版的微信，所以在使用之前我想验证下此方案是否可行，刚准备登录网页版微信，就直接提示：</p>
+
+<pre><code class="language-html">&lt;error&gt;&lt;ret&gt;1203&lt;/ret&gt;&lt;message&gt;To protect your account, logging in to WeChat via the web has been suspended. Use WeChat for Windows or WeChat for Mac to log in on a computer. Download WeChat for Windows or Mac at http://wechat.com.&lt;/message&gt;&lt;/error&gt;
 </code></pre>
 
-<p>构建镜像：</p>
+<p><img src="https://i.loli.net/2019/09/16/ArhyCYUg1d925qz.png" alt="" /></p>
 
-<p><code>docker build -t owllook:0.1 .</code></p>
+<p>果不其然现在微信准备加强<code>Web</code>版本的限制了，心里凉凉的，第二步还没开始就已经被宣判死刑。</p>
 
-<p>构建成功后，可直接运行，不过针对<code>owllook</code>这个项目，我设置了几个环境变量，可运行如下命令运行：</p>
+<p>只能换个思路了，怎么办。其实这一步走不通我还是能接受的，因为我一直觉得依赖<code>Web</code>版总有一天会挂掉，毕竟多了个依赖总是会增加复杂度。</p>
 
-<pre><code class="language-shell"># 运行并将docker的8001端口映射到主机的8001
-# 在dev_owllook.env里面填上数据库配置 数据库ip需要注意 不得填localhost
-docker run --env-file ./dev_owllook.env -d -p 8001:8001 owllook:0.1
+<p>能不能依靠客户端？</p>
+
+<p>我们知道，微信数据是有同步功能的，开发过客户端的都知道，这就意味着微信的数据必然保存一份在客户端本地系统上。</p>
+
+<p>所以对于第二点的解决思路就转换成了如何获取微信保存在客户端本地的数据，找到某个软件的数据文件夹自然是很简单的事情，比如微信客户端的数据就存放在：</p>
+
+<pre><code class="language-shell"># howie6879是我的用户名，请自行替换
+/Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9
 </code></pre>
 
-<p>仅仅是达到使用<code>Docker</code>的程度，所花费时间真的不多，所以说<code>Docker</code>还是很简单方便的，下一步就是上传到镜像仓库。</p>
+<p>具体有如下目录：</p>
 
-<h3 id="3-上传镜像">3.上传镜像</h3>
+<pre><code class="language-shell">├── 988eebd1078a0d794bff2b6f5c8d5176
+├── Avatar
+├── CGI
+├── CrashReport
+├── KeyValue
+├── MMResourceMgr
+├── checkVersionFile
+├── d41d8cd93400b204e9800998ecf8427e
+├── f965739b566114f907dc394322e1e826
+├── topinfo.data
+├── upgradeHistoryFile
+├── whatsNewVersionFile
+└── wx.dat
 
-<p>首先请注册<a href="https://hub.docker.com/"><em>Docker Hub</em></a>账号，然后创建自己的仓库之后，比如这里创建好<code>howie6879/owllook</code>，随即在终端输入：</p>
-
-<pre><code class="language-shell"># 重新打包下 或者改下tag也没问题
-docker build -t howie6879/owllook:0.1 .
-# 根据提示登录
-docker login
-docker push howie6879/owllook:0.1
+8 directories, 5 files
 </code></pre>
 
-<p>稍等即大功告成</p>
+<p>不知道上面那三个32位的字符串大家看起来熟悉不熟悉：</p>
 
-<h3 id="4-最后">4.最后</h3>
+<p><img src="https://i.loli.net/2019/09/16/bqu2sUkc6VwxLIR.png" alt="" /></p>
 
-<p>现在可以根据<code>Dockerfile</code>自己构建<code>owllook</code>镜像或者直接<code>docker pull owllook</code>镜像，确实十分方便</p>
+<p>一想到<code>32</code>，就是<code>md5</code>加密，我第一反应就是对于每个登录账号的id加密值，我们先不管，直接进去看更深一层的文件夹：</p>
+
+<pre><code class="language-shell">├── Account
+├── Avatar
+├── Contact
+├── Favorites
+├── FileStateSync
+├── FunctionMsg
+├── Group
+├── Message
+├── RevokeMsg
+├── Session
+├── Stickers
+├── Sync
+├── complexSearch
+├── mmexpt
+└── newabtest
+
+15 directories, 0 files
+</code></pre>
+
+<p><code>Message</code>出来了，这是不是我们想要的呢？再往下看里面的目录：</p>
+
+<pre><code class="language-shell">├── MessageTemp
+├── fts
+├── msg_0.db
+├── msg_0.db-backup
+├── msg_0.db-shm
+├── msg_0.db-wal
+├── msg_1.db
+</code></pre>
+
+<p>如果你登录过该台电脑并同步过信息，那么不出意外会有挺多<code>*.db</code>后缀的文件。大胆地猜测一下，这是不是我们想要的聊天数据存放路径呢？</p>
+
+<p>不要管太多，先看看总不会错，一般本地存储的数据库，咱们程序员第一反应应该就是<code>SQLite</code>，要不要试试？</p>
+
+<pre><code class="language-shell">sqlite3 Message/msg_0.db
+sqlite&gt; .schema
+Error: file is not a database
+sqlite&gt;
+</code></pre>
+
+<p>？？提示不是数据库，此时陷入了瓶颈，怎么就不是数据库了呢。反思一下，是不是打开的姿势不对。</p>
+
+<p><strong>会不会是加密了</strong>？依照这个思路，我了解到有一款基于<code>SQLite</code>的扩展数据库[SQLCipher](<a href="https://github.com/sqlcipher/sqlcipher">https://github.com/sqlcipher/sqlcipher</a>，<code>SQLCipher</code>是一个在<code>SQLite</code>基础之上进行扩展的开源数据库，它主要是在<code>SQLite</code>的基础之上增加了数据加密功能。</p>
+
+<p>实践证明，我猜想的是对的，接下来主要做的怎么打开<code>Message/msg_0.db</code>这个文件并成功读取里面的数据。</p>
+
+<p>最后我参考到一份有意思的问答，我就是参考这个<a href="https://www.v2ex.com/t/466053#reply15">问答</a>对数据库进行解密，这里我复述一下：</p>
+
+<ul>
+<li>打开微信，但是先不登录</li>
+<li>打开终端，输入<code>lldb -p $(pgrep WeChat)</code></li>
+<li>会看到进入了<code>lldb</code>，然后输入<code>br set -n sqlite3_key</code>，按回车</li>
+<li>在<code>lldb</code>中，输入<code>c</code>，按回车</li>
+<li>打开微信并扫码登录</li>
+<li>然后回到<code>lldb</code>中，输入<code>memory read --size 1 --format x --count 32 $rsi</code></li>
+</ul>
+
+<p>此时就会得到以下类似的输出：</p>
+
+<pre><code class="language-shell">0x600003888340: 0xd1 0x05 0x29 0x04 0x75 0xc5 0x45 0x05
+0x600003888348: 0x92 0x26 0xa1 0x65 0x95 0xe5 0x15 0x3f
+0x600003888350: 0xf3 0xc7 0x43 0x85 0x05 0x35 0x45 0x3d
+0x600003888358: 0x84 0xc8 0x64 0xe5 0x35 0x65 0x45 0xe2
+</code></pre>
+
+<p>去掉冒号前面的那一串，后面是四行八列的数据，再去除掉<code>0x</code>、<code>空格</code>、<code>\n</code>等，就会得到一串64位的字符串，举个例子：</p>
+
+<pre><code class="language-shell">df012f587cc546000025a56599e81530f9cc49800329423d8ec460e1386549e2
+</code></pre>
+
+<p>这就是我们进入数据库的钥匙，接下来，请安装sqlcipher的相关软件，如：</p>
+
+<pre><code class="language-shell">brew install sqlcipher
+brew cask install db-browser-for-sqlite
+</code></pre>
+
+<p>让我们用<code>db-browser-for-sqlite</code>打开<code>db</code>后缀的文件看看有什么不一样吧：
+<img src="https://i.loli.net/2019/09/16/27CUG48QzEuKWop.png" alt="" />
+<img src="https://i.loli.net/2019/09/16/XE7lHKqdbvuM4g8.png" alt="" /></p>
+
+<p>点击<code>OK</code>，成功打开！
+<img src="https://i.loli.net/2019/09/16/4JD5TBSgn3Aptyb.png" alt="" /></p>
+
+<p>随便进入一个表：
+<img src="https://i.loli.net/2019/09/16/q6iGsJNZYC5WBpg.png" alt="" /></p>
+
+<p>很显然，我们成功获取了本地的聊天记录，总算将第二步流程打通了，如今我们可以监控发送收藏文章的微信账户的聊天记录，只要收到此账号发来的推文消息，此时监控服务可以立马反应过来并解析发送到Bear。</p>
+
+<p>有个小问题，怎么知道发推文的账号在哪个库哪个表呢？可以这样看，在电脑上登录发推文的账号，打开文件<code>userinfo.data</code>：</p>
+
+<pre><code class="language-shell">cd /Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/988eebd1023a0d794bff2b6f5c8d5176/Account
+cat userinfo.data
+</code></pre>
+
+<p>大概输出如下：</p>
+
+<pre><code class="language-textile">&quot;:BHPpx��127417592694754732��wxid_epXXXXXXXfj12�    Howie6879�老胡的储物柜�
+</code></pre>
+
+<p>这里很明显我的<code>wxid</code>就是：<code>wxid_epXXXXXXXfj12</code>，那么对应需要监控的表名就是：<code>Chat_md5(wxid_epXXXXXXXfj12)</code>，形式如同这样</p>
+
+<pre><code class="language-shell">Chat_f965739xxxx114fxxxxc394322exxxx
+</code></pre>
+
+<p>随后实现在库里面找到对应的表即可，我本机发现对应账户的表存在于库 <code>msg_5.db</code>中。</p>
+
+<p>接下来要做的事情就很简单了，就是将提取后的内容发送到Bear，这里可以利用<a href="https://bear.app/faq/X-callback-url%20Scheme%20documentation/">X callback url Scheme documentation</a>，比如你在终端输入：</p>
+
+<pre><code class="language-shell">open 'bear://x-callback-url/create?title=Test%20Bear&amp;text=Hello%20Bear'
+</code></pre>
+
+<p>立马就可以看到Bear自动建立了一篇笔记</p>
+
+<h2 id="编码实现">编码实现</h2>
+
+<p>终于到了编码阶段，好心酸：</p>
+
+<p><img src="https://i.loli.net/2019/09/16/UDTA6xBphuvoFbs.png" alt="" /></p>
+
+<p>第一步，拿到必须要的常量：</p>
+
+<ul>
+<li>S_ACCOUNT_ID：微信发送账户ID，可以在<code>Account/userinfo.data</code>下查看</li>
+<li>R_ACCOUNT_ID：微信接收账户ID，同上</li>
+<li>RAW_KEY：解密Key，就是上面介绍的64位字符串</li>
+<li>DB_PATH_TEM：定义的是消息DB路径，比如：&rdquo;/Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/{0}/Message/&rdquo;</li>
+</ul>
+
+<p>定义这四个常量，接下来的事情就一帆风顺了哈，我将项目开源在<code>Github</code>，地址见<a href="https://github.com/howie6879/w2b">w2b</a>，接下来我直接说说怎么用：</p>
+
+<pre><code class="language-shell">git clone https://github.com/howie6879/w2b
+cd w2b
+# 推荐使用pipenv 你也可以使用自己中意的环境构建方式
+pipenv install --python=/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
+# 运行前需要填好配置文件
+pipenv run python w2b/run.py
+</code></pre>
+
+<p>随后，会有日志输出：</p>
+
+<pre><code class="language-shell">[w2b] pipenv run python w2b/run.py                                                                                                
+Loading .env environment variables…
+[2019:09:13 09:16:35] INFO  w2b  目标表 Chat_f965739b676114fxxxxc394322e1e826 存在于库 msg_5.db
+</code></pre>
+
+<p>好，代码跑起来后，接下来电脑上登录你的小号（也就是接收微信文章的微信号），然后在手机上登录发送文章的微信号，最终成功就和文章一开始的动图一样了~</p>
 
             <p class="post-info">
                 本文由
@@ -188,17 +334,16 @@ docker push howie6879/owllook:0.1
         <div class="bottom-bar-inner">
             <div class="bottom-bar-items social-share left">
                 <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f27%2f" target="_blank" title="2.Docker - 实例演示 - owllook" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f27%2f&text=2.Docker%20-%20%e5%ae%9e%e4%be%8b%e6%bc%94%e7%a4%ba%20-%20owllook" target="_blank" title="2.Docker - 实例演示 - owllook" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f27%2f&amp;title=2.Docker%20-%20%e5%ae%9e%e4%be%8b%e6%bc%94%e7%a4%ba%20-%20owllook" target="_blank" title="2.Docker - 实例演示 - owllook" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f27%2f" target="_blank" rel="nofollow">QRcode</a></span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f09_save_wechat_article_to_bear%2f" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f09_save_wechat_article_to_bear%2f&text=%e5%88%a9%e7%94%a8%e5%be%ae%e4%bf%a1%e5%90%8c%e6%ad%a5%e6%96%87%e7%ab%a0%e5%88%b0Bear" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f09_save_wechat_article_to_bear%2f&amp;title=%e5%88%a9%e7%94%a8%e5%be%ae%e4%bf%a1%e5%90%8c%e6%ad%a5%e6%96%87%e7%ab%a0%e5%88%b0Bear" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f09_save_wechat_article_to_bear%2f" target="_blank" rel="nofollow">QRcode</a></span>
             </div>
 
             <div class="bottom-bar-items right">
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/26/" title="1.Docker - 初使用">←</a></span> 
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/" title="神经网络与深度学习笔记 - 2.反向传播算法如何工作">←</a></span> 
                 
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/28/" title="Sanic 使用教程 - 1.初使用">→</a></span> 
                 <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
                 <span class="bottom-bar-item"><a href="#">↑</a></span>
             </div>
