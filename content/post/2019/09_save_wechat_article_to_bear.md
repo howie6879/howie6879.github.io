@@ -4,7 +4,7 @@ categories:
   - 效率
 comments: true
 date: 2019-09-16T08:37:56+08:00
-image: /images/thumbs/h_46.png
+image: https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190916120642.png
 tags: [python,效率]
 title: "利用微信同步文章到Bear"
 toc: true
@@ -16,7 +16,7 @@ toc: true
 
 以前在使用有道云笔记的时候，有个功能我很喜欢，就是当看到一篇想收藏的文章的话，就可以直接右上角发送到有道云笔记，如下图：
 
-![](https://i.loli.net/2019/09/16/uA24OnZWtjodC69.png)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190916120642.png)
 
 > 顺便一提：熊掌记是一款优雅、灵活的写作笔记应用。  
 > 回到正题，我现在面临的需求是能不能在看到喜欢的文章的时候，也通过类似于右上角`分享一下`就可以直接将文章同步到我各个终端上的`Bear`，最终成果如下：
