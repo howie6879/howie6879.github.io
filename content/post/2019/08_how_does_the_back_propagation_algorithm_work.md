@@ -5,7 +5,7 @@ date: 2019-05-10 16:36:44+08:00
 image: /images/thumbs/h_49.jpg
 tags: [神经网络与深度学习]
 title: "神经网络与深度学习笔记 - 2.反向传播算法如何工作"
-toc: true
+markup: mmark
 ---
 
 ![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png)

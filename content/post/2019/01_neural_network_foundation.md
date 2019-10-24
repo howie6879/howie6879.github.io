@@ -1,7 +1,6 @@
 ---
 categories:
   - Machine Learning
-comments: true
 date: 2019-01-03T08:37:56+08:00
 image: /images/thumbs/h_43.jpg
 tags: [神经网络与深度学习]

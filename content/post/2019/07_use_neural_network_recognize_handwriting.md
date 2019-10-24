@@ -5,7 +5,7 @@ date: 2019-05-08 16:36:44+08:00
 image: /images/thumbs/h_48.png
 tags: [神经网络与深度学习]
 title: "神经网络与深度学习笔记 - 1.识别手写字"
-toc: true
+markup: mmark
 ---
 
 ![from Unsplash](/images/post/33/01.jpg)
