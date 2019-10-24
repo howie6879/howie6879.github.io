@@ -243,3 +243,7 @@ Loading .env environment variables…
 ```
 
 好，代码跑起来后，接下来电脑上登录你的小号（也就是接收微信文章的微信号），然后在手机上登录发送文章的微信号，最终成功就和文章一开始的动图一样了~
+
+搞定收工，有兴趣欢迎关注我的公众号：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)

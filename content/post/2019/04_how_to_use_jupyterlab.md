@@ -2,7 +2,6 @@
 categories:
   - Python
   - 效率
-comments: true
 date: 2019-03-20T13:37:56+08:00
 image: /images/thumbs/h_46.png
 tags: [python,效率]

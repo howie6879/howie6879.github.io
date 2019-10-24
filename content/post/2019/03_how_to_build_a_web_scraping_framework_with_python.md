@@ -1,7 +1,6 @@
 ---
 categories:
   - Python
-comments: true
 date: 2019-03-15T08:37:56+08:00
 image: /images/thumbs/h_45.png
 tags: [python]

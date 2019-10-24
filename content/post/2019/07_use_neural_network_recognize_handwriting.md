@@ -1,8 +1,6 @@
 ---
 categories:
   - Deep Learning
-comments: true
-markup: mmark
 date: 2019-05-08 16:36:44+08:00
 image: /images/thumbs/h_48.png
 tags: [神经网络与深度学习]

@@ -6,7 +6,6 @@ image: /images/thumbs/h_47.jpg
 tags: [效率]
 title: "oh-my-zsh：让终端飞"
 toc: true
-comments: true
 ---
 
 上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错

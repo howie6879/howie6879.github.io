@@ -4,9 +4,9 @@ date : 2018-01-06
 author : howie6879
 ---
 
-### 介绍
+### 老胡的储物柜
 
-努力的程序员：
+做一个努力的程序员：
 
 - Github : [howie6879](https://github.com/howie6879)
 - Email : howie6879@gmail.com
@@ -27,6 +27,6 @@ author : howie6879
 
 ### 个人公众号
 
-我的随笔、学习笔记、自己写的原创教程，都会放这里：
+我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎关注：
 
 <img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png" width="300px">
