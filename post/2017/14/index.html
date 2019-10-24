@@ -1,91 +1,160 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="x-dns-prefetch-control" content="on">
-    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
-    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
-    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-    <meta name="renderer" content="webkit">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-transform" />
-    <meta http-equiv="Cache-Control" content="no-siteapp" />
-    
-    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
-    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
-    <title>
-        
-        对于python抓取google搜索结果的一些了解 - 老胡的储物柜
-        
-    </title>
-    <meta name="keywords" content=" " />
-    <meta name="description" content=" " />
-    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>对于python抓取google搜索结果的一些了解 - 老胡的储物柜</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
-    
-    
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="howie6879" /><meta name="description" content="大学时期博文 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉 本人前段时间有个脚本用到了谷" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.58.3 with theme even" />
+
+
+<link rel="canonical" href="https://www.howie6879.cn/post/2017/14/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+<link href="/dist/even.7700d289.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="对于python抓取google搜索结果的一些了解" />
+<meta property="og:description" content="大学时期博文 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉 本人前段时间有个脚本用到了谷" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/post/2017/14/" />
+<meta property="article:published_time" content="2017-01-25T22:25:00+00:00" />
+<meta property="article:modified_time" content="2017-01-25T22:25:00+00:00" />
+<meta itemprop="name" content="对于python抓取google搜索结果的一些了解">
+<meta itemprop="description" content="大学时期博文 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉 本人前段时间有个脚本用到了谷">
+
+
+<meta itemprop="datePublished" content="2017-01-25T22:25:00&#43;00:00" />
+<meta itemprop="dateModified" content="2017-01-25T22:25:00&#43;00:00" />
+<meta itemprop="wordCount" content="1314">
+
+
+
+<meta itemprop="keywords" content="Spider,Python,Google," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="对于python抓取google搜索结果的一些了解"/>
+<meta name="twitter:description" content="大学时期博文 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉 本人前段时间有个脚本用到了谷"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
 </head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">howie.hu</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a><a href="/friends/">
+        <li class="mobile-menu-item">友链</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">howie.hu</a>
+</div>
 
-
-<body class="bg-white" gtools_scp_screen_capture_injected="true">
-    
-    <header id="header" class="header bg-white">
-        <div class="navbar-container">
-            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">老胡的储物柜</a>
-            <div class="navbar-menu">
-            
-                <a href="https://www.howie6879.cn/post/">Archives</a>  
-            
-                <a href="https://www.howie6879.cn/tags/">Tags</a>  
-            
-                <a href="https://www.howie6879.cn/about/">About</a>  
-            
-                <a href="https://www.howie6879.cn/friend/">Friend</a>  
-            
-            </div>
-            
-            <div class="navbar-mobile-menu" onclick=""> 
-                <span class="icon-menu cross"><span class="middle"></span></span>
-                <ul>
-                
-                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
-                
-                </ul>
-            </div>
-        </div>
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/friends/">友链</a>
+      </li>
+  </ul>
+</nav>
     </header>
-    <article class="main-content page-page">
-        <div class="post-header">
-            <h1 class="post-title" itemprop="name headline">
-                对于python抓取google搜索结果的一些了解
-            </h1>
-            <div class="post-data">
-                Published on Jan 25, 2017 ,1 min reading time
-            </div>
-        </div>
-        <div id="post-content" class="post-content">
-            
-<p class="post-tags"> 
-	
-	<a href="https://www.howie6879.cn/tags/spider">Spider</a>
-	
-	<a href="https://www.howie6879.cn/tags/python">Python</a>
-	
-	<a href="https://www.howie6879.cn/tags/google">Google</a>
-	
-</p>
 
- 
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">对于python抓取google搜索结果的一些了解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-01-25 </span>
+        <div class="post-category">
+            <a href="/categories/python/"> Python </a>
+            <a href="/categories/web/"> Web </a>
+            </div>
+          <span class="more-meta"> 1314 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#1-问题">1.问题</a></li>
+<li><a href="#2-如何解决">2.如何解决</a></li>
+<li><a href="#3-总结">3.总结</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
 
 <blockquote>
 <p>大学时期博文</p>
@@ -126,41 +195,76 @@
 <p>对于这个<code>url</code>，相信机智的你应该会明白些什么</p>
 
 <p>这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的<code>html</code>，简单写下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python">    <span class="n">URL_SEARCH</span> <span class="o">=</span> <span class="s2">&#34;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&#34;</span>
+    <span class="n">URL_NUM</span> <span class="o">=</span> <span class="s2">&#34;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&amp;num={num}&#34;</span>
 
-<pre><code class="language-python">    URL_SEARCH = &quot;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&quot;
-    URL_NUM = &quot;https://{domain}/search?hl={language}&amp;q={query}&amp;btnG=Search&amp;gbv=1&amp;num={num}&quot;
-
-    def search_page(query, language='en', num=None, start=0, pause=2):
-        &quot;&quot;&quot;
-        Google search
-        :param query: Keyword
-        :param language: Language
-        :return: result
-        &quot;&quot;&quot;
-        time.sleep(pause)
-        domain = self.get_random_domain()
-        if num is None:
-            url = URL_SEARCH
-            url = url.format(
-                domain=domain, language=language, query=quote_plus(query))
-        else:
-            url = URL_NUM
-            url = url.format(
-                domain=domain, language=language, query=quote_plus(query), num=num)
-        try:
-            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-            r = requests.get(url=url,
-                             allow_redirects=False,
-                             verify=False,
-                             timeout=30)
-            charset = chardet.detect(r.content)
-            content = r.content.decode(charset['encoding'])
-            return content
-        except Exception as e:
-            logging.error(e)
-            return None
-</code></pre>
-
+    <span class="k">def</span> <span class="nf">search_page</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        Google search
+</span><span class="s2">        :param query: Keyword
+</span><span class="s2">        :param language: Language
+</span><span class="s2">        :return: result
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_random_domain</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">num</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">URL_SEARCH</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">quote_plus</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">URL_NUM</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">quote_plus</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">requests</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+                             <span class="n">allow_redirects</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                             <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                             <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="n">charset</span> <span class="o">=</span> <span class="n">chardet</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">content</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>到了这里，问题才刚开始，你可以做个实验，我假设你是使用代理进行谷歌搜索，如果你连续不断无间隔使用谷歌搜索某一关键字二三十下，不出意外你会被要求进行这样的验证：</p>
 
 <p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9y3qs2nj30n807wq3a.jpg" alt="" /></p>
@@ -193,49 +297,92 @@
 </ul>
 
 <p>我将这些写成了一个项目，<a href="https://github.com/howie6879/magic_google">magic_google-python</a>，若你是phper，可以看看我写的php版本<a href="https://github.com/howie6879/php-google">php-google</a>，具体代码可以看这里，对应的功能很简单：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">magic_google</span> <span class="kn">import</span> <span class="n">MagicGoogle</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
 
-<pre><code class="language-python">from magic_google import MagicGoogle
-import pprint
+<span class="c1"># Or PROXIES = None</span>
+<span class="n">PROXIES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;http&#39;</span><span class="p">:</span> <span class="s1">&#39;http://192.168.2.207:1080&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;https&#39;</span><span class="p">:</span> <span class="s1">&#39;http://192.168.2.207:1080&#39;</span>
+<span class="p">}]</span>
 
-# Or PROXIES = None
-PROXIES = [{
-    'http': 'http://192.168.2.207:1080',
-    'https': 'http://192.168.2.207:1080'
-}]
+<span class="c1"># Or MagicGoogle()</span>
+<span class="n">mg</span> <span class="o">=</span> <span class="n">MagicGoogle</span><span class="p">(</span><span class="n">PROXIES</span><span class="p">)</span>
 
-# Or MagicGoogle()
-mg = MagicGoogle(PROXIES)
+<span class="c1">#  Crawling the whole page</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">search_page</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">)</span>
 
-#  Crawling the whole page
-result = mg.search_page(query='python')
+<span class="c1"># Crawling url</span>
+<span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">mg</span><span class="o">.</span><span class="n">search_url</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">):</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
-# Crawling url
-for url in mg.search_url(query='python'):
-    pprint.pprint(url)
+<span class="c1"># Output</span>
+<span class="c1"># &#39;https://www.python.org/&#39;</span>
+<span class="c1"># &#39;https://www.python.org/downloads/&#39;</span>
+<span class="c1"># &#39;https://www.python.org/about/gettingstarted/&#39;</span>
+<span class="c1"># &#39;https://docs.python.org/2/tutorial/&#39;</span>
+<span class="c1"># &#39;https://docs.python.org/&#39;</span>
+<span class="c1"># &#39;https://en.wikipedia.org/wiki/Python_(programming_language)&#39;</span>
+<span class="c1"># &#39;https://www.codecademy.com/courses/introduction-to-python-6WeG3/0?curriculum_id=4f89dab3d788890003000096&#39;</span>
+<span class="c1"># &#39;https://www.codecademy.com/learn/python&#39;</span>
+<span class="c1"># &#39;https://developers.google.com/edu/python/&#39;</span>
+<span class="c1"># &#39;https://learnpythonthehardway.org/book/&#39;</span>
+<span class="c1"># &#39;https://www.continuum.io/downloads&#39;</span>
 
-# Output
-# 'https://www.python.org/'
-# 'https://www.python.org/downloads/'
-# 'https://www.python.org/about/gettingstarted/'
-# 'https://docs.python.org/2/tutorial/'
-# 'https://docs.python.org/'
-# 'https://en.wikipedia.org/wiki/Python_(programming_language)'
-# 'https://www.codecademy.com/courses/introduction-to-python-6WeG3/0?curriculum_id=4f89dab3d788890003000096'
-# 'https://www.codecademy.com/learn/python'
-# 'https://developers.google.com/edu/python/'
-# 'https://learnpythonthehardway.org/book/'
-# 'https://www.continuum.io/downloads'
+<span class="c1"># Get {&#39;title&#39;,&#39;url&#39;,&#39;text&#39;}</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">mg</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-# Get {'title','url','text'}
-for i in mg.search(query='python', num=1):
-    pprint.pprint(i)
-
-# Output
-# {'text': 'The official home of the Python Programming Language.',
-# 'title': 'Welcome to Python .org',
-# 'url': 'https://www.python.org/'}
-</code></pre>
-
+<span class="c1"># Output</span>
+<span class="c1"># {&#39;text&#39;: &#39;The official home of the Python Programming Language.&#39;,</span>
+<span class="c1"># &#39;title&#39;: &#39;Welcome to Python .org&#39;,</span>
+<span class="c1"># &#39;url&#39;: &#39;https://www.python.org/&#39;}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="3-总结">3.总结</h2>
 
 <p>对google搜索结果的爬取，有以下建议：</p>
@@ -247,253 +394,134 @@ for i in mg.search(query='python', num=1):
 <li>4.休眠</li>
 </ul>
 
-            <p class="post-info">
-                本文由
-                
-                    <a href="https://www.howie6879.cn/about">
-                howie6879 
-                
-                </a> 创作，采用
-                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
-                国际许可协议进行许可，转载请注明出处！ <br>
-                
-            </p>
-        </div>
-    </article>
-
-    <div id="post-bottom-bar" class="post-bottom-bar">
-        <div class="bottom-bar-inner">
-            <div class="bottom-bar-items social-share left">
-                <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f&text=%e5%af%b9%e4%ba%8epython%e6%8a%93%e5%8f%96google%e6%90%9c%e7%b4%a2%e7%bb%93%e6%9e%9c%e7%9a%84%e4%b8%80%e4%ba%9b%e4%ba%86%e8%a7%a3" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f&amp;title=%e5%af%b9%e4%ba%8epython%e6%8a%93%e5%8f%96google%e6%90%9c%e7%b4%a2%e7%bb%93%e6%9e%9c%e7%9a%84%e4%b8%80%e4%ba%9b%e4%ba%86%e8%a7%a3" target="_blank" title="对于python抓取google搜索结果的一些了解" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2017%2f14%2f" target="_blank" rel="nofollow">QRcode</a></span>
-            </div>
-
-            <div class="bottom-bar-items right">
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2016/13/" title="Mastering Pandas 01">←</a></span> 
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2017/15/" title="ITBooks—简单的书籍下载小工具">→</a></span> 
-                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
-                <span class="bottom-bar-item"><a href="#">↑</a></span>
-            </div>
-            
-        </div>
     </div>
 
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">howie6879</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-01-25
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
     
- <footer id="footer" class="footer bg-white" style="padding-bottom: 200px;">
-    <div class="footer-social">
-        <div class="footer-container clearfix">
-            <div class="social-list">
-                 
-                
-                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
-                
-                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
-                
-                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
-            </div>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/wechat.png">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/spider/">Spider</a>
+          <a href="/tags/python/">Python</a>
+          <a href="/tags/google/">Google</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2017/15/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">ITBooks—简单的书籍下载小工具</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2016/13/">
+            <span class="next-text nav-default">Mastering Pandas 01</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
         </div>
-    </div>
-    <div class="footer-meta">
-        <div class="footer-container">
-            <div class="meta-item meta-copyright">
-                <div class="meta-copyright-info">
-                    <br>
-                    <div class="info-text">
-                        <p id="chakhsu"> </p>
-                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
-                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
-                        </p>
-                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
-                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
-                    </div>
-                </div>
-            </div>
+        
 
-            <div class="meta-item meta-comments">
-                <h3 class="meta-title">CATEGORIES</h3>
-                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/deep-learning">Deep-Learning</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(5)</li>
-                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(26)</li>
-                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
-                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E6%95%88%E7%8E%87">效率</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
-            </div>
-            <div class="meta-item meta-posts">
-                <h3 class="meta-title">RECENT POSTS</h3>
-                   
-                <li><a href="https://www.howie6879.cn/post/2019/09_save_wechat_article_to_bear/">利用微信同步文章到Bear</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/">神经网络与深度学习笔记 - 2.反向传播算法如何工作</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/">神经网络与深度学习笔记 - 1.识别手写字</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/04_how_to_use_jupyterlab/">JupyterLab：程序员的笔记本神器</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">如何实现一个Python爬虫框架</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/02_talk_about_python_spider/">谈谈对Python爬虫的理解</a></li>
-                 
+  
 
-            </div>
-        </div>
-    </div>
-    </div>
-</footer>
+  
 
+      </div>
+    </main>
 
-
-
-<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
-<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
-<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
-<script>
-
-
-
-     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "pinned",
-            unpinned: "unpinned"
-        }
-    });
-    postSharer.init();
-    
-
-
-
-    var header = new Headroom(document.getElementById("header"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "slideDown",
-            unpinned: "slideUp"
-        }
-    });
-    header.init();
-    var chakhsu = function (r) {
-        function t() {
-            return b[Math.floor(Math.random() * b.length)]
-        }
-
-        function e() {
-            return String.fromCharCode(94 * Math.random() + 33)
-        }
-
-        function n(r) {
-            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
-                var l = document.createElement("span");
-                l.textContent = e(), l.style.color = t(), n.appendChild(l)
-            }
-            return n
-        }
-
-        function i() {
-            var t = o[c.skillI];
-            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
-        }
-        var l = "",
-            o = ["浮浮沉沉","努力就好"].map(function (r) {
-                return r + "."
-            }),
-            a = 2,
-            g = 1,
-            s = 5,
-            d = 75,
-            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
-            c = {
-                text: "",
-                prefixP: -s,
-                skillI: 0,
-                skillP: 0,
-                direction: "forward",
-                delay: a,
-                step: g
-            };
-        i()
-    };
-    chakhsu(document.getElementById('chakhsu'));
-    if ('addEventListener' in document) {
-        document.addEventListener('DOMContentLoaded', function () {
-            FastClick.attach(document.body);
-        }, false);
-    }
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
-    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
-    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
-<div class="cnzz" style="display: none">
-    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:xiaozizayang@email.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/howie6879" class="iconfont icon-github" title="github"></a>
+      <a href="https://www.zhihu.com/people/howie6879/activities" class="iconfont icon-zhihu" title="zhihu"></a>
+  <a href="https://www.howie6879.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
 </div>
 
-<script data-no-instant>
-    InstantClick.on('change', function (isInitialLoad) {
-        var blocks = document.querySelectorAll('pre code');
-        for (var i = 0; i < blocks.length; i++) {
-            hljs.highlightBlock(blocks[i]);
-        }
-        if (isInitialLoad === false) {
-            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
-            if (typeof MathJax !== 'undefined') {
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-            }
-        }
-    });
-    InstantClick.init('mousedown');
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
 
-</script>
+  
 
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2019
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">howie6879</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 
 
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
-	
+	ga('set', 'anonymizeIp', true);
 	ga('send', 'pageview');
 }
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
 
 
 </body>
-
 </html>

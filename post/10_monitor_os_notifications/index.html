@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
+    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
+    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
+    <title>
+        
+        利用微信同步文章到Bear - 老胡的储物柜
+        
+    </title>
+    <meta name="keywords" content=" " />
+    <meta name="description" content=" " />
+    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+
+    
+    
+</head>
+
+
+<body class="bg-white" gtools_scp_screen_capture_injected="true">
+    
+    <header id="header" class="header bg-white">
+        <div class="navbar-container">
+            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">老胡的储物柜</a>
+            <div class="navbar-menu">
+            
+                <a href="https://www.howie6879.cn/post/">Archives</a>  
+            
+                <a href="https://www.howie6879.cn/tags/">Tags</a>  
+            
+                <a href="https://www.howie6879.cn/about/">About</a>  
+            
+                <a href="https://www.howie6879.cn/friend/">Friend</a>  
+            
+            </div>
+            
+            <div class="navbar-mobile-menu" onclick=""> 
+                <span class="icon-menu cross"><span class="middle"></span></span>
+                <ul>
+                
+                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
+                
+                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
+                
+                </ul>
+            </div>
+        </div>
+    </header>
+    <article class="main-content page-page">
+        <div class="post-header">
+            <h1 class="post-title" itemprop="name headline">
+                利用微信同步文章到Bear
+            </h1>
+            <div class="post-data">
+                Published on Oct 21, 2019 ,1 min reading time
+            </div>
+        </div>
+        <div id="post-content" class="post-content">
+            
+<p class="post-tags"> 
+	
+	<a href="https://www.howie6879.cn/tags/python">python</a>
+	
+	<a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87">效率</a>
+	
+</p>
+
+ 
+
+<p>上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到<strong>Bear</strong>。</p>
+
+<p>虽说那篇文章比较实用，也有很多朋友表示喜欢，但还有不少缺陷：
+- 对技术薄弱的朋友复现困难，项目很多配置需要手动生成，前期校验工作很多
+- 二次开发比较困难，不能直接作为第三方包使用
+- 项目兼容性不强，目前只支持Mac并且只支持微信这个APP，其他如钉钉就没辙
+- 项目稳定性不强，微信更改机制可能又需要重头再来</p>
+
+<p>对，问题很多，但在勉强能用的情况下我并不是很有动力进行新方案的开发。那么是什么原因促使我更新方案了呢~</p>
+
+<blockquote>
+<p>背景：在公司和数据打交道居多，运营那块每天会将一些表格数据发到钉钉群里面，然后我组内成员需要手动下载并找到对应的处理脚本进行处理</p>
+</blockquote>
+
+<p>然后我问了下两周需要耗费多长时间在这件事情上，答曰<strong>1</strong>小时，这确实不能忍了！</p>
+
+<p>于是我花了<strong>10</strong>小时做了这个处理方案！顺便解决上面说的四个问题，赚了。。。</p>
+
+<h2 id="调研">调研</h2>
+
+<p>开始之前，自然是先下决心将一切历史问题解决掉：
+- 跨系统！跨软件！
+- 程序能直接作为第三方包使用，并且傻瓜式！</p>
+
+<p>好，<strong>flag</strong>已立，开始吧，核心技术点就是如何监控所有平台软件的消息。</p>
+
+<p>上一篇推文的方案只能支持微信，所以我目前的背景需求里面的监控对象是钉钉，难道我又要按照以前的方法去搞db文件么？</p>
+
+<p>总结来说，我监控的是消应用息，并且不只是微信、还需要钉钉、QQ等其他任意软件的消息，而且我也不能一个个地去破解（就算这次解密成功，如果下次需求是其他通信软件呢？），那该怎么办呢？</p>
+
+<p>所以这次处理问题的角度需要站在上帝视角，说来简单，做起来也简单，哈哈。</p>
+
+<p>话说我灵光一闪，既然目标对象是所有应用的消息，那我我为何不将视角从应用层面移到系统层面呢？</p>
+
+<p>我以我的Mac为例，这不有现成的通知中心么？</p>
+
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143142.png" alt="" /></p>
+
+<p>可谓是柳暗花明又一村，老胡我这招隔山打牛，姿势还可以吧？</p>
+
+<p>现在问题很明确了：
+- 我管你微信、钉钉、还是QQ，我只看系统的通知中心
+- 我管你怎么加密、怎么限制，你总不会限制系统吧，我还是只看系统的通知中心</p>
+
+<p>我背靠<strong>操作系统</strong>老大，现在还害怕你几个小应用，一起上，我哭算我输。</p>
+
+<p>在操作系统的领域内，这个方案就是武侠世界的九阳神功，还配上了屠龙刀，可谓：<strong>十步杀一人，千里不留行。</strong></p>
+
+<p>调研结束。</p>
+
+<h2 id="实践">实践</h2>
+
+<p>解决方案确立了，接下来无非就是验证加实现，这里还是以<code>Mac</code>为例。</p>
+
+<p>来来来，看看苹果的系统中心好不好攻占，首先，咋们来确立系统中心数据的存储方式，进入终端：</p>
+
+<pre><code class="language-shell">cd `getconf DARWIN_USER_DIR`/com.apple.notificationcenter/db2
+ls
+db     db-shm db-wal
+</code></pre>
+
+<p>可以看到，有三个文件，哎，好熟悉，<code>SQLite</code>呗。</p>
+
+<p>打开：</p>
+
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143214.png" alt="" /></p>
+
+<p>分别有以下几个表：</p>
+
+<ul>
+<li>app</li>
+<li>categories</li>
+<li>dbinfo</li>
+<li>delivered</li>
+<li>displayed</li>
+<li>record</li>
+<li>requests</li>
+<li>snoozed</li>
+</ul>
+
+<p>可能有点多，但我们只需要关注两个表就行：</p>
+
+<ul>
+<li>app：应用id</li>
+<li>record：监控的应用消息</li>
+</ul>
+
+<p>建表语句分别如下：</p>
+
+<pre><code class="language-mysql">create table app
+(
+    app_id     INTEGER
+        primary key,
+    identifier VARCHAR,
+    badge      INTEGER
+);
+
+create table record
+(
+    rec_id            INTEGER
+        primary key,
+    app_id            INTEGER,
+    uuid              BLOB,
+    data              BLOB,
+    request_date      REAL,
+    request_last_date REAL,
+    delivered_date    REAL,
+    presented         Bool,
+    style             INTEGER,
+    snooze_fire_date  REAL
+);
+</code></pre>
+
+<p>在app表的这行，可以看到微信应用的<code>id</code>是<code>35</code>。</p>
+
+<pre><code class="language-txt">app_id	identifier
+35			com.tencent.xinwechat	
+</code></pre>
+
+<p>知道应用<code>id</code>后就可以直接在<code>record</code>表里面直接找到通知消息：</p>
+
+<pre><code class="language-mysql">SELECT app_id,data, presented, delivered_date FROM record WHERE app_id IN (35)  ORDER BY delivered_date DESC;
+</code></pre>
+
+<p>得到结果如下：</p>
+
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143236.png" alt="" /></p>
+
+<p>一切顺利，但定睛一看，中间那一大串是什么？不要慌，里面<code>bplist</code>，给了很大的提示。</p>
+
+<p>在Python的世界里，没有什么问题是引入一个第三方包解决不了的，如果有，那么引入两个第三方包就可以了。</p>
+
+<pre><code class="language-shell">pip install biplist
+</code></pre>
+
+<p>利用<code>biplist</code>会将那一串加载成我们人类可以看懂的语言。</p>
+
+<p>好像没有一点阻碍，那就可以直接编码实现了。</p>
+
+<h2 id="编码">编码</h2>
+
+<p>算了，不多说，多了我也说不出来，直接开源吧，见 <a href="https://github.com/howie6879/examiner">https://github.com/howie6879/examiner</a> ，不要吝啬你的<strong>Star</strong>（可点击阅读原文）。</p>
+
+<pre><code class="language-shell">git clone https://github.com/howie6879/examiner
+cd examiner
+# 推荐使用pipenv 你也可以使用自己中意的环境构建方式
+pipenv install --python=/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
+</code></pre>
+
+<p>接下来只需要在根目录构建自己的监控脚本就行，比如监控微信，监理文件命名为 <em><code>wechat_app.py</code></em>:</p>
+
+<pre><code class="language-python">from examiner.notification import notification_factory
+
+def get_data(app_names: list):
+    os_notification = notification_factory(app_names)
+    info_list = os_notification.get_target_notification()
+    for each in info_list:
+        # 自行实现监控逻辑以及处理方案
+        print(each)
+
+
+if __name__ == &quot;__main__&quot;:
+    app_names = [&quot;WeChat&quot;]
+    get_data(app_names)
+</code></pre>
+
+<p>和上一篇比起来，这代码，不需要配置、不需要提前准备什么，只需要在列表里面填上你想监控的目标应用即可（我顺便支持了多应用），你可以同时监控钉钉和微信等等</p>
+
+<p>自己可以慢慢玩，一般会这样输出：</p>
+
+<pre><code class="language-shell">{'title': '老胡的储物柜', 'subtitle': '', 'body': '测试消息监控，任何应用都行', 'delivered_date': datetime.datetime(2019, 10, 20, 21, 40, 26, 428654), 'presented': 1, 'app_identifier': 'com.tencent.xinwechat', 'app_name': 'WeChat', 'md5': '75e24e2ccc502f01c101fcbd3637950b'}
+</code></pre>
+
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png" alt="" /></p>
+
+            <p class="post-info">
+                本文由
+                
+                    <a href="https://www.howie6879.cn/about">
+                howie6879 
+                
+                </a> 创作，采用
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
+                国际许可协议进行许可，转载请注明出处！ <br>
+                
+            </p>
+        </div>
+    </article>
+
+    <div id="post-bottom-bar" class="post-bottom-bar">
+        <div class="bottom-bar-inner">
+            <div class="bottom-bar-items social-share left">
+                <span class="bottom-bar-item">Share : </span>
+                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f10_monitor_os_notifications%2f" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Facebook</a></span>
+                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f10_monitor_os_notifications%2f&text=%e5%88%a9%e7%94%a8%e5%be%ae%e4%bf%a1%e5%90%8c%e6%ad%a5%e6%96%87%e7%ab%a0%e5%88%b0Bear" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Twitter</a></span>
+                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f10_monitor_os_notifications%2f&amp;title=%e5%88%a9%e7%94%a8%e5%be%ae%e4%bf%a1%e5%90%8c%e6%ad%a5%e6%96%87%e7%ab%a0%e5%88%b0Bear" target="_blank" title="利用微信同步文章到Bear" rel="nofollow">Weibo</a></span>
+                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f10_monitor_os_notifications%2f" target="_blank" rel="nofollow">QRcode</a></span>
+            </div>
+
+            <div class="bottom-bar-items right">
+                
+                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/09_save_wechat_article_to_bear/" title="利用微信同步文章到Bear">←</a></span> 
+                
+                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
+                <span class="bottom-bar-item"><a href="#">↑</a></span>
+            </div>
+            
+        </div>
+    </div>
+
+    
+ <footer id="footer" class="footer bg-white" style="padding-bottom: 200px;">
+    <div class="footer-social">
+        <div class="footer-container clearfix">
+            <div class="social-list">
+                 
+                
+                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
+                
+                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
+                
+                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
+            </div>
+        </div>
+    </div>
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <br>
+                    <div class="info-text">
+                        <p id="chakhsu"> </p>
+                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
+                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
+                        </p>
+                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
+                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-item meta-comments">
+                <h3 class="meta-title">CATEGORIES</h3>
+                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/deep-learning">Deep-Learning</a>(3)</li>
+                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(5)</li>
+                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
+                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(27)</li>
+                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
+                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E6%95%88%E7%8E%87">效率</a>(4)</li>
+                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
+            </div>
+            <div class="meta-item meta-posts">
+                <h3 class="meta-title">RECENT POSTS</h3>
+                   
+                <li><a href="https://www.howie6879.cn/post/10_monitor_os_notifications/">利用微信同步文章到Bear</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/09_save_wechat_article_to_bear/">利用微信同步文章到Bear</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/">神经网络与深度学习笔记 - 2.反向传播算法如何工作</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/">神经网络与深度学习笔记 - 1.识别手写字</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/04_how_to_use_jupyterlab/">JupyterLab：程序员的笔记本神器</a></li>
+                  
+                <li><a href="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">如何实现一个Python爬虫框架</a></li>
+                 
+
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+ 
+    <div id="directory-content" class="directory-content">
+        <div id="directory"></div>
+    </div>
+    <script>
+    var postDirectoryBuild = function() {
+        var postChildren = function children(childNodes, reg) {
+                var result = [],
+                    isReg = typeof reg === 'object',
+                    isStr = typeof reg === 'string',
+                    node, i, len;
+                for (i = 0, len = childNodes.length; i < len; i++) {
+                    node = childNodes[i];
+                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
+                        result.push(node);
+                    }
+                }
+                return result;
+            },
+            createPostDirectory = function(article, directory, isDirNum) {
+                var contentArr = [],
+                    titleId = [],
+                    levelArr, root, level, currentList, list, li, link, i, len;
+                levelArr = (function(article, contentArr, titleId) {
+                    var titleElem = postChildren(article.childNodes, /^h\d$/),
+                        levelArr = [],
+                        lastNum = 1,
+                        lastRevNum = 1,
+                        count = 0,
+                        guid = 1,
+                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
+                        lastRevNum, num, elem;
+                    while (titleElem.length) {
+                        elem = titleElem.shift();
+                        contentArr.push(elem.innerHTML);
+                        num = +elem.tagName.match(/\d/)[0];
+                        if (num > lastNum) {
+                            levelArr.push(1);
+                            lastRevNum += 1;
+                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
+                            levelArr.push(0);
+                            lastRevNum = lastRevNum;
+                        } else if (num < lastRevNum) {
+                            levelArr.push(num - lastRevNum);
+                            lastRevNum = num;
+                        }
+                        count += levelArr[levelArr.length - 1];
+                        lastNum = num;
+                        elem.id = elem.id || (id + guid++);
+                        titleId.push(elem.id);
+                    }
+                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
+                    return levelArr;
+                })(article, contentArr, titleId);
+                currentList = root = document.createElement('ul');
+                dirNum = [0];
+                for (i = 0, len = levelArr.length; i < len; i++) {
+                    level = levelArr[i];
+                    if (level === 1) {
+                        list = document.createElement('ul');
+                        if (!currentList.lastElementChild) {
+                            currentList.appendChild(document.createElement('li'));
+                        }
+                        currentList.lastElementChild.appendChild(list);
+                        currentList = list;
+                        dirNum.push(0);
+                    } else if (level < 0) {
+                        level *= 2;
+                        while (level++) {
+                            if (level % 2) dirNum.pop();
+                            currentList = currentList.parentNode;
+                        }
+                    }
+                    dirNum[dirNum.length - 1]++;
+                    li = document.createElement('li');
+                    link = document.createElement('a');
+                    link.href = '#' + titleId[i];
+                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
+                    li.appendChild(link);
+                    currentList.appendChild(li);
+                }
+                directory.appendChild(root);
+            };
+        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
+    };
+    postDirectoryBuild();
+    </script> 
+
+
+<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
+<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+<script>
+
+
+    var postDirectory = new Headroom(document.getElementById("directory-content"), {
+        tolerance: 0,
+        offset: 90,
+        classes: {
+            initial: "initial",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postDirectory.init();
+
+
+     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "pinned",
+            unpinned: "unpinned"
+        }
+    });
+    postSharer.init();
+    
+
+
+
+    var header = new Headroom(document.getElementById("header"), {
+        tolerance: 0,
+        offset: 70,
+        classes: {
+            initial: "animated",
+            pinned: "slideDown",
+            unpinned: "slideUp"
+        }
+    });
+    header.init();
+    var chakhsu = function (r) {
+        function t() {
+            return b[Math.floor(Math.random() * b.length)]
+        }
+
+        function e() {
+            return String.fromCharCode(94 * Math.random() + 33)
+        }
+
+        function n(r) {
+            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
+                var l = document.createElement("span");
+                l.textContent = e(), l.style.color = t(), n.appendChild(l)
+            }
+            return n
+        }
+
+        function i() {
+            var t = o[c.skillI];
+            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
+        }
+        var l = "",
+            o = ["浮浮沉沉","努力就好"].map(function (r) {
+                return r + "."
+            }),
+            a = 2,
+            g = 1,
+            s = 5,
+            d = 75,
+            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
+            c = {
+                text: "",
+                prefixP: -s,
+                skillI: 0,
+                skillP: 0,
+                direction: "forward",
+                delay: a,
+                step: g
+            };
+        i()
+    };
+    chakhsu(document.getElementById('chakhsu'));
+    if ('addEventListener' in document) {
+        document.addEventListener('DOMContentLoaded', function () {
+            FastClick.attach(document.body);
+        }, false);
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
+    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
+    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+<div class="cnzz" style="display: none">
+    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+</div>
+
+<script data-no-instant>
+    InstantClick.on('change', function (isInitialLoad) {
+        var blocks = document.querySelectorAll('pre code');
+        for (var i = 0; i < blocks.length; i++) {
+            hljs.highlightBlock(blocks[i]);
+        }
+        if (isInitialLoad === false) {
+            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
+        }
+    });
+    InstantClick.init('mousedown');
+
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+
+</html>

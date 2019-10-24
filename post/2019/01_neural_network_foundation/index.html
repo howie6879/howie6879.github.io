@@ -1,87 +1,190 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="x-dns-prefetch-control" content="on">
-    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
-    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
-    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-    <meta name="renderer" content="webkit">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-transform" />
-    <meta http-equiv="Cache-Control" content="no-siteapp" />
-    
-    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
-    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
-    <title>
-        
-        神经网络基础 - 老胡的储物柜
-        
-    </title>
-    <meta name="keywords" content=" " />
-    <meta name="description" content=" " />
-    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>神经网络基础 - 老胡的储物柜</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
-    
-    
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="howie6879" /><meta name="description" content="要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址： 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.58.3 with theme even" />
+
+
+<link rel="canonical" href="https://www.howie6879.cn/post/2019/01_neural_network_foundation/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+<link href="/dist/even.7700d289.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="神经网络基础" />
+<meta property="og:description" content="要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址： 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/post/2019/01_neural_network_foundation/" />
+<meta property="article:published_time" content="2019-01-03T08:37:56+08:00" />
+<meta property="article:modified_time" content="2019-01-03T08:37:56+08:00" />
+<meta itemprop="name" content="神经网络基础">
+<meta itemprop="description" content="要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址： 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降">
+
+
+<meta itemprop="datePublished" content="2019-01-03T08:37:56&#43;08:00" />
+<meta itemprop="dateModified" content="2019-01-03T08:37:56&#43;08:00" />
+<meta itemprop="wordCount" content="5098">
+
+
+
+<meta itemprop="keywords" content="神经网络与深度学习," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="神经网络基础"/>
+<meta name="twitter:description" content="要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址： 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
 </head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">howie.hu</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a><a href="/friends/">
+        <li class="mobile-menu-item">友链</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">howie.hu</a>
+</div>
 
-
-<body class="bg-white" gtools_scp_screen_capture_injected="true">
-    
-    <header id="header" class="header bg-white">
-        <div class="navbar-container">
-            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">老胡的储物柜</a>
-            <div class="navbar-menu">
-            
-                <a href="https://www.howie6879.cn/post/">Archives</a>  
-            
-                <a href="https://www.howie6879.cn/tags/">Tags</a>  
-            
-                <a href="https://www.howie6879.cn/about/">About</a>  
-            
-                <a href="https://www.howie6879.cn/friend/">Friend</a>  
-            
-            </div>
-            
-            <div class="navbar-mobile-menu" onclick=""> 
-                <span class="icon-menu cross"><span class="middle"></span></span>
-                <ul>
-                
-                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
-                
-                </ul>
-            </div>
-        </div>
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/friends/">友链</a>
+      </li>
+  </ul>
+</nav>
     </header>
-    <article class="main-content page-page">
-        <div class="post-header">
-            <h1 class="post-title" itemprop="name headline">
-                神经网络基础
-            </h1>
-            <div class="post-data">
-                Published on Jan 3, 2019 ,5 min reading time
-            </div>
-        </div>
-        <div id="post-content" class="post-content">
-            
-<p class="post-tags"> 
-	
-	<a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0">神经网络与深度学习</a>
-	
-</p>
 
- 
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">神经网络基础</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-01-03 </span>
+        <div class="post-category">
+            <a href="/categories/machine-learning/"> Machine Learning </a>
+            </div>
+          <span class="more-meta"> 5098 words </span>
+          <span class="more-meta"> 11 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#带着问题出发">带着问题出发</a></li>
+<li><a href="#感知器">感知器</a></li>
+<li><a href="#s型神经元">S型神经元</a></li>
+<li><a href="#神经网络">神经网络</a></li>
+<li><a href="#神经网络的数据表示">神经网络的数据表示</a>
+<ul>
+<li><a href="#标量">标量</a></li>
+<li><a href="#向量">向量</a></li>
+<li><a href="#矩阵">矩阵</a></li>
+<li><a href="#3d张量与更高维张量">3D张量与更高维张量</a></li>
+<li><a href="#关键属性">关键属性</a></li>
+<li><a href="#在numpy中操作张量">在Numpy中操作张量</a></li>
+<li><a href="#数据批量的概念">数据批量的概念</a></li>
+<li><a href="#现实世界的数据张量">现实世界的数据张量</a></li>
+</ul></li>
+<li><a href="#张量运算">张量运算</a>
+<ul>
+<li><a href="#逐元素计算">逐元素计算</a></li>
+<li><a href="#广播">广播</a></li>
+<li><a href="#张量点积">张量点积</a></li>
+<li><a href="#张量变形">张量变形</a></li>
+</ul></li>
+<li><a href="#梯度优化">梯度优化</a>
+<ul>
+<li><a href="#再回到感知器">再回到感知器</a></li>
+<li><a href="#什么是导数">什么是导数</a></li>
+<li><a href="#什么是梯度">什么是梯度</a></li>
+<li><a href="#随机梯度下降">随机梯度下降</a></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
+<li><a href="#说明">说明</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
 
 <p>要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，<a href="https://mp.weixin.qq.com/s/RdmMvuq8Vj33ggZALjfMLw">备份地址</a>：</p>
 
@@ -119,44 +222,79 @@
 <p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/0A0F8531-ACD0-4843-8A4F-F16C82720088.png" alt="" /></p>
 
 <p>图片生成代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 
-<pre><code class="language-python">%matplotlib inline
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
+<span class="kn">from</span> <span class="nn">keras.datasets</span> <span class="kn">import</span> <span class="n">mnist</span>
 
-from keras.datasets import mnist
+<span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">),</span> <span class="p">(</span><span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
 
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+<span class="k">def</span> <span class="nf">plot_digits</span><span class="p">(</span><span class="n">instances</span><span class="p">,</span> <span class="n">images_per_row</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">images_per_row</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">instances</span><span class="p">),</span> <span class="n">images_per_row</span><span class="p">)</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="n">instances</span>
+    <span class="n">n_rows</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">images_per_row</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">row_images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">n_empty</span> <span class="o">=</span> <span class="n">n_rows</span> <span class="o">*</span> <span class="n">images_per_row</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span>
+    <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span> <span class="o">*</span> <span class="n">n_empty</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_rows</span><span class="p">):</span>
+        <span class="n">rimages</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">row</span> <span class="o">*</span> <span class="n">images_per_row</span> <span class="p">:</span> <span class="p">(</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">images_per_row</span><span class="p">]</span>
+        <span class="n">row_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rimages</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">row_images</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&#34;off&#34;</span><span class="p">)</span>
 
-def plot_digits(instances, images_per_row=10, **options):
-    size = 28
-    images_per_row = min(len(instances), images_per_row)
-    images = instances
-    n_rows = (len(instances) - 1) // images_per_row + 1
-    row_images = []
-    n_empty = n_rows * images_per_row - len(instances)
-    images.append(np.zeros((size, size * n_empty)))
-    for row in range(n_rows):
-        rimages = images[row * images_per_row : (row + 1) * images_per_row]
-        row_images.append(np.concatenate(rimages, axis=1))
-    image = np.concatenate(row_images, axis=0)
-    plt.imshow(image, cmap = matplotlib.cm.binary, **options)
-    plt.axis(&quot;off&quot;)
-
-plt.figure(figsize=(9,9))
-plot_digits(train_images[:100], images_per_row=10)
-plt.show()
-</code></pre>
-
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+<span class="n">plot_digits</span><span class="p">(</span><span class="n">train_images</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">images_per_row</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>不过你不用急着尝试，接下来我们可以一步一步慢慢来分析手写字训练集</p>
 
 <p>看这一行代码：</p>
-
-<pre><code class="language-python">(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">),</span> <span class="p">(</span><span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>MNIST数据集</code>通过<code>keras.datasets</code>加载，其中<code>train_images</code>和<code>train_labels</code>构成了训练集，另外两个则是测试集：</p>
 
 <ul>
@@ -187,93 +325,176 @@ plt.show()
 <p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CD964C69-3677-4B34-8A98-1DAAF45BA6B3.png" alt="" /></p>
 
 <p>上面右侧的式子是一个阶跃函数，就是和Sigmoid、Relu一样作用的激活函数，然后我们就可以自己实现一个感知器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<pre><code class="language-python">
-import numpy as np
+
+<span class="k">class</span> <span class="nc">Perceptron</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    代码实现 Frank Rosenblatt 提出的感知器的与非门，加深对感知器的理解
+</span><span class="s2">    blog: https://www.howie6879.cn/post/33/
+</span><span class="s2">    &#34;&#34;&#34;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">act_func</span><span class="p">,</span> <span class="n">input_nums</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        实例化一些基本参数
+</span><span class="s2">        :param act_func: 激活函数
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="c1"># 激活函数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act_func</span> <span class="o">=</span> <span class="n">act_func</span>
+        <span class="c1"># 权重 已经确定只会有两个二进制输入</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">input_nums</span><span class="p">)</span>
+        <span class="c1"># 偏置项</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_vectors</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">learn_nums</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        训练出合适的 w 和 b
+</span><span class="s2">        :param input_vectors: 样本训练数据集
+</span><span class="s2">        :param labels: 标记值
+</span><span class="s2">        :param learn_nums: 学习多少次
+</span><span class="s2">        :param rate: 学习率
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">learn_nums</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">input_vector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_vectors</span><span class="p">):</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">input_vector</span><span class="p">)</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">label</span> <span class="o">-</span> <span class="n">output</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">+=</span> <span class="n">input_vector</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">delta</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">+=</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">delta</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&#34;此时感知器权重为{0}，偏置项为{1}&#34;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_vector</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_vector</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">input_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_vector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">act_func</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">*</span> <span class="n">input_vector</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
 
 
-class Perceptron:
-    &quot;&quot;&quot;
-    代码实现 Frank Rosenblatt 提出的感知器的与非门，加深对感知器的理解
-    blog: https://www.howie6879.cn/post/33/
-    &quot;&quot;&quot;
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    激活函数
+</span><span class="s2">    :param z: (w1*x1+w2*x2+...+wj*xj) + b
+</span><span class="s2">    :return: 1 or 0
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
 
-    def __init__(self, act_func, input_nums=2):
-        &quot;&quot;&quot;
-        实例化一些基本参数
-        :param act_func: 激活函数
-        &quot;&quot;&quot;
-        # 激活函数
-        self.act_func = act_func
-        # 权重 已经确定只会有两个二进制输入
-        self.w = np.zeros(input_nums)
-        # 偏置项
-        self.b = 0.0
-
-    def fit(self, input_vectors, labels, learn_nums=10, rate=0.1):
-        &quot;&quot;&quot;
-        训练出合适的 w 和 b
-        :param input_vectors: 样本训练数据集
-        :param labels: 标记值
-        :param learn_nums: 学习多少次
-        :param rate: 学习率
-        &quot;&quot;&quot;
-        for i in range(learn_nums):
-            for index, input_vector in enumerate(input_vectors):
-                label = labels[index]
-                output = self.predict(input_vector)
-                delta = label - output
-                self.w += input_vector * rate * delta
-                self.b += rate * delta
-        print(&quot;此时感知器权重为{0}，偏置项为{1}&quot;.format(self.w, self.b))
-        return self
-
-    def predict(self, input_vector):
-        if isinstance(input_vector, list):
-            input_vector = np.array(input_vector)
-        return self.act_func(sum(self.w * input_vector) + self.b)
+<span class="k">def</span> <span class="nf">get_and_gate_training_data</span><span class="p">():</span>
+    <span class="s1">&#39;&#39;&#39;
+</span><span class="s1">    AND 训练数据集
+</span><span class="s1">    &#39;&#39;&#39;</span>
+    <span class="n">input_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">input_vectors</span><span class="p">,</span> <span class="n">labels</span>
 
 
-def f(z):
-    &quot;&quot;&quot;
-    激活函数
-    :param z: (w1*x1+w2*x2+...+wj*xj) + b
-    :return: 1 or 0
-    &quot;&quot;&quot;
-    return 1 if z &gt; 0 else 0
-
-def get_and_gate_training_data():
-    '''
-    AND 训练数据集
-    '''
-    input_vectors = np.array([[1, 1], [1, 0], [0, 1], [0, 0]])
-    labels = np.array([1, 0, 0, 0])
-    return input_vectors, labels
-
-
-if __name__ == '__main__':
-    &quot;&quot;&quot;
-    输出如下：
-        此时感知器权重为[ 0.1  0.2]，偏置项为-0.2 与门
-        1 and 1 = 1
-        1 and 0 = 0
-        0 and 1 = 0
-        0 and 0 = 0
-    &quot;&quot;&quot;
-    # 获取样本数据
-    and_input_vectors, and_labels = get_and_gate_training_data()
-    # 实例化感知器模型
-    p = Perceptron(f)
-    # 开始学习 AND
-    p_and = p.fit(and_input_vectors, and_labels)
-    # 开始预测 AND
-    print('1 and 1 = %d' % p_and.predict([1, 1]))
-    print('1 and 0 = %d' % p_and.predict([1, 0]))
-    print('0 and 1 = %d' % p_and.predict([0, 1]))
-    print('0 and 0 = %d' % p_and.predict([0, 0]))
-
-</code></pre>
-
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    输出如下：
+</span><span class="s2">        此时感知器权重为[ 0.1  0.2]，偏置项为-0.2 与门
+</span><span class="s2">        1 and 1 = 1
+</span><span class="s2">        1 and 0 = 0
+</span><span class="s2">        0 and 1 = 0
+</span><span class="s2">        0 and 0 = 0
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="c1"># 获取样本数据</span>
+    <span class="n">and_input_vectors</span><span class="p">,</span> <span class="n">and_labels</span> <span class="o">=</span> <span class="n">get_and_gate_training_data</span><span class="p">()</span>
+    <span class="c1"># 实例化感知器模型</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Perceptron</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="c1"># 开始学习 AND</span>
+    <span class="n">p_and</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">and_input_vectors</span><span class="p">,</span> <span class="n">and_labels</span><span class="p">)</span>
+    <span class="c1"># 开始预测 AND</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;1 and 1 = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">p_and</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;1 and 0 = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">p_and</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;0 and 1 = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">p_and</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;0 and 0 = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">p_and</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="s型神经元">S型神经元</h3>
 
 <p>神经元和感知器本质上是一样的，他们的区别在于激活函数不同，比如跃迁函数改为Sigmoid函数</p>
@@ -307,35 +528,62 @@ if __name__ == '__main__':
 <p>从输入层传入<code>手写字训练集</code>，然后通过隐藏层向前传递训练集数据，最后输出层会输出10个概率值，总和为1。现在，我们可以看看<code>Keras</code>代码:</p>
 
 <p>第一步，对数据进行预处理，我们知道，原本数据形状是<code>(60000, 28, 28)</code>，取值区间为<code>[0, 255]</code>，现在改为<code>[0, 1]</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">60000</span><span class="p">,</span> <span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">))</span> 
+<span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
-<pre><code class="language-python">train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype('float32') / 255
-
-test_images = test_images.reshape((10000, 28 * 28)) 
-test_images = test_images.astype('float32') / 255
-</code></pre>
-
+<span class="n">test_images</span> <span class="o">=</span> <span class="n">test_images</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">))</span> 
+<span class="n">test_images</span> <span class="o">=</span> <span class="n">test_images</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>然后对标签进行分类编码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
 
-<pre><code class="language-python">from keras.utils import to_categorical
-
-train_labels = to_categorical(train_labels) 
-test_labels = to_categorical(test_labels)
-</code></pre>
-
+<span class="n">train_labels</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span> 
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>第二步，编写模型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">models</span> 
+<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">layers</span>
 
-<pre><code class="language-python">from keras import models 
-from keras import layers
-
-network = models.Sequential() 
-network.add(layers.Dense(512, activation='relu', input_shape=(28 * 28,))) 
-network.add(layers.Dense(10, activation='softmax')
+<span class="n">network</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span> 
+<span class="n">network</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">,)))</span> 
+<span class="n">network</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
             
-network.compile(optimizer='rmsprop',loss='categorical_crossentropy', metrics=['accuracy'])
-network.fit(train_images, train_labels, epochs=5, batch_size=128)
-</code></pre>
-
+<span class="n">network</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;rmsprop&#39;</span><span class="p">,</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">])</span>
+<span class="n">network</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/8FC079F8-7379-479D-A478-6FED187D8A9C.png" alt="" /></p>
 
 <p>一个隐藏层，激活函数选用<code>relu</code>，输出层使用<code>softmax</code>返回一个由10个概率值（总和为 1）组成的数组</p>
@@ -353,50 +601,83 @@ network.fit(train_images, train_labels, epochs=5, batch_size=128)
 <h4 id="标量">标量</h4>
 
 <p>包含一个数字的张量叫做标量（0D张量），如下：</p>
-
-<pre><code class="language-python">x = np.array(12)
-print(x, x.ndim)
-# 12, 0
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+<span class="c1"># 12, 0</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>张量轴的个数也叫做阶(rank)</p>
 
 <h4 id="向量">向量</h4>
 
 <p>数字组成的数组叫做向量（1D张量），如下：</p>
-
-<pre><code class="language-python">x = np.array([12, 3, 6, 14, 7])
-print(x, x.ndim)
-# [12  3  6 14  7] 1
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+<span class="c1"># [12  3  6 14  7] 1</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="矩阵">矩阵</h4>
 
 <p>向量组成的数组叫做矩阵（2D张量），如下：</p>
-
-<pre><code class="language-python">x = np.array([[5, 78, 2, 34, 0], [6, 79, 3, 35, 1], [7, 80, 4, 36, 2]])
-print(x, x.ndim)
-# [[ 5 78  2 34  0]
-# [ 6 79  3 35  1]
-# [ 7 80  4 36  2]] 2
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+<span class="c1"># [[ 5 78  2 34  0]</span>
+<span class="c1"># [ 6 79  3 35  1]</span>
+<span class="c1"># [ 7 80  4 36  2]] 2</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="3d张量与更高维张量">3D张量与更高维张量</h4>
 
 <p>将多个矩阵组合成一个新的数组就是一个3D张量，如下：</p>
-
-<pre><code class="language-python">x = np.array([[[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]], [[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]], [[5, 78, 2, 34, 0], [6, 79, 3, 35, 1]]])
-print(x, x.ndim)
-# (array([[[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]],
-#  
-#         [[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]],
-#  
-#         [[ 5, 78,  2, 34,  0],
-#          [ 6, 79,  3, 35,  1]]]), 3)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+<span class="c1"># (array([[[ 5, 78,  2, 34,  0],</span>
+<span class="c1">#          [ 6, 79,  3, 35,  1]],</span>
+<span class="c1">#  </span>
+<span class="c1">#         [[ 5, 78,  2, 34,  0],</span>
+<span class="c1">#          [ 6, 79,  3, 35,  1]],</span>
+<span class="c1">#  </span>
+<span class="c1">#         [[ 5, 78,  2, 34,  0],</span>
+<span class="c1">#          [ 6, 79,  3, 35,  1]]]), 3)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>将多个3D张量组合成一个数组，可以创建一个4D张量</p>
 
 <h4 id="关键属性">关键属性</h4>
@@ -412,25 +693,40 @@ print(x, x.ndim)
 <h4 id="在numpy中操作张量">在Numpy中操作张量</h4>
 
 <p>以前面加载的<code>train_images</code>为：</p>
-
-<pre><code class="language-python">(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">),</span> <span class="p">(</span><span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>比如进行切片选择<code>10~100</code>个数字：</p>
-
-<pre><code class="language-python">train_images[10:100].shape
-# (90, 28, 28)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">train_images</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># (90, 28, 28)</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="数据批量的概念">数据批量的概念</h4>
 
 <p>深度学习模型会将数据集随机分割成小批量进行处理，比如：</p>
-
-<pre><code class="language-python">batch = train_images[:128]
-batch.shape
-# (128, 28, 28)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">batch</span> <span class="o">=</span> <span class="n">train_images</span><span class="p">[:</span><span class="mi">128</span><span class="p">]</span>
+<span class="n">batch</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># (128, 28, 28)</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="现实世界的数据张量">现实世界的数据张量</h4>
 
 <p>下面将介绍下现实世界中数据的形状：</p>
@@ -447,122 +743,216 @@ batch.shape
 <p>类似于计算机程序的计算可以转化为二进制计算，深度学习计算可以转化为数值数据张量上的一些<strong>张量运算</strong>(tensor operation)</p>
 
 <p>上面模型的隐藏层代码如下：</p>
-
-<pre><code class="language-python">keras.layers.Dense(512, activation='relu')
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>这一层可以理解为一个函数，输入一个2D张量，输出一个2D张量，就如同上面感知机那一节最后输出的计算函数：</p>
-
-<pre><code class="language-txt">output = relu(dot(W, input) + b)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-txt" data-lang="txt"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-txt" data-lang="txt">output = relu(dot(W, input) + b)</code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="逐元素计算">逐元素计算</h4>
 
 <p>Relu 和加法运算都是逐元素的运算，比如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># 输入示例</span>
+<span class="n">input_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+<span class="c1"># 权重</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="c1"># 计算输出 z</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">input_x</span><span class="p">)</span>
 
-<pre><code class="language-python"># 输入示例
-input_x = np.array([[2], [3], [1]])
-# 权重
-W = np.array([[5, 6, 1], [7, 8, 1]])
-# 计算输出 z
-z = np.dot(W, input_x)
+<span class="c1"># 实现激活函数</span>
+<span class="k">def</span> <span class="nf">naive_relu</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">x</span>
 
-# 实现激活函数
-def naive_relu(x):
-    assert len(x.shape) == 2
-    x = x.copy()
-    for i in range(x.shape[0]):
-        for j in range(x.shape[1]):
-            x[i, j] = max(x[i, j], 0) 
-    return x
-
-# 激活函数对应的输出
-output = naive_relu(z)
-output
-</code></pre>
-
+<span class="c1"># 激活函数对应的输出</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">naive_relu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="n">output</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="广播">广播</h4>
 
 <p>张量运算那节中，有这样一段代码：</p>
-
-<pre><code class="language-python">output = relu(dot(W, input) + b)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">output</span> <span class="o">=</span> <span class="n">relu</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>dot(W, input)</code>是2D张量，<code>b</code>是向量，两个形状不同的张量相加，会发生什么？</p>
 
 <p>如果没有歧义的话，较小的张量会被广播，用来匹配较大张量的形状：</p>
-
-<pre><code class="language-python">input_x = np.array([[1], [3]])
-# 权重
-W = np.array([[5, 6], [7, 8]])
-b = np.array([1])
-# 计算输出 z
-z = np.dot(W, input_x) + b
-# array([[24],
-#        [32]])
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">input_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+<span class="c1"># 权重</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]])</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+<span class="c1"># 计算输出 z</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">input_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+<span class="c1"># array([[24],</span>
+<span class="c1">#        [32]])</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="张量点积">张量点积</h4>
 
 <p>点积运算，也叫张量积，如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<pre><code class="language-python">import numpy as np
-
-# 输入示例
-input_x = np.array([[2], [3], [1]])
-# 权重
-W = np.array([[5, 6, 1], [7, 8, 1]])
-np.dot(W, input_x)
-</code></pre>
-
+<span class="c1"># 输入示例</span>
+<span class="n">input_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+<span class="c1"># 权重</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">input_x</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>两个向量之间的点积是一个标量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">naive_vector_dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> 
+    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">z</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> 
+    <span class="k">return</span> <span class="n">z</span>
 
-<pre><code class="language-python">def naive_vector_dot(x, y):
-    assert len(x.shape) == 1
-    assert len(y.shape) == 1 
-    assert x.shape[0] == y.shape[0]
-    z = 0.
-    for i in range(x.shape[0]):
-        z += x[i] * y[i] 
-    return z
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
 
-x = np.array([1,2])
-y = np.array([1,2])
+<span class="n">naive_vector_dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-naive_vector_dot(x, y)
-
-# 5.0
-</code></pre>
-
+<span class="c1"># 5.0</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>矩阵和向量点积后是一个向量：</p>
-
-<pre><code class="language-python">np.dot(W, [1, 2, 3])
-# array([20, 26])
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="c1"># array([20, 26])</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="张量变形">张量变形</h4>
 
 <p>前面对数据进行预处理的时候：</p>
-
-<pre><code class="language-python">train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype('float32') / 255
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">60000</span><span class="p">,</span> <span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">))</span> 
+<span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>上面的例子将输入数据的shape变成了(60000, 784)，张量变形指的就是改变张量的行和列，得到想要的形状，前后数据集个数不变，经常遇到一个特殊的张量变形是转置(transposition)，如下：</p>
-
-<pre><code class="language-python">x = np.zeros((300, 20))
-x = np.transpose(x)
-x.shape
-# (20, 300)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">300</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># (20, 300)</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="梯度优化">梯度优化</h3>
 
 <p>针对每个输入，神经网络都会通过下面的函数对输入数据进行变换：</p>
-
-<pre><code class="language-python">output = relu(dot(W, input_x) + b)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="n">output</span> <span class="o">=</span> <span class="n">relu</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">input_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>其中：</p>
 
 <ul>
@@ -613,43 +1003,75 @@ x.shape
 <p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/sgd.jpg" alt="" /></p>
 
 <p>感知器代码里面的这段:</p>
-
-<pre><code class="language-python">self.w += input_vector * rate * delta
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">+=</span> <span class="n">input_vector</span> <span class="o">*</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">delta</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>就对应上面式子里面推导出来的规则</p>
 
 <h3 id="总结">总结</h3>
 
 <p>再来看看全部的手写字识别模型代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">models</span> 
+<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">layers</span>
+<span class="kn">from</span> <span class="nn">keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
 
-<pre><code class="language-python">from keras import models 
-from keras import layers
-from keras.utils import to_categorical
+<span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">),</span> <span class="p">(</span><span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
 
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+<span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">60000</span><span class="p">,</span> <span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">))</span> 
+<span class="n">train_images</span> <span class="o">=</span> <span class="n">train_images</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
-train_images = train_images.reshape((60000, 28 * 28)) 
-train_images = train_images.astype('float32') / 255
+<span class="n">test_images</span> <span class="o">=</span> <span class="n">test_images</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">))</span> 
+<span class="n">test_images</span> <span class="o">=</span> <span class="n">test_images</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
-test_images = test_images.reshape((10000, 28 * 28)) 
-test_images = test_images.astype('float32') / 255
-
-train_labels = to_categorical(train_labels) 
-test_labels = to_categorical(test_labels)
+<span class="n">train_labels</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span> 
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)</span>
 
 
-network = models.Sequential() 
-network.add(layers.Dense(512, activation='relu', input_shape=(28 * 28,))) 
-network.add(layers.Dense(10, activation='softmax'))
+<span class="n">network</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span> 
+<span class="n">network</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">,)))</span> 
+<span class="n">network</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">))</span>
 
-network.compile(optimizer='rmsprop',loss='categorical_crossentropy', metrics=['accuracy'])
-network.fit(train_images, train_labels, epochs=5, batch_size=128)
+<span class="n">network</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;rmsprop&#39;</span><span class="p">,</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">])</span>
+<span class="n">network</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
 
-test_loss, test_acc = network.evaluate(test_images, test_labels)
-print('test_acc:', test_acc)
-</code></pre>
-
+<span class="n">test_loss</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;test_acc:&#39;</span><span class="p">,</span> <span class="n">test_acc</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <ul>
 <li>输入数据保存在<code>float32</code>格式的<code>Numpy</code>张量中，形状分别是(60000, 784)和(10000, 784)</li>
 <li>神经网络结构为：1个输入层、一个隐藏层、一个输出层</li>
@@ -671,350 +1093,132 @@ print('test_acc:', test_acc)
 
 <p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png" alt="" /></p>
 
-            <p class="post-info">
-                本文由
-                
-                    <a href="https://www.howie6879.cn/about">
-                howie6879 
-                
-                </a> 创作，采用
-                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
-                国际许可协议进行许可，转载请注明出处！ <br>
-                
-            </p>
-        </div>
-    </article>
-
-    <div id="post-bottom-bar" class="post-bottom-bar">
-        <div class="bottom-bar-inner">
-            <div class="bottom-bar-items social-share left">
-                <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f01_neural_network_foundation%2f" target="_blank" title="神经网络基础" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f01_neural_network_foundation%2f&text=%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e5%9f%ba%e7%a1%80" target="_blank" title="神经网络基础" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f01_neural_network_foundation%2f&amp;title=%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e5%9f%ba%e7%a1%80" target="_blank" title="神经网络基础" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f01_neural_network_foundation%2f" target="_blank" rel="nofollow">QRcode</a></span>
-            </div>
-
-            <div class="bottom-bar-items right">
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2018/41/" title="如何用PEP 8编写优雅的Python代码">←</a></span> 
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/02_talk_about_python_spider/" title="谈谈对Python爬虫的理解">→</a></span> 
-                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
-                <span class="bottom-bar-item"><a href="#">↑</a></span>
-            </div>
-            
-        </div>
     </div>
 
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">howie6879</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-01-03
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
     
- <footer id="footer" class="footer bg-white" style="padding-bottom: 200px;">
-    <div class="footer-social">
-        <div class="footer-container clearfix">
-            <div class="social-list">
-                 
-                
-                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
-                
-                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
-                
-                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
-            </div>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/wechat.png">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2019/02_talk_about_python_spider/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">谈谈对Python爬虫的理解</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2018/41/">
+            <span class="next-text nav-default">如何用PEP 8编写优雅的Python代码</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
         </div>
-    </div>
-    <div class="footer-meta">
-        <div class="footer-container">
-            <div class="meta-item meta-copyright">
-                <div class="meta-copyright-info">
-                    <br>
-                    <div class="info-text">
-                        <p id="chakhsu"> </p>
-                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
-                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
-                        </p>
-                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
-                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
-                    </div>
-                </div>
-            </div>
+        
 
-            <div class="meta-item meta-comments">
-                <h3 class="meta-title">CATEGORIES</h3>
-                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/deep-learning">Deep-Learning</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(5)</li>
-                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(26)</li>
-                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
-                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E6%95%88%E7%8E%87">效率</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
-            </div>
-            <div class="meta-item meta-posts">
-                <h3 class="meta-title">RECENT POSTS</h3>
-                   
-                <li><a href="https://www.howie6879.cn/post/2019/09_save_wechat_article_to_bear/">利用微信同步文章到Bear</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/">神经网络与深度学习笔记 - 2.反向传播算法如何工作</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/">神经网络与深度学习笔记 - 1.识别手写字</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/04_how_to_use_jupyterlab/">JupyterLab：程序员的笔记本神器</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">如何实现一个Python爬虫框架</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/02_talk_about_python_spider/">谈谈对Python爬虫的理解</a></li>
-                 
+  
 
-            </div>
-        </div>
-    </div>
-    </div>
-</footer>
+  
 
- 
-    <div id="directory-content" class="directory-content">
-        <div id="directory"></div>
-    </div>
-    <script>
-    var postDirectoryBuild = function() {
-        var postChildren = function children(childNodes, reg) {
-                var result = [],
-                    isReg = typeof reg === 'object',
-                    isStr = typeof reg === 'string',
-                    node, i, len;
-                for (i = 0, len = childNodes.length; i < len; i++) {
-                    node = childNodes[i];
-                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
-                        result.push(node);
-                    }
-                }
-                return result;
-            },
-            createPostDirectory = function(article, directory, isDirNum) {
-                var contentArr = [],
-                    titleId = [],
-                    levelArr, root, level, currentList, list, li, link, i, len;
-                levelArr = (function(article, contentArr, titleId) {
-                    var titleElem = postChildren(article.childNodes, /^h\d$/),
-                        levelArr = [],
-                        lastNum = 1,
-                        lastRevNum = 1,
-                        count = 0,
-                        guid = 1,
-                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
-                        lastRevNum, num, elem;
-                    while (titleElem.length) {
-                        elem = titleElem.shift();
-                        contentArr.push(elem.innerHTML);
-                        num = +elem.tagName.match(/\d/)[0];
-                        if (num > lastNum) {
-                            levelArr.push(1);
-                            lastRevNum += 1;
-                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
-                            levelArr.push(0);
-                            lastRevNum = lastRevNum;
-                        } else if (num < lastRevNum) {
-                            levelArr.push(num - lastRevNum);
-                            lastRevNum = num;
-                        }
-                        count += levelArr[levelArr.length - 1];
-                        lastNum = num;
-                        elem.id = elem.id || (id + guid++);
-                        titleId.push(elem.id);
-                    }
-                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
-                    return levelArr;
-                })(article, contentArr, titleId);
-                currentList = root = document.createElement('ul');
-                dirNum = [0];
-                for (i = 0, len = levelArr.length; i < len; i++) {
-                    level = levelArr[i];
-                    if (level === 1) {
-                        list = document.createElement('ul');
-                        if (!currentList.lastElementChild) {
-                            currentList.appendChild(document.createElement('li'));
-                        }
-                        currentList.lastElementChild.appendChild(list);
-                        currentList = list;
-                        dirNum.push(0);
-                    } else if (level < 0) {
-                        level *= 2;
-                        while (level++) {
-                            if (level % 2) dirNum.pop();
-                            currentList = currentList.parentNode;
-                        }
-                    }
-                    dirNum[dirNum.length - 1]++;
-                    li = document.createElement('li');
-                    link = document.createElement('a');
-                    link.href = '#' + titleId[i];
-                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
-                    li.appendChild(link);
-                    currentList.appendChild(li);
-                }
-                directory.appendChild(root);
-            };
-        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
-    };
-    postDirectoryBuild();
-    </script> 
+      </div>
+    </main>
 
-
-<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
-<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
-<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
-<script>
-
-
-    var postDirectory = new Headroom(document.getElementById("directory-content"), {
-        tolerance: 0,
-        offset: 90,
-        classes: {
-            initial: "initial",
-            pinned: "pinned",
-            unpinned: "unpinned"
-        }
-    });
-    postDirectory.init();
-
-
-     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "pinned",
-            unpinned: "unpinned"
-        }
-    });
-    postSharer.init();
-    
-
-
-
-    var header = new Headroom(document.getElementById("header"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "slideDown",
-            unpinned: "slideUp"
-        }
-    });
-    header.init();
-    var chakhsu = function (r) {
-        function t() {
-            return b[Math.floor(Math.random() * b.length)]
-        }
-
-        function e() {
-            return String.fromCharCode(94 * Math.random() + 33)
-        }
-
-        function n(r) {
-            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
-                var l = document.createElement("span");
-                l.textContent = e(), l.style.color = t(), n.appendChild(l)
-            }
-            return n
-        }
-
-        function i() {
-            var t = o[c.skillI];
-            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
-        }
-        var l = "",
-            o = ["浮浮沉沉","努力就好"].map(function (r) {
-                return r + "."
-            }),
-            a = 2,
-            g = 1,
-            s = 5,
-            d = 75,
-            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
-            c = {
-                text: "",
-                prefixP: -s,
-                skillI: 0,
-                skillP: 0,
-                direction: "forward",
-                delay: a,
-                step: g
-            };
-        i()
-    };
-    chakhsu(document.getElementById('chakhsu'));
-    if ('addEventListener' in document) {
-        document.addEventListener('DOMContentLoaded', function () {
-            FastClick.attach(document.body);
-        }, false);
-    }
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
-    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
-    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
-<div class="cnzz" style="display: none">
-    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:xiaozizayang@email.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/howie6879" class="iconfont icon-github" title="github"></a>
+      <a href="https://www.zhihu.com/people/howie6879/activities" class="iconfont icon-zhihu" title="zhihu"></a>
+  <a href="https://www.howie6879.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
 </div>
 
-<script data-no-instant>
-    InstantClick.on('change', function (isInitialLoad) {
-        var blocks = document.querySelectorAll('pre code');
-        for (var i = 0; i < blocks.length; i++) {
-            hljs.highlightBlock(blocks[i]);
-        }
-        if (isInitialLoad === false) {
-            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
-            if (typeof MathJax !== 'undefined') {
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-            }
-        }
-    });
-    InstantClick.init('mousedown');
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
 
-</script>
+  
 
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2019
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">howie6879</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 
 
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
-	
+	ga('set', 'anonymizeIp', true);
 	ga('send', 'pageview');
 }
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
 
 
 </body>
-
 </html>

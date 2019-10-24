@@ -1,87 +1,165 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="x-dns-prefetch-control" content="on">
-    <link rel="dns-prefetch" href="https://o243f9mnq.qnssl.com/" />
-    <link rel="dns-prefetch" href="https://cdn.bootcss.com" />
-    <link rel="dns-prefetch" href="https://secure.gravatar.com" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-    <meta name="renderer" content="webkit">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-transform" />
-    <meta http-equiv="Cache-Control" content="no-siteapp" />
-    
-    <link rel="shortcut icon" href="https://www.howie6879.cn/images/favicon.png">
-    <link rel="apple-touch-icon" href="https://www.howie6879.cn/images/apple-touch-icon.png">
-    <title>
-        
-        神经网络与深度学习笔记 - 1.识别手写字 - 老胡的储物柜
-        
-    </title>
-    <meta name="keywords" content=" " />
-    <meta name="description" content=" " />
-    <link href="https://cdn.bootcss.com/highlight.js/9.10.0/styles/xcode.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
-    <link href="https://www.howie6879.cn/css/style.min.css?20170331" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>神经网络与深度学习笔记 - 1.识别手写字 - 老胡的储物柜</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
-    
-    
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="howie6879" /><meta name="description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.58.3 with theme even" />
+
+
+<link rel="canonical" href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+<link href="/dist/even.7700d289.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="神经网络与深度学习笔记 - 1.识别手写字" />
+<meta property="og:description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/" />
+<meta property="article:published_time" content="2019-05-08T16:36:44+08:00" />
+<meta property="article:modified_time" content="2019-05-08T16:36:44+08:00" />
+<meta itemprop="name" content="神经网络与深度学习笔记 - 1.识别手写字">
+<meta itemprop="description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础">
+
+
+<meta itemprop="datePublished" content="2019-05-08T16:36:44&#43;08:00" />
+<meta itemprop="dateModified" content="2019-05-08T16:36:44&#43;08:00" />
+<meta itemprop="wordCount" content="4162">
+
+
+
+<meta itemprop="keywords" content="神经网络与深度学习," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="神经网络与深度学习笔记 - 1.识别手写字"/>
+<meta name="twitter:description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
 </head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">howie.hu</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a><a href="/friends/">
+        <li class="mobile-menu-item">友链</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">howie.hu</a>
+</div>
 
-
-<body class="bg-white" gtools_scp_screen_capture_injected="true">
-    
-    <header id="header" class="header bg-white">
-        <div class="navbar-container">
-            <a href="https://www.howie6879.cn" class="navbar-logo" style="color: #5f5f5f">老胡的储物柜</a>
-            <div class="navbar-menu">
-            
-                <a href="https://www.howie6879.cn/post/">Archives</a>  
-            
-                <a href="https://www.howie6879.cn/tags/">Tags</a>  
-            
-                <a href="https://www.howie6879.cn/about/">About</a>  
-            
-                <a href="https://www.howie6879.cn/friend/">Friend</a>  
-            
-            </div>
-            
-            <div class="navbar-mobile-menu" onclick=""> 
-                <span class="icon-menu cross"><span class="middle"></span></span>
-                <ul>
-                
-                <li><a href="https://www.howie6879.cn/post/">Archives</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/tags/">Tags</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/about/">About</a></li> 
-                
-                <li><a href="https://www.howie6879.cn/friend/">Friend</a></li> 
-                
-                </ul>
-            </div>
-        </div>
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/friends/">友链</a>
+      </li>
+  </ul>
+</nav>
     </header>
-    <article class="main-content page-page">
-        <div class="post-header">
-            <h1 class="post-title" itemprop="name headline">
-                神经网络与深度学习笔记 - 1.识别手写字
-            </h1>
-            <div class="post-data">
-                Published on May 8, 2019 ,2 min reading time
-            </div>
-        </div>
-        <div id="post-content" class="post-content">
-            
-<p class="post-tags"> 
-	
-	<a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0">神经网络与深度学习</a>
-	
-</p>
 
- <p><figure><img src="https://www.howie6879.cn/images/post/33/01.jpg" alt="from Unsplash"></figure></p>
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">神经网络与深度学习笔记 - 1.识别手写字</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-05-08 </span>
+        <div class="post-category">
+            <a href="/categories/deep-learning/"> Deep Learning </a>
+            </div>
+          <span class="more-meta"> 4162 words </span>
+          <span class="more-meta"> 9 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#感知器">感知器</a></li>
+<li><a href="#s型神经元">S型神经元</a></li>
+<li><a href="#神经-络的架构">神经⽹络的架构</a></li>
+<li><a href="#个简单的分类-写数字的-络">⼀个简单的分类⼿写数字的⽹络</a></li>
+<li><a href="#随机梯度下降算法">随机梯度下降算法</a></li>
+<li><a href="#实现数字分类模型">实现数字分类模型</a></li>
+<li><a href="#参考">参考</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
+
+<p><img src="/images/post/33/01.jpg" alt="from Unsplash" /></p>
 
 <p><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a> 是由 <a href="http://michaelnielsen.org/">Michael Nielsen</a> 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。</p>
 
@@ -111,24 +189,24 @@
 
 <p>感知器的工作方式如下所示：</p>
 
-<p><figure><img src="https://www.howie6879.cn/images/post/33/02.jpg" alt="from nndl"></figure></p>
+<p><img src="/images/post/33/02.jpg" alt="from nndl" /></p>
 
-<p>$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。</p>
+<p>$x<em>{1},x</em>{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。</p>
 
-<p>对于$x_{1},x_{2},...,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},...,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：</p>
+<p>对于$x<em>{1},x</em>{2},&hellip;,x<em>{j}$个输入，每个输入都有对应的权重$w</em>{1},w<em>{2},&hellip;,w</em>{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：</p>
 
-<p><figure><img src="https://www.howie6879.cn/images/post/33/03.jpg" alt="from nndl"></figure></p>
+<p><img src="/images/post/33/03.jpg" alt="from nndl" /></p>
 
 <p>假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：</p>
 
 <ul>
-<li>$x=(x_{1},x_{2},...,x_{j})$</li>
-<li>$w=(w_{1},w_{2},...,w_{j})$</li>
+<li>$x=(x<em>{1},x</em>{2},&hellip;,x_{j})$</li>
+<li>$w=(w<em>{1},w</em>{2},&hellip;,w_{j})$</li>
 </ul>
 
 <p>那么感知器的规则可以重写为:</p>
 
-<p><figure><img src="https://www.howie6879.cn/images/post/33/04.jpg" alt="from nndl"></figure></p>
+<p><img src="/images/post/33/04.jpg" alt="from nndl" /></p>
 
 <p>这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。</p>
 
@@ -184,25 +262,25 @@
 
 <p>前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？</p>
 
-<p><figure><img src="https://www.howie6879.cn/images/post/33/05.jpg" alt="from nndl"></figure></p>
+<p><img src="/images/post/33/05.jpg" alt="from nndl" /></p>
 
 <p>以数字识别为例，假设⽹络错误地把⼀个<code>9</code>的图像分类为<code>8</code>，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果<code>9</code>，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把<code>9</code>的图像分类为<code>8</code>调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。</p>
 
 <p>所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：</p>
 
-<p><span  class="math">\[
+<p>$$
 \sigma(z) \equiv \frac{1}{1+e^{-z}}
-\]</span></p>
+$$</p>
 
 <p>其中$z$表达式为：</p>
 
-<p><span  class="math">\[z=\sum_{j} w{_j}x{_j}+b\]</span></p>
+<p>$$z=\sum_{j} w{_j}x{_j}+b$$</p>
 
-<p>那么⼀个具有输⼊$x_{1},x_{2},...,x_{j}$，权重为$w_{1},w_{2},...,w_{j}$，和偏置b的S型神经元的输出是：</p>
+<p>那么⼀个具有输⼊$x<em>{1},x</em>{2},&hellip;,x<em>{j}$，权重为$w</em>{1},w<em>{2},&hellip;,w</em>{j}$，和偏置b的S型神经元的输出是：</p>
 
-<p><span  class="math">\[
+<p>$$
 \frac{1}{1+\exp(-\sum_j w_j x_j-b)}
-\]</span></p>
+$$</p>
 
 <p>上面说过，感知器的激活函数只会输出两个值，分别是<code>0</code>或<code>1</code>，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？</p>
 
@@ -213,11 +291,11 @@
 <li>$\sigma(z)&gt;0.5$  输出1</li>
 </ul>
 
-<h2 id="神经络的架构">神经⽹络的架构</h2>
+<h2 id="神经-络的架构">神经⽹络的架构</h2>
 
 <p>看下面一个四层神经网络，这种类型的多层⽹络有时被称为<strong>多层感知器</strong>或者<strong>MLP</strong>，如下图：</p>
 
-<p><figure><img src="https://www.howie6879.cn/images/post/33/06.jpg" alt="from nndl"></figure></p>
+<p><img src="/images/post/33/06.jpg" alt="from nndl" /></p>
 
 <p>需要记住以下几个概念：</p>
 
@@ -229,17 +307,17 @@
 <li>有回路，其中反馈环路是可⾏的：<strong>递归神经网络</strong></li>
 </ul>
 
-<h2 id="个简单的分类写数字的络">⼀个简单的分类⼿写数字的⽹络</h2>
+<h2 id="个简单的分类-写数字的-络">⼀个简单的分类⼿写数字的⽹络</h2>
 
 <p>对于这六个数字<code>504192</code>，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：</p>
 
 <ul>
-<li>504192是连续在一起的图像，首先可以将其分割成6个小图像，比如<code>5</code> <code>0</code> ...等</li>
+<li>504192是连续在一起的图像，首先可以将其分割成6个小图像，比如<code>5</code> <code>0</code> &hellip;等</li>
 
 <li><p>再对分割开的小图像进行分类，比如识别5
 
 我们将使⽤⼀个三层神经⽹络来识别单个数字：
-<figure><img src="https://www.howie6879.cn/images/post/33/07.jpg" alt="from nndl"></figure>
+<img src="/images/post/33/07.jpg" alt="from nndl" />
 由于训练数据由$28*28$的⼿写数字的图像组成，所以:</p></li>
 
 <li><p>输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊</p></li>
@@ -254,61 +332,102 @@
 <h2 id="随机梯度下降算法">随机梯度下降算法</h2>
 
 <p>分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤<a href="http://yann.lecun.com/exdb/mnist/">MNIST</a>数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用<code>jupyter notebook</code>开始吧，如果没有，请自行检索教程安装，代码目录如下：</p>
-
-<pre><code class="language-shell">pylab
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">pylab
 └── datasets
     └── MNIST_data
         ├── t10k-images-idx3-ubyte.gz
         ├── t10k-labels-idx1-ubyte.gz
         ├── train-images-idx3-ubyte.gz
-        └── train-labels-idx1-ubyte.gz
-</code></pre>
-
+        └── train-labels-idx1-ubyte.gz</code></pre></td></tr></table>
+</div>
+</div>
 <p>然后使用<code>TensorFlow</code>来读取数据，看看下载的数据集到底是什么样子，可以在<code>mnist_data.ipynb</code>中添加如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tensorflow.examples.tutorials.mnist.input_data</span> <span class="kn">import</span> <span class="n">read_data_sets</span>
 
-<pre><code class="language-python">from matplotlib import pyplot as plt
-from tensorflow.examples.tutorials.mnist.input_data import read_data_sets
-
-mnist = read_data_sets(&quot;../datasets/MNIST_data/&quot;, one_hot=True)
-
-</code></pre>
-
+<span class="n">mnist</span> <span class="o">=</span> <span class="n">read_data_sets</span><span class="p">(</span><span class="s2">&#34;../datasets/MNIST_data/&#34;</span><span class="p">,</span> <span class="n">one_hot</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>查看一些基本信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="k">print</span><span class="p">(</span><span class="s2">&#34;Training data size: </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">mnist</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">num_examples</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Validating data size: </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">mnist</span><span class="o">.</span><span class="n">validation</span><span class="o">.</span><span class="n">num_examples</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Testing data size: </span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">mnist</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">num_examples</span><span class="p">)</span>
 
-<pre><code class="language-python">print(&quot;Training data size: %s&quot; % mnist.train.num_examples)
-print(&quot;Validating data size: %s&quot; % mnist.validation.num_examples)
-print(&quot;Testing data size: %s&quot; % mnist.test.num_examples)
+<span class="c1"># 每张图片是长度为784的一维数组</span>
+<span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mnist</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-# 每张图片是长度为784的一维数组
-print(len(mnist.train.images[0]))
+<span class="k">def</span> <span class="nf">display_digit</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;gray_r&#39;</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-def display_digit(image):
-    image = image.reshape([28,28])
-    plt.imshow(image, cmap=plt.get_cmap('gray_r'))
-    plt.show()
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;样本真实数字为：</span><span class="si">%s</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="n">mnist</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1"># 显示图像</span>
+<span class="n">display_digit</span><span class="p">(</span><span class="n">mnist</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-print(&quot;样本真实数字为：%s&quot; % list(mnist.train.labels[1]).index(1))
-# 显示图像
-display_digit(mnist.train.images[1])
-
-# Output
-# Training data size: 55000
-# Validating data size: 5000
-# Testing data size: 10000
-# 784
-# 样本真实数字为：3
-</code></pre>
-
+<span class="c1"># Output</span>
+<span class="c1"># Training data size: 55000</span>
+<span class="c1"># Validating data size: 5000</span>
+<span class="c1"># Testing data size: 10000</span>
+<span class="c1"># 784</span>
+<span class="c1"># 样本真实数字为：3</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>可以看到显示如下图像：
-<figure><img src="https://www.howie6879.cn/images/post/33/08.jpg" alt="from mnist"></figure></p>
+<img src="/images/post/33/08.jpg" alt="from mnist" /></p>
 
 <p>通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。</p>
 
 <p>感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个<strong>代价函数</strong>（有时被称为损失或⽬标函数）：</p>
 
-<p><span  class="math">\[
-C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
-\]</span></p>
+<p>$$
+C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+$$</p>
 
 <ul>
 <li>w 表⽰所有的⽹络中权重的集合</li>
@@ -323,7 +442,7 @@ C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
 
 <p>下面是我的推导过程：</p>
 
-<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190513120212.png" alt=""></figure></p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190513120212.png" alt="" /></p>
 
 <h2 id="实现数字分类模型">实现数字分类模型</h2>
 
@@ -332,59 +451,108 @@ C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
 <p>书籍作者很贴心地实现了模型代码，仓库见<a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a>，接下来我们一起来看看具体的实现代码吧。</p>
 
 <p>首先是实现一个<code>Network</code>类，</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="ch">#!/usr/bin/env python</span>
 
-<pre><code class="language-python">#!/usr/bin/env python
+<span class="kn">import</span> <span class="nn">random</span>
 
-import random
-
-import numpy as np
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
-class Network(object):
+<span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    def __init__(self, sizes):
-        &quot;&quot;&quot;
-        初始化
-        :param sizes:
-            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
-        &quot;&quot;&quot;
-        self.num_layers = len(sizes)
-        self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
-                        for x, y in zip(sizes[:-1], sizes[1:])]
-
-</code></pre>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sizes</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        初始化
+</span><span class="s2">        :param sizes:
+</span><span class="s2">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizes</span> <span class="o">=</span> <span class="n">sizes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biases</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sizes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考<a href="https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py">network.py</a>：</p>
-
-<pre><code class="language-python">def sigmoid(z):
-    &quot;&quot;&quot;The sigmoid function.&quot;&quot;&quot;
-    return 1.0/(1.0+np.exp(-z))
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
+    <span class="k">return</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>代码已经准备就绪，下面可以开始进行模型训练：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">mnist_loader</span><span class="o">,</span> <span class="nn">network</span>
 
-<pre><code class="language-python">import mnist_loader, network
+<span class="n">training_data</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">test_data</span> <span class="o">=</span> <span class="n">mnist_loader</span><span class="o">.</span><span class="n">load_data_wrapper</span><span class="p">()</span>
 
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+<span class="n">net</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">Network</span><span class="p">([</span><span class="mi">784</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">net</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">training_data</span><span class="p">),</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">test_data</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">test_data</span><span class="p">))</span>
 
-net = network.Network([784, 30, 10])
-net.SGD(list(training_data), 30, 10, 3.0, test_data=list(test_data))
-
-# Output
-Epoch 0: 9023 / 10000
-Epoch 1: 9222 / 10000
-Epoch 2: 9312 / 10000
-Epoch 3: 9312 / 10000
-Epoch 4: 9383 / 10000
-Epoch 5: 9421 / 10000
-Epoch 6: 9432 / 10000
-Epoch 7: 9421 / 10000
-Epoch 8: 9454 / 10000
-Epoch 9: 9447 / 10000
-</code></pre>
-
+<span class="c1"># Output</span>
+<span class="n">Epoch</span> <span class="mi">0</span><span class="p">:</span> <span class="mi">9023</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">9222</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">9312</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">9312</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">9383</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">9421</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">9432</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">9421</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">8</span><span class="p">:</span> <span class="mi">9454</span> <span class="o">/</span> <span class="mi">10000</span>
+<span class="n">Epoch</span> <span class="mi">9</span><span class="p">:</span> <span class="mi">9447</span> <span class="o">/</span> <span class="mi">10000</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>看结果，十次迭代后，轻轻松松突破94%</p>
 
 <h2 id="参考">参考</h2>
@@ -397,350 +565,132 @@ Epoch 9: 9447 / 10000
 <li><a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a></li>
 </ul>
 
-            <p class="post-info">
-                本文由
-                
-                    <a href="https://www.howie6879.cn/about">
-                howie6879 
-                
-                </a> 创作，采用
-                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="external nofollow">知识共享署名4.0</a>                
-                国际许可协议进行许可，转载请注明出处！ <br>
-                
-            </p>
-        </div>
-    </article>
-
-    <div id="post-bottom-bar" class="post-bottom-bar">
-        <div class="bottom-bar-inner">
-            <div class="bottom-bar-items social-share left">
-                <span class="bottom-bar-item">Share : </span>
-                <span class="bottom-bar-item bottom-bar-facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f07_use_neural_network_recognize_handwriting%2f" target="_blank" title="神经网络与深度学习笔记 - 1.识别手写字" rel="nofollow">Facebook</a></span>
-                <span class="bottom-bar-item bottom-bar-twitter"><a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f07_use_neural_network_recognize_handwriting%2f&text=%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e4%b8%8e%e6%b7%b1%e5%ba%a6%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%20-%201.%e8%af%86%e5%88%ab%e6%89%8b%e5%86%99%e5%ad%97" target="_blank" title="神经网络与深度学习笔记 - 1.识别手写字" rel="nofollow">Twitter</a></span>
-                <span class="bottom-bar-item bottom-bar-weibo"><a href="http://service.weibo.com/share/share.php?url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f07_use_neural_network_recognize_handwriting%2f&amp;title=%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e4%b8%8e%e6%b7%b1%e5%ba%a6%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%20-%201.%e8%af%86%e5%88%ab%e6%89%8b%e5%86%99%e5%ad%97" target="_blank" title="神经网络与深度学习笔记 - 1.识别手写字" rel="nofollow">Weibo</a></span>
-                <span class="bottom-bar-item bottom-bar-qrcode"><a href="//pan.baidu.com/share/qrcode?w=300&amp;h=300&amp;url=https%3a%2f%2fwww.howie6879.cn%2fpost%2f2019%2f07_use_neural_network_recognize_handwriting%2f" target="_blank" rel="nofollow">QRcode</a></span>
-            </div>
-
-            <div class="bottom-bar-items right">
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/06_oh_my_zsh/" title="oh-my-zsh：让终端飞">←</a></span> 
-                
-                <span class="bottom-bar-item"><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/" title="神经网络与深度学习笔记 - 2.反向传播算法如何工作">→</a></span> 
-                <span class="bottom-bar-item"></span> <span class="bottom-bar-item"><a href="#footer">↓</a></span>
-                <span class="bottom-bar-item"><a href="#">↑</a></span>
-            </div>
-            
-        </div>
     </div>
 
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">howie6879</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-05-08
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
     
- <footer id="footer" class="footer bg-white" style="padding-bottom: 200px;">
-    <div class="footer-social">
-        <div class="footer-container clearfix">
-            <div class="social-list">
-                 
-                
-                <a class="social" target="blank" href="https://github.com/howie6879">Github</a>   
-                
-                <a class="social" target="blank" href="mailto:xiaozizayang@gmail.com">Email</a>   
-                
-                <a class="social" target="blank" href="https://www.howie6879.cn/index.xml">RSS</a>  
-            </div>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/wechat.png">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2019/08_how_does_the_back_propagation_algorithm_work/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">神经网络与深度学习笔记 - 2.反向传播算法如何工作</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2019/06_oh_my_zsh/">
+            <span class="next-text nav-default">oh-my-zsh：让终端飞</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
         </div>
-    </div>
-    <div class="footer-meta">
-        <div class="footer-container">
-            <div class="meta-item meta-copyright">
-                <div class="meta-copyright-info">
-                    <br>
-                    <div class="info-text">
-                        <p id="chakhsu"> </p>
-                        <p>Powered by <a href="https://gohugo.io/" target="_blank" rel="nofollow">Hugo</a>.
-                            <a href="https://golang.org/" target="_blank" rel="nofollow">#golang</a>.
-                        </p>
-                        <p>Theme is <a href="https://github.com/mjyi/Gemini" target="_blank" rel="nofollow">Gemini</a></p>
-                        <p> &copy; 2017 <a href="https://www.howie6879.cn">howie6879</a></p>
-                    </div>
-                </div>
-            </div>
+        
 
-            <div class="meta-item meta-comments">
-                <h3 class="meta-title">CATEGORIES</h3>
-                <li><a href="https://www.howie6879.cn/categories/caddy">Caddy</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/deep-learning">Deep-Learning</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/docker">Docker</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/google">Google</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/haskell">Haskell</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/linux">Linux</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/machine-learning">Machine-Learning</a>(5)</li>
-                <li><a href="https://www.howie6879.cn/categories/markdown">Markdown</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/mysql">Mysql</a>(1)</li>
-                <li><a href="https://www.howie6879.cn/categories/python">Python</a>(26)</li>
-                <li><a href="https://www.howie6879.cn/categories/sanic">Sanic</a>(9)</li>
-                <li><a href="https://www.howie6879.cn/categories/web">Web</a>(2)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E6%95%88%E7%8E%87">效率</a>(3)</li>
-                <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94">随笔</a>(2)</li>
-            </div>
-            <div class="meta-item meta-posts">
-                <h3 class="meta-title">RECENT POSTS</h3>
-                   
-                <li><a href="https://www.howie6879.cn/post/2019/09_save_wechat_article_to_bear/">利用微信同步文章到Bear</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/">神经网络与深度学习笔记 - 2.反向传播算法如何工作</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/">神经网络与深度学习笔记 - 1.识别手写字</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/04_how_to_use_jupyterlab/">JupyterLab：程序员的笔记本神器</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">如何实现一个Python爬虫框架</a></li>
-                  
-                <li><a href="https://www.howie6879.cn/post/2019/02_talk_about_python_spider/">谈谈对Python爬虫的理解</a></li>
-                 
+  
 
-            </div>
-        </div>
-    </div>
-    </div>
-</footer>
+  
 
- 
-    <div id="directory-content" class="directory-content">
-        <div id="directory"></div>
-    </div>
-    <script>
-    var postDirectoryBuild = function() {
-        var postChildren = function children(childNodes, reg) {
-                var result = [],
-                    isReg = typeof reg === 'object',
-                    isStr = typeof reg === 'string',
-                    node, i, len;
-                for (i = 0, len = childNodes.length; i < len; i++) {
-                    node = childNodes[i];
-                    if ((node.nodeType === 1 || node.nodeType === 9) && (!reg || isReg && reg.test(node.tagName.toLowerCase()) || isStr && node.tagName.toLowerCase() === reg)) {
-                        result.push(node);
-                    }
-                }
-                return result;
-            },
-            createPostDirectory = function(article, directory, isDirNum) {
-                var contentArr = [],
-                    titleId = [],
-                    levelArr, root, level, currentList, list, li, link, i, len;
-                levelArr = (function(article, contentArr, titleId) {
-                    var titleElem = postChildren(article.childNodes, /^h\d$/),
-                        levelArr = [],
-                        lastNum = 1,
-                        lastRevNum = 1,
-                        count = 0,
-                        guid = 1,
-                        id = 'directory' + (Math.random() + '').replace(/\D/, ''),
-                        lastRevNum, num, elem;
-                    while (titleElem.length) {
-                        elem = titleElem.shift();
-                        contentArr.push(elem.innerHTML);
-                        num = +elem.tagName.match(/\d/)[0];
-                        if (num > lastNum) {
-                            levelArr.push(1);
-                            lastRevNum += 1;
-                        } else if (num === lastRevNum || num > lastRevNum && num <= lastNum) {
-                            levelArr.push(0);
-                            lastRevNum = lastRevNum;
-                        } else if (num < lastRevNum) {
-                            levelArr.push(num - lastRevNum);
-                            lastRevNum = num;
-                        }
-                        count += levelArr[levelArr.length - 1];
-                        lastNum = num;
-                        elem.id = elem.id || (id + guid++);
-                        titleId.push(elem.id);
-                    }
-                    if (count !== 0 && levelArr[0] === 1) levelArr[0] = 0;
-                    return levelArr;
-                })(article, contentArr, titleId);
-                currentList = root = document.createElement('ul');
-                dirNum = [0];
-                for (i = 0, len = levelArr.length; i < len; i++) {
-                    level = levelArr[i];
-                    if (level === 1) {
-                        list = document.createElement('ul');
-                        if (!currentList.lastElementChild) {
-                            currentList.appendChild(document.createElement('li'));
-                        }
-                        currentList.lastElementChild.appendChild(list);
-                        currentList = list;
-                        dirNum.push(0);
-                    } else if (level < 0) {
-                        level *= 2;
-                        while (level++) {
-                            if (level % 2) dirNum.pop();
-                            currentList = currentList.parentNode;
-                        }
-                    }
-                    dirNum[dirNum.length - 1]++;
-                    li = document.createElement('li');
-                    link = document.createElement('a');
-                    link.href = '#' + titleId[i];
-                    link.innerHTML = !isDirNum ? contentArr[i] : dirNum.join('.') + ' ' + contentArr[i];
-                    li.appendChild(link);
-                    currentList.appendChild(li);
-                }
-                directory.appendChild(root);
-            };
-        createPostDirectory(document.getElementById('post-content'), document.getElementById('directory'), true);
-    };
-    postDirectoryBuild();
-    </script> 
+      </div>
+    </main>
 
-
-<script src="//cdn.bootcss.com/headroom/0.9.1/headroom.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.10.0/highlight.min.js"></script>
-<script src="https://www.howie6879.cn/js/instantclick.min.js?v20140319"></script>
-<script src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
-<script>
-
-
-    var postDirectory = new Headroom(document.getElementById("directory-content"), {
-        tolerance: 0,
-        offset: 90,
-        classes: {
-            initial: "initial",
-            pinned: "pinned",
-            unpinned: "unpinned"
-        }
-    });
-    postDirectory.init();
-
-
-     var postSharer = new Headroom(document.getElementById("post-bottom-bar"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "pinned",
-            unpinned: "unpinned"
-        }
-    });
-    postSharer.init();
-    
-
-
-
-    var header = new Headroom(document.getElementById("header"), {
-        tolerance: 0,
-        offset: 70,
-        classes: {
-            initial: "animated",
-            pinned: "slideDown",
-            unpinned: "slideUp"
-        }
-    });
-    header.init();
-    var chakhsu = function (r) {
-        function t() {
-            return b[Math.floor(Math.random() * b.length)]
-        }
-
-        function e() {
-            return String.fromCharCode(94 * Math.random() + 33)
-        }
-
-        function n(r) {
-            for (var n = document.createDocumentFragment(), i = 0; r > i; i++) {
-                var l = document.createElement("span");
-                l.textContent = e(), l.style.color = t(), n.appendChild(l)
-            }
-            return n
-        }
-
-        function i() {
-            var t = o[c.skillI];
-            c.step ? c.step-- : (c.step = g, c.prefixP < l.length ? (c.prefixP >= 0 && (c.text += l[c.prefixP]), c.prefixP++) : "forward" === c.direction ? c.skillP < t.length ? (c.text += t[c.skillP], c.skillP++) : c.delay ? c.delay-- : (c.direction = "backward", c.delay = a) : c.skillP > 0 ? (c.text = c.text.slice(0, -1), c.skillP--) : (c.skillI = (c.skillI + 1) % o.length, c.direction = "forward")), r.textContent = c.text, r.appendChild(n(c.prefixP < l.length ? Math.min(s, s + c.prefixP) : Math.min(s, t.length - c.skillP))), setTimeout(i, d)
-        }
-        var l = "",
-            o = ["浮浮沉沉","努力就好"].map(function (r) {
-                return r + "."
-            }),
-            a = 2,
-            g = 1,
-            s = 5,
-            d = 75,
-            b = ["rgb(110,64,170)", "rgb(150,61,179)", "rgb(191,60,175)", "rgb(228,65,157)", "rgb(254,75,131)", "rgb(255,94,99)", "rgb(255,120,71)", "rgb(251,150,51)", "rgb(226,183,47)", "rgb(198,214,60)", "rgb(175,240,91)", "rgb(127,246,88)", "rgb(82,246,103)", "rgb(48,239,130)", "rgb(29,223,163)", "rgb(26,199,194)", "rgb(35,171,216)", "rgb(54,140,225)", "rgb(76,110,219)", "rgb(96,84,200)"],
-            c = {
-                text: "",
-                prefixP: -s,
-                skillI: 0,
-                skillP: 0,
-                direction: "forward",
-                delay: a,
-                step: g
-            };
-        i()
-    };
-    chakhsu(document.getElementById('chakhsu'));
-    if ('addEventListener' in document) {
-        document.addEventListener('DOMContentLoaded', function () {
-            FastClick.attach(document.body);
-        }, false);
-    }
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/x-mathjax-config"> MathJax.Hub.Config({ showProcessingMessages: false, messageStyle: "none", extensions: ["tex2jax.js"], jax: ["input/TeX",
-    "output/HTML-CSS"], tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], ignoreClass:"comment-content" }, "HTML-CSS":
-    { availableFonts: ["STIX","TeX"], showMathMenu: false } }); MathJax.Hub.Queue(["Typeset",MathJax.Hub]); </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
-<div class="cnzz" style="display: none">
-    <script src="https://s5.cnzz.com/z_stat.php?id=1275251618&amp;web_id=1275251618" language="JavaScript"></script>
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:xiaozizayang@email.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/howie6879" class="iconfont icon-github" title="github"></a>
+      <a href="https://www.zhihu.com/people/howie6879/activities" class="iconfont icon-zhihu" title="zhihu"></a>
+  <a href="https://www.howie6879.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
 </div>
 
-<script data-no-instant>
-    InstantClick.on('change', function (isInitialLoad) {
-        var blocks = document.querySelectorAll('pre code');
-        for (var i = 0; i < blocks.length; i++) {
-            hljs.highlightBlock(blocks[i]);
-        }
-        if (isInitialLoad === false) {
-            if (typeof ga !== 'undefined') ga('send', 'pageview', location.pathname + location.search);
-            if (typeof MathJax !== 'undefined') {
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-            }
-        }
-    });
-    InstantClick.init('mousedown');
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
 
-</script>
+  
 
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2019
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">howie6879</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 
 
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
-	
+	ga('set', 'anonymizeIp', true);
 	ga('send', 'pageview');
 }
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
 
 
 </body>
-
 </html>
