@@ -1,12 +1,32 @@
 ---
 categories:
   - Deep Learning
+  - nndl_note
 date: 2019-05-10 16:36:44+08:00
 image: /images/thumbs/h_49.jpg
 tags: [神经网络与深度学习]
-title: "神经网络与深度学习笔记 - 2.反向传播算法如何工作"
+title: "2.反向传播算法如何工作"
 markup: mmark
 ---
+
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法](#热身神经网络中使用矩阵快速计算输出的方法)
+- [关于代价函数的两个假设](#关于代价函数的两个假设)
+- [反向传播的四个基本方程](#反向传播的四个基本方程)
+  - [输出层误差的⽅程](#输出层误差的方程)
+  - [使用下一层的误差表示当前层的误差](#使用下一层的误差表示当前层的误差)
+  - [代价函数关于⽹络中任意偏置的改变率](#代价函数关于网络中任意偏置的改变率)
+  - [代价函数关于任何⼀个权重的改变率](#代价函数关于任何一个权重的改变率)
+- [反向传播算法](#反向传播算法)
+- [反向传播：全局观](#反向传播全局观)
+- [参考](#参考)
+
+<!-- /code_chunk_output -->
+
 
 ![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png)
 

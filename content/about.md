@@ -27,6 +27,6 @@ author : howie6879
 
 ### 个人公众号
 
-我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎关注：
+我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎关注 - **老胡的储物柜**：
 
 <img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png" width="300px">

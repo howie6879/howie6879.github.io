@@ -1,12 +1,29 @@
 ---
 categories:
   - Deep Learning
+  - nndl_note
 date: 2019-05-08 16:36:44+08:00
 image: /images/thumbs/h_48.png
 tags: [神经网络与深度学习]
-title: "神经网络与深度学习笔记 - 1.识别手写字"
+title: "1.识别手写字"
 markup: mmark
 ---
+
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [感知器](#感知器)
+- [S型神经元](#s型神经元)
+- [神经⽹络的架构](#神经网络的架构)
+- [⼀个简单的分类⼿写数字的⽹络](#一个简单的分类手写数字的网络)
+- [随机梯度下降算法](#随机梯度下降算法)
+- [实现数字分类模型](#实现数字分类模型)
+- [参考](#参考)
+
+<!-- /code_chunk_output -->
+
 
 ![from Unsplash](/images/post/33/01.jpg)
 
