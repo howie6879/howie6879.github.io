@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>神经网络与深度学习笔记 - 1.识别手写字 - 老胡的储物柜</title>
+  <title>1.识别手写字 - 老胡的储物柜</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="howie6879" /><meta name="description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础" /><meta name="keywords" content="Hugo, theme, even" />
+<meta name="author" content="howie6879" /><meta name="description" content="感知器 S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 随机梯度下降算法 实现数字分类模型 参考 Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲" /><meta name="keywords" content="Hugo, theme, even" />
 
 
 
@@ -38,26 +38,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="神经网络与深度学习笔记 - 1.识别手写字" />
-<meta property="og:description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础" />
+<meta property="og:title" content="1.识别手写字" />
+<meta property="og:description" content="感知器 S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 随机梯度下降算法 实现数字分类模型 参考 Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/" />
 <meta property="article:published_time" content="2019-05-08T16:36:44+08:00" />
 <meta property="article:modified_time" content="2019-05-08T16:36:44+08:00" />
-<meta itemprop="name" content="神经网络与深度学习笔记 - 1.识别手写字">
-<meta itemprop="description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础">
+<meta itemprop="name" content="1.识别手写字">
+<meta itemprop="description" content="感知器 S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 随机梯度下降算法 实现数字分类模型 参考 Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲">
 
 
 <meta itemprop="datePublished" content="2019-05-08T16:36:44&#43;08:00" />
 <meta itemprop="dateModified" content="2019-05-08T16:36:44&#43;08:00" />
-<meta itemprop="wordCount" content="4149">
+<meta itemprop="wordCount" content="4196">
 
 
 
 <meta itemprop="keywords" content="神经网络与深度学习," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="神经网络与深度学习笔记 - 1.识别手写字"/>
-<meta name="twitter:description" content="Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础"/>
+<meta name="twitter:title" content="1.识别手写字"/>
+<meta name="twitter:description" content="感知器 S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 随机梯度下降算法 实现数字分类模型 参考 Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -124,14 +124,15 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">神经网络与深度学习笔记 - 1.识别手写字</h1>
+      <h1 class="post-title">1.识别手写字</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2019-05-08 </span>
         <div class="post-category">
             <a href="/categories/deep-learning/"> Deep Learning </a>
+            <a href="/categories/nndl_note/"> nndl_note </a>
             </div>
-          <span class="more-meta"> 4149 words </span>
+          <span class="more-meta"> 4196 words </span>
           <span class="more-meta"> 9 mins read </span>
         
       </div>
@@ -144,7 +145,23 @@
   </div>
 </div>
     <div class="post-content">
-      <p><figure><img src="/images/post/33/01.jpg" alt="from Unsplash"></figure></p>
+      <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+<ul>
+<li><a href="#感知器">感知器</a></li>
+<li><a href="#s型神经元">S型神经元</a></li>
+<li><a href="#神经网络的架构">神经⽹络的架构</a></li>
+<li><a href="#一个简单的分类手写数字的网络">⼀个简单的分类⼿写数字的⽹络</a></li>
+<li><a href="#随机梯度下降算法">随机梯度下降算法</a></li>
+<li><a href="#实现数字分类模型">实现数字分类模型</a></li>
+<li><a href="#参考">参考</a></li>
+</ul>
+
+<!-- /code_chunk_output -->
+
+<p><figure><img src="/images/post/33/01.jpg" alt="from Unsplash"></figure></p>
 
 <p><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a> 是由 <a href="http://michaelnielsen.org/">Michael Nielsen</a> 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。</p>
 
@@ -588,7 +605,7 @@ C(w,b) \equiv \frac{1}{2n} \sum_x \| y(x) - a\|^2
       <nav class="post-nav">
         <a class="prev" href="/post/2019/08_how_does_the_back_propagation_algorithm_work/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">神经网络与深度学习笔记 - 2.反向传播算法如何工作</span>
+            <span class="prev-text nav-default">2.反向传播算法如何工作</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
         <a class="next" href="/post/2019/06_oh_my_zsh/">
