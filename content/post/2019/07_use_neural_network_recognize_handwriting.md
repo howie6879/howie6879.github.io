@@ -5,7 +5,7 @@ categories:
 date: 2019-05-08 16:36:44+08:00
 image: /images/thumbs/h_48.png
 tags: [神经网络与深度学习]
-title: "1.识别手写字"
+title: "nndl_note: 识别手写字"
 markup: mmark
 ---
 
@@ -295,4 +295,6 @@ Epoch 9: 9447 / 10000
 - [神经网络浅讲：从神经元到深度学习](http://www.cnblogs.com/subconscious/p/5058741.html)
 - [neural-networks-and-deep-learning 官方git仓库](https://github.com/mnielsen/neural-networks-and-deep-learning)
 
+搞定收工，有兴趣欢迎关注我的公众号：
 
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)

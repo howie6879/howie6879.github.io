@@ -5,7 +5,7 @@ categories:
 date: 2019-05-10 16:36:44+08:00
 image: /images/thumbs/h_49.jpg
 tags: [神经网络与深度学习]
-title: "2.反向传播算法如何工作"
+title: "nndl_note: 反向传播算法如何工作"
 markup: mmark
 ---
 
@@ -318,3 +318,7 @@ $$
 - [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html)
 - [Neural Networks and Deep Learning 中文版](https://github.com/zhanggyb/nndl)
 - [知乎上另外一篇笔记](https://zhuanlan.zhihu.com/p/26765585)
+
+搞定收工，有兴趣欢迎关注我的公众号：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)

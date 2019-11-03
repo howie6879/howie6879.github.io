@@ -1,5 +1,5 @@
 ---
-title: "3.改进神经⽹络的学习⽅法"
+title: "nndl_note: 改进神经⽹络的学习⽅法"
 date: 2019-10-30T19:40:02+08:00
 lastmod: 2019-10-30T19:40:02+08:00
 draft: true
@@ -282,3 +282,7 @@ $$
 
 - [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html)
 - [Neural Networks and Deep Learning 中文版](https://github.com/zhanggyb/nndl)
+
+搞定收工，有兴趣欢迎关注我的公众号：
+
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
