@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.59.0 with theme even" />
 
 
 <link rel="canonical" href="https://www.howie6879.cn/post/2017/27/" />
@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2017-08-22T20:18:06&#43;00:00" />
 <meta itemprop="dateModified" content="2017-08-22T20:18:06&#43;00:00" />
-<meta itemprop="wordCount" content="1170">
+<meta itemprop="wordCount" content="974">
 
 
 
@@ -131,8 +131,8 @@
         <div class="post-category">
             <a href="/categories/docker/"> Docker </a>
             </div>
-          <span class="more-meta"> 1170 words </span>
-          <span class="more-meta"> 3 mins read </span>
+          <span class="more-meta"> 974 words </span>
+          <span class="more-meta"> 2 mins read </span>
         
       </div>
     </header>
@@ -212,42 +212,21 @@ docker run -it --rm python:3.6 </code></pre></td></tr></table>
 </ul>
 
 <p>Dockerfile内容如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="c"># 基于python3.6镜像来构建owllook镜像</span><span class="err">
-</span><span class="err"></span><span class="k">FROM</span><span class="s"> python:3.6</span><span class="err">
-</span><span class="err"></span><span class="k">MAINTAINER</span><span class="s"> howie6879 &lt;howie6879@gmail.com&gt;</span><span class="err">
-</span><span class="err"></span><span class="k">RUN</span> apt update -y <span class="o">&amp;&amp;</span> apt-get install -y net-tools<span class="err">
-</span><span class="err"></span><span class="c"># 设置环境变量</span><span class="err">
-</span><span class="err"></span><span class="k">ENV</span><span class="s"> APP_ROOT /opt</span><span class="err">
-</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> ${APP_ROOT}/</span><span class="err">
-</span><span class="err"></span>COPY requirements.txt <span class="si">${</span><span class="nv">APP_ROOT</span><span class="si">}</span>/<span class="err">
-</span><span class="err"></span><span class="c"># 安装依赖</span><span class="err">
-</span><span class="err"></span><span class="k">RUN</span> pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt<span class="err">
-</span><span class="err"></span>COPY . <span class="si">${</span><span class="nv">APP_ROOT</span><span class="si">}</span><span class="err">
-</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> ${APP_ROOT}/owllook/</span><span class="err">
-</span><span class="err"></span><span class="k">RUN</span> find . -name <span class="s2">&#34;*.pyc&#34;</span> -delete<span class="err">
-</span><span class="err"></span><span class="c"># 启动</span><span class="err">
-</span><span class="err"></span><span class="k">CMD</span><span class="s"> [&#34;gunicorn&#34;,&#34;-c&#34;,&#34;config/dev_gunicorn.py&#34;,&#34;--worker-class&#34;,&#34;sanic.worker.GunicornWorker&#34;,&#34;server:app&#34;]</span></code></pre></td></tr></table>
-</div>
-</div>
+# 基于python3.6镜像来构建owllook镜像
+FROM python:3.6
+MAINTAINER howie6879 <howie6879@gmail.com>
+RUN apt update -y && apt-get install -y net-tools
+# 设置环境变量
+ENV APP_ROOT /opt
+WORKDIR ${APP_ROOT}/
+COPY requirements.txt ${APP_ROOT}/
+# 安装依赖
+RUN pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+COPY . ${APP_ROOT}
+WORKDIR ${APP_ROOT}/owllook/
+RUN find . -name "*.pyc" -delete
+# 启动
+CMD ["gunicorn","-c","config/dev_gunicorn.py","--worker-class","sanic.worker.GunicornWorker","server:app"]
 <p>构建镜像：</p>
 
 <p><code>docker build -t owllook:0.1 .</code></p>
