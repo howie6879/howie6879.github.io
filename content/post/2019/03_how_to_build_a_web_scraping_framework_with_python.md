@@ -31,7 +31,7 @@ toc: true
 
 这三个流程有没有可能以一种优雅的形式串联起来，`Ruia`目前是这样实现的，请看代码示例：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fzoxh0ehngj31340fmack.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125084850.png)
 
 可以看到，`Item & Field`类结合一起实现了字段的解析提取，`Spider`类结合`Request * Response`类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的`item`可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程
 
@@ -49,7 +49,7 @@ toc: true
 
 什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：
 
-￼![](https://ws1.sinaimg.cn/large/007i3XCUgy1fzoyohk60qj30hm09a3yy.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125084914.png)
 
 同时让我们结合上面一节的`Ruia`代码来从业务逻辑角度看看这几个模块到底是什么意思：
 

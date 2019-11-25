@@ -24,7 +24,7 @@ toc: true
 
 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fyzio0y1hlj32aq1hq4p4.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125084953.png)
 
 看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
 
@@ -104,7 +104,7 @@ with open('title.txt', 'w') as fp:
 
 通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 [电影-肖申克的救赎](https://movie.douban.com/subject/1292052/) 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fvmwhbmzekj31hb0lkdnx.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085136.png)
 
 在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：`#content > h1 > span:nth-child(1)`，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：
 
@@ -127,7 +127,7 @@ print(item.title)
 
 假设现在的需求是抓取 [豆瓣电影250](https://movie.douban.com/top250) 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，因此目标需要循环获取，这就是所谓的单页面多目标了：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxeit345j30ln0pyjxx.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085148.png)
 
 ```python
 import asyncio
@@ -155,7 +155,7 @@ for item in items:
 
 多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fvmxjpbouqj30wr0pnwlp.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085208.png)
 
 ```python
 from ruia import TextField, Item, Request, Spider
@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
 如果网络没问题的话，会得到如下输出：
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fx9nqjuoznj30yb0azqeh.jpg)
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085229.png)
 
 注意爬虫运行时间，1s不到，这就是异步的魅力
 
@@ -263,7 +263,6 @@ if __name__ == '__main__':
 
 任何事物都有两面性，爬虫自然也不例外，因此我送诸位一张图，关键时刻好好想想
 
-![](https://ws1.sinaimg.cn/large/007i3XCUgy1fyzjixe8dsj316a0pudj3.jpg)
-
+![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085250.png)
 
 ![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
