@@ -6,5 +6,6 @@ author : howie6879
 
 下面是我的朋友：
 
-- [elfgzp](https://elfgzp.cn/): 一个兴趣使然的程序员，Python工程师
-- [Ruter](https://ruterly.com/): Python工程师，擅长Odoo
+- [elfgzp](https://elfgzp.cn/): 一个兴趣使然的程序员
+- [Ruter](https://ruterly.com/): 技术连接生活
+- [shidenggui](https://shidenggui.com/): 人生意何存，我思故我在
