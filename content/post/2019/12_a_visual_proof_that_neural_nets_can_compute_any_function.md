@@ -2,7 +2,7 @@
 title: "nndl_note: 神经⽹络可以计算任何函数的可视化证明"
 date: 2019-11-02T21:13:58+08:00
 lastmod: 2019-11-22T21:13:58+08:00
-draft: true
+draft: false
 keywords: []
 tags: [神经网络与深度学习]
 categories: [Deep Learning,nndl_note]
