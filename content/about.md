@@ -29,4 +29,6 @@ author : howie6879
 
 我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎关注 - **老胡的储物柜**：
 
-<img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png" width="300px">
+<!-- ![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg) -->
+
+<div align=center> <img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" width="300px"> </div>
