@@ -23,7 +23,7 @@ toc: true
 
 框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？
 
-很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章[谈谈对Python爬虫的理解](https://www.howie6879.cn/post/2019/02-talk-about-python-spider/)，下面总结一下爬虫流程：
+很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章[谈谈对Python爬虫的理解](https://www.howie6879.cn/post/2019/02_talk_about_python_spider/)，下面总结一下爬虫流程：
 
 - 请求&响应
 - 解析
