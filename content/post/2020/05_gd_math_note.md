@@ -85,7 +85,7 @@ $$
 &=\frac{1}{2} \sum_{i=1}^{n} \frac{\partial}{\partial \mathrm{w}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \\
 &=\frac{1}{2} \sum_{i=1}^{n}\left(\frac{\partial}{\partial \bar{y}^{(i)}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \frac{\partial y_{(i)}}{\partial \mathrm{w}}\right) \\
 &=\frac{1}{2} \sum_{i=1}^{n}\left(\left(-2 y^{(i)}+2 \bar{y}^{(i)}\right) \mathbf{x}^{(i)}\right) \\
-&=-\sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right) \mathrm{x}
+&=-\sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right) \mathrm{x}^{(i)}
 \end{aligned}
 $$
 
