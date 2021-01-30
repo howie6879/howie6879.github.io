@@ -4,7 +4,7 @@ categories:
   - 效率
 comments: true
 date: 2019-09-16T08:37:56+08:00
-image: https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190916120642.png
+image: /images/thumbs/h_07.jpg
 tags: [python,效率]
 title: "利用微信同步文章到Bear"
 toc: true
@@ -246,4 +246,4 @@ Loading .env environment variables…
 
 搞定收工，有兴趣欢迎关注我的公众号：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

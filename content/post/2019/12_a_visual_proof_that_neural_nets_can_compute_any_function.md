@@ -5,7 +5,7 @@ lastmod: 2019-11-22T21:13:58+08:00
 draft: false
 keywords: []
 tags: [神经网络与深度学习]
-categories: [Deep Learning,nndl_note]
+categories: [Deep Learning,NNDL]
 markup: mmark
 ---
 
@@ -311,4 +311,4 @@ $$
 
 搞定收工，有兴趣欢迎关注我的公众号：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

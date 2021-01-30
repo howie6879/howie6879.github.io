@@ -5,6 +5,7 @@ lastmod: 2021-01-11T22:17:08+08:00
 draft: false
 keywords: ["k8s基础概念"]
 description: "介绍k8s的基础概念"
+image: https://gitee.com/howie6879/oss/raw/master/uPic/module_03_pods.ccc5ba54.svg
 tags: ["k8s学习之路"]
 categories: ["k8s"]
 author: "howie6879"

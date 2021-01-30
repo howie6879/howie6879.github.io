@@ -1,7 +1,7 @@
 ---
 categories:
   - Deep Learning
-  - nndl_note
+  - NNDL
 date: 2019-05-10 16:36:44+08:00
 image: /images/thumbs/h_49.jpg
 tags: [神经网络与深度学习]
@@ -321,4 +321,4 @@ $$
 
 搞定收工，有兴趣欢迎关注我的公众号：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

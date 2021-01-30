@@ -5,7 +5,7 @@ lastmod: 2020-09-23T21:00:39+08:00
 draft: false
 keywords: []
 description: "程序员如何提升个人的技术影响力"
-tags: [随笔]
+tags: [随笔,思考]
 categories: [随笔]
 author: "howie6879"
 toc: true

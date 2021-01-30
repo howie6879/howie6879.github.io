@@ -6,7 +6,7 @@ draft: false
 keywords: []
 description: "万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的，本章我们主要讨论改进神经⽹络的学习⽅法"
 tags: [神经网络与深度学习]
-categories: [Deep Learning,nndl_note]
+categories: [Deep Learning,NNDL]
 markup: mmark
 ---
 
@@ -285,4 +285,4 @@ $$
 
 搞定收工，有兴趣欢迎关注我的公众号：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

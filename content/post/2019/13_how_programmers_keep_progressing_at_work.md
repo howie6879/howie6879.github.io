@@ -5,7 +5,7 @@ lastmod: 2019-12-29T11:57:39+08:00
 draft: false
 keywords: []
 description: "程序员如何在工作中保持进步"
-tags: [随笔]
+tags: [随笔,思考]
 categories: [随笔]
 author: "howie6879"
 toc: true
@@ -128,5 +128,5 @@ toc: true
 
 欢迎关注我的公众号：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
 

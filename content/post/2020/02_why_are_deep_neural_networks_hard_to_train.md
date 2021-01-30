@@ -5,7 +5,7 @@ lastmod: 2020-12-18T21:13:58+08:00
 draft: false
 keywords: []
 tags: [神经网络与深度学习]
-categories: [Deep Learning,nndl_note]
+categories: [Deep Learning,NNDL]
 markup: mmark
 toc: true
 ---
@@ -214,4 +214,4 @@ $$
 - [On the importance of initialization and momentum in deep learning](chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fwww.cs.toronto.edu%2F~hinton%2Fabsps%2Fmomentum.pdf)
 
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

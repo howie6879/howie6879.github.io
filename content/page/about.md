@@ -2,9 +2,12 @@
 title : Hello World
 date : 2018-01-06
 author : howie6879
----
+author : "Hugo Authors"
+lastmod : "2020-01-31"
+license : "CC BY-NC-ND"
+description : "努力就好"
 
-### 老胡的储物柜
+---
 
 做一个努力的程序员：
 
@@ -29,6 +32,6 @@ author : howie6879
 
 我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎关注 - **老胡的储物柜**：
 
-<!-- ![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg) -->
+![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
 
-<div align=center> <img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" width="300px"> </div>
+<!-- <div align=center> <img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" width="300px"> </div> -->

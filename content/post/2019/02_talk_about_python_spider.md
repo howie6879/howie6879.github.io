@@ -265,4 +265,4 @@ if __name__ == '__main__':
 
 ![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085250.png)
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

@@ -393,4 +393,4 @@ if __name__ == '__main__':
 
 如果觉得写得不错，点个好看来个`star`呗~
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

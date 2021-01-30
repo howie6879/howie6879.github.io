@@ -7,9 +7,10 @@ keywords: []
 toc: true
 description: "梯度下降数学推导"
 tags: [神经网络与深度学习]
-categories: [Deep Learning,nndl_note]
+categories: [Deep Learning, NNDL]
 author: "howie.hu"
 markup: mmark
+image: https://gitee.com/howie6879/oss/raw/master/uPic/1042406-20161017221342935-1872962415.png
 ---
 
 以感知器为例，可以梯度下降来学习合适的权重和偏置：
