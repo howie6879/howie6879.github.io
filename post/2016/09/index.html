@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.59.0 with theme even" />
+<meta name="generator" content="Hugo 0.80.0 with theme even" />
 
 
 <link rel="canonical" href="https://www.howie6879.cn/post/2016/09/" />
@@ -46,11 +46,9 @@
 <meta property="article:modified_time" content="2016-09-28T20:38:22+00:00" />
 <meta itemprop="name" content="Python之由公司名推算出公司官网(余弦相似度)">
 <meta itemprop="description" content="1.问题 对展会数据分类后，我的新任务是如何通过公司名、公司地址、国家等海关数据推断出该公司的官网网站（若官网不存在则不考虑） 以下数据仅供参考">
-
-
-<meta itemprop="datePublished" content="2016-09-28T20:38:22&#43;00:00" />
-<meta itemprop="dateModified" content="2016-09-28T20:38:22&#43;00:00" />
-<meta itemprop="wordCount" content="2806">
+<meta itemprop="datePublished" content="2016-09-28T20:38:22+00:00" />
+<meta itemprop="dateModified" content="2016-09-28T20:38:22+00:00" />
+<meta itemprop="wordCount" content="2804">
 
 
 
@@ -131,7 +129,7 @@
         <div class="post-category">
             <a href="/categories/python/"> Python </a>
             </div>
-          <span class="more-meta"> 2806 words </span>
+          <span class="more-meta"> 2804 words </span>
           <span class="more-meta"> 6 mins read </span>
         
       </div>
@@ -141,145 +139,115 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1-问题">1.问题</a></li>
-<li><a href="#2-解决">2.解决</a>
-<ul>
-<li><a href="#2-1-获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</a></li>
-<li><a href="#2-2-初步排除某些url">2.2.初步排除某些url</a></li>
-<li><a href="#2-3-余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</a></li>
-<li><a href="#2-3-2-构建单词向量">2.3.2：构建单词向量</a></li>
-<li><a href="#2-3-3-计算余弦相似度">2.3.3:计算余弦相似度</a></li>
-</ul></li>
-<li><a href="#3-总结">3.总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1问题">1.问题</a></li>
+    <li><a href="#2解决">2.解决</a>
+      <ul>
+        <li><a href="#21获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</a></li>
+        <li><a href="#22初步排除某些url">2.2.初步排除某些url</a></li>
+        <li><a href="#23余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</a></li>
+        <li><a href="#232构建单词向量">2.3.2：构建单词向量</a></li>
+        <li><a href="#233计算余弦相似度">2.3.3:计算余弦相似度</a></li>
+      </ul>
+    </li>
+    <li><a href="#3总结">3.总结</a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<h2 id="1-问题">1.问题</h2>
-
+      <h2 id="1问题">1.问题</h2>
 <p>对展会数据分类后，我的新任务是如何通过<code>公司名、公司地址、国家</code>等海关数据推断出该公司的官网网站（若官网不存在则不考虑）
 以下数据仅供参考：</p>
-
 <table>
 <thead>
 <tr>
-<th align="center">公司名</th>
-<th align="center">国家</th>
-<th align="center">地址</th>
+<th style="text-align:center">公司名</th>
+<th style="text-align:center">国家</th>
+<th style="text-align:center">地址</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
-<td align="center">JPW INDUSTRIES INC</td>
-<td align="center"></td>
-<td align="center">427 NEW SANFORD RD LAVERGNE TN 37086 US</td>
+<td style="text-align:center">JPW INDUSTRIES INC</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">427 NEW SANFORD RD LAVERGNE TN 37086 US</td>
 </tr>
-
 <tr>
-<td align="center">Fujian Xishi Co., Ltd</td>
-<td align="center">CN, CHINA</td>
-<td align="center"></td>
+<td style="text-align:center">Fujian Xishi Co., Ltd</td>
+<td style="text-align:center">CN, CHINA</td>
+<td style="text-align:center"></td>
 </tr>
-
 <tr>
-<td align="center">BusinessPartner Co.,ltd</td>
-<td align="center"></td>
-<td align="center"></td>
+<td style="text-align:center">BusinessPartner Co.,ltd</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
 </tr>
-
 <tr>
-<td align="center">BENKAI Co.,Ltd</td>
-<td align="center"></td>
-<td align="center"></td>
+<td style="text-align:center">BENKAI Co.,Ltd</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
 </tr>
-
 <tr>
-<td align="center">GOLD INC</td>
-<td align="center"></td>
-<td align="center">18245 E 40TH AVE AURORA CO 80011 US</td>
+<td style="text-align:center">GOLD INC</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">18245 E 40TH AVE AURORA CO 80011 US</td>
 </tr>
 </tbody>
 </table>
-
 <p>需要得到结果：</p>
-
 <table>
 <thead>
 <tr>
-<th align="center">公司名</th>
-<th align="center">官方网站</th>
+<th style="text-align:center">公司名</th>
+<th style="text-align:center">官方网站</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
-<td align="center">JPW INDUSTRIES INC</td>
-<td align="center"><a href="http://http://www.jpwindustries.com/">http://http://www.jpwindustries.com/</a></td>
+<td style="text-align:center">JPW INDUSTRIES INC</td>
+<td style="text-align:center">http://http://www.jpwindustries.com/</td>
 </tr>
-
 <tr>
-<td align="center">Fujian Xishi Co., Ltd</td>
-<td align="center"><a href="http://www.xishigroup.com/">http://www.xishigroup.com/</a></td>
+<td style="text-align:center">Fujian Xishi Co., Ltd</td>
+<td style="text-align:center"><a href="http://www.xishigroup.com/">http://www.xishigroup.com/</a></td>
 </tr>
-
 <tr>
-<td align="center">BusinessPartner Co.,ltd</td>
-<td align="center"><a href="http://www.traderthailand.com/">http://www.traderthailand.com/</a></td>
+<td style="text-align:center">BusinessPartner Co.,ltd</td>
+<td style="text-align:center"><a href="http://www.traderthailand.com/">http://www.traderthailand.com/</a></td>
 </tr>
-
 <tr>
-<td align="center">BENKAI Co.,Ltd</td>
-<td align="center"><a href="http://www.benkaico.com">http://www.benkaico.com</a></td>
+<td style="text-align:center">BENKAI Co.,Ltd</td>
+<td style="text-align:center"><a href="http://www.benkaico.com">http://www.benkaico.com</a></td>
 </tr>
-
 <tr>
-<td align="center">GOLD INC</td>
-<td align="center"><a href="https://goldbuginc.com/">https://goldbuginc.com/</a></td>
+<td style="text-align:center">GOLD INC</td>
+<td style="text-align:center"><a href="https://goldbuginc.com/">https://goldbuginc.com/</a></td>
 </tr>
 </tbody>
 </table>
-
-<h2 id="2-解决">2.解决</h2>
-
+<h2 id="2解决">2.解决</h2>
 <p>由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。</p>
-
 <p>大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选<code>google</code>，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的<code>url</code>。
 初步搜索一下，看看各种情况：</p>
-
 <ul>
 <li>第一种情况，检索即可很直观地得出结果</li>
 </ul>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt="" /></p>
-
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt=""></p>
 <ul>
-<li>第二种情况，检索不能直观地得出结果，但官网确实存在（*第二检索个结果*）</li>
+<li>第二种情况，检索不能直观地得出结果，但官网确实存在（<em>第二检索个结果</em>）</li>
 </ul>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt="" /></p>
-
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk91cpik3j30n70jiafu.jpg" alt=""></p>
 <ul>
 <li>第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样</li>
 </ul>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk930d67aj30yg0iqh0h.jpg" alt="" /></p>
-
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk930d67aj30yg0iqh0h.jpg" alt=""></p>
 <p>对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。</p>
-
 <p>观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其<code>website</code>对应的<code>url</code>绝对正确。</p>
-
 <p>故代码的第一步骤可以首先检索公司名+公司地址，观察<code>website</code>元素是否存在，若存在，返回公司官网，否则，对公司名进行检索，代码如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -306,25 +274,21 @@
         <span class="k">return</span> <span class="n">link</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">pass</span>
-    <span class="k">return</span> <span class="bp">None</span></code></pre></td></tr></table>
+    <span class="k">return</span> <span class="bp">None</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk95j9m1lj30bf01odfm.jpg" alt="" /></p>
-
+</div><p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk95j9m1lj30bf01odfm.jpg" alt=""></p>
 <p>能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：</p>
-
 <ul>
 <li>获取搜索引擎检索结果提取url</li>
 <li>初步排除某些url</li>
 <li>余弦相似度计算最可能的结果</li>
 </ul>
-
-<h3 id="2-1-获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</h3>
-
+<h3 id="21获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</h3>
 <p>对于谷歌搜索，我使用了<code>MarioVilas</code>的项目<a href="https://github.com/MarioVilas/google">google</a>，毕竟在国内，为了以防万一我也写了<code>yahoo</code>搜索，代码如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -499,15 +463,14 @@
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="c1"># GOLD INC 18245 E 40TH AVE AURORA CO 80011 US</span>
     <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">yahooSearch</span><span class="p">(</span><span class="s2">&#34;GOLD INC 18245 E 40TH AVE AURORA CO 80011 US&#34;</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></code></pre></td></tr></table>
+        <span class="k">print</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-2-初步排除某些url">2.2.初步排除某些url</h3>
-
+</div><h3 id="22初步排除某些url">2.2.初步排除某些url</h3>
 <p>这个可根据个人需求来配置，可添加<code>webConfig.py</code>脚本，排除某些<code>url</code>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -526,20 +489,17 @@
     <span class="n">forbid_www</span><span class="o">=</span><span class="p">[</span><span class="s2">&#34;www.linkedin.com&#34;</span><span class="p">,</span> <span class="s2">&#34;www.alibaba.com&#34;</span><span class="p">],</span>
     <span class="c1"># 非www开头的网站</span>
     <span class="n">forbid</span><span class="o">=</span><span class="p">[</span><span class="s2">&#34;imexbb.com&#34;</span><span class="p">,</span> <span class="s2">&#34;made-in-china.com&#34;</span><span class="p">]</span>
-<span class="p">)</span></code></pre></td></tr></table>
+<span class="p">)</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>以公司名<code>BENKAI Co.,Ltd</code>为例，初步获取url：
+</div><p>以公司名<code>BENKAI Co.,Ltd</code>为例，初步获取url：
 <code>['http://www.benkaico.com', 'http://hisupplier.com', 'http://www.hktdc.com/en']</code></p>
-
-<h3 id="2-3-余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</h3>
-
+<h3 id="23余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</h3>
 <p>对于公司<code>BENKAI Co.,Ltd</code>，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。</p>
-
 <p>这里可以采用余弦相似度，具体公式可google，稍稍解释下，对于这三个网站：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -554,43 +514,41 @@
 <span class="err">​</span><span class="sb">``</span><span class="err">`</span><span class="n">python</span>
 <span class="p">{</span><span class="s1">&#39;http://www.benkaico.com&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;benkai&#39;</span><span class="p">,</span> <span class="s1">&#39;co.&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;ltd&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">],</span> 
 <span class="s1">&#39;http://www.hktdc.com/en&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;hktdc.com&#39;</span><span class="p">,</span> <span class="s1">&#39;â</span><span class="se">\x80\x93</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="s1">&#39;not&#39;</span><span class="p">,</span> <span class="s1">&#39;found&#39;</span><span class="p">],</span> 
-<span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;china&#39;</span><span class="p">,</span> <span class="s1">&#39;suppliers&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;suppliers&#39;</span><span class="p">,</span> <span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;china&#39;</span><span class="p">,</span> <span class="s1">&#39;manufacturers&#39;</span><span class="p">,</span> <span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;hisupplier.com&#39;</span><span class="p">]}</span></code></pre></td></tr></table>
+<span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;china&#39;</span><span class="p">,</span> <span class="s1">&#39;suppliers&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;suppliers&#39;</span><span class="p">,</span> <span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;china&#39;</span><span class="p">,</span> <span class="s1">&#39;manufacturers&#39;</span><span class="p">,</span> <span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;hisupplier.com&#39;</span><span class="p">]}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-3-2-构建单词向量">2.3.2：构建单词向量</h3>
+</div><h3 id="232构建单词向量">2.3.2：构建单词向量</h3>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-python" data-lang="python"><span class="p">{</span><span class="s1">&#39;http://www.benkaico.com&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> 
 <span class="s1">&#39;http://www.hktdc.com/en&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
- <span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]}</span></code></pre></td></tr></table>
+ <span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-3-3-计算余弦相似度">2.3.3:计算余弦相似度</h3>
+</div><h3 id="233计算余弦相似度">2.3.3:计算余弦相似度</h3>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-python" data-lang="python"><span class="p">{</span><span class="s1">&#39;http://www.benkaico.com&#39;</span><span class="p">:</span> <span class="mf">0.94427190999915878</span><span class="p">,</span> 
 <span class="s1">&#39;http://www.hktdc.com/en&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> 
-<span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="mf">0.31451985913875646</span><span class="p">}</span></code></pre></td></tr></table>
+<span class="s1">&#39;http://hisupplier.com&#39;</span><span class="p">:</span> <span class="mf">0.31451985913875646</span><span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>通过比较，可以看到<code>http://www.benkaico.com</code>相似度最高的结果，跟真实结果一样。</p>
-
-<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk97bj12zj30yd043jro.jpg" alt="" /></p>
-
+</div><p>通过比较，可以看到<code>http://www.benkaico.com</code>相似度最高的结果，跟真实结果一样。</p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk97bj12zj30yd043jro.jpg" alt=""></p>
 <p>全部步骤代码如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt">  1
+<pre class="chroma"><code><span class="lnt">  1
 </span><span class="lnt">  2
 </span><span class="lnt">  3
 </span><span class="lnt">  4
@@ -875,13 +833,13 @@
     <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">allQuery</span><span class="p">:</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">website</span> <span class="o">=</span> <span class="n">website</span><span class="o">.</span><span class="n">get_web</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">website</span><span class="p">)</span></code></pre></td></tr></table>
+        <span class="k">print</span><span class="p">(</span><span class="n">website</span><span class="p">)</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>计算余弦相似度代码</p>
+</div><p>计算余弦相似度代码</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1034,11 +992,10 @@
                 <span class="n">keyword</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">eachWebsite</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                 <span class="k">if</span> <span class="s1">&#39;home&#39;</span> <span class="ow">in</span> <span class="n">keyword</span> <span class="ow">or</span> <span class="s2">&#34;welcome&#34;</span> <span class="ow">in</span> <span class="n">keyword</span><span class="p">:</span>
                     <span class="n">website</span> <span class="o">=</span> <span class="n">eachWebsite</span>
-        <span class="k">return</span> <span class="n">website</span></code></pre></td></tr></table>
+        <span class="k">return</span> <span class="n">website</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="3-总结">3.总结</h2>
-
+</div><h2 id="3总结">3.总结</h2>
 <p>至此，若有更好的解决方案，欢迎赐教，谢谢。</p>
 
     </div>

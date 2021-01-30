@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.59.0 with theme even" />
+<meta name="generator" content="Hugo 0.80.0 with theme even" />
 
 
 <link rel="canonical" href="https://www.howie6879.cn/post/2019/10_monitor_os_notifications/" />
@@ -46,11 +46,9 @@
 <meta property="article:modified_time" content="2019-10-21T08:37:56+08:00" />
 <meta itemprop="name" content="不论微信钉钉，我写了个通用消息监控处理机器人">
 <meta itemprop="description" content="上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到Bear。 虽说那">
-
-
-<meta itemprop="datePublished" content="2019-10-21T08:37:56&#43;08:00" />
-<meta itemprop="dateModified" content="2019-10-21T08:37:56&#43;08:00" />
-<meta itemprop="wordCount" content="1751">
+<meta itemprop="datePublished" content="2019-10-21T08:37:56+08:00" />
+<meta itemprop="dateModified" content="2019-10-21T08:37:56+08:00" />
+<meta itemprop="wordCount" content="1743">
 
 
 
@@ -132,7 +130,7 @@
             <a href="/categories/python/"> Python </a>
             <a href="/categories/%E6%95%88%E7%8E%87/"> 效率 </a>
             </div>
-          <span class="more-meta"> 1751 words </span>
+          <span class="more-meta"> 1743 words </span>
           <span class="more-meta"> 4 mins read </span>
         
       </div>
@@ -142,95 +140,70 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#调研">调研</a></li>
-<li><a href="#实践">实践</a></li>
-<li><a href="#编码">编码</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#调研">调研</a></li>
+    <li><a href="#实践">实践</a></li>
+    <li><a href="#编码">编码</a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<p>上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到<strong>Bear</strong>。</p>
-
-<p>虽说那篇文章比较实用，也有很多朋友表示喜欢，但还有不少缺陷：
-- 对技术薄弱的朋友复现困难，项目很多配置需要手动生成，前期校验工作很多
-- 二次开发比较困难，不能直接作为第三方包使用
-- 项目兼容性不强，目前只支持Mac并且只支持微信这个APP，其他如钉钉就没辙
-- 项目稳定性不强，微信更改机制可能又需要重头再来</p>
-
+      <p>上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到<strong>Bear</strong>。</p>
+<p>虽说那篇文章比较实用，也有很多朋友表示喜欢，但还有不少缺陷：</p>
+<ul>
+<li>对技术薄弱的朋友复现困难，项目很多配置需要手动生成，前期校验工作很多</li>
+<li>二次开发比较困难，不能直接作为第三方包使用</li>
+<li>项目兼容性不强，目前只支持Mac并且只支持微信这个APP，其他如钉钉就没辙</li>
+<li>项目稳定性不强，微信更改机制可能又需要重头再来</li>
+</ul>
 <p>对，问题很多，但在勉强能用的情况下我并不是很有动力进行新方案的开发。那么是什么原因促使我更新方案了呢~</p>
-
 <blockquote>
 <p>背景：在公司和数据打交道居多，运营那块每天会将一些表格数据发到钉钉群里面，然后我组内成员需要手动下载并找到对应的处理脚本进行处理</p>
 </blockquote>
-
 <p>然后我问了下两周需要耗费多长时间在这件事情上，答曰<strong>1</strong>小时，这确实不能忍了！</p>
-
 <p>于是我花了<strong>10</strong>小时做了这个处理方案！顺便解决上面说的四个问题，赚了。。。</p>
-
 <h2 id="调研">调研</h2>
-
-<p>开始之前，自然是先下决心将一切历史问题解决掉：
-- 跨系统！跨软件！
-- 程序能直接作为第三方包使用，并且傻瓜式！</p>
-
+<p>开始之前，自然是先下决心将一切历史问题解决掉：</p>
+<ul>
+<li>跨系统！跨软件！</li>
+<li>程序能直接作为第三方包使用，并且傻瓜式！</li>
+</ul>
 <p>好，<strong>flag</strong>已立，开始吧，核心技术点就是如何监控所有平台软件的消息。</p>
-
 <p>上一篇推文的方案只能支持微信，所以我目前的背景需求里面的监控对象是钉钉，难道我又要按照以前的方法去搞db文件么？</p>
-
 <p>总结来说，我监控的是消应用息，并且不只是微信、还需要钉钉、QQ等其他任意软件的消息，而且我也不能一个个地去破解（就算这次解密成功，如果下次需求是其他通信软件呢？），那该怎么办呢？</p>
-
 <p>所以这次处理问题的角度需要站在上帝视角，说来简单，做起来也简单，哈哈。</p>
-
 <p>话说我灵光一闪，既然目标对象是所有应用的消息，那我我为何不将视角从应用层面移到系统层面呢？</p>
-
 <p>我以我的Mac为例，这不有现成的通知中心么？</p>
-
-<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143142.png" alt="" /></p>
-
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143142.png" alt=""></p>
 <p>可谓是柳暗花明又一村，老胡我这招隔山打牛，姿势还可以吧？</p>
-
-<p>现在问题很明确了：
-- 我管你微信、钉钉、还是QQ，我只看系统的通知中心
-- 我管你怎么加密、怎么限制，你总不会限制系统吧，我还是只看系统的通知中心</p>
-
+<p>现在问题很明确了：</p>
+<ul>
+<li>我管你微信、钉钉、还是QQ，我只看系统的通知中心</li>
+<li>我管你怎么加密、怎么限制，你总不会限制系统吧，我还是只看系统的通知中心</li>
+</ul>
 <p>我背靠<strong>操作系统</strong>老大，现在还害怕你几个小应用，一起上，我哭算我输。</p>
-
 <p>在操作系统的领域内，这个方案就是武侠世界的九阳神功，还配上了屠龙刀，可谓：<strong>十步杀一人，千里不留行。</strong></p>
-
 <p>调研结束。</p>
-
 <h2 id="实践">实践</h2>
-
 <p>解决方案确立了，接下来无非就是验证加实现，这里还是以<code>Mac</code>为例。</p>
-
 <p>来来来，看看苹果的系统中心好不好攻占，首先，咋们来确立系统中心数据的存储方式，进入终端：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-shell" data-lang="shell"><span class="nb">cd</span> <span class="sb">`</span>getconf DARWIN_USER_DIR<span class="sb">`</span>/com.apple.notificationcenter/db2
 ls
-db     db-shm db-wal</code></pre></td></tr></table>
+db     db-shm db-wal
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>可以看到，有三个文件，哎，好熟悉，<code>SQLite</code>呗。</p>
-
+</div><p>可以看到，有三个文件，哎，好熟悉，<code>SQLite</code>呗。</p>
 <p>打开：</p>
-
-<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143214.png" alt="" /></p>
-
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143214.png" alt=""></p>
 <p>分别有以下几个表：</p>
-
 <ul>
 <li>app</li>
 <li>categories</li>
@@ -241,18 +214,15 @@ db     db-shm db-wal</code></pre></td></tr></table>
 <li>requests</li>
 <li>snoozed</li>
 </ul>
-
 <p>可能有点多，但我们只需要关注两个表就行：</p>
-
 <ul>
 <li>app：应用id</li>
 <li>record：监控的应用消息</li>
 </ul>
-
 <p>建表语句分别如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -297,54 +267,48 @@ db     db-shm db-wal</code></pre></td></tr></table>
     <span class="n">presented</span>         <span class="kt">Bool</span><span class="p">,</span>
     <span class="n">style</span>             <span class="kt">INTEGER</span><span class="p">,</span>
     <span class="n">snooze_fire_date</span>  <span class="kt">REAL</span>
-<span class="p">);</span></code></pre></td></tr></table>
+<span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>在app表的这行，可以看到微信应用的<code>id</code>是<code>35</code>。</p>
+</div><p>在app表的这行，可以看到微信应用的<code>id</code>是<code>35</code>。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-txt" data-lang="txt"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-txt" data-lang="txt">app_id	identifier
-35			com.tencent.xinwechat	</code></pre></td></tr></table>
+35			com.tencent.xinwechat	
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>知道应用<code>id</code>后就可以直接在<code>record</code>表里面直接找到通知消息：</p>
+</div><p>知道应用<code>id</code>后就可以直接在<code>record</code>表里面直接找到通知消息：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="k">SELECT</span> <span class="n">app_id</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">presented</span><span class="p">,</span> <span class="n">delivered_date</span> <span class="k">FROM</span> <span class="n">record</span> <span class="k">WHERE</span> <span class="n">app_id</span> <span class="k">IN</span> <span class="p">(</span><span class="mi">35</span><span class="p">)</span>  <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">delivered_date</span> <span class="k">DESC</span><span class="p">;</span></code></pre></td></tr></table>
+<pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="k">SELECT</span> <span class="n">app_id</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">presented</span><span class="p">,</span> <span class="n">delivered_date</span> <span class="k">FROM</span> <span class="n">record</span> <span class="k">WHERE</span> <span class="n">app_id</span> <span class="k">IN</span> <span class="p">(</span><span class="mi">35</span><span class="p">)</span>  <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">delivered_date</span> <span class="k">DESC</span><span class="p">;</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>得到结果如下：</p>
-
-<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143236.png" alt="" /></p>
-
+</div><p>得到结果如下：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191021143236.png" alt=""></p>
 <p>一切顺利，但定睛一看，中间那一大串是什么？不要慌，里面<code>bplist</code>，给了很大的提示。</p>
-
 <p>在Python的世界里，没有什么问题是引入一个第三方包解决不了的，如果有，那么引入两个第三方包就可以了。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell">pip install biplist</code></pre></td></tr></table>
+<pre class="chroma"><code class="language-shell" data-lang="shell">pip install biplist
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>利用<code>biplist</code>会将那一串加载成我们人类可以看懂的语言。</p>
-
+</div><p>利用<code>biplist</code>会将那一串加载成我们人类可以看懂的语言。</p>
 <p>好像没有一点阻碍，那就可以直接编码实现了。</p>
-
 <h2 id="编码">编码</h2>
-
 <p>算了，不多说，多了我也说不出来，直接开源吧，见 <a href="https://github.com/howie6879/examiner">https://github.com/howie6879/examiner</a> ，不要吝啬你的<strong>Star</strong>（可点击阅读原文）。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -353,13 +317,13 @@ db     db-shm db-wal</code></pre></td></tr></table>
 <pre class="chroma"><code class="language-shell" data-lang="shell">git clone https://github.com/howie6879/examiner
 <span class="nb">cd</span> examiner
 <span class="c1"># 推荐使用pipenv 你也可以使用自己中意的环境构建方式</span>
-pipenv install --python<span class="o">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock</code></pre></td></tr></table>
+pipenv install --python<span class="o">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>接下来只需要在根目录构建自己的监控脚本就行，比如监控微信，监理文件命名为 <em><code>wechat_app.py</code></em>:</p>
+</div><p>接下来只需要在根目录构建自己的监控脚本就行，比如监控微信，监理文件命名为 <em><code>wechat_app.py</code></em>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -386,23 +350,21 @@ pipenv install --python<span class="o">=</span>/Users/howie6879/anaconda3/envs/p
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
     <span class="n">app_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;WeChat&#34;</span><span class="p">]</span>
-    <span class="n">get_data</span><span class="p">(</span><span class="n">app_names</span><span class="p">)</span></code></pre></td></tr></table>
+    <span class="n">get_data</span><span class="p">(</span><span class="n">app_names</span><span class="p">)</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>和上一篇比起来，这代码，不需要配置、不需要提前准备什么，只需要在列表里面填上你想监控的目标应用即可（我顺便支持了多应用），你可以同时监控钉钉和微信等等</p>
-
+</div><p>和上一篇比起来，这代码，不需要配置、不需要提前准备什么，只需要在列表里面填上你想监控的目标应用即可（我顺便支持了多应用），你可以同时监控钉钉和微信等等</p>
 <p>自己可以慢慢玩，一般会这样输出：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="o">{</span><span class="s1">&#39;title&#39;</span>: <span class="s1">&#39;老胡的储物柜&#39;</span>, <span class="s1">&#39;subtitle&#39;</span>: <span class="s1">&#39;&#39;</span>, <span class="s1">&#39;body&#39;</span>: <span class="s1">&#39;测试消息监控，任何应用都行&#39;</span>, <span class="s1">&#39;delivered_date&#39;</span>: datetime.datetime<span class="o">(</span><span class="m">2019</span>, <span class="m">10</span>, <span class="m">20</span>, <span class="m">21</span>, <span class="m">40</span>, <span class="m">26</span>, <span class="m">428654</span><span class="o">)</span>, <span class="s1">&#39;presented&#39;</span>: <span class="m">1</span>, <span class="s1">&#39;app_identifier&#39;</span>: <span class="s1">&#39;com.tencent.xinwechat&#39;</span>, <span class="s1">&#39;app_name&#39;</span>: <span class="s1">&#39;WeChat&#39;</span>, <span class="s1">&#39;md5&#39;</span>: <span class="s1">&#39;75e24e2ccc502f01c101fcbd3637950b&#39;</span><span class="o">}</span></code></pre></td></tr></table>
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="o">{</span><span class="s1">&#39;title&#39;</span>: <span class="s1">&#39;老胡的储物柜&#39;</span>, <span class="s1">&#39;subtitle&#39;</span>: <span class="s1">&#39;&#39;</span>, <span class="s1">&#39;body&#39;</span>: <span class="s1">&#39;测试消息监控，任何应用都行&#39;</span>, <span class="s1">&#39;delivered_date&#39;</span>: datetime.datetime<span class="o">(</span>2019, 10, 20, 21, 40, 26, 428654<span class="o">)</span>, <span class="s1">&#39;presented&#39;</span>: 1, <span class="s1">&#39;app_identifier&#39;</span>: <span class="s1">&#39;com.tencent.xinwechat&#39;</span>, <span class="s1">&#39;app_name&#39;</span>: <span class="s1">&#39;WeChat&#39;</span>, <span class="s1">&#39;md5&#39;</span>: <span class="s1">&#39;75e24e2ccc502f01c101fcbd3637950b&#39;</span><span class="o">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
-
-<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png" alt="" /></p>
+</div><p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png" alt=""></p>
 
     </div>
 
