@@ -381,5 +381,4 @@ kubectl get services
 - [Web基础配置篇（十六）: Kubernetes集群的安装使用](https://www.pomit.cn/p/2366402025269761#1010602)
 - Kubernetes in Action中文版：第1、2章
 
-
-
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)

@@ -384,4 +384,4 @@ curl http://0.0.0.0:30068/
 - [Kubernetes 中文指南](https://jimmysong.io/kubernetes-handbook/concepts/service.html)：Service 
 - Kubernetes in Action中文版：第3、4、9章
 
-
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
