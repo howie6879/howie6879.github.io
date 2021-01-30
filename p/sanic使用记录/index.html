@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的async/await来编写无阻塞的异步程序。 于是我利用业余时间使用sanic编写了这个项目。
+前言 在使用过程中，我尽量将程序编写成异步的，首先进行安装：
+python -m pip install sanic sanic的文档写得很详细，但是在使用过程中我还是有些问题。 下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：
+ 1.blueprint 2.html templates编写（引入jinja2） 3.session（引入sanic_session） 4.缓存（引入aiocache） 5.api接口验证（自定义一个装饰器） 6.恶意将其他域名绑定到你的网站独立ip 7.注意 '><title>sanic使用记录</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='sanic使用记录'>
+<meta property='og:description' content='在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的async/await来编写无阻塞的异步程序。 于是我利用业余时间使用sanic编写了这个项目。
+前言 在使用过程中，我尽量将程序编写成异步的，首先进行安装：
+python -m pip install sanic sanic的文档写得很详细，但是在使用过程中我还是有些问题。 下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：
+ 1.blueprint 2.html templates编写（引入jinja2） 3.session（引入sanic_session） 4.缓存（引入aiocache） 5.api接口验证（自定义一个装饰器） 6.恶意将其他域名绑定到你的网站独立ip 7.注意 '>
+<meta property='og:url' content='https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='python' /><meta property='article:tag' content='sanic' /><meta property='article:published_time' content='2017-02-28T16:33:44&#43;00:00'/><meta property='article:modified_time' content='2017-02-28T16:33:44&#43;00:00'/>
+<meta name="twitter:title" content="sanic使用记录">
+<meta name="twitter:description" content="在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的async/await来编写无阻塞的异步程序。 于是我利用业余时间使用sanic编写了这个项目。
+前言 在使用过程中，我尽量将程序编写成异步的，首先进行安装：
+python -m pip install sanic sanic的文档写得很详细，但是在使用过程中我还是有些问题。 下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：
+ 1.blueprint 2.html templates编写（引入jinja2） 3.session（引入sanic_session） 4.缓存（引入aiocache） 5.api接口验证（自定义一个装饰器） 6.恶意将其他域名绑定到你的网站独立ip 7.注意 ">
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>Dark Mode</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" >
+                Python
+            </a>
+        
+            <a href="/categories/sanic/" >
+                Sanic
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/">sanic使用记录</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Feb 28, 2017</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的<code>async/await</code>来编写无阻塞的异步程序。
+于是我利用业余时间使用<a class="link" href="https://github.com/channelcat/sanic"  target="_blank" rel="noopener"
+    >sanic</a>编写了这个项目。</p>
+<h2 id="前言">前言</h2>
+<p>在使用过程中，我尽量将程序编写成异步的，首先进行安装：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">sanic</span>
+</code></pre></div><p>sanic的<a class="link" href="http://sanic.readthedocs.io/en/latest/index.html"  target="_blank" rel="noopener"
+    >文档</a>写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：</p>
+<ul>
+<li>1.blueprint</li>
+<li>2.html templates编写（引入jinja2）</li>
+<li>3.session（引入sanic_session）</li>
+<li>4.缓存（引入aiocache）</li>
+<li>5.api接口验证（自定义一个装饰器）</li>
+<li>6.恶意将其他域名绑定到你的网站独立ip</li>
+<li>7.注意</li>
+</ul>
+<h2 id="问题记录">问题记录</h2>
+<h3 id="blueprint">blueprint</h3>
+<p>借用官方文档的例子，一个简单的sanic服务就搭好了：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># main.py</span>
+<span class="kn">from</span> <span class="nn">sanic</span> <span class="kn">import</span> <span class="n">Sanic</span>
+<span class="kn">from</span> <span class="nn">sanic.response</span> <span class="kn">import</span> <span class="n">json</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Sanic</span><span class="p">()</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">json</span><span class="p">({</span><span class="s2">&#34;hello&#34;</span><span class="p">:</span> <span class="s2">&#34;world&#34;</span><span class="p">})</span>
+
+<span class="c1">#访问http://0.0.0.0:8000/即可</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div><p>上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+比如我现在编写的项目，我使用的是功能式架构，具体如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">├── server.py
+├── static
+│   └── novels
+│       ├── css
+│       │   ├── chapter.css
+│       │   ├── content.css
+│       │   ├── index.css
+│       │   ├── main.css
+│       │   └── result.css
+│       ├── img
+│       │   ├── bookMark.png
+│       │   ├── favicon.ico
+│       │   ├── read_bg.png
+│       │   └── read_content.png
+│       └── js
+│           ├── list.js
+│           └── main.js
+├── template
+│   └── novels
+│       ├── chapter.html
+│       ├── content.html
+│       ├── donate.html
+│       ├── feedback.html
+│       ├── index.html
+│       ├── main.html
+│       └── result.html
+└── views
+    └── novels_blueprint.py
+</code></pre></div><p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># server.py</span>
+<span class="c1">#!/usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">sanic</span> <span class="kn">import</span> <span class="n">Sanic</span>
+<span class="kn">from</span> <span class="nn">novels_search.views.novels_blueprint</span> <span class="kn">import</span> <span class="n">bp</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Sanic</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><p>具体的<code>novels_blueprint.py</code>请点击<a class="link" href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py"  target="_blank" rel="noopener"
+    >这里</a></p>
+<h3 id="html-templates编写">html templates编写</h3>
+<p>编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># novels_blueprint.py片段</span>
+<span class="kn">from</span> <span class="nn">sanic</span> <span class="kn">import</span> <span class="n">Blueprint</span>
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">PackageLoader</span><span class="p">,</span> <span class="n">select_autoescape</span>
+
+<span class="c1"># 初始化blueprint并定义静态文件夹路径</span>
+<span class="n">bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;novels_blueprint&#39;</span><span class="p">)</span>
+<span class="n">bp</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="s1">&#39;/static&#39;</span><span class="p">,</span> <span class="s1">&#39;./static/novels&#39;</span><span class="p">)</span>
+
+<span class="c1"># jinjia2 config</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
+    <span class="n">loader</span><span class="o">=</span><span class="n">PackageLoader</span><span class="p">(</span><span class="s1">&#39;views.novels_blueprint&#39;</span><span class="p">,</span> <span class="s1">&#39;../templates/novels&#39;</span><span class="p">),</span>
+    <span class="n">autoescape</span><span class="o">=</span><span class="n">select_autoescape</span><span class="p">([</span><span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span> <span class="s1">&#39;tpl&#39;</span><span class="p">]))</span>
+
+<span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="n">tpl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">html</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))</span>
+    
+<span class="nd">@bp.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+</code></pre></div><p>这样，就实现了jinja2 的引入。</p>
+<p>=========05-02===========
+在官方文档发现了已经加入了如何引入jinja2，具体见：https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py</p>
+<h3 id="session">session</h3>
+<p>sanic对此有一个第三方插件<a class="link" href="https://github.com/subyraman/sanic_session"  target="_blank" rel="noopener"
+    ><code>sanic_session</code></a>，用法非常简单，见官方例子如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">asyncio_redis</span>
+
+<span class="kn">from</span> <span class="nn">sanic</span> <span class="kn">import</span> <span class="n">Sanic</span>
+<span class="kn">from</span> <span class="nn">sanic.response</span> <span class="kn">import</span> <span class="n">text</span>
+<span class="kn">from</span> <span class="nn">sanic_session</span> <span class="kn">import</span> <span class="n">RedisSessionInterface</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Sanic</span><span class="p">()</span>
+
+
+<span class="c1"># Token from https://github.com/subyraman/sanic_session</span>
+
+<span class="k">class</span> <span class="nc">Redis</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    A simple wrapper class that allows you to share a connection
+</span><span class="s2">    pool across your application.
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">_pool</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">get_redis_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio_redis</span><span class="o">.</span><span class="n">Pool</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">,</span> <span class="n">poolsize</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span>
+
+
+<span class="n">redis</span> <span class="o">=</span> <span class="n">Redis</span><span class="p">()</span>
+
+<span class="c1"># pass the getter method for the connection pool into the session</span>
+<span class="n">session_interface</span> <span class="o">=</span> <span class="n">RedisSessionInterface</span><span class="p">(</span><span class="n">redis</span><span class="o">.</span><span class="n">get_redis_pool</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="mi">604800</span><span class="p">)</span>
+
+
+<span class="nd">@app.middleware</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">add_session_to_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># before each request initialize a session</span>
+    <span class="c1"># using the client&#39;s request</span>
+    <span class="n">await</span> <span class="n">session_interface</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+
+<span class="nd">@app.middleware</span><span class="p">(</span><span class="s1">&#39;response&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">save_session</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="c1"># after each request save the session,</span>
+    <span class="c1"># pass the response to set client cookies</span>
+    <span class="n">await</span> <span class="n">session_interface</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># interact with the session like a normal dict</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">):</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">][</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">][</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">][</span><span class="s1">&#39;foo&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><h3 id="缓存">缓存</h3>
+<p>我在项目中主要使用redis作为缓存，使用<a class="link" href="https://github.com/argaen/aiocache"  target="_blank" rel="noopener"
+    >aiocache</a>很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@cached</span><span class="p">(</span><span class="n">ttl</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">RedisCache</span><span class="p">,</span> <span class="n">key_from_attr</span><span class="o">=</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="n">serializer</span><span class="o">=</span><span class="n">PickleSerializer</span><span class="p">(),</span>
+        <span class="n">endpoint</span><span class="o">=</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REDIS_ENDPOINT&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">port</span><span class="o">=</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REDIS_PORT&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">namespace</span><span class="o">=</span><span class="s2">&#34;main&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">cache_owllook_novels_chapter</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">netloc</span><span class="p">):</span>
+    <span class="n">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">await</span> <span class="n">target_fetch</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">html</span><span class="p">:</span>
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span>
+            <span class="n">selector</span> <span class="o">=</span> <span class="n">RULES</span><span class="p">[</span><span class="n">netloc</span><span class="p">]</span><span class="o">.</span><span class="n">chapter_selector</span>
+            <span class="k">if</span> <span class="n">selector</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">selector</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">selector</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">selector</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tag&#39;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="k">if</span> <span class="n">content</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</code></pre></div><p>带上装饰器，什么都解决了。</p>
+<h3 id="api接口验证">api接口验证</h3>
+<p>在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">sanic.response</span> <span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="nn">novels_search.config</span> <span class="kn">import</span> <span class="n">AUTH</span>
+
+<span class="k">def</span> <span class="nf">authenticator</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    
+</span><span class="s2">    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
+</span><span class="s2">    :return: 返回值
+</span><span class="s2">    &#34;&#34;&#34;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="n">async</span> <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">AUTH</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">await</span> <span class="n">func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">response</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="p">({</span><span class="s1">&#39;msg&#39;</span><span class="p">:</span> <span class="s1">&#39;not_authorized&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="mi">403</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">authenticate</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+</code></pre></div><p>至于使用</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@api_bp.route</span><span class="p">(</span><span class="s2">&#34;/bd_novels/&lt;name&gt;&#34;</span><span class="p">)</span>
+<span class="nd">@authenticator</span><span class="p">(</span><span class="s1">&#39;Owllook-Api-Key&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">bd_novels</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">pass</span>
+</code></pre></div><p>具体见<a class="link" href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py"  target="_blank" rel="noopener"
+    >例子</a></p>
+<h3 id="恶意将其他域名绑定到你的网站独立ip">恶意将其他域名绑定到你的网站独立ip</h3>
+<p>前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。</p>
+<p>首先，定义你允许访问的HOST，再获取访问时获取的host，比如：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># config.py</span>
+<span class="n">HOST</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;127.0.0.1:8001&#39;</span><span class="p">]</span>
+
+<span class="c1"># sanic获取host</span>
+<span class="n">host</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</code></pre></div><p>那么就可以在sanic中间件中定义：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># 当host不满足条件就调到baidu</span>
+<span class="nd">@app.middleware</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">add_session_to_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span> <span class="ow">or</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HOST</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;http://www.baidu.com&#39;</span><span class="p">)</span>
+</code></pre></div><h3 id="注意">注意</h3>
+<p>sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见https://github.com/channelcat/sanic/issues/633。
+sanic更新换代还是很快的。</p>
+<h2 id="说明">说明</h2>
+<p>遇到什么想到什么就继续更新，具体代码<a class="link" href="https://github.com/howie6879/novels-search"  target="_blank" rel="noopener"
+    >地址</a></p>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">python</a>
+        
+            <a href="/tags/sanic/">sanic</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">Related contents</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_08.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_08.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 6.常用的技巧</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_07.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_07.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 5.数据库使用</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_01.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_01.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 4.展示一个页面</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_02.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_02.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 源码阅读 - 基于0.1.2</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_03.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_03.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 3.项目结构</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.0.1">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css">
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

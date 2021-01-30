@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字 async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36 若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5&#43;，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic 通过上面的命令，你就可以在 python3.'><title>Sanic 使用教程 - 1.初使用</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='Sanic 使用教程 - 1.初使用'>
+<meta property='og:description' content='在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字 async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36 若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5&#43;，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic 通过上面的命令，你就可以在 python3.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='python' /><meta property='article:tag' content='sanic' /><meta property='article:published_time' content='2017-10-06T08:03:15&#43;00:00'/><meta property='article:modified_time' content='2017-10-06T08:03:15&#43;00:00'/><meta property='og:image' content='https://www.howie6879.cn/images/thumbs/h_05.jpg' />
+<meta name="twitter:title" content="Sanic 使用教程 - 1.初使用">
+<meta name="twitter:description" content="在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字 async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36 若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5&#43;，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic 通过上面的命令，你就可以在 python3."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_05.jpg' />
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>Dark Mode</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/">
+                
+                    <img src="/images/thumbs/h_05.jpg" loading="lazy" alt="Featured image of post Sanic 使用教程 - 1.初使用" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" >
+                Python
+            </a>
+        
+            <a href="/categories/sanic/" >
+                Sanic
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/">Sanic 使用教程 - 1.初使用</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Oct 06, 2017</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。</p>
+<p>首先是Python3.4版本引入了<code>asyncio</code>，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字<code> async/await</code>，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的<code>asyncio</code>，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。</p>
+<h3 id="安装">安装</h3>
+<p>Sanic是一个支持 <code>async/await</code> 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有<code>Flask</code>框架的使用经验，那么你可以迅速地使用<code>Sanic</code>来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是<code>Falsk</code>的1.5倍。</p>
+<p>仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了<code>uvloop</code>作为<code>asyncio</code>的事件循环，<code>uvloop</code>由Cython编写，它的出现让<code>asyncio</code>更快，快到什么程度？<a class="link" href="http://codingpy.com/article/uvloop-blazing-fast-networking-with-python/"  target="_blank" rel="noopener"
+    >这篇</a>文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。</p>
+<p>怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。</p>
+<blockquote>
+<p>说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux</p>
+</blockquote>
+<h4 id="虚拟环境">虚拟环境</h4>
+<p>程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。</p>
+<p>其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。</p>
+<p>通过上面的叙述，我们是不是可以得出这样一个核心观点：<strong>应该在不同的环境下做不同的事</strong> ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：</p>
+<blockquote>
+<p>不同的项目，需要为其构建不同的虚拟环境，以免互相干扰</p>
+</blockquote>
+<p>构建虚拟环境的工具很多，如下：</p>
+<ul>
+<li><a class="link" href="https://virtualenv.pypa.io/en/stable/"  target="_blank" rel="noopener"
+    >virtualenv</a></li>
+<li><a class="link" href="https://github.com/pyenv/pyenv"  target="_blank" rel="noopener"
+    >pyenv</a></li>
+<li><a class="link" href="https://www.continuum.io/downloads"  target="_blank" rel="noopener"
+    >anaconda</a></li>
+</ul>
+<p>…&hellip;</p>
+<p>以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。</p>
+<p>安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是<code>anaconda</code> ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 新建一个python3.6环境</span>
+conda create --name python36 <span class="nv">python</span><span class="o">=</span>3.6
+<span class="c1"># 安装好之后 输入下面命令进入名为python36的环境</span>
+<span class="nb">source</span> activate python36
+</code></pre></div><p>若安装速度比较慢，可以考虑换国内源，比如 <a class="link" href="https://mirrors.tuna.tsinghua.edu.cn/help/pypi/"  target="_blank" rel="noopener"
+    >国内镜像</a> ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的<code>asyncio</code>。</p>
+<h4 id="安装sanic">安装Sanic</h4>
+<p>Python安装第三方模块都是利用<code>pip</code>工具进行安装，这里也不例外，首先进入上一步我们新建的 <code>python3.6</code> 虚拟环境，然后安装：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># 安装Sanic，请先使用 source activate python36 进入虚拟环境</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">sanic</span>
+<span class="c1"># 如果不想使用uvloop和ujson 可以这样安装</span>
+<span class="n">SANIC_NO_UVLOOP</span><span class="o">=</span><span class="n">true</span> <span class="n">SANIC_NO_UJSON</span><span class="o">=</span><span class="n">true</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">sanic</span>
+</code></pre></div><p>通过上面的命令，你就可以在 <code>python3.6</code> 虚拟环境中安装Sanic以及其依赖的第三方库了，若想查看Sanic是否已经正确安装，可以进入终端下对应的虚拟环境，启动Python解释器，导入Sanic库：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 启动Python解释器</span>
+python
+&gt;&gt;&gt; import sanic
+&gt;&gt;&gt;
+</code></pre></div><p>如果没有出现错误，就说明你已经正确地安装了Sanic，请继续阅读下一节，了解下如何利用Sanic来构建一个Web项目吧。</p>
+<h3 id="踏出第一步">踏出第一步</h3>
+<p>我们将正式使用Sanic来构建一个web项目，让我们踏出第一步，利用Sanic来编写一个返回<code>Hello World!</code>字符串的服务程序。</p>
+<p>新建一个文件，名为 <code>run.py</code> :</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">sanic</span> <span class="kn">import</span> <span class="n">Sanic</span>
+<span class="kn">from</span> <span class="nn">sanic.response</span> <span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Sanic</span><span class="p">()</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">text</span><span class="p">(</span><span class="s1">&#39;Hello World!&#39;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div><p>Sanic的目标是让编写服务更加简单易用，请看上面仅用不到10行的代码，就编写好了一个简单的Web服务，运行此文件，在浏览器输入 <code>http://0.0.0.0:8000</code> ，出现的字符会让你回想起当年学c的恐惧^_^。</p>
+<p>如果你是第一次使用Sanic，上面的代码可能会让你产生一些困扰，不用担心，接下来，我们将一起用Sanic编写一个简单的资讯阅读的web服务，在这过程中，你将逐渐地了解到Sanic的一些基本用法，如路由的构建、接受请求数据以及返回响应的内容等。</p>
+<p>本次示例的源代码全部在github上，见<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo01/news.py"  target="_blank" rel="noopener"
+    >examples/demo01/news.py</a>。</p>
+<h4 id="编写一个资讯阅读项目">编写一个资讯阅读项目</h4>
+<p>在开始编写之前，第一步最好写一下需求，哪怕是个简单不过的玩具项目也不能略过这个步骤，比如现在编写的资讯阅读项目，需求就一个，在页面中展示一些资讯新闻。</p>
+<p>既然是展示资讯新闻，那么解决数据来源的问题最为重要，对于这个问题你也不用担心，因为在本次示例的源码中我编写了一个名为<code>get_news()</code>的函数专门用来返回资讯新闻数据，简化代码如下:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">async</span> <span class="k">def</span> <span class="nf">get_news</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    Sanic是一个异步框架，为了更好的发挥它的性能，有些操作最好也要用异步的
+</span><span class="s2">    比如这里发起请求就必须要用异步请求框架aiohttp
+</span><span class="s2">    所以使用本服务的时候请先执行: pip install aiohttp
+</span><span class="s2">    数据使用的是readhub网站的api接口
+</span><span class="s2">    为了使这个数据获取函数正常运行，我会保持更新，所以具体代码：examples/demo01/news.py
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">async</span> <span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">readhub_api</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">text</span>
+</code></pre></div><p>这样各位就可以只专注于Sanic的代码实现，而不必考虑其他问题，我会一直维护这个数据获取函数，以保证数据正常输出，各位请放心使用。</p>
+<h4 id="构建路由">构建路由</h4>
+<p>数据的问题解决之后，我们可以开始着手于需求的实现了，根据前面的描述，此时的需求是当客户端（Web浏览器）访问<code>http://0.0.0.0:8000/</code>的时候，浏览器会立马展示服务端响应返回的10条资讯新闻（假设内容由index()函数返回），若浏览器访问的是<code>http://0.0.0.0:8000/2</code>，此时返回的就是第二页的10条资讯新闻，以此类推&hellip;&hellip;</p>
+<p>当Sanic程序实例接收到一个请求，比如前面提到的<code>http://0.0.0.0:8000/</code>，它是怎么知道这个URL可以对应到<code>index()</code>函数呢？</p>
+<p>Sanic有一个机制来保存URL和函数（一般称之为视图函数）之间的映射关系，就像<code>dict</code>中<code>key</code>和<code>value</code>，这样当服务端接收到请求<code>http://0.0.0.0:8000/</code>，就会立马知道，接下来需要调用<code>index()</code>函数了，我们将其称之为路由。</p>
+<p>Sanic中可以用<code>app.route</code>修饰器来定义路由，当Sanic服务启动的时候，<code>app.route</code>就会将其中传入的参数与装饰的函数自动注册好，比如下面这段代码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;当服务端接收到客户端的/请求时，就会调用此函数&#34;&#34;&#34;</span>
+    <span class="k">return</span> <span class="n">text</span><span class="p">(</span><span class="s1">&#39;Hello World!&#39;</span><span class="p">)</span>
+</code></pre></div><p>此时请求<code>http://0.0.0.0:8000/</code>就会返回<code>Hello World!</code>，很显然，这不是我们想要的需求，我们的需求是展示10条资讯新闻，数据怎么来？你只需要调用<code>get_news()</code>函数，就会获取到你想要的资讯数据：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># html页面模板</span>
+    <span class="n">html_tem</span> <span class="o">=</span> <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    &lt;div style=&#34;width: 80%; margin-left: 10%&#34;&gt;
+</span><span class="s2">        &lt;p&gt;&lt;a href=&#34;{href}&#34; target=&#34;_blank&#34;&gt;{title}&lt;/a&gt;&lt;/p&gt;
+</span><span class="s2">        &lt;p&gt;{summary}&lt;/p&gt;
+</span><span class="s2">         &lt;p&gt;{updated_at}&lt;/p&gt;
+</span><span class="s2">    &lt;/div&gt;
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">html_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># 获取数据</span>
+    <span class="n">all_news</span> <span class="o">=</span> <span class="n">await</span> <span class="n">get_news</span><span class="p">()</span>
+    <span class="c1"># 生成在浏览器展示的html页面</span>
+    <span class="k">for</span> <span class="n">each_news</span> <span class="ow">in</span> <span class="n">all_news</span><span class="p">:</span>
+        <span class="n">html_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">html_tem</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">href</span><span class="o">=</span><span class="n">each_news</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;news_info&#39;</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="s1">&#39;#&#39;</span><span class="p">),</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">each_news</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">),</span>
+            <span class="n">summary</span><span class="o">=</span><span class="n">each_news</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;summary&#39;</span><span class="p">),</span>
+            <span class="n">updated_at</span><span class="o">=</span><span class="n">each_news</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;updated_at&#39;</span><span class="p">),</span>
+        <span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">html</span><span class="p">(</span><span class="s1">&#39;&lt;hr&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">html_list</span><span class="p">))</span>
+</code></pre></div><p>运行此服务：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">python run news.py
+</code></pre></div><p>此时，访问<code>http://0.0.0.0:8000/</code>，你就会获得Sanic服务程序返回的资讯新闻，如下图，可以看到返回服务端提供的最新资讯：</p>
+<p><img src="/images/post/28/01_0.jpg" alt="01_0"  /></p>
+<p>页面成功地呈现出我们想要的结果，实在是令人兴奋，等等，不能高兴太早，我们还有一个需求，要根据浏览器输入的页数来展示内容，如：<code>http://0.0.0.0:8000/2</code>，思考一下，应该怎样优雅地完成这个需求，或许你会想，再构建一对URL与视图函数的映射关系，像下面这样：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/2&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">page_2</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</code></pre></div><p>不得不说，这是一个糟糕的解决方案，这样没法解决接下来的第3页、第4页、甚至第n页（虽然目前这个服务程序只展示到第2页），最佳实践应该是把页数当做变量来获取，Sanic的路由机制自然提供了获取动态请求参数的功能，如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&lt;page:int&gt;&#34;</span><span class="p">)</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    支持/请求与/page请求方式
+</span><span class="s2">    具体的代码逻辑也会有一点改变，可参考：examples/demo01/news.py
+</span><span class="s2">    &#34;&#34;&#34;</span>
+</code></pre></div><p>再次运行此服务：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">python run news.py
+</code></pre></div><p>不论是请求<code>http://0.0.0.0:8000/</code>或者<code>http://0.0.0.0:8000/2</code>，都是我们想要的结果。</p>
+<h4 id="请求数据">请求数据</h4>
+<p>细心的你可能会发现，每次编写一个视图函数的时候，总是有一个<code>request</code>参数：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">async</span> <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</code></pre></div><p>为什么必须定义这个参数，它从哪来？它有什么作用，下面我将一一为你解答。</p>
+<p>如果你在客户端请求<code>http://0.0.0.0:8000/</code>的时候，顺手在视图函数里面打印下参数<code>request</code>，会有如下输出：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">&lt;Request: GET /&gt;
+</code></pre></div><p>看终端的输出可以了解到<code>request</code>参数实际上是一个名为<code>Request</code>的实例对象，每当服务端接收到一个请求，Sanic的<code>handle_request</code>函数必定会接收一个<code>Request</code>实例对象，这个实例对象包含了一系列请求信息。</p>
+<p>前面说到，每个URL对应一个视图函数，而Sanic的<code>handle_request</code>接下来会将接收的<code>Request</code>实例对象作为参数传给URL对应的视图函数，也就是上面<code>index</code>的<code>request</code>参数，这样一来，就必须定义<code>request</code>来接收<code>Request</code>实例对象，其中包含的一些请求信息对视图函数来说非常重要，目前<code>Request</code>对象提供了以下属性：</p>
+<ul>
+<li>json</li>
+<li>token</li>
+<li>form</li>
+<li>files</li>
+<li>args</li>
+<li>raw_args</li>
+<li>cookies</li>
+<li>ip</li>
+<li>port</li>
+<li>socket</li>
+<li>remote_addr</li>
+<li>path</li>
+<li>url</li>
+</ul>
+<p>上面只是列出了一部分属性，如果你想了解更多，可查看<a class="link" href="https://github.com/channelcat/sanic/blob/master/sanic/request.py"  target="_blank" rel="noopener"
+    >request.py</a>源码文件了解。</p>
+<p>为了可以实际使用下<code>request</code>，我们可以再加一个需求，比如增加一个<code>GET</code>请求的接口<code>http://0.0.0.0:8000/json</code>，如果请求不设置参数<code>nums</code>的值，则默认返回一条资讯新闻，如果设置了<code>nums</code>参数，则该接口返回的新闻数量由参数值决定，参数最大值为10：</p>
+<div class="highlight"><pre class="chroma"><code class="language-json" data-lang="json"><span class="err">@app.route(&#39;/json&#39;)</span>
+<span class="err">async</span> <span class="err">def</span> <span class="err">index_json(request):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    默认返回一条资讯，最多十条
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="err">nums</span> <span class="err">=</span> <span class="err">request.args.get(&#39;nums&#39;,</span> <span class="mi">1</span><span class="err">)</span>
+    <span class="err">#</span> <span class="err">获取数据</span>
+    <span class="err">all_news</span> <span class="err">=</span> <span class="err">await</span> <span class="err">get_news()</span>
+    <span class="err">try:</span>
+        <span class="err">return</span> <span class="err">json(random.sample(all_news,</span> <span class="err">int(nums)))</span>
+    <span class="err">except</span> <span class="err">ValueError:</span>
+        <span class="err">return</span> <span class="err">json(all_news)</span>
+</code></pre></div><p>运行此服务：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">python run news.py
+</code></pre></div><p>此时视图函数<code>index_json</code>就可以根据接受的参数<code>nums</code>来返回对应数量的新闻，访问<code>http://0.0.0.0:8000/json?nums=2</code>，效果如下：</p>
+<p><img src="/images/post/28/01_1.jpg" alt="01_1"  /></p>
+<h4 id="响应">响应</h4>
+<p>不论哪个Web框架，都是需要构建响应对象的，Sanic自然也不例外，它用的是<code>sanic.response</code>来构建响应对象，像上面的代码中可以看到：</p>
+<pre><code>from sanic.response import html, json
+</code></pre><p>这表示我们目前构建的资讯阅读服务，分别返回了<code>body</code>格式为<code>html</code>以及<code>json</code>的响应对象，除了这两种格式，Sanic还提供了下面几种格式：</p>
+<ul>
+<li>json</li>
+<li>text</li>
+<li>raw</li>
+<li>html</li>
+<li>file</li>
+<li>file_stream</li>
+<li>stream</li>
+</ul>
+<p>更多属性请看<a class="link" href="https://github.com/channelcat/sanic/blob/master/sanic/response.py"  target="_blank" rel="noopener"
+    >response.py</a>，我们可以根据实际需求来构建响应对象，最后再返回给客户端。</p>
+<h4 id="继续深入">继续深入</h4>
+<p>不要以为现在编写的资讯服务已经很完善了，其实还有许多问题需要我们解决，比如访问<code>http://0.0.0.0:8000/html</code>这个URL会返回：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">Error: Requested URL /html not found
+</code></pre></div><p>服务程序为什么会抛出这个错误？因为程序中并路由没有注册<code>html</code>，并且没有进行错误捕捉（比如此时的404），解决这个问题也很方便，比如把这个错误全部跳转到首页，代码如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nd">@app.exception</span><span class="p">(</span><span class="n">NotFound</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ignore_404s</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+</code></pre></div><p>此时访问一些没有注册于路由的URL，比如此时的<code>http://0.0.0.0:8000/html</code>都会自动跳转到<code>http://0.0.0.0:8000/</code>。</p>
+<p>现在，我们已经用Sanic编写了一个简单的资讯阅读服务，在编写的过程中使用了路由、数据请求、处理以及响应对象，这些基础知识足够你编写一些基本的服务，但这还远远不够，比如模板引、引入静态文件等，这些都等着我们在实践中继续深入了解。</p>
+<h3 id="总结">总结</h3>
+<p>本章介绍了Sanic的安装以及基本的使用，目标是希望诸位可以迅速的了解并掌握Sanic的基本使用方法，并为阅读接下来的章节打一下基础。</p>
+<p>文档以及代码：</p>
+<ul>
+<li><code>Sanic</code> github地址：https://github.com/channelcat/sanic</li>
+<li>官方教程：http://sanic.readthedocs.io/en/latest/</li>
+<li>demo地址：<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo01/run.py"  target="_blank" rel="noopener"
+    >demo01</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">python</a>
+        
+            <a href="/tags/sanic/">sanic</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">Related contents</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_08.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_08.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 6.常用的技巧</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_07.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_07.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 5.数据库使用</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_01.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_01.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 4.展示一个页面</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_02.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_02.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 源码阅读 - 基于0.1.2</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_03.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_03.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 3.项目结构</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.0.1">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css">
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

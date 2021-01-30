@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist 如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;#34;packages&amp;#34;: [&amp;#34;os&amp;#34;], &amp;#34;excludes&amp;#34;: [&amp;#34;tkinter&amp;#34;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;#34;win32&amp;#34;: base = &amp;#34;Win32GUI&amp;#34; setup( name = &amp;#34;guifoo&amp;#34;, version = &amp;#34;0.1&amp;#34;, description = &amp;#34;My GUI application!'><title>cx_Freeze打包py文件</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='cx_Freeze打包py文件'>
+<meta property='og:description' content='最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist 如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;#34;packages&amp;#34;: [&amp;#34;os&amp;#34;], &amp;#34;excludes&amp;#34;: [&amp;#34;tkinter&amp;#34;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;#34;win32&amp;#34;: base = &amp;#34;Win32GUI&amp;#34; setup( name = &amp;#34;guifoo&amp;#34;, version = &amp;#34;0.1&amp;#34;, description = &amp;#34;My GUI application!'>
+<meta property='og:url' content='https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='python' /><meta property='article:published_time' content='2016-09-28T20:30:57&#43;00:00'/><meta property='article:modified_time' content='2016-09-28T20:30:57&#43;00:00'/>
+<meta name="twitter:title" content="cx_Freeze打包py文件">
+<meta name="twitter:description" content="最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist 如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;#34;packages&amp;#34;: [&amp;#34;os&amp;#34;], &amp;#34;excludes&amp;#34;: [&amp;#34;tkinter&amp;#34;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;#34;win32&amp;#34;: base = &amp;#34;Win32GUI&amp;#34; setup( name = &amp;#34;guifoo&amp;#34;, version = &amp;#34;0.1&amp;#34;, description = &amp;#34;My GUI application!">
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>Dark Mode</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" >
+                Python
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/">cx_Freeze打包py文件</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Sep 28, 2016</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。</p>
+<!-- raw HTML omitted -->
+<p>首先进行<a class="link" href="https://sourceforge.net/projects/cx-freeze/files/"  target="_blank" rel="noopener"
+    >下载</a>，需要注意对应的版本号，比如本人使用python3.4，64位，故下载<a class="link" href="https://sourceforge.net/projects/cx-freeze/files/4.3.3/cx_Freeze-4.3.3.win-amd64-py3.4.msi/download"  target="_blank" rel="noopener"
+    >cx_Freeze-4.3.3.win-amd64-py3.4.msi</a>这个版本，下载后在<code>python</code>安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图：
+<img src="http://oe7yjec8x.bkt.clouddn.com/06/01.png-blog.howie" alt="目录.png"  /></p>
+<p><img src="http://oe7yjec8x.bkt.clouddn.com/06/02.png-blog.howie" alt="cxfreeze.png"  /></p>
+<p><code>cxfreeze</code>有两种打包方式，一是<code>cxfreeze script</code>,这种方式很简单，只要打开<code>cmd</code>，<code>cd</code>到<code>python</code>文件所在目录，比如文件名为<code>hello.py</code>,执行：</p>
+<pre><code>cxfreeze hello.py --target-dir dist
+</code></pre><p>如果要生成可安装包文件，就要用到这种打包方式，名为<code>distutils setup script</code>，这种方式必须创建一个<code>setup.py</code>文件，可以使用官方提供的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">sysfrom</span> <span class="nn">cx_Freeze</span> <span class="nn">import</span> <span class="nn">setup</span><span class="o">,</span> <span class="nn">Executable</span>
+<span class="c1"># Dependencies are automatically detected, but it might need fine tuning.</span>
+<span class="n">build_exe_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&#34;packages&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;os&#34;</span><span class="p">],</span> <span class="s2">&#34;excludes&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;tkinter&#34;</span><span class="p">]}</span>
+<span class="c1"># GUI applications require a different base on Windows (the default is for a console application).</span>
+<span class="n">base</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&#34;win32&#34;</span><span class="p">:</span> 
+    <span class="n">base</span> <span class="o">=</span> <span class="s2">&#34;Win32GUI&#34;</span>
+<span class="n">setup</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&#34;guifoo&#34;</span><span class="p">,</span> 
+       <span class="n">version</span> <span class="o">=</span> <span class="s2">&#34;0.1&#34;</span><span class="p">,</span> 
+       <span class="n">description</span> <span class="o">=</span> <span class="s2">&#34;My GUI application!&#34;</span><span class="p">,</span> 
+       <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&#34;build_exe&#34;</span><span class="p">:</span> <span class="n">build_exe_options</span><span class="p">},</span> 
+       <span class="n">executables</span> <span class="o">=</span> <span class="p">[</span><span class="n">Executable</span><span class="p">(</span><span class="s2">&#34;guifoo.py&#34;</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)]</span>
+<span class="p">)</span>
+</code></pre></div><p>或者在<code>cmd </code>窗口输入<code>cxfreeze-quickstart</code>也可以自动生成<code>setup.py</code>，如下：</p>
+<p><img src="http://oe7yjec8x.bkt.clouddn.com/06/03.png-blog.howie" alt="setup.py.png"  /></p>
+<p>接下来只要到python文件的目录，运行</p>
+<pre><code>python setup.py bdist_msi
+</code></pre><p>如果想更加详细了解操作方法，可以查看官方文档</p>
+<blockquote>
+<p>官方操作文档：<a class="link" href="http://cx-freeze.readthedocs.org/en/latest/overview.html"  target="_blank" rel="noopener"
+    >查看</a></p>
+</blockquote>
+<h1 id="问题"><em>问题</em></h1>
+<p>可是我在使用<code>cxfreeze hello.py --target-dir dist</code>后，发现生成的exe文件无法运行，总是一闪而过，心好累，一番谷歌，找到如下解决办法：
+1、去这个网站下载cx_Freeze（注意32/64位）
+<a class="link" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/"  target="_blank" rel="noopener"
+    >cx_Freeze‑4.3.4‑cp34‑none‑win64.whl</a>
+2、把扩展名whl，改为zip进行解压
+4、然后进入<code>C:\Python34\Lib\site-packages</code>，请参考各自python安装路径，删除cx_Freeze相关的包，我这里有两个，全部都删除掉
+5、然后将<code>cx_Freeze‑4.3.4‑cp34‑none‑win64</code>目录下的文件夹全部复制到<code>C:\Python34\Lib\site-packages</code>，如图：</p>
+<p><img src="http://oe7yjec8x.bkt.clouddn.com/06/04.png-blog.howie" alt="C:\Python34\Lib\site-packages.png"  /></p>
+<p>最后进行打包，<code>cxfreeze hello.py --target-dir dist</code>,终于可以运行了，如果想打包成一个exe文件的话，可以将dist文件夹下面的文件全部创建自解压文件，不会的看<a class="link" href="http://jingyan.baidu.com/article/597035523d9ec28fc00740a7.html"  target="_blank" rel="noopener"
+    >这里</a>。</p>
+<p>这样就解决了，希望能有帮助。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">python</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">Related contents</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_50.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_50.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">不论微信钉钉，我写了个通用消息监控处理机器人</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_07.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_07.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">利用微信同步文章到Bear</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/jupyterlab%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%A5%9E%E5%99%A8/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_46.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_46.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">JupyterLab：程序员的笔记本神器</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_45.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_45.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">如何实现一个Python爬虫框架</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_44.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_44.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">谈谈对Python爬虫的理解</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.0.1">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css">
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

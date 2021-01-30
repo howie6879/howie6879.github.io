@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='一、基本操作  对数据库以及表的一些基本操作
+  1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student; 1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.'><title>MySQL基本操作命令汇总</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/mysql%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='MySQL基本操作命令汇总'>
+<meta property='og:description' content='一、基本操作  对数据库以及表的一些基本操作
+  1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student; 1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/mysql%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='mysql' /><meta property='article:published_time' content='2016-09-28T20:21:49&#43;00:00'/><meta property='article:modified_time' content='2020-09-23T20:57:39&#43;08:00'/>
+<meta name="twitter:title" content="MySQL基本操作命令汇总">
+<meta name="twitter:description" content="一、基本操作  对数据库以及表的一些基本操作
+  1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student; 1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.">
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>Dark Mode</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/mysql/" >
+                Mysql
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/mysql%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/">MySQL基本操作命令汇总</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Sep 28, 2016</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <h2 id="一基本操作">一、基本操作</h2>
+<blockquote>
+<p>对数据库以及表的一些基本操作</p>
+</blockquote>
+<hr>
+<h3 id="1-1关于数据库">1-1.关于数据库</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">创建数据库</span>
+<span class="k">create</span> <span class="k">database</span> <span class="n">h_test</span><span class="p">;</span>        
+<span class="o">//</span><span class="err">查看数据库</span>
+<span class="k">show</span> <span class="k">databases</span><span class="p">;</span>  
+<span class="o">//</span><span class="err">查看数据库信息</span>    
+<span class="k">show</span> <span class="k">create</span> <span class="k">database</span> <span class="n">h_test</span><span class="p">;</span>
+<span class="o">//</span><span class="err">修改数据库的编码，可使用上一条语句查看是否修改成功</span>
+<span class="k">alter</span> <span class="k">database</span> <span class="n">h_test</span> <span class="k">default</span> <span class="k">character</span> <span class="kt">set</span> <span class="n">gbk</span> <span class="k">collate</span> <span class="n">gbk_bin</span><span class="p">;</span>      
+<span class="o">//</span><span class="err">删除数据库</span>
+<span class="k">drop</span> <span class="k">database</span> <span class="n">h_test</span><span class="p">;</span>
+<span class="o">//</span><span class="err">综上，可以直接创建数据库且设置编码方式</span>
+<span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">h_test</span> <span class="k">DEFAULT</span> <span class="k">CHARACTER</span> <span class="kt">SET</span> <span class="n">utf8</span> <span class="k">COLLATE</span> <span class="n">utf8_general_ci</span><span class="p">;</span>
+</code></pre></div><hr>
+<!-- raw HTML omitted -->
+<h3 id="1-2关于数据表">1-2.关于数据表</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">首先选定操作的数据库</span>
+<span class="k">use</span> <span class="n">h_test</span><span class="p">;</span>
+<span class="o">//</span><span class="err">创建表</span><span class="n">student</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">int</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span>
+  <span class="n">name</span>  <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="err">查看数据表</span>
+<span class="k">show</span> <span class="kp">tables</span><span class="p">;</span>
+<span class="o">//</span><span class="err">查看数据表信息，后面加上参数</span><span class="o">/</span><span class="n">G可使结果更加美观</span>
+<span class="k">show</span> <span class="k">create</span> <span class="k">table</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">查看表的的字段信息</span>
+<span class="k">desc</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">修改表名</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">rename</span> <span class="p">[</span><span class="k">to</span><span class="p">]</span> <span class="n">h_student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">修改字段名</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="k">change</span> <span class="n">name</span> <span class="n">stu_name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+<span class="o">//</span><span class="err">修改字段的数据类型</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="n">modify</span> <span class="n">id</span> <span class="kt">int</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+<span class="o">//</span><span class="err">添加字段</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="k">add</span> <span class="n">grade</span> <span class="kt">float</span><span class="p">;</span>
+<span class="o">//</span><span class="err">删除字段</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="k">drop</span> <span class="n">grade</span><span class="p">;</span>
+<span class="o">//</span><span class="err">修改字段的位置</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="n">modify</span> <span class="n">stu_name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="n">first</span><span class="p">;</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">h_student</span> <span class="n">modify</span> <span class="n">id</span> <span class="kt">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="n">after</span> <span class="n">age</span><span class="p">;</span>
+<span class="o">//</span><span class="err">删除数据表</span>
+<span class="k">drop</span> <span class="k">table</span> <span class="n">h_student</span><span class="p">;</span>
+</code></pre></div><h3 id="1-3表的约束">1-3表的约束</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">约束条件</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">PRIMARY KEY</td>
+<td style="text-align:center">主键约束，用于唯一标识对应的记录</td>
+</tr>
+<tr>
+<td style="text-align:left">FOREIGN KEY</td>
+<td style="text-align:center">外键约束</td>
+</tr>
+<tr>
+<td style="text-align:left">NOT NULL</td>
+<td style="text-align:center">非空约束</td>
+</tr>
+<tr>
+<td style="text-align:left">UNIQUE</td>
+<td style="text-align:center">唯一性约束</td>
+</tr>
+<tr>
+<td style="text-align:left">DEFAULT</td>
+<td style="text-align:center">默认值约束，用于设置字段的默认值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-4索引">1-4索引</h3>
+<blockquote>
+<p>作用：提高表中数据的查询速度
+1.普通索引
+2.唯一性索引
+3.全文索引
+4.单列索引
+5.多列索引
+6.空间索引</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">创建索引</span>
+<span class="o">//</span><span class="err">一</span><span class="p">.</span><span class="err">创建表的时候创建索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="err">表名</span><span class="p">(</span>
+        <span class="err">字段名</span> <span class="err">数据类型</span><span class="p">[</span><span class="err">完整性约束条件</span><span class="p">],</span>
+        <span class="p">...</span>
+        <span class="err">字段名</span> <span class="err">数据类型</span><span class="p">,</span>
+        <span class="p">[</span><span class="k">UNIQUE</span><span class="o">|</span><span class="k">FULLTEXT</span><span class="o">|</span><span class="k">SPATIAL</span><span class="p">]</span> <span class="k">INDEX</span><span class="o">|</span><span class="k">KEY</span>
+  <span class="p">);</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="err">创建普通索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test1</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">INT</span><span class="p">,</span>
+  <span class="k">INDEX</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="err">可以插入一条数据</span><span class="p">,</span><span class="err">查看索引是否被使用</span>
+<span class="k">explain</span> <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">test1</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">1</span> <span class="err">\</span><span class="n">G</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="err">创建唯一性索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test2</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">INT</span><span class="p">,</span>
+  <span class="k">UNIQUE</span> <span class="k">INDEX</span> <span class="nf">unique_id</span><span class="p">(</span><span class="n">id</span> <span class="k">asc</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="err">创建全文索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test3</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">INT</span><span class="p">,</span>
+  <span class="k">FULLTEXT</span> <span class="k">INDEX</span> <span class="nf">fulltext_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">MyISAM</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">4</span><span class="p">.</span><span class="err">创建单列索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test4</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">INT</span><span class="p">,</span>
+  <span class="k">INDEX</span> <span class="nf">single_name</span><span class="p">(</span><span class="nf">name</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="err">创建多列索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test5</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">age</span> <span class="kt">INT</span><span class="p">,</span>
+  <span class="k">INDEX</span> <span class="nf">multi</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="nf">name</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="mi">1</span><span class="o">-</span><span class="mi">6</span><span class="p">.</span><span class="err">创建空间索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">test6</span><span class="p">(</span>
+  <span class="n">id</span>  <span class="kt">INT</span><span class="p">,</span>
+  <span class="n">space</span> <span class="n">GEOMETRY</span> <span class="k">NOT</span> <span class="no">NULL</span><span class="p">,</span>
+  <span class="k">SPATIAL</span> <span class="k">INDEX</span> <span class="nf">sp</span><span class="p">(</span><span class="n">space</span><span class="p">)</span>
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">MyISAM</span><span class="p">;</span>
+<span class="o">-------------------------------------------------</span><span class="c1">--
+</span><span class="c1">//二.使用create index语句在已经存在的表上创建索引
+</span><span class="c1"></span><span class="o">//</span><span class="err">首先新建一个表</span><span class="p">,</span><span class="err">这个表没有索引</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span><span class="p">,</span>
+  <span class="n">age</span> <span class="kt">int</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">intro</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span>
+  <span class="n">g</span> <span class="n">GEOMETRY</span> <span class="k">NOT</span> <span class="no">NULL</span>
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">MyISAM</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="err">创建普通索引</span>
+<span class="k">create</span> <span class="k">index</span> <span class="n">index_id</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="err">创建唯一性索引</span>
+<span class="k">create</span> <span class="k">unique</span> <span class="k">index</span> <span class="n">uniqueidx</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="err">创建单列索引</span>
+<span class="k">create</span> <span class="k">index</span> <span class="n">singleidx</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="n">age</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">4</span><span class="p">.</span><span class="err">创建多列索引</span>
+<span class="k">create</span> <span class="k">index</span> <span class="n">mulitidx</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="nf">name</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="nf">intro</span><span class="p">(</span><span class="mi">40</span><span class="p">));</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="err">创建全文索引</span>
+<span class="k">create</span> <span class="k">fulltext</span> <span class="k">index</span> <span class="n">fulltextidx</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">2</span><span class="o">-</span><span class="mi">6</span><span class="p">.</span><span class="err">创建空间索引</span>
+<span class="k">create</span> <span class="k">spatial</span> <span class="k">index</span> <span class="n">spatidx</span> <span class="k">on</span> <span class="nf">student</span><span class="p">(</span><span class="n">g</span><span class="p">);</span> 
+<span class="o">//</span><span class="err">下图是第二种方法创建索引演示后的所有索引</span>
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-8d7b377d65f2ef07.png" alt="img"  /></p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">三</span><span class="p">.</span><span class="err">使用</span><span class="n">alter</span> <span class="n">table语句在已经存在的表上创建索引</span>
+<span class="o">//</span><span class="err">删除</span><span class="n">student表</span><span class="err">，重新创建</span>
+<span class="k">drop</span> <span class="k">table</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span><span class="p">,</span>
+  <span class="n">age</span> <span class="kt">int</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+  <span class="n">intro</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span>
+  <span class="n">space</span> <span class="n">GEOMETRY</span> <span class="k">NOT</span> <span class="no">NULL</span>
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">MyISAM</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="err">创建普通索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">index</span> <span class="nf">index_id</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="err">创建唯一性索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">unique</span> <span class="nf">uniqueidx</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="err">创建单列索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">index</span> <span class="nf">singleidx</span> <span class="p">(</span><span class="n">age</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">4</span><span class="p">.</span><span class="err">创建多列索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">index</span> <span class="nf">multidx</span><span class="p">(</span><span class="nf">name</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="nf">intro</span><span class="p">(</span><span class="mi">40</span><span class="p">));</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="err">创建全文索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">fulltext</span> <span class="k">index</span> <span class="nf">fulltextidx</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+<span class="o">//</span><span class="mi">3</span><span class="o">-</span><span class="mi">6</span><span class="p">.</span><span class="err">创建空间索引</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">spatial</span> <span class="k">index</span> <span class="nf">spatidx</span><span class="p">(</span><span class="n">space</span><span class="p">);</span>
+<span class="o">//</span><span class="err">下图演示结果</span>
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-259ee7d12bc238d6.png" alt="img"  /></p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">删除索引，有下面两种方式</span>
+<span class="o">//</span><span class="mi">1</span><span class="p">.</span><span class="err">使用</span><span class="n">alter</span> <span class="n">table删除索引fulltextidx</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">drop</span> <span class="k">index</span> <span class="n">fulltextidx</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">2</span><span class="p">.</span><span class="err">使用</span><span class="n">drop</span> <span class="n">index删除索引spatidx</span>
+<span class="k">drop</span> <span class="k">index</span> <span class="n">spatidx</span> <span class="k">on</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">下图可看到删除成功</span>
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-e752d5df3325619b.png" alt="img"  /></p>
+<h3 id="1-5添加数据">1-5.添加数据</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">重新建立表</span><span class="n">student</span>
+<span class="k">drop</span> <span class="k">table</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span><span class="p">,</span>
+  <span class="n">grade</span> <span class="kt">float</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="err">插入一条数据，也可以少某个字段的同时也少对应的数据</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="nf">student</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">grade</span><span class="p">)</span> <span class="k">values</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;howie&#39;</span><span class="p">,</span><span class="mi">70</span><span class="p">);</span>
+<span class="o">//</span><span class="err">也可以不指定字段名，但要注意顺序</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">student</span> <span class="k">values</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;howie&#39;</span><span class="p">,</span><span class="mi">80</span><span class="p">);</span>
+<span class="o">//</span><span class="err">也可以这样添加数据</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">student</span> <span class="kt">set</span> <span class="n">id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&#34;howie&#34;</span><span class="p">,</span><span class="n">grade</span><span class="o">=</span><span class="mi">90</span><span class="p">;</span>
+<span class="o">//</span><span class="err">同时添加多条数据</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">student</span> <span class="k">values</span>
+<span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;howie&#39;</span><span class="p">,</span><span class="mi">80</span><span class="p">),</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;howie&#39;</span><span class="p">,</span><span class="mi">80</span><span class="p">),</span>
+<span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="s1">&#39;howie&#39;</span><span class="p">,</span><span class="mi">80</span><span class="p">);</span>
+</code></pre></div><h3 id="1-6更新数据">1-6.更新数据</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">更新</span><span class="n">id</span><span class="o">=</span><span class="mi">1</span><span class="err">的数据</span>
+<span class="k">update</span> <span class="n">student</span> <span class="kt">set</span> <span class="n">name</span><span class="o">=</span><span class="s2">&#34;howie1&#34;</span><span class="p">,</span><span class="n">grade</span><span class="o">=</span><span class="mi">60</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+<span class="o">//</span><span class="err">批量更新</span><span class="p">,</span><span class="err">如果没有</span><span class="n">where子句</span><span class="err">，会更新表中所有对应数据</span>
+<span class="k">update</span> <span class="n">student</span> <span class="kt">set</span> <span class="n">grade</span><span class="o">=</span><span class="mi">100</span> <span class="k">where</span> <span class="n">id</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">;</span>
+</code></pre></div><h3 id="1-7删除数据">1-7.删除数据</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">删除</span><span class="n">id</span><span class="o">=</span><span class="mi">6</span><span class="err">的数据</span>
+<span class="k">delete</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">6</span><span class="p">;</span>
+<span class="o">//</span><span class="err">批量删除数据</span>
+<span class="k">delete</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span><span class="o">&gt;</span><span class="mi">3</span><span class="p">;</span>
+<span class="o">//</span><span class="err">删除所有数据</span><span class="p">,</span><span class="nf">DDL</span><span class="p">(</span><span class="err">数据定义语言</span><span class="p">)</span><span class="err">语句</span> <span class="n">truncate</span> <span class="k">table</span> <span class="n">student也可以删除表内所有数据</span>
+<span class="k">delete</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+</code></pre></div><hr>
+<h2 id="二-单表查询和多表操作">二 、单表查询和多表操作</h2>
+<blockquote>
+<p>单表查询：如何从数据库中获取你需要的数据
+多表查询：实际开发中，需要进行2张表以上进行操作</p>
+</blockquote>
+<h3 id="2-1-1单表查询">2-1-1.单表查询</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">建立表</span><span class="n">student</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="kp">auto_increment</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span><span class="p">,</span>
+  <span class="n">grade</span> <span class="kt">float</span><span class="p">,</span>
+  <span class="k">primary</span> <span class="k">key</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="o">//</span><span class="err">插入数据</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="nf">student</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">grade</span><span class="p">)</span> <span class="k">values</span>
+<span class="p">(</span><span class="s2">&#34;howie1&#34;</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie1&#34;</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie2&#34;</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie3&#34;</span><span class="p">,</span><span class="mi">60</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie4&#34;</span><span class="p">,</span><span class="mi">70</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie5&#34;</span><span class="p">,</span><span class="mi">80</span><span class="p">),</span>
+<span class="p">(</span><span class="s2">&#34;howie6&#34;</span><span class="p">,</span><span class="no">null</span><span class="p">);</span>
+<span class="o">//</span><span class="err">查询全部</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">查询某个字段</span>
+<span class="k">select</span> <span class="n">name</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">条件查询</span><span class="p">,</span><span class="err">查询</span><span class="n">id</span><span class="o">=</span><span class="mi">2</span><span class="err">学生的信息</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+<span class="o">//</span><span class="n">in关键字查询</span><span class="p">,</span><span class="err">也可以使用</span><span class="n">not</span> <span class="k">in</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span> <span class="k">IN</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+<span class="o">//</span><span class="k">between</span> <span class="n">and关键字查询</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span> <span class="k">between</span> <span class="mi">2</span> <span class="k">and</span> <span class="mi">5</span><span class="p">;</span>
+<span class="o">//</span><span class="err">空值</span><span class="p">(</span><span class="no">NULL</span><span class="p">)</span><span class="err">查询，使用</span><span class="n">IS</span> <span class="no">NULL</span><span class="err">来判断</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">grade</span> <span class="k">is</span> <span class="no">null</span><span class="p">;</span>
+<span class="o">//</span><span class="n">distinct关键字查询</span>
+<span class="k">select</span> <span class="k">distinct</span> <span class="n">name</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="n">like关键字查询</span><span class="p">,</span><span class="err">查询以</span><span class="n">h开头</span><span class="err">，</span><span class="n">e结尾的数据</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">name</span> <span class="k">like</span> <span class="s2">&#34;h%e&#34;</span><span class="p">;</span>
+<span class="o">//</span><span class="n">and关键字多条件查询</span><span class="p">,</span><span class="n">or关键字的使用也是类似</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">id</span><span class="o">&gt;</span><span class="mi">5</span> <span class="k">and</span> <span class="n">grade</span><span class="o">&gt;</span><span class="mi">60</span><span class="p">;</span>
+</code></pre></div><h3 id="2-1-2高级查询">2-1-2.高级查询</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">聚合函数</span>
+<span class="o">//</span><span class="nf">count</span><span class="p">()</span><span class="err">函数</span><span class="p">,</span><span class="nf">sum</span><span class="p">()</span><span class="err">函数</span><span class="p">,</span><span class="nf">avg</span><span class="p">()</span><span class="err">函数</span><span class="p">,</span><span class="nf">max</span><span class="p">()</span><span class="err">函数</span><span class="p">,</span><span class="nf">min</span><span class="p">()</span><span class="err">函数</span>
+<span class="k">select</span> <span class="nf">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">select</span> <span class="nf">sum</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">select</span> <span class="nf">avg</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">select</span> <span class="nf">max</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">select</span> <span class="nf">min</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">对查询结果进行排序</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">order</span> <span class="k">by</span> <span class="n">grade</span><span class="p">;</span>
+<span class="o">//</span><span class="err">分组查询</span>
+<span class="o">//</span><span class="mi">1</span><span class="p">.</span><span class="err">单独使用</span><span class="n">group</span> <span class="n">by分组</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">group</span> <span class="k">by</span> <span class="n">grade</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">2</span><span class="p">.</span><span class="err">和聚合函数一起使用</span>
+<span class="k">select</span> <span class="nf">count</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="n">grade</span> <span class="k">from</span> <span class="n">student</span> <span class="k">group</span> <span class="k">by</span> <span class="n">grade</span><span class="p">;</span>
+<span class="o">//</span><span class="mi">3</span><span class="p">.</span><span class="err">和</span><span class="n">having关键字一起使用</span>
+<span class="k">select</span> <span class="nf">sum</span><span class="p">(</span><span class="n">grade</span><span class="p">),</span><span class="n">name</span> <span class="k">from</span> <span class="n">student</span> <span class="k">group</span> <span class="k">by</span> <span class="n">grade</span> <span class="k">having</span> <span class="nf">sum</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span> <span class="o">&gt;</span><span class="mi">100</span><span class="p">;</span>
+<span class="o">//</span><span class="err">使用</span><span class="n">limit限制查询结果的数量</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">limit</span> <span class="mi">5</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">limit</span> <span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">order</span> <span class="k">by</span> <span class="n">grade</span> <span class="k">desc</span> <span class="k">limit</span> <span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span>
+<span class="o">//</span><span class="err">函数</span><span class="p">,</span><span class="n">mysql提供了许多函数</span>
+<span class="k">select</span> <span class="nf">concat</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="n">grade</span><span class="p">)</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">为表取别名</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">as</span> <span class="n">stu</span> <span class="k">where</span> <span class="n">stu</span><span class="p">.</span><span class="n">name</span><span class="o">=</span><span class="s2">&#34;howie&#34;</span><span class="p">;</span>
+<span class="o">//</span><span class="err">为字段取别名</span><span class="p">,</span><span class="n">as关键字也可以不写</span>
+<span class="k">select</span> <span class="n">name</span> <span class="k">as</span> <span class="n">stu_name</span><span class="p">,</span><span class="n">grade</span> <span class="n">stu_grade</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+</code></pre></div><h3 id="2-2多表操作">2-2.多表操作</h3>
+<p>介绍知识点如下：</p>
+<ul>
+<li>1.了解外键</li>
+<li>2.了解关联关系</li>
+<li>3.了解各种连接查询多表的数据</li>
+<li>4.了解子查询，会使用各种关键字以及比较运算符查询多表中的数据</li>
+</ul>
+<h4 id="2-2-1外键">2-2-1.外键</h4>
+<blockquote>
+<p>外键是指引用另一个表中的一列或者多列，被引用的列应该具有主键约束或者唯一性约束，用于建立和加强两个数据表之间的连接。</p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">创建表</span><span class="n">class</span><span class="p">,</span><span class="n">student</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">class</span><span class="p">(</span>
+   <span class="n">id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="k">primary</span> <span class="k">key</span><span class="p">,</span>
+   <span class="n">classname</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span>
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="p">;</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+   <span class="n">stu_id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="k">primary</span> <span class="k">key</span><span class="p">,</span>
+   <span class="n">stu_name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span><span class="p">,</span>
+   <span class="n">cid</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span>      <span class="c1">-- 表示班级id，它就是class表的外键
+</span><span class="c1"></span><span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="p">;</span>
+<span class="o">//</span><span class="err">添加外键约束</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">constraint</span> <span class="n">FK_ID</span> <span class="k">foreign</span> <span class="k">key</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span> <span class="k">references</span> <span class="nf">class</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="err">删除外键约束</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">drop</span> <span class="k">foreign</span> <span class="k">key</span> <span class="n">FK_ID</span><span class="p">;</span>
+</code></pre></div><p>看下图可知外键添加成功：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-087e13adbb0e1994.png" alt="img"  /></p>
+<h4 id="2-2-2操作关联表">2-2-2.操作关联表</h4>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">数据表有三种关联关系，多对一、多对多、一对一</span>
+<span class="o">//</span><span class="err">学生</span><span class="p">(</span><span class="n">student</span><span class="p">)</span><span class="err">和班级</span><span class="p">(</span><span class="n">class</span><span class="p">)</span><span class="err">是多对一关系，添加数据</span>
+<span class="o">//</span><span class="err">首选添加外键约束</span>
+<span class="k">alter</span> <span class="k">table</span> <span class="n">student</span> <span class="k">add</span> <span class="k">constraint</span> <span class="n">FK_ID</span> <span class="k">foreign</span> <span class="k">key</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span> <span class="k">references</span> <span class="nf">class</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="o">//</span><span class="err">添加数据</span><span class="p">,</span><span class="err">这两个表便有了关联若插入中文在终端显示空白，可设置</span><span class="n">set</span> <span class="n">names</span> <span class="s1">&#39;gbk&#39;</span><span class="p">;</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">class</span> <span class="k">values</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&#34;软件一班&#34;</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="s2">&#34;软件二班&#34;</span><span class="p">);</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">student</span> <span class="k">values</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&#34;howie&#34;</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="s2">&#34;howie1&#34;</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="s2">&#34;howie2&#34;</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="s2">&#34;howie3&#34;</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="o">//</span><span class="err">交叉连接</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">cross</span> <span class="k">join</span> <span class="n">class</span><span class="p">;</span>
+<span class="o">//</span><span class="err">内连接，该功能也可以使用</span><span class="n">where语句实现</span>
+<span class="k">select</span> <span class="n">student</span><span class="p">.</span><span class="n">stu_name</span><span class="p">,</span><span class="n">class</span><span class="p">.</span><span class="n">classname</span> <span class="k">from</span> <span class="n">student</span> <span class="k">join</span> <span class="n">class</span> <span class="k">on</span> <span class="n">class</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">student</span><span class="p">.</span><span class="n">cid</span><span class="p">;</span>
+<span class="o">//</span><span class="err">外连接</span>
+<span class="o">//</span><span class="err">首先在</span><span class="n">student</span><span class="p">,</span><span class="n">class表中插入数据</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">class</span> <span class="k">values</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s2">&#34;软件三班&#34;</span><span class="p">);</span>
+<span class="o">//</span><span class="err">左连接，右连接</span>
+<span class="k">select</span> <span class="n">s</span><span class="p">.</span><span class="n">stu_id</span><span class="p">,</span><span class="n">s</span><span class="p">.</span><span class="n">stu_name</span><span class="p">,</span><span class="n">c</span><span class="p">.</span><span class="n">classname</span> <span class="k">from</span> <span class="n">student</span> <span class="n">s</span> <span class="k">left</span> <span class="k">join</span> <span class="n">class</span> <span class="n">c</span> <span class="k">on</span> <span class="n">c</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">s</span><span class="p">.</span><span class="n">cid</span><span class="p">;</span>
+<span class="k">select</span> <span class="n">s</span><span class="p">.</span><span class="n">stu_id</span><span class="p">,</span><span class="n">s</span><span class="p">.</span><span class="n">stu_name</span><span class="p">,</span><span class="n">c</span><span class="p">.</span><span class="n">classname</span> <span class="k">from</span> <span class="n">student</span> <span class="n">s</span> <span class="k">right</span> <span class="k">join</span> <span class="n">class</span> <span class="n">c</span> <span class="k">on</span> <span class="n">c</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">s</span><span class="p">.</span><span class="n">cid</span><span class="p">;</span>
+<span class="o">//</span><span class="err">复合条件连接查询就是添加过滤条件</span>
+<span class="o">//</span><span class="err">子查询</span>
+<span class="o">//</span><span class="n">in关键字子查询跟上面的in关键字查询类似</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">cid</span> <span class="k">in</span><span class="p">(</span><span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">class</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">2</span><span class="p">);</span>
+<span class="o">//</span><span class="n">exists关键字查询</span><span class="p">,</span><span class="err">相当于测试，不产生数据，只返回</span><span class="no">true</span><span class="err">或者</span><span class="no">false</span><span class="err">，只有返回</span><span class="no">true</span><span class="err">，外层才会执行，具体看下图</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="k">exists</span><span class="p">(</span><span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">class</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">12</span><span class="p">);</span>   <span class="c1">-- 外层不会执行
+</span><span class="c1"></span><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="k">exists</span><span class="p">(</span><span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">class</span> <span class="k">where</span> <span class="n">id</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>    <span class="c1">-- 外层会执行
+</span><span class="c1"></span><span class="o">//</span><span class="n">any关键字查询</span>
+ <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">cid</span><span class="o">&gt;</span><span class="nf">any</span><span class="p">(</span><span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">class</span><span class="p">);</span>
+<span class="o">//</span><span class="n">all关键字查询</span>
+ <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">cid</span><span class="o">=</span><span class="nf">any</span><span class="p">(</span><span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">class</span><span class="p">);</span>
+
+</code></pre></div><p>具体结果请看下图：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-2c85dd353f7d03b8.png" alt="img"  /></p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-05b727ee995cc414.png" alt="img"  /></p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-e778d07773ae7b83.png" alt="img"  /></p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-a18ce0a5a97d4bd8.png" alt="img"  /></p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-ab0f4706d4d6b2cf.png" alt="img"  /></p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-f4f71a1de7bf0667.png" alt="img"  /></p>
+<h2 id="三-事务与存储过程">三 、事务与存储过程</h2>
+<blockquote>
+<p>事务的概念，会开启、提交和回滚事务
+事务的四种隔离级别
+创建存储过程
+调用、查看、修改和删除存储过程</p>
+</blockquote>
+<h3 id="3-1-事务管理">3-1 事务管理</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="n">start</span> <span class="n">transaction</span><span class="p">;</span>  <span class="c1">-- 开启事务
+</span><span class="c1"></span><span class="n">commit</span><span class="p">;</span>             <span class="c1">-- 提交事务
+</span><span class="c1"></span><span class="n">rollback</span><span class="p">;</span>           <span class="c1">-- 取消事务(回滚)
+</span><span class="c1"></span><span class="o">//</span><span class="err">创建表</span><span class="n">account</span><span class="err">，插入数据</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">account</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span> <span class="k">primary</span> <span class="k">key</span> <span class="kp">auto_increment</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span>
+  <span class="n">money</span> <span class="kt">float</span>
+<span class="p">);</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="nf">account</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">money</span><span class="p">)</span> <span class="k">values</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="mi">1000</span><span class="p">),(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="mi">2000</span><span class="p">),(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span><span class="mi">3000</span><span class="p">);</span>
+<span class="o">//</span><span class="err">利用事务实现转账功能，首先开启事务，然后执行语句，提交事务</span>
+<span class="n">start</span> <span class="n">transaction</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">-</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">+</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">;</span>
+<span class="n">commit</span><span class="p">;</span>
+<span class="o">//</span><span class="err">事务的提交，通过这个命令查看</span><span class="n">mysql提交方式</span>
+<span class="k">select</span> <span class="o">@@</span><span class="n">autocommit</span><span class="p">;</span> <span class="c1">-- 若为1，表示自动提交，为0，就要手动提交
+</span><span class="c1"></span><span class="o">//</span><span class="err">若事务的提交方式为手动提交</span>
+<span class="kt">set</span> <span class="o">@@</span><span class="n">autocommit</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">-- 设置为手动提交
+</span><span class="c1"></span><span class="n">start</span> <span class="n">transaction</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">+</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">-</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">;</span>
+<span class="o">//</span><span class="err">现在执行</span><span class="n">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">account</span> <span class="err">可以看到转账成功，若此时退出数据库重新登录，会看到各账户余额没有改变，所以一定要用</span><span class="n">commit语句提交事务</span><span class="err">，否则会失败</span>
+<span class="o">//</span><span class="err">事务的回滚，别忘记设置为手动提交的模式</span>
+<span class="n">start</span> <span class="n">transaction</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">-</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">;</span>
+<span class="k">update</span> <span class="n">account</span> <span class="kt">set</span> <span class="n">money</span><span class="o">=</span><span class="n">money</span><span class="o">+</span><span class="mi">100</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">;</span>
+<span class="o">//</span><span class="err">若此时</span><span class="n">a不想转账给b</span><span class="err">，可以使用事务的回滚</span>
+<span class="n">rollback</span><span class="p">;</span>
+<span class="o">//</span><span class="err">事务的隔离级别</span>
+<span class="k">read</span> <span class="n">uncommitted</span><span class="p">;</span>
+<span class="k">read</span> <span class="n">committed</span><span class="p">;</span>
+<span class="n">repeatable</span> <span class="k">read</span><span class="p">;</span>
+<span class="n">serializable</span><span class="p">;</span>
+</code></pre></div><h3 id="3-2-存储过程">3-2 存储过程</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">创建查看</span><span class="n">student表的存储过程</span>
+<span class="o">//</span><span class="err">创建</span><span class="n">student表</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span> 
+  <span class="n">id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="k">primary</span> <span class="k">key</span> <span class="kp">auto_increment</span><span class="p">,</span> 
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> 
+  <span class="n">grade</span> <span class="kt">float</span> 
+<span class="p">)</span><span class="kp">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="k">default</span> <span class="k">character</span> <span class="kt">set</span> <span class="n">utf8</span><span class="p">;</span>
+<span class="n">delimiter</span> <span class="o">//</span>  <span class="c1">-- 将mysql的结束符设置为//
+</span><span class="c1"></span><span class="k">create</span> <span class="k">procedure</span> <span class="nf">Proc</span><span class="p">()</span>
+  <span class="n">begin</span>
+  <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+  <span class="n">end</span> <span class="o">//</span>
+<span class="n">delimiter</span> <span class="p">;</span>   <span class="c1">-- 将mysql的结束符设置为;
+</span><span class="c1"></span><span class="k">call</span> <span class="nf">Proc</span><span class="p">();</span>  <span class="c1">-- 这样就可以调用该存储过程
+</span><span class="c1"></span><span class="o">//</span><span class="err">变量的使用</span><span class="p">,</span><span class="n">mysql中变量不用事前申明</span><span class="err">，在用的时候直接用“</span><span class="o">@</span><span class="err">变量名”使用就可以</span>
+<span class="kt">set</span> <span class="o">@</span><span class="n">number</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span> <span class="c1">-- 或set @num:=1;
+</span><span class="c1"></span><span class="o">//</span><span class="err">定义条件和处理程序</span>
+<span class="o">//</span><span class="err">光标的使用</span>
+<span class="o">//</span><span class="mi">1</span><span class="p">.</span><span class="err">声明光标</span>
+<span class="k">DECLARE</span> <span class="o">*</span> <span class="n">cursor_name</span><span class="o">*</span> <span class="k">CURSOR</span> <span class="k">FOR</span> <span class="n">select_statement</span>
+<span class="mi">2</span><span class="p">.</span> <span class="err">光标</span><span class="n">OPEN语句</span>
+<span class="n">OPEN</span> <span class="n">cursor_name</span>
+<span class="mi">3</span><span class="p">.</span> <span class="err">光标</span><span class="n">FETCH语句</span>
+<span class="k">FETCH</span> <span class="n">cursor_name</span> <span class="k">INTO</span> <span class="n">var_name</span> <span class="p">[,</span> <span class="n">var_name</span><span class="p">]</span> <span class="p">...</span>
+<span class="mi">4</span><span class="p">.</span> <span class="err">光标</span><span class="n">CLOSE语句</span>
+<span class="n">CLOSE</span> <span class="n">cursor_name</span>
+<span class="o">//</span><span class="err">流程控制的使用</span>  <span class="err">不做介绍</span>
+</code></pre></div><h3 id="3-3-调用存储过程">3-3 调用存储过程</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">定义存储过程</span>
+<span class="n">delimiter</span> <span class="o">//</span>
+<span class="k">create</span> <span class="k">procedure</span> <span class="nf">proc1</span><span class="p">(</span><span class="k">in</span> <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="k">out</span> <span class="n">num</span> <span class="kt">int</span><span class="p">)</span>
+<span class="n">begin</span>
+<span class="k">select</span> <span class="nf">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">into</span> <span class="n">num</span> <span class="k">from</span> <span class="n">student</span> <span class="k">where</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">;</span>
+<span class="n">end</span><span class="o">//</span>
+<span class="n">delimiter</span> <span class="p">;</span>
+<span class="o">//</span><span class="err">调用存储过程</span>
+<span class="k">call</span> <span class="nf">proc1</span><span class="p">(</span><span class="s2">&#34;tom&#34;</span><span class="p">,</span><span class="o">@</span><span class="n">num</span><span class="p">)</span> <span class="c1">-- 查找名为tom学生人数
+</span><span class="c1"></span><span class="o">//</span><span class="err">查看结果</span>
+<span class="k">select</span> <span class="o">@</span><span class="n">num</span><span class="p">;</span>  <span class="c1">-- 看下图
+</span></code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-38362382cb4c6cda.png" alt="img"  /></p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">查看存储过程</span>
+ <span class="k">show</span> <span class="k">procedure</span> <span class="n">status</span> <span class="k">like</span> <span class="s1">&#39;p%&#39;</span> <span class="err">\</span><span class="n">G</span> <span class="c1">-- 获得以p开头的存储过程信息
+</span><span class="c1"></span><span class="o">//</span><span class="err">修改存储过程</span>
+<span class="k">alter</span> <span class="err">{</span><span class="k">procedure</span><span class="o">|</span><span class="n">function</span><span class="err">}</span> <span class="n">sp_name</span><span class="p">[</span><span class="n">characteristic</span><span class="p">...]</span>
+<span class="o">//</span><span class="err">删除存储过程</span>
+<span class="k">drop</span> <span class="k">procedure</span> <span class="n">proc1</span><span class="p">;</span>
+</code></pre></div><hr>
+<h2 id="四视图">四、视图</h2>
+<blockquote>
+<p>如何创建视图
+查看、修改、更新、删除视图</p>
+</blockquote>
+<h3 id="4-1视图的基本操作">4-1、视图的基本操作</h3>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">在单表上创建视图</span><span class="p">,</span><span class="err">重新创建</span><span class="n">student表</span><span class="err">，插入数据</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">student</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="k">primary</span> <span class="k">key</span> <span class="kp">auto_increment</span><span class="p">,</span>
+  <span class="n">name</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span><span class="p">,</span>
+  <span class="n">math</span> <span class="kt">float</span><span class="p">,</span>
+  <span class="n">chinese</span> <span class="kt">float</span>
+<span class="p">);</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="nf">student</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">math</span><span class="p">,</span><span class="n">chinese</span><span class="p">)</span> <span class="k">values</span>
+<span class="p">(</span><span class="s1">&#39;howie1&#39;</span><span class="p">,</span><span class="mi">66</span><span class="p">,</span><span class="mi">77</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;howie2&#39;</span><span class="p">,</span><span class="mi">66</span><span class="p">,</span><span class="mi">77</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;howie3&#39;</span><span class="p">,</span><span class="mi">66</span><span class="p">,</span><span class="mi">77</span><span class="p">);</span>
+<span class="o">//</span><span class="err">开始创建视图</span>
+<span class="k">create</span> <span class="n">view</span> <span class="n">stu_view</span> <span class="k">as</span> <span class="k">select</span> <span class="n">math</span><span class="p">,</span><span class="n">chinese</span><span class="p">,</span><span class="n">math</span><span class="o">+</span><span class="n">chinese</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>  <span class="c1">-- 下图可看出创建成功
+</span><span class="c1"></span><span class="o">//</span><span class="err">也可以创建自定义字段名称的视图</span>
+<span class="k">create</span> <span class="n">view</span> <span class="nf">stu_view2</span><span class="p">(</span><span class="n">math</span><span class="p">,</span><span class="n">chin</span><span class="p">,</span><span class="n">sum</span><span class="p">)</span> <span class="k">as</span> <span class="k">select</span> <span class="n">math</span><span class="p">,</span><span class="n">chinese</span><span class="p">,</span><span class="n">math</span><span class="o">+</span><span class="n">chinese</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-a32a60623f4140c4.png" alt="img"  />
+<img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-9597565720bf4dfe.png" alt="img"  /></p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">//</span><span class="err">在多表上创建视图，创建表</span><span class="n">stu_info</span><span class="err">，插入数据</span>
+<span class="k">create</span> <span class="k">table</span> <span class="nf">stu_info</span><span class="p">(</span>
+  <span class="n">id</span> <span class="kt">int</span> <span class="k">not</span> <span class="no">null</span> <span class="k">primary</span> <span class="k">key</span> <span class="kp">auto_increment</span><span class="p">,</span>
+  <span class="n">class</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="k">not</span> <span class="no">null</span><span class="p">,</span>
+  <span class="n">addr</span> <span class="kt">varchar</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="nf">stu_info</span><span class="p">(</span><span class="n">class</span><span class="p">,</span><span class="n">addr</span><span class="p">)</span> <span class="k">values</span>
+<span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;anhui&#39;</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">,</span><span class="s1">&#39;fujian&#39;</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">,</span><span class="s1">&#39;guangdong&#39;</span><span class="p">);</span>
+<span class="o">//</span><span class="err">创建视图</span><span class="n">stu_class</span>
+<span class="k">create</span> <span class="n">view</span> <span class="nf">stu_class</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">class</span><span class="p">)</span> <span class="k">as</span> 
+<span class="k">select</span> <span class="n">student</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="n">student</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="n">stu_info</span><span class="p">.</span><span class="n">class</span> <span class="k">from</span> 
+<span class="n">student</span><span class="p">,</span><span class="n">stu_info</span> <span class="k">where</span> <span class="n">student</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">stu_info</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+<span class="o">//</span><span class="err">查看视图</span>
+<span class="k">desc</span> <span class="n">stu_class</span><span class="p">;</span>
+<span class="k">show</span> <span class="k">table</span> <span class="n">status</span> <span class="k">like</span> <span class="s1">&#39;stu_class&#39;</span><span class="err">\</span><span class="n">G</span>
+<span class="k">show</span> <span class="k">create</span> <span class="n">view</span> <span class="n">stu_class</span><span class="err">\</span><span class="n">G</span>
+<span class="o">//</span><span class="err">修改视图</span>
+<span class="k">create</span> <span class="k">or</span> <span class="k">replace</span> <span class="n">view</span> <span class="n">stu_view</span> <span class="k">as</span> <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="k">alter</span> <span class="n">view</span> <span class="n">stu_view</span> <span class="k">as</span> <span class="k">select</span> <span class="n">chinese</span> <span class="k">from</span> <span class="n">student</span><span class="p">;</span>
+<span class="o">//</span><span class="err">更新视图</span>
+<span class="k">update</span> <span class="n">stu_view</span> <span class="kt">set</span> <span class="n">chinese</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">student</span> <span class="k">values</span><span class="p">(</span><span class="no">null</span><span class="p">,</span><span class="s1">&#39;haha&#39;</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">);</span>
+<span class="k">delete</span> <span class="k">from</span> <span class="n">stu_view2</span> <span class="k">where</span> <span class="n">math</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span>
+<span class="o">//</span><span class="err">删除视图</span>
+<span class="k">drop</span> <span class="n">view</span> <span class="k">if</span> <span class="k">exists</span> <span class="n">stu_view2</span><span class="p">;</span>
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1157824-5bd260c21fc6265c.png" alt="img"  /></p>
+<h2 id="五总结">五、总结</h2>
+<blockquote>
+<p>笔记参考《MySql数据库入门》
+基本命令就这么多，仍需多多敲写巩固
+以上命令本人全部敲过，若有错误，敬请指出，希望有帮助，谢谢。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/mysql/">mysql</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    <section class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span class="article-time--modified">
+            Last updated on Sep 23, 2020 20:57 CST
+        </span>
+    </section></footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.0.1">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css">
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

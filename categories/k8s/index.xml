@@ -5,24 +5,37 @@
     <link>https://www.howie6879.cn/categories/k8s/</link>
     <description>Recent content in k8s on 老胡的储物柜</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
+    <language>en-us</language>
     <lastBuildDate>Mon, 11 Jan 2021 22:17:08 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>k8s学习之路.[02.概念介绍]</title>
-      <link>https://www.howie6879.cn/post/2021/02_k8s_note_02_basic_concept/</link>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
       <pubDate>Mon, 11 Jan 2021 22:17:08 +0800</pubDate>
       
-      <guid>https://www.howie6879.cn/post/2021/02_k8s_note_02_basic_concept/</guid>
-      <description>俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。</description>
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</guid>
+      <description>俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。
+本文主要讲解以下四个概念：
+ Pod Deployment Service Namespace  引入 让我们使用Deployment运行一个无状态应用来开启此章节吧，比如运行一个nginx Deployment（创建文件：nginx-deployment.yaml）：
+apiVersion:apps/v1kind:Deploymentmetadata:name:nginx-deploymentlabels:app:nginxspec:replicas:1selector:matchLabels:app:nginxtemplate:metadata:labels:app:nginxspec:containers:- name:nginximage:nginx:latestports:- containerPort:80配置文件第二行，有个kind字段，表示的是此时yaml配置的类型，即Deployment。什么是Deployment？这里我先不做解释，让我们先实践，看能不能在使用过程中体会出这个类型的概念意义。
+在终端执行：
+kubectl apply -f ./nginx-deployment.yaml # 输出 deployment.apps/nginx-deployment created 然后通过以下命令分别查看集群中创建的 Deployment 和 Pod 的状态：
+# 查看 Deployment kubectl get deployments # 输出 NAME READY UP-TO-DATE AVAILABLE AGE nginx-deployment 1/1 1 1 2m29s # 查看 Pod kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE nginx-deployment-585449566-qslv5 1/1 Running 0 2m38s # 查看 Deployment 的信息 kubectl describe deployment nginx	# 删除 Deployment kubectl delete deployment nginx-deployment # 查看 Pod 的信息 # kubectl describe pod &amp;lt;pod-name&amp;gt; # 这里的 &amp;lt;pod-name&amp;gt; 是某一 Pod 的名称 kubectl describe pod nginx-deployment-585449566-qslv5 # 进入容器 kubectl exec -it nginx-deployment-585449566-qslv5 -- /bin/bash 此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词Pod，这又是什么？让我们带着疑问继续往下看吧。</description>
     </item>
     
     <item>
       <title>k8s学习之路.[01.安装]</title>
-      <link>https://www.howie6879.cn/post/2021/01_k8s_note_01_installation/</link>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</link>
       <pubDate>Mon, 11 Jan 2021 22:16:42 +0800</pubDate>
       
-      <guid>https://www.howie6879.cn/post/2021/01_k8s_note_01_installation/</guid>
-      <description>什么是Kubernetes 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，</description>
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</guid>
+      <description>什么是Kubernetes 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  安装 单机安装 关于单机安装k8s，我使用的相关环境如下：
+ macOS：Catalina 10.15.1 Docker Desktop Vesion：3.0.2 Kubernetes：1.19.3  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3 k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3 k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3 k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3 k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0 k8s.gcr.io/pause:3.2=gotok8s/pause:3.2 k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0 随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+如果状态一直处于Kubernetes starting状态，可在终端执行以下命令然后重启Docker：
+rm -rf ~/.kube rm -rf ~/Library/Group\ Containers/group.com.docker/pki/ 集群安装 准备   准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：
+ 192.168.5.91：Master：  执行：  hostnamectl set-hostname master echo &amp;quot;127.0.0.1 $(hostname)&amp;quot; &amp;gt;&amp;gt; /etc/hosts     192.168.5.92：Node01  执行：  hostnamectl set-hostname node01 echo &amp;quot;127.</description>
     </item>
     
   </channel>
