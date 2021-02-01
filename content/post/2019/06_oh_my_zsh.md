@@ -1,6 +1,6 @@
 ---
 categories:
-  - 效率
+  - Tool
 date: 2019-04-15 16:16:58+08:00
 image: /images/thumbs/h_47.jpg
 tags: [效率]

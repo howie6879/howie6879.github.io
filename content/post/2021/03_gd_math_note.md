@@ -6,8 +6,8 @@ draft: false
 keywords: []
 toc: true
 description: "梯度下降数学推导"
-tags: [神经网络与深度学习]
-categories: [Deep Learning, NNDL]
+tags: [神经网络与深度学习,nndl-book]
+categories: [Deep Learning]
 author: "howie.hu"
 markup: mmark
 image: https://gitee.com/howie6879/oss/raw/master/uPic/1042406-20161017221342935-1872962415.png

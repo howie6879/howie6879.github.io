@@ -4,8 +4,8 @@ date: 2020-12-18T21:13:58+08:00
 lastmod: 2020-12-18T21:13:58+08:00
 draft: false
 keywords: []
-tags: [神经网络与深度学习]
-categories: [Deep Learning,NNDL]
+tags: [神经网络与深度学习,nndl-book]
+categories: [Deep Learning]
 markup: mmark
 toc: true
 image: https://gitee.com/howie6879/oss/raw/master/uPic/image-20201119214431316-20210201235258715.png

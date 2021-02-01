@@ -1,7 +1,7 @@
 ---
 categories:
   - Python
-  - 效率
+  - Tool
 comments: true
 date: 2019-10-21T08:37:56+08:00
 image: /images/thumbs/h_50.jpg

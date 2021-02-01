@@ -4,8 +4,8 @@ date: 2019-11-02T21:13:58+08:00
 lastmod: 2019-11-22T21:13:58+08:00
 draft: false
 keywords: []
-tags: [神经网络与深度学习]
-categories: [Deep Learning,NNDL]
+tags: [神经网络与深度学习,nndl-book]
+categories: [Deep Learning]
 markup: mmark
 ---
 

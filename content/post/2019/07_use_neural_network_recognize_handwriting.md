@@ -1,10 +1,9 @@
 ---
 categories:
   - Deep Learning
-  - NNDL
 date: 2019-05-08 16:36:44+08:00
 image: /images/thumbs/h_48.png
-tags: [神经网络与深度学习]
+tags: [神经网络与深度学习,nndl-book]
 title: "nndl_note: 识别手写字"
 markup: mmark
 ---
