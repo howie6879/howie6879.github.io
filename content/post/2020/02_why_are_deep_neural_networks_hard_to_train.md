@@ -8,6 +8,7 @@ tags: [神经网络与深度学习]
 categories: [Deep Learning,NNDL]
 markup: mmark
 toc: true
+image: https://gitee.com/howie6879/oss/raw/master/uPic/image-20201119214431316-20210201235258715.png
 ---
 
 
@@ -29,11 +30,11 @@ toc: true
 
 而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：
 
-![shadow-image-20201119214307565](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201119214307565.png)
+![shadow-image-20201119214307565](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201119214307565-20210201235205704.png)
 
 这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？
 
-![shadow-image-20201119214431316](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201119214431316.png)
+![shadow-image-20201119214431316](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201119214431316-20210201235159992.png)
 
 随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？
 
@@ -103,17 +104,17 @@ net = network2.Network([784, 30, 30, 30, 30, 10])
 
 下图（基于`[784, 30, 30, 10]`网络）表⽰了每个神经元权重和偏置在神经⽹络学习时的变化速率，图中的每个神经元有⼀个条形统计图，表⽰这个神经元在⽹络进⾏学习时改变的速度。更⼤的条意味着更快的速度，而小的条则表⽰变化缓慢。
 
-![shadow-20201217162947909](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201217162947909.png)
+![shadow-20201217162947909](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217162947909-20210201235152243.png)
 
 可以发现，第⼆个隐藏层上的条基本上都要⽐第⼀个隐藏层上的条要⼤；所以，在第⼆个隐藏层的神经元将学习得更加快速。这并不是巧合，前⾯的层学习速度确实低于后⾯的层。
 
 我们可以继续观察学习速度的变化，下方分别是2~4个隐藏层的学习速度变化图：
 
-![shadow-image-20201217163602988](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20201217163602988.png)
+![shadow-image-20201217163602988](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217163602988-20210201235216607.png)
 
-![shadow-image-20201217163721344](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201217163721344.png)
+![shadow-image-20201217163721344](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217163721344-20210201235221602.png)
 
-![shadow-image-20201217163735287](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201217163735287.png)
+![shadow-image-20201217163735287](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217163735287-20210201235232432.png)
 
 同样的情况出现了，前⾯的隐藏层的学习速度要低于后⾯的隐藏层。这⾥，第⼀层的学习速度和最后⼀层要差了两个数量级，也就是⽐第四层慢了 100 倍。
 
@@ -125,7 +126,7 @@ net = network2.Network([784, 30, 30, 30, 30, 10])
 
 看下面这个既简单的深度神经网络，每⼀层都只有⼀ 个单⼀的神经元：
 
-![shadow-image-20201217170827163](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201217170827163.png)
+![shadow-image-20201217170827163](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217170827163-20210201235242656.png)
 
 首先回顾几个计算公式：
 
@@ -153,7 +154,7 @@ $$
 $$
 其实可以直观地看出上述表达式是一系列如$w_j\sigma^\prime(z_j)$的乘积，其中有`sigmoid`的导数，我们可以观察一下$\sigma^\prime(x)$的函数图像（$\sigma^\prime(x) = \sigma(x)(1 - \sigma(x))$）:
 
-![shadow-image-20201217223631570](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20201217223631570.png)
+![shadow-image-20201217223631570](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201217223631570-20210201235252564.png)
 
 绘图代码：
 
@@ -187,7 +188,7 @@ plt.show()
 
 当我们从简单的神经网络上发现了随着网络层次的加深，会造成网络权值更新不稳定的情况后，也很明确地观察到了梯度消失问题。继续扩展一下，对于那些每层包含很多神经元的更加复杂的网络来说会是怎样的情况呢？
 
-![shadow-image-20201119214431316](https://raw.githubusercontent.com/howie6879/oss/master/uPic/image-20201119214431316.png)
+![shadow-image-20201119214431316](https://gitee.com/howie6879/oss/raw/master/uPic/image-20201119214431316-20210201235258715.png)
 
 对于第$l$层的梯度：
 $$

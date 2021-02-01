@@ -8,6 +8,7 @@ description: "程序员如何提升个人的技术影响力"
 tags: [随笔,思考]
 categories: [随笔]
 author: "howie6879"
+image: https://gitee.com/howie6879/oss/raw/master/uPic/2yQI1G.jpg
 toc: true
 ---
 
@@ -24,7 +25,7 @@ toc: true
 
 ## 为什么要提升个人技术影响力
 
-![shadow-image-20200917170121335](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200917170121335.png)
+![Dms2MU](https://gitee.com/howie6879/oss/raw/master/uPic/Dms2MU.jpg)
 
 为什么要提升个人的技术影响力？自然是能给作为程序员的我们带来好处，而且是无法拒绝的好处，比如：
 
@@ -56,11 +57,11 @@ toc: true
 
 我当时第一个入局的项目是一个Python异步Web框架`Sanic`，如下图：
 
-![image-20200908224329963](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908224329963.png)
+![image-20200908224329963](https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908224329963.png)
 
 我大概贡献了8个`Commits`：
 
-![image-20200908224430166](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908224430166.png)
+![image-20200908224430166](https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908224430166.png)
 
 #### 核心开发者方式
 
@@ -72,23 +73,23 @@ toc: true
 
 我当时写的是一个异步爬虫框架，那时候是16到17年，Python的异步正是大力宣传的时候，我当时抓到的点就是异步爬虫框架，于是我就编写了异步爬虫框架`Ruia`：
 
-![image-20200908225713018](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908225713018.png)
+![image-20200908225713018](https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908225713018.png)
 
-![image-20200908225754733](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908225754733.png)
+![image-20200908225754733](https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908225754733.png)
 
 这两种方式尝试下来，这是我目前在开源这块的成果：
 
-![image-20200908225907240](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908225907240.png)
+![2yQI1G](https://gitee.com/howie6879/oss/raw/master/uPic/2yQI1G.jpg)
 
 ### 文章
 
-<img src="https://raw.githubusercontent.com/howie6879/oss/master/images/创作平台.png" alt="创作平台" style="zoom:50%;" />
+<img src="https://gitee.com/howie6879/oss/raw/master/uPic/%E5%88%9B%E4%BD%9C%E5%B9%B3%E5%8F%B0.png" alt="创作平台" style="zoom:50%;" />
 
 除了开源项目的影响力输出，我们作为程序员还可以写技术文章发布到各种平台，上面这张图说明了我个人一篇文章会分享的平台。这块的核心点是要坚持，毕竟持续输出是一件很难的事情。
 
 除了写文章，还可以写教程&课程：
 
-![image-20200908230637723](https://raw.githubusercontent.com/howie6879/oss/master/images/image-20200908230637723.png)
+![image-20200908230637723](https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908230637723.png)
 
 我出这个目的完全是为了宣传我的`Ruia`异步爬虫框架。
 
@@ -102,4 +103,4 @@ toc: true
 
 这个主题其实可扩展的东西很多，大家可以私下好好研究一番。当然，我自身做的还远远不够，还有很大的进步空间，但是至少我自身是在往这个方向进步，这里我就先将自己的一些经验分享出来，算是抛砖引玉吧，诸位大佬多多包涵；谢谢，大家加油！
 
-
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
