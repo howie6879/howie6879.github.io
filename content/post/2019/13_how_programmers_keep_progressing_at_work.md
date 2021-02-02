@@ -9,7 +9,7 @@ tags: [随笔,思考]
 categories: [随笔]
 author: "howie6879"
 toc: true
-image: /images/thumbs/h_08.jpg
+image: https://gitee.com/howie6879/oss/raw/master/uPic/h_51.jpg
 ---
 
 

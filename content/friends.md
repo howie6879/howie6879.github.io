@@ -1,7 +1,8 @@
 ---
-title : 友链
+title : 
 date : 2018-01-06
 author : howie6879
+image: https://gitee.com/howie6879/oss/raw/master/uPic/hannah-rodrigo-mf_3yZnC6ug-unsplash.jpg
 ---
 
 下面是我的朋友：

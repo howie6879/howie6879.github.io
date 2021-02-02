@@ -6,7 +6,7 @@ author : "Hugo Authors"
 lastmod : "2021-01-31"
 license : "CC BY-NC-ND"
 description : "努力就好"
-
+image: https://gitee.com/howie6879/oss/raw/master/uPic/h_51.jpg
 ---
 
 做一个努力的程序员：
@@ -35,9 +35,3 @@ description : "努力就好"
 ![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
 
 <!-- <div align=center> <img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" width="300px"> </div> -->
-
-下面是我的朋友：
-
-- [elfgzp](https://elfgzp.cn/): 一个兴趣使然的程序员
-- [Ruter](https://ruterly.com/): 技术连接生活
-- [shidenggui](https://shidenggui.com/): 人生意何存，我思故我在
