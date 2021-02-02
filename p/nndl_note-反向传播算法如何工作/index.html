@@ -12,7 +12,7 @@
 
 <link rel='canonical' href='https://www.howie6879.cn/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/'>
 
-<link rel="stylesheet" href="/scss/style.min.css"><script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><meta property='og:title' content='nndl_note: 反向传播算法如何工作'>
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='nndl_note: 反向传播算法如何工作'>
 <meta property='og:description' content='热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程  输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函数关于⽹络中任意偏置的改变率 代价函数关于任何⼀个权重的改变率  反向传播算法 反向传播：全局观 参考  
 前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：
  $L$ : 表示网络层数 $b_j^l$ : 表示第$l$层的第$j$个神经元的偏置 $a_j^l$ : 表示第$l$层的第$j$个神经元的激活值 $w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重 $w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重 $b^l$ : 第$l$层神经元的偏置向量 $z^l$ : 第$l$层神经元的带权输入向量 $a^l$ : 第$l$层每个神经元激活值构成的向量 $\delta_{j}^{l}$ : 第$l$层第$j$个神经元的误差  本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：
@@ -34,6 +34,8 @@
 举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：
 \[ \begin{aligned} a_3^2 &amp;= \sigma(w_{3 1}^{2} a_1^1 &#43; w_{3 2}^{2} a_2^1&#43; w_{3 3}^{2} a_3^1 &#43; b_3^2 ) \\ &amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 &#43; b_3^2 \right) \end{aligned} \]"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_49.jpg' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
     </head>
     <body class="">
     <script>
@@ -59,7 +61,7 @@
     })();
 </script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
             <aside class="sidebar left-sidebar sticky">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
         <span class="hamburger-box">
             <span class="hamburger-inner"></span>
         </span>
@@ -130,6 +132,24 @@
         
 
         <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
             <a href='/archives'>
                 
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -183,7 +203,7 @@
 
 
 
-                <span>Dark Mode</span>
+                <span>暗色模式</span>
             </li>
         
     </ol>
@@ -602,12 +622,34 @@ C_{x}=\frac{1}{2}\left\|y-a^{L}\right\|^{2}
     </footer>
 
     
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+    integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+    crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+    integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"
+    onload="StackLaTeX()"></script>
+
+<script>
+    function StackLaTeX() {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });
+    }
+</script>
+    
 </article>
 
     <aside class="related-contents--wrapper">
     
     
-        <h2 class="section-title">Related contents</h2>
+        <h2 class="section-title">相关文章</h2>
         <div class="related-contents">
             <div class="flex article-list--tile">
                 
