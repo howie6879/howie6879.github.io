@@ -5,7 +5,7 @@ author : howie6879
 author : "Hugo Authors"
 lastmod : "2021-02-05"
 license : "CC BY-NC-ND"
-image: https://gitee.com/howie6879/oss/raw/master/uPic/M3AWEj.jpg
+image: /images/thumbs/h_52.jpg
 ---
 
 ## 联系方式
