@@ -16,7 +16,7 @@ image: /images/thumbs/h_52.jpg
 ## 个人信息
 
 - howie.hu/男/1995 
-- 本科/惠州学院计算机系 
+- 本科/惠州学院计算机系（2013~2017）
 - 工作年限：3年
 - Github：[http://github.com/howie6879](http://github.com/howie6879)
 - Blog：[https://www.howie6879.cn/](https://www.howie6879.cn/)，如果无法访问请翻墙
