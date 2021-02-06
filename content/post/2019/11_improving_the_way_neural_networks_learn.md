@@ -7,7 +7,6 @@ keywords: []
 description: "万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的，本章我们主要讨论改进神经⽹络的学习⽅法"
 tags: [神经网络与深度学习,nndl-book]
 categories: [Deep Learning]
-markup: mmark
 ---
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->

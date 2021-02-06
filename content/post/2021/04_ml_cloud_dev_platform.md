@@ -9,7 +9,7 @@ description: "一站式机器学习云开发平台"
 tags: [机器学习,架构]
 categories: [Machine Learning, Architecture]
 author: "howie.hu"
-image: https://gitee.com/howie6879/oss/raw/master/uPic/visually-construct-1757524.png
+image: /images/thumbs/h_54.png
 ---
 
 > 本篇是关于自身在机器学习这块工作经验的思考总结

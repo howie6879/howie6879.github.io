@@ -8,7 +8,7 @@ description: "程序员如何提升个人的技术影响力"
 tags: [随笔,思考]
 categories: [随笔]
 author: "howie6879"
-image: https://gitee.com/howie6879/oss/raw/master/uPic/2yQI1G.jpg
+image: /images/thumbs/h_59.jpg
 toc: true
 ---
 

@@ -9,7 +9,7 @@ tags: ["k8s学习之路"]
 categories: ["k8s"]
 author: "howie6879"
 toc: true
-image: https://gitee.com/howie6879/oss/raw/master/uPic/image-20201220201512486.png
+image: /images/thumbs/h_57.png
 ---
 
 ## 什么是Kubernetes
