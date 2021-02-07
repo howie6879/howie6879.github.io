@@ -75,7 +75,7 @@ image: /images/thumbs/h_52.jpg
 
 - [sanic](https://github.com/channelcat/sanic)： 一个异步web框架，修复中文编码route的bug，见[#1081](https://github.com/channelcat/sanic/pull/1081)，参数检查机制，见[#1097](https://github.com/channelcat/sanic/pull/1097)
 - [text-classification-cnn-rnn](https://github.com/gaussic/text-classification-cnn-rnn)：CNN-RNN中文文本分类，基于tensorflow，PR修复了在同样训练集情况下python2训练的模型准确率偏低的问题
-- [GraphScope](https://github.com/alibaba/GraphScope)：一站式的图计算系统，贡献了`K8s`的远程连接特性([#40](https://github.com/alibaba/GraphScope/pull/40))
+- [GraphScope](https://github.com/alibaba/GraphScope)：阿里开源的一站式的图计算系统，贡献了`K8s`的远程连接特性([#40](https://github.com/alibaba/GraphScope/pull/40))
 - [orchest](https://github.com/orchest/orchest)：A new kind of IDE for Data Science. 修复项目检测失败的问题（[#117](https://github.com/orchest/orchest/pull/117)）
 - ......
 
