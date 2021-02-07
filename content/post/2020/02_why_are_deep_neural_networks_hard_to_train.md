@@ -6,7 +6,7 @@ draft: false
 keywords: []
 tags: [神经网络与深度学习,nndl-book]
 categories: [Deep Learning]
-toc: true
+markup: mmark
 image: /images/thumbs/h_58.png
 ---
 

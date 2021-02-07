@@ -9,6 +9,7 @@ description: "梯度下降数学推导"
 tags: [神经网络与深度学习,nndl-book]
 categories: [Deep Learning]
 author: "howie.hu"
+markup: mmark
 image: /images/thumbs/h_55.png
 ---
 
