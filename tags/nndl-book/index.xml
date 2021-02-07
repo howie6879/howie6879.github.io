@@ -14,23 +14,24 @@
       
       <guid>https://www.howie6879.cn/p/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%8E%A8%E5%AF%BC/</guid>
       <description>以感知器为例，可以梯度下降来学习合适的权重和偏置：
+
 假设有n个样本，第i次的实际输出为y，对于样本的预测输出可以表示为：
-$$ \bar{y}^i = w_1x_1^i+w_2x_2^i+&amp;hellip;+w_nx_n^i+b $$
+\[ \bar{y}^i = w_1x_1^i+w_2x_2^i+...+w_nx_n^i+b \]
 任意一个样本的实际输出和预测输出单个样本的误差，可以使用MES表示：
-$$ e^i=\frac{1}{2}(y^i-\bar{y}^i)^{2} $$
+\[ e^i=\frac{1}{2}(y^i-\bar{y}^i)^{2} \]
 那么所有误差的和可以表示为：
-$$ \begin{aligned} E &amp;amp;= e^1+e^2+&amp;hellip;+e^n \ &amp;amp;= \sum_{i=1}^ne^i \ &amp;amp;= \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 \end{aligned} $$
+\[ \begin{aligned} E &amp;= e^1+e^2+...+e^n \\ &amp;= \sum_{i=1}^ne^i \\ &amp;= \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 \end{aligned} \]
 想象一下，当你从山顶往下走，只要你沿着最陡峭的位置往下走，那么终将走到最底部（也可能是局部最低）：
+
 我们学习的目的就是在$E$尽量最小，然后得到此时的$w$和$b$，前面说的最陡峭的位置该怎么定义呢？我们可以引入梯度，这是一个向量，指的是函数值上升最快的方向，那么最陡峭的位置就可以用在最陡峭的方向迈出一步（步长，学习速率），用数学公式表示为：
-$$ \mathbf{x}{n e w}=\mathbf{x}{\text {old }}-\eta \nabla f(x) $$
+\[ \mathbf{x}_{n e w}=\mathbf{x}_{\text {old }}-\eta \nabla f(x) \]
 其中：
  $\nabla$表示梯度算子 $\nabla f(x)$表示函数的梯度 $\eta$表示梯度、学习速率，可以理解为找准下山的方向后要迈多大步子  现在有了目标函数，也知道怎么找到让目标函数值最小的办法，对于参数$w$：
-$$ E_{(w)} = \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 $$
+\[ E_{(w)} = \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 \]
 那么$W$值的更新公式为：
-$$ w_{n e w}=w_{\text {old }}-\eta \nabla E_{(w)} $$
+\[ w_{n e w}=w_{\text {old }}-\eta \nabla E_{(w)} \]
 关键步骤来了，来看看$E_{(w)}$的推导吧：
-$$ \begin{aligned} \nabla E(\mathrm{w}) &amp;amp;=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \
-&amp;amp;=\frac{\partial}{\partial \mathrm{w}} \frac{1}{2} \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)^{2} \&amp;amp;=\frac{1}{2}\frac{\partial}{\partial \mathrm{w}} \sum_{i=1}^{n} \left(y^{(i)2}-2y^{(i)}\bar{y}^{(i)}+\bar{y}^{(i)2}\right) \end{aligned} $$</description>
+\[ \begin{aligned} \nabla E(\mathrm{w}) &amp;=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \\ &amp;=\frac{\partial}{\partial \mathrm{w}} \frac{1}{2} \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)^{2} \\&amp;=\frac{1}{2}\frac{\partial}{\partial \mathrm{w}} \sum_{i=1}^{n} \left(y^{(i)2}-2y^{(i)}\bar{y}^{(i)}+\bar{y}^{(i)2}\right) \end{aligned} \]</description>
     </item>
     
     <item>
@@ -42,14 +43,16 @@ $$ \begin{aligned} \nabla E(\mathrm{w}) &amp;amp;=\frac{\partial}{\partial \math
       <description>消失的梯度问题 导致梯度消失的原因 在更加复杂⽹络中的不稳定梯度 其它深度学习的障碍  上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。
  普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数
  而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：
+
 这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？
+
 随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？
 仔细研究会发现：
-  如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前
-  反之情况也会发生，前面层训练良好，后面停滞不前
+ 如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前
+ 反之情况也会发生，前面层训练良好，后面停滞不前
   实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。
 消失的梯度问题 我们在第一章识别手写字曾经以MNIST数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。
-简单回顾一下，之前我们的训练样本路径为/pylab/datasets/mnist.pkl.gz ，相关案例代码在pylab都可以找到（我稍做了改动以支持Python3）。
+简单回顾一下，之前我们的训练样本路径为/pylab/datasets/mnist.pkl.gz，相关案例代码在pylab都可以找到（我稍做了改动以支持Python3）。
 import mnist_loader import network2 training_data, validation_data, test_data = mnist_loader.load_data_wrapper() # 输入层 784 # 隐藏层 30 # 输出层 10 sizes = [784, 30, 10] net = network2.Network(sizes=sizes) # 随机梯度下降开始训练 net.SGD( training_data, 30, 10, 0.1, lmbda=5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, ) &amp;#34;&amp;#34;&amp;#34; Epoch 0 training complete Accuracy on evaluation data: 9280 / 10000 Epoch 1 training complete Accuracy on evaluation data: 9391 / 10000 .</description>
     </item>
     
@@ -63,17 +66,20 @@ import mnist_loader import network2 training_data, validation_data, test_data = 
 主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
  不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
  试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
- 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 &amp;hellip;  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 ...  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
 前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
 两个预先声明 在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
  这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&amp;lt;\epsilon$，其中$\epsilon&amp;gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
  接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
 一个输入和一个输出的普遍性 先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+
 第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+
 第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
-$$ \sigma(z) \equiv 1 /\left(1+e^{-z}\right) $$
+\[ \sigma(z) \equiv 1 /\left(1+e^{-z}\right) \]
 其中：$z=wx+b$，参见右上角的图，让我们考虑一下几个情况：
- 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变   上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变 上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+
 其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
 import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 + np.exp(-(w * x + b))) def plot_sigmoid(w, b): x = np.</description>
     </item>

@@ -247,70 +247,96 @@
 
     <section class="article-content">
     <p>以感知器为例，可以梯度下降来学习合适的权重和偏置：</p>
-<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210114211230457.png" alt="shadow-感知器图示"  /></p>
+
+<p><figure><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210114211230457.png" alt="shadow-感知器图示"></figure></p>
+
 <p>假设有<code>n</code>个样本，第<code>i</code>次的实际输出为<code>y</code>，对于样本的预测输出可以表示为：</p>
-<p>$$
-\bar{y}^i = w_1x_1^i+w_2x_2^i+&hellip;+w_nx_n^i+b
-$$</p>
+
+<p><span  class="math">\[
+\bar{y}^i = w_1x_1^i+w_2x_2^i+...+w_nx_n^i+b
+\]</span></p>
+
 <p>任意一个样本的实际输出和预测输出单个样本的误差，可以使用<code>MES</code>表示：</p>
-<p>$$
+
+<p><span  class="math">\[
 e^i=\frac{1}{2}(y^i-\bar{y}^i)^{2}
-$$</p>
+\]</span></p>
+
 <p>那么所有误差的和可以表示为：</p>
-<p>$$
+
+<p><span  class="math">\[
 \begin{aligned}
-E &amp;= e^1+e^2+&hellip;+e^n
-\ &amp;= \sum_{i=1}^ne^i
-\ &amp;= \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2
+E &= e^1+e^2+...+e^n
+\\ &= \sum_{i=1}^ne^i
+\\ &= \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2
 \end{aligned}
-$$</p>
+\]</span></p>
+
 <p>想象一下，当你从山顶往下走，只要你沿着最陡峭的位置往下走，那么终将走到最底部（也可能是局部最低）：</p>
-<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1042406-20161017221342935-1872962415.png" alt="img"  /></p>
+
+<p><figure><img src="https://gitee.com/howie6879/oss/raw/master/uPic/1042406-20161017221342935-1872962415.png" alt="img"></figure></p>
+
 <p>我们学习的目的就是在$E$尽量最小，然后得到此时的$w$和$b$，前面说的<strong>最陡峭的位置</strong>该怎么定义呢？我们可以引入<strong>梯度</strong>，这是一个向量，指的是函数值上升最快的方向，那么<strong>最陡峭的位置</strong>就可以用在最陡峭的方向迈出一步（步长，学习速率），用数学公式表示为：</p>
-<p>$$
-\mathbf{x}<em>{n e w}=\mathbf{x}</em>{\text {old }}-\eta \nabla f(x)
-$$</p>
+
+<p><span  class="math">\[
+\mathbf{x}_{n e w}=\mathbf{x}_{\text {old }}-\eta \nabla f(x)
+\]</span></p>
+
 <p>其中：</p>
+
 <ul>
 <li>$\nabla$表示梯度算子</li>
 <li>$\nabla f(x)$表示函数的梯度</li>
 <li>$\eta$表示梯度、学习速率，可以理解为找准下山的方向后要迈多大步子</li>
 </ul>
+
 <p>现在有了目标函数，也知道怎么找到让目标函数值最小的办法，对于参数$w$：</p>
-<p>$$
+
+<p><span  class="math">\[
 E_{(w)} = \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2
-$$</p>
+\]</span></p>
+
 <p>那么$W$值的更新公式为：</p>
-<p>$$
+
+<p><span  class="math">\[
 w_{n e w}=w_{\text {old }}-\eta \nabla E_{(w)}
-$$</p>
+\]</span></p>
+
 <p>关键步骤来了，来看看$E_{(w)}$的推导吧：</p>
-<p>$$
+
+<p><span  class="math">\[
 \begin{aligned}
-\nabla E(\mathrm{w}) &amp;=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \<br>
-&amp;=\frac{\partial}{\partial \mathrm{w}} \frac{1}{2} \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)^{2}
-\&amp;=\frac{1}{2}\frac{\partial}{\partial \mathrm{w}} \sum_{i=1}^{n}
+\nabla E(\mathrm{w}) &=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \\
+&=\frac{\partial}{\partial \mathrm{w}} \frac{1}{2} \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)^{2}
+\\&=\frac{1}{2}\frac{\partial}{\partial \mathrm{w}} \sum_{i=1}^{n}
 \left(y^{(i)2}-2y^{(i)}\bar{y}^{(i)}+\bar{y}^{(i)2}\right)
 \end{aligned}
-$$</p>
+\]</span></p>
+
 <p>再引入链式求导法则：</p>
-<p>$$
+
+<p><span  class="math">\[
 \begin{aligned}
-\nabla E(\mathrm{w}) &amp;=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \<br>
-&amp;=\frac{1}{2} \sum_{i=1}^{n} \frac{\partial}{\partial \mathrm{w}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \<br>
-&amp;=\frac{1}{2} \sum_{i=1}^{n}\left(\frac{\partial}{\partial \bar{y}^{(i)}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \frac{\partial y_{(i)}}{\partial \mathrm{w}}\right) \<br>
-&amp;=\frac{1}{2} \sum_{i=1}^{n}\left(\left(-2 y^{(i)}+2 \bar{y}^{(i)}\right) \mathbf{x}^{(i)}\right) \<br>
-&amp;=-\sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right) \mathrm{x}^{(i)}
+\nabla E(\mathrm{w}) &=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \\
+&=\frac{1}{2} \sum_{i=1}^{n} \frac{\partial}{\partial \mathrm{w}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \\
+&=\frac{1}{2} \sum_{i=1}^{n}\left(\frac{\partial}{\partial \bar{y}^{(i)}}\left(y^{(i) 2}-2 y^{(i)} \bar{y}^{(i)}+\bar{y}^{(i) 2}\right) \frac{\partial y_{(i)}}{\partial \mathrm{w}}\right) \\
+&=\frac{1}{2} \sum_{i=1}^{n}\left(\left(-2 y^{(i)}+2 \bar{y}^{(i)}\right) \mathbf{x}^{(i)}\right) \\
+&=-\sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right) \mathrm{x}^{(i)}
 \end{aligned}
-$$</p>
+\]</span></p>
+
 <p>前面提到$W$值的更新公式为：</p>
-<p>$$
+
+<p><span  class="math">\[
 w_{n e w}=w_{\text {old }}-\eta \nabla E_{(w)}
-$$</p>
+\]</span></p>
+
 <p>将上面计算结果带入：</p>
-<p>$$
+
+<p><span  class="math">\[
 w_{n e w}=w_{\text {old }}+\eta \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right) \mathrm{x}^{(i)}
-$$</p>
+\]</span></p>
+
 <p>参数的更新方式就这样计算出来了，其实所谓的学习，就是确定一个目标函数用一定的计算方法让其算出最优的参数。</p>
 
 </section>
