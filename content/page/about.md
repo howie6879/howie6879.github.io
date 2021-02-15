@@ -1,5 +1,5 @@
 ---
-title : 关于我
+title : "About"
 date : 2018-01-06
 author : howie6879
 author : "Hugo Authors"

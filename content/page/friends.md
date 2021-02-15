@@ -1,5 +1,5 @@
 ---
-title : 
+title : Friends
 date : 2018-01-06
 author : howie6879
 image: /images/thumbs/h_53.jpg
