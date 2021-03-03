@@ -319,7 +319,7 @@ kubectl &lt;span class=&#34;nb&#34;&gt;exec&lt;/span&gt; -it nginx-deployment-58
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词&lt;code&gt;Pod&lt;/code&gt;，这又是什么？让我们带着疑问继续往下看吧。&lt;/p&gt;
 &lt;h2 id=&#34;pod&#34;&gt;Pod&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;在Kubernetes中，最小的管理元素不是一个个独立的容器，而是pod。&lt;/p&gt;
+&lt;p&gt;在Kubernetes中，最小的管理元素不是一个个独立的容器，而是pod（目的在于解决容器间&lt;strong&gt;紧密协作&lt;/strong&gt;关系的难题）&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/module_03_pods.ccc5ba54.svg&#34; alt=&#34;Kubernetes教程：Pod概念&#34;  /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Pod&lt;/code&gt;是一组并置的容器，代表了&lt;code&gt;Kubernetes&lt;/code&gt;中的基本构建模块:&lt;/p&gt;
@@ -332,7 +332,8 @@ kubectl &lt;span class=&#34;nb&#34;&gt;exec&lt;/span&gt; -it nginx-deployment-58
 &lt;/li&gt;
 &lt;li&gt;一个&lt;code&gt;Pod&lt;/code&gt;的所有容器都运行在同一个节点&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;容器可以被管理，但是容器里面的多个进程实际上是不好被管理的，所以&lt;strong&gt;容器被设计为每个容器只运行一个进程&lt;/strong&gt;，由于这个原因，我们需要另一种更高级的结构来将容器绑定在一起，并将它们作为一个单元进行管理，这就是&lt;code&gt;Pod&lt;/code&gt;出现的目的。&lt;/p&gt;
+&lt;p&gt;容器可以被管理，但是容器里面的多个进程实际上是不好被管理的，所以&lt;strong&gt;容器被设计为每个容器只运行一个进程&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;容器的本质实际上就是一个进程，&lt;strong&gt;Namespace 做隔离，Cgroups 做限制，rootfs 做文件系统&lt;/strong&gt;。在一个容器只能运行一个进程的前提下，实际开发过程中一个应用是由多个容器紧密协作才可以成功地运行起来。因此，我们需要另一种更高级的结构来将容器绑定在一起，并将它们作为一个单元进行管理，这就是&lt;code&gt;Pod&lt;/code&gt;出现的目的。&lt;/p&gt;
 &lt;h3 id=&#34;如何定义并创建一个pod&#34;&gt;如何定义并创建一个Pod&lt;/h3&gt;
 &lt;p&gt;创建文件&lt;code&gt;nginx-pod.yaml&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;apiVersion: v1
@@ -390,35 +391,14 @@ kubectl get po nginx -o yaml
 
 &lt;span class=&#34;c1&#34;&gt;# 删除 Pod&lt;/span&gt;
 kubectl delete -f nginx-pod.yaml
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;外部访问&#34;&gt;外部访问&lt;/h3&gt;
-&lt;p&gt;此时我们已经启动了一个&lt;code&gt;nginx&lt;/code&gt;，我们有哪些方法可以对&lt;code&gt;Pod&lt;/code&gt;进行连接测试呢？&lt;/p&gt;
-&lt;p&gt;可以使用如下命令：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl port-forward nginx 8088:80
-&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
-Forwarding from 127.0.0.1:8088 -&amp;gt; &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
-Forwarding from &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;::1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;:8088 -&amp;gt; &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
-
-&lt;span class=&#34;c1&#34;&gt;# 再开一个终端访问测试或者打开浏览器&lt;/span&gt;
-curl http://0.0.0.0:8088/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210105230002954.png&#34; alt=&#34;image-20210105230002954&#34;  /&gt;&lt;/p&gt;
-&lt;p&gt;显然，成功访问，但是这个有个问题就是此端口不会长期开放，一旦一定时间内没有访问，就会自动断掉，我们需要其他的方式来进行访问。比如后面会提到的&lt;code&gt;Service&lt;/code&gt;，这里就简单运行个命令，大家感受一下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 创建一个服务对象&lt;/span&gt;
-&lt;span class=&#34;c1&#34;&gt;# NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务&lt;/span&gt;
-kubectl expose po nginx --port&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt; --target-port&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt; --type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;NodePort  --name nginx-http
-&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
-service/nginx-http exposed
-
-&lt;span class=&#34;c1&#34;&gt;# 查看服务&lt;/span&gt;
-kubectl get svc
-&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;S&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;        AGE
-kubernetes   ClusterIP   10.96.0.1        &amp;lt;none&amp;gt;        443/TCP        16d
-nginx-http   NodePort    10.102.141.232   &amp;lt;none&amp;gt;        80:32220/TCP   1s
-
-&lt;span class=&#34;c1&#34;&gt;# 终端访问测试&lt;/span&gt;
-curl http://0.0.0.0:32220/
-&lt;span class=&#34;c1&#34;&gt;# 输出 html, 表示成功端口成功开放给外部&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;标签&#34;&gt;标签&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里简单介绍了用声明式API怎么创建&lt;code&gt;Pod&lt;/code&gt;，但从技术角度看，&lt;code&gt;Pod&lt;/code&gt;又是怎样被创建的呢？实际上&lt;code&gt;Pod&lt;/code&gt;只是一个逻辑概念，&lt;code&gt;Pod&lt;/code&gt;里的所有容器，共享的是同一个&lt;code&gt;Network Namespace&lt;/code&gt;，并且可以声明共享同一个&lt;code&gt;Volume&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Pod&lt;/code&gt;除了启动你定义的容器，还会启动一个&lt;code&gt;Infra&lt;/code&gt;容器，这个容器使用的就是&lt;code&gt;k8s.gcr.io/pause&lt;/code&gt;镜像，它的作用就是整一个&lt;code&gt;Network Namespace&lt;/code&gt;方便用户容器加入，这就意味着&lt;code&gt;Pod&lt;/code&gt;有以下特性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内部直接使用&lt;code&gt;127.0.0.1&lt;/code&gt;通信，网络设备一致（&lt;code&gt;Infra&lt;/code&gt;容器决定）&lt;/li&gt;
+&lt;li&gt;只有一个IP地址&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Pod&lt;/code&gt;的生命周期只跟&lt;code&gt;Infra&lt;/code&gt;容器一致，而与用户容器无关&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;标签&#34;&gt;标签&lt;/h3&gt;
 &lt;p&gt;现在我们的集群里面只运行了一个&lt;code&gt;Pod&lt;/code&gt;，但在实际环境中，我们运行数十上百个&lt;code&gt;Pod&lt;/code&gt;也是一件很正常的事情，这样就引出了&lt;code&gt;Pod&lt;/code&gt;管理上的问题，我们可以通过标签来组织&lt;code&gt;Pod&lt;/code&gt;和所有其他&lt;code&gt;Kubernetes&lt;/code&gt;对象。&lt;/p&gt;
 &lt;p&gt;前面&lt;code&gt;nginx-pod.yaml&lt;/code&gt;里面就声明了&lt;code&gt;labels&lt;/code&gt;字段，标签为&lt;code&gt;name&lt;/code&gt;，相关操作记录如下：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 查看标签&lt;/span&gt;
@@ -470,34 +450,39 @@ kubectl create -f nginx-pod.yaml -n cus-ns
 &lt;li&gt;手动增删改查&lt;code&gt;Pod&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;让其服务化（&lt;code&gt;Service&lt;/code&gt;）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;但是在实际使用中，我们并不会直接人工干预来管理&lt;code&gt;Pod&lt;/code&gt;，为什么呢？当&lt;code&gt;Pod&lt;/code&gt;健康出问题，人是没有精力来做这种维护管理工作的，但我们擅长创造工具来自动化这些繁琐的事情。&lt;/p&gt;
-&lt;p&gt;所以我们可以使用&lt;code&gt;Deployment&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;deployment&#34;&gt;Deployment&lt;/h2&gt;
-&lt;p&gt;窥一斑而知全豹，好好了解完&lt;code&gt;Pod&lt;/code&gt;之后，再继续了解&lt;code&gt;k8s&lt;/code&gt;的概念也就水到渠成了。我们一般不会直接创建&lt;code&gt;Pod&lt;/code&gt;，毕竟通过创建&lt;code&gt;Deployment&lt;/code&gt;资源可以很方便的创建管理&lt;code&gt;Pod&lt;/code&gt;，并支持声明式地更新应用程序。&lt;/p&gt;
-&lt;p&gt;本章第一小节&lt;strong&gt;引入&lt;/strong&gt;部分就是以&lt;code&gt;Deployment&lt;/code&gt;举例，当时启动配置文件我们看到了一个&lt;code&gt;Deployment&lt;/code&gt;资源和一个&lt;code&gt;Pod&lt;/code&gt;，查看命令如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl get deployments
+&lt;p&gt;但是在实际使用中，我们并不会直接人工干预来管理&lt;code&gt;Pod&lt;/code&gt;，为什么呢？当&lt;code&gt;Pod&lt;/code&gt;健康出问题或者需要进行更新等操作时，人是没有精力来做这种维护管理工作的，但我们擅长创造工具来自动化这些繁琐的事情，所以我们可以使用后面介绍的&lt;code&gt;Deployment&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;外部访问&#34;&gt;外部访问&lt;/h3&gt;
+&lt;p&gt;此时我们已经启动了一个&lt;code&gt;nginx&lt;/code&gt;，我们有哪些方法可以对&lt;code&gt;Pod&lt;/code&gt;进行连接测试呢？&lt;/p&gt;
+&lt;p&gt;可以使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl port-forward nginx 8088:80
 &lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-deployment   0/1     &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;            &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;           4s
+Forwarding from 127.0.0.1:8088 -&amp;gt; &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
+Forwarding from &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;::1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;:8088 -&amp;gt; &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
 
-kubectl get pods
-&lt;span class=&#34;c1&#34;&gt;# 输出 如果名字有变化不用在意，只是我重新创建了一个 Deployment &lt;/span&gt;
-NAME                               READY   STATUS    RESTARTS   AGE
-nginx-deployment-585449566-mnrtn   1/1     Running   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;          2m1s
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里我们再增加一条命令：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl get replicasets.apps
+&lt;span class=&#34;c1&#34;&gt;# 再开一个终端访问测试或者打开浏览器&lt;/span&gt;
+curl http://0.0.0.0:8088/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210105230002954.png&#34; alt=&#34;image-20210105230002954&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;显然，成功访问，但是这个有个问题就是此端口不会长期开放，一旦一定时间内没有访问，就会自动断掉，我们需要其他的方式来进行访问，比如后面会提到的&lt;code&gt;Service&lt;/code&gt;，这里就简单运行个命令，大家感受一下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 创建一个服务对象&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务&lt;/span&gt;
+kubectl expose po nginx --port&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt; --target-port&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt; --type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;NodePort  --name nginx-http
 &lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
-NAME                         DESIRED   CURRENT   READY   AGE
-nginx-deployment-585449566   &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;         &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;         &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;       10m
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;嗯嗯~，让我们捋一捋，当我们创建一个&lt;code&gt;Deployment&lt;/code&gt;对象时，&lt;code&gt;k8s&lt;/code&gt;不会只创建一个&lt;code&gt;Deployment&lt;/code&gt;资源，还会创建另外的&lt;code&gt;ReplicaSet &lt;/code&gt;以及1个&lt;code&gt;Pod &lt;/code&gt;对象。&lt;/p&gt;
-&lt;p&gt;所以问题来了， &lt;code&gt;ReplicaSet&lt;/code&gt;又是个是什么东西？说到&lt;code&gt;ReplicaSet&lt;/code&gt;就得说到&lt;code&gt;ReplicationController&lt;/code&gt;（弃用）。&lt;/p&gt;
+service/nginx-http exposed
+
+&lt;span class=&#34;c1&#34;&gt;# 查看服务&lt;/span&gt;
+kubectl get svc
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;S&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;        AGE
+kubernetes   ClusterIP   10.96.0.1        &amp;lt;none&amp;gt;        443/TCP        16d
+nginx-http   NodePort    10.102.141.232   &amp;lt;none&amp;gt;        80:32220/TCP   1s
+
+&lt;span class=&#34;c1&#34;&gt;# 终端访问测试&lt;/span&gt;
+curl http://0.0.0.0:32220/
+&lt;span class=&#34;c1&#34;&gt;# 输出 html, 表示成功端口成功开放给外部&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;service&#34;&gt;Service&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;code&gt;ReplicationController&lt;/code&gt;是一种&lt;code&gt;k8s&lt;/code&gt;资源，其会持续监控正在运行的pod列表，从而保证&lt;code&gt;Pod&lt;/code&gt;的稳定（在现有&lt;code&gt;Pod&lt;/code&gt;丢失时启动一个新&lt;code&gt;Pod&lt;/code&gt;），也能轻松实现&lt;code&gt;Pod&lt;/code&gt;的水平伸缩。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;ReplicaSet&lt;/code&gt;的行为与&lt;code&gt;ReplicationController&lt;/code&gt;完全相同，但Pod选择器的表达能力更强。&lt;/p&gt;
+&lt;p&gt;Service 服务的主要作用就是替代 Pod 对外暴露一个不变的访问地址&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;所以我们可以将&lt;code&gt;Deployment&lt;/code&gt;当成一种更高阶的资源，用于部署应用程序，并以声明的方式管理应用，而不是通过&lt;code&gt;ReplicaSet&lt;/code&gt;进行部署，上述命令的创建关系如下图：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210110174652178.png&#34; alt=&#34;image-20210110174652178&#34;  /&gt;&lt;/p&gt;
-&lt;h2 id=&#34;service&#34;&gt;Service&lt;/h2&gt;
 &lt;p&gt;在本文第二节&lt;code&gt;Pod&lt;/code&gt;部分的&lt;code&gt;外部访问&lt;/code&gt;小节，就已经提到并演示了&lt;code&gt;Service&lt;/code&gt;，它很方便地将我们的服务端口成功开放给外部访问。&lt;/p&gt;
 &lt;h3 id=&#34;介绍&#34;&gt;介绍&lt;/h3&gt;
 &lt;p&gt;我们的&lt;code&gt;Pod&lt;/code&gt;是有生命周期的，它们可以被创建、销毁，但是一旦被销毁，这个对象的相关痕迹就没有了，哪怕我们用&lt;code&gt;ReplicaSet&lt;/code&gt;让他又&lt;em&gt;复生&lt;/em&gt;了，但是新&lt;code&gt;Pod&lt;/code&gt; 的&lt;code&gt;IP&lt;/code&gt;我们是没法管控的。&lt;/p&gt;
@@ -518,7 +503,13 @@ nginx-deployment-585449566   &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;       
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;port&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;8068&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;protocol&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;TCP&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;targetPort&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;相信上述配置，大部分的字段看起来都没什么问题了吧，这里我想强调的是&lt;code&gt;type&lt;/code&gt;字段，说明如下：&lt;/p&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;相信上述配置，大部分的字段看起来都没什么问题了吧，先说一下端口这块的含义：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;nodePort：通过任意节点的&lt;code&gt;30068&lt;/code&gt;端口来访问&lt;code&gt;Service&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;port：集群内的其他容器组可通过&lt;code&gt;8068&lt;/code&gt;端口访问&lt;code&gt;Service&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;targetPort：&lt;code&gt;Pod&lt;/code&gt;内容器的开发端口&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这里我想强调的是&lt;code&gt;type&lt;/code&gt;字段，说明如下：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;ClusterIP：默认类型，服务只能够在集群内部可以访问&lt;/li&gt;
 &lt;li&gt;NodePort：通过每个 Node 上的 IP 和静态端口（&lt;code&gt;NodePort&lt;/code&gt;）暴露服务&lt;/li&gt;
@@ -540,7 +531,45 @@ nginx        NodePort    10.110.245.214   &amp;lt;none&amp;gt;        8068:30068
 
 &lt;span class=&#34;c1&#34;&gt;# 终端测试&lt;/span&gt;
 curl http://0.0.0.0:30068/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;除了前面提的两种方法（&lt;code&gt;NodePort&lt;/code&gt;、&lt;code&gt;LoadBalancer&lt;/code&gt;），还有另外一种方法——&lt;code&gt;Ingress&lt;/code&gt;资源。我们为什么需要引入&lt;code&gt;Ingress&lt;/code&gt;，最主要的原因是&lt;code&gt;LoadBalancer&lt;/code&gt;需要公有的IP地址，自行搭建的就不要考虑了。&lt;/p&gt;
+&lt;p&gt;而&lt;code&gt;Ingress&lt;/code&gt;非常强大，它位于多个服务之前，充当集群中的&lt;strong&gt;智能路由器&lt;/strong&gt;或入口点：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/ab886a9dd4e912cf6f5a1f3ed983ac4c.png&#34; alt=&#34;Ingress.png&#34;  /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;deployment&#34;&gt;Deployment&lt;/h2&gt;
+&lt;p&gt;窥一斑而知全豹，好好了解完&lt;code&gt;Pod&lt;/code&gt;之后，再继续了解&lt;code&gt;k8s&lt;/code&gt;的概念也就水到渠成了。我们一般不会直接创建&lt;code&gt;Pod&lt;/code&gt;，毕竟通过创建&lt;code&gt;Deployment&lt;/code&gt;资源可以很方便的创建管理&lt;code&gt;Pod&lt;/code&gt;（水平扩展、伸缩），并支持声明式地更新应用程序。&lt;/p&gt;
+&lt;h3 id=&#34;介绍-1&#34;&gt;介绍&lt;/h3&gt;
+&lt;p&gt;本章第一小节&lt;strong&gt;引入&lt;/strong&gt;部分就是以&lt;code&gt;Deployment&lt;/code&gt;举例，当时启动配置文件我们看到了一个&lt;code&gt;Deployment&lt;/code&gt;资源和一个&lt;code&gt;Pod&lt;/code&gt;，查看命令如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl get deployments
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   0/1     &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;            &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;           4s
+
+kubectl get pods
+&lt;span class=&#34;c1&#34;&gt;# 输出 如果名字有变化不用在意，只是我重新创建了一个 Deployment &lt;/span&gt;
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-585449566-mnrtn   1/1     Running   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;          2m1s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里我们再增加一条命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl get replicasets.apps
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-585449566   &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;         &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;         &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;       10m
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;嗯嗯~，让我们捋一捋，当我们创建一个&lt;code&gt;Deployment&lt;/code&gt;对象时，&lt;code&gt;k8s&lt;/code&gt;不会只创建一个&lt;code&gt;Deployment&lt;/code&gt;资源，还会创建另外的&lt;code&gt;ReplicaSet &lt;/code&gt;以及1个&lt;code&gt;Pod &lt;/code&gt;对象。所以问题来了， &lt;code&gt;ReplicaSet&lt;/code&gt;又是个是什么东西？&lt;/p&gt;
+&lt;h3 id=&#34;replicaset&#34;&gt;ReplicaSet&lt;/h3&gt;
+&lt;p&gt;如果你更新了&lt;code&gt;Deployment&lt;/code&gt;的&lt;code&gt;Pod&lt;/code&gt;模板，那么&lt;code&gt;Deployment&lt;/code&gt;就需要通过滚动更新（rolling update）的方式进行更新。&lt;/p&gt;
+&lt;p&gt;而滚动更新，离不开&lt;code&gt;ReplicaSet&lt;/code&gt;，说到&lt;code&gt;ReplicaSet&lt;/code&gt;就得说到&lt;code&gt;ReplicationController&lt;/code&gt;（弃用）。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;ReplicationController&lt;/code&gt;是一种&lt;code&gt;k8s&lt;/code&gt;资源，其会持续监控正在运行的pod列表，从而保证&lt;code&gt;Pod&lt;/code&gt;的稳定（在现有&lt;code&gt;Pod&lt;/code&gt;丢失时启动一个新&lt;code&gt;Pod&lt;/code&gt;），也能轻松实现&lt;code&gt;Pod&lt;/code&gt;的水平伸缩&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;ReplicaSet&lt;/code&gt;的行为与&lt;code&gt;ReplicationController&lt;/code&gt;完全相同，但&lt;code&gt;Pod&lt;/code&gt;选择器的表达能力更强（允许匹配缺少某个标签的Pod，或包含特定标签名的Pod）。所以我们可以将&lt;code&gt;Deployment&lt;/code&gt;当成一种更高阶的资源，用于部署应用程序，并以声明的方式管理应用，而不是通过&lt;code&gt;ReplicaSet&lt;/code&gt;进行部署，上述命令的创建关系如下图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210110174652178.png&#34; alt=&#34;image-20210110174652178&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;如上图，&lt;code&gt;Deployment&lt;/code&gt;的控制器，实际上控制的是&lt;code&gt;ReplicaSet&lt;/code&gt;的数目，以及每个&lt;code&gt;ReplicaSet&lt;/code&gt;的属性。我们可以说&lt;code&gt;Deployment&lt;/code&gt;是一个两层控制器：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Deployment&amp;ndash;&amp;gt;ReplicaSet&amp;ndash;&amp;gt;Pod&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这种形式下滚动更新是极好的，但这里有个前提条件那就是&lt;code&gt;Pod&lt;/code&gt;是无状态的，如果运行的容器必须依赖此时的相关运行数据，那么回滚后这些存在于容器的数据或者一些相关运行状态值就不存在了，对于这种情况，该怎么办？此时需要的就是&lt;code&gt;StatefulSet&lt;/code&gt;（部署有状态的多副本应用）。&lt;/p&gt;
+&lt;h2 id=&#34;statefulset&#34;&gt;StatefulSet&lt;/h2&gt;
+&lt;p&gt;如果通过&lt;code&gt;ReplicaSet&lt;/code&gt;创建多个&lt;code&gt;Pod&lt;/code&gt;副本（其中描述了关联到特定持久卷声明的数据卷），那么这些副本都将共享这个持久卷声明的数据卷。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/CB_3NC5VK5SeDyX6Np6Ln_00500.jpeg&#34; alt=&#34;img&#34;  /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
 &lt;p&gt;本章的基本概念就介绍到这里了，谢谢！本部分内容有参考如下文章：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://kuboard.cn/learning/k8s-basics/kubernetes-basics.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -551,18 +580,20 @@ curl http://0.0.0.0:30068/
     &gt;Kubernetes 中文指南&lt;/a&gt;：Deployment&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://jimmysong.io/kubernetes-handbook/concepts/service.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Kubernetes 中文指南&lt;/a&gt;：Service&lt;/li&gt;
-&lt;li&gt;Kubernetes in Action中文版：第3、4、9章&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;深入剖析Kubernetes&lt;/a&gt;：容器编排部分&lt;/li&gt;
+&lt;li&gt;Kubernetes in Action中文版：第3、4、5、9章&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
 </description>
         </item>
         <item>
-        <title>k8s学习之路.[01.安装]</title>
-        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</link>
+        <title>k8s学习之路.[01.走进Kubernetes]</title>
+        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</link>
         <pubDate>Mon, 11 Jan 2021 22:16:42 +0800</pubDate>
         
-        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_57.png" alt="Featured image of post k8s学习之路.[01.安装]" /&gt;&lt;h2 id=&#34;什么是kubernetes&#34;&gt;什么是Kubernetes&lt;/h2&gt;
+        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_57.png" alt="Featured image of post k8s学习之路.[01.走进Kubernetes]" /&gt;&lt;h2 id=&#34;什么是kubernetes&#34;&gt;什么是Kubernetes&lt;/h2&gt;
 &lt;p&gt;随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;服务发现和负载均衡&lt;/strong&gt;&lt;/li&gt;
@@ -570,6 +601,24 @@ curl http://0.0.0.0:30068/
 &lt;li&gt;&lt;strong&gt;自动发布和回滚&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;自愈&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;密钥及配置管理&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通过下面架构图可以看到其有上下两部分对应的&lt;code&gt;Master&amp;amp;Node&lt;/code&gt;节点构成，这两种角色分别对应着控制节点和计算节点。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/8ee9f2fa987eccb490cfaa91c6484f67.png&#34; alt=&#34;全局架构&#34;  /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Kubernetes控制节点主要由以下几个核心组件组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;etcd保存了整个集群的状态&lt;/li&gt;
+&lt;li&gt;apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制&lt;/li&gt;
+&lt;li&gt;controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等&lt;/li&gt;
+&lt;li&gt;scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对于计算节点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理&lt;/li&gt;
+&lt;li&gt;Container runtime负责镜像管理以及Pod和容器的真正运行（CRI）&lt;/li&gt;
+&lt;li&gt;kube-proxy负责为Service提供cluster内部的服务发现和负载均衡&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
 &lt;h3 id=&#34;单机安装&#34;&gt;单机安装&lt;/h3&gt;
@@ -834,6 +883,10 @@ kubectl get services
     &gt;使用kubeadm安装kubernetes_v1.19.x&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.pomit.cn/p/2366402025269761#1010602&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Web基础配置篇（十六）: Kubernetes集群的安装使用&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://jimmysong.io/kubernetes-handbook/concepts/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Kubernetes架构&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;深入剖析Kubernetes&lt;/a&gt;：入门篇以及集群搭建部分&lt;/li&gt;
 &lt;li&gt;Kubernetes in Action中文版：第1、2章&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;

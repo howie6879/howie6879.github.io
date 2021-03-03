@@ -311,7 +311,7 @@ kubectl <span class="nb">exec</span> -it nginx-deployment-585449566-qslv5 -- /bi
 </code></pre></div><p>此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词<code>Pod</code>，这又是什么？让我们带着疑问继续往下看吧。</p>
 <h2 id="pod">Pod</h2>
 <blockquote>
-<p>在Kubernetes中，最小的管理元素不是一个个独立的容器，而是pod。</p>
+<p>在Kubernetes中，最小的管理元素不是一个个独立的容器，而是pod（目的在于解决容器间<strong>紧密协作</strong>关系的难题）</p>
 </blockquote>
 <p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/module_03_pods.ccc5ba54.svg" alt="Kubernetes教程：Pod概念"  /></p>
 <p><code>Pod</code>是一组并置的容器，代表了<code>Kubernetes</code>中的基本构建模块:</p>
@@ -324,7 +324,8 @@ kubectl <span class="nb">exec</span> -it nginx-deployment-585449566-qslv5 -- /bi
 </li>
 <li>一个<code>Pod</code>的所有容器都运行在同一个节点</li>
 </ul>
-<p>容器可以被管理，但是容器里面的多个进程实际上是不好被管理的，所以<strong>容器被设计为每个容器只运行一个进程</strong>，由于这个原因，我们需要另一种更高级的结构来将容器绑定在一起，并将它们作为一个单元进行管理，这就是<code>Pod</code>出现的目的。</p>
+<p>容器可以被管理，但是容器里面的多个进程实际上是不好被管理的，所以<strong>容器被设计为每个容器只运行一个进程</strong>。</p>
+<p>容器的本质实际上就是一个进程，<strong>Namespace 做隔离，Cgroups 做限制，rootfs 做文件系统</strong>。在一个容器只能运行一个进程的前提下，实际开发过程中一个应用是由多个容器紧密协作才可以成功地运行起来。因此，我们需要另一种更高级的结构来将容器绑定在一起，并将它们作为一个单元进行管理，这就是<code>Pod</code>出现的目的。</p>
 <h3 id="如何定义并创建一个pod">如何定义并创建一个Pod</h3>
 <p>创建文件<code>nginx-pod.yaml</code>:</p>
 <div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">apiVersion: v1
@@ -382,35 +383,14 @@ kubectl get po nginx -o yaml
 
 <span class="c1"># 删除 Pod</span>
 kubectl delete -f nginx-pod.yaml
-</code></pre></div><h3 id="外部访问">外部访问</h3>
-<p>此时我们已经启动了一个<code>nginx</code>，我们有哪些方法可以对<code>Pod</code>进行连接测试呢？</p>
-<p>可以使用如下命令：</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl port-forward nginx 8088:80
-<span class="c1"># 输出</span>
-Forwarding from 127.0.0.1:8088 -&gt; <span class="m">80</span>
-Forwarding from <span class="o">[</span>::1<span class="o">]</span>:8088 -&gt; <span class="m">80</span>
-
-<span class="c1"># 再开一个终端访问测试或者打开浏览器</span>
-curl http://0.0.0.0:8088/
-</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210105230002954.png" alt="image-20210105230002954"  /></p>
-<p>显然，成功访问，但是这个有个问题就是此端口不会长期开放，一旦一定时间内没有访问，就会自动断掉，我们需要其他的方式来进行访问。比如后面会提到的<code>Service</code>，这里就简单运行个命令，大家感受一下：</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 创建一个服务对象</span>
-<span class="c1"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
-kubectl expose po nginx --port<span class="o">=</span><span class="m">80</span> --target-port<span class="o">=</span><span class="m">80</span> --type<span class="o">=</span>NodePort  --name nginx-http
-<span class="c1"># 输出</span>
-service/nginx-http exposed
-
-<span class="c1"># 查看服务</span>
-kubectl get svc
-<span class="c1"># 输出</span>
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>        AGE
-kubernetes   ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        16d
-nginx-http   NodePort    10.102.141.232   &lt;none&gt;        80:32220/TCP   1s
-
-<span class="c1"># 终端访问测试</span>
-curl http://0.0.0.0:32220/
-<span class="c1"># 输出 html, 表示成功端口成功开放给外部</span>
-</code></pre></div><h3 id="标签">标签</h3>
+</code></pre></div><p>这里简单介绍了用声明式API怎么创建<code>Pod</code>，但从技术角度看，<code>Pod</code>又是怎样被创建的呢？实际上<code>Pod</code>只是一个逻辑概念，<code>Pod</code>里的所有容器，共享的是同一个<code>Network Namespace</code>，并且可以声明共享同一个<code>Volume</code>。</p>
+<p><code>Pod</code>除了启动你定义的容器，还会启动一个<code>Infra</code>容器，这个容器使用的就是<code>k8s.gcr.io/pause</code>镜像，它的作用就是整一个<code>Network Namespace</code>方便用户容器加入，这就意味着<code>Pod</code>有以下特性：</p>
+<ul>
+<li>内部直接使用<code>127.0.0.1</code>通信，网络设备一致（<code>Infra</code>容器决定）</li>
+<li>只有一个IP地址</li>
+<li><code>Pod</code>的生命周期只跟<code>Infra</code>容器一致，而与用户容器无关</li>
+</ul>
+<h3 id="标签">标签</h3>
 <p>现在我们的集群里面只运行了一个<code>Pod</code>，但在实际环境中，我们运行数十上百个<code>Pod</code>也是一件很正常的事情，这样就引出了<code>Pod</code>管理上的问题，我们可以通过标签来组织<code>Pod</code>和所有其他<code>Kubernetes</code>对象。</p>
 <p>前面<code>nginx-pod.yaml</code>里面就声明了<code>labels</code>字段，标签为<code>name</code>，相关操作记录如下：</p>
 <div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 查看标签</span>
@@ -462,34 +442,39 @@ kubectl create -f nginx-pod.yaml -n cus-ns
 <li>手动增删改查<code>Pod</code></li>
 <li>让其服务化（<code>Service</code>）</li>
 </ul>
-<p>但是在实际使用中，我们并不会直接人工干预来管理<code>Pod</code>，为什么呢？当<code>Pod</code>健康出问题，人是没有精力来做这种维护管理工作的，但我们擅长创造工具来自动化这些繁琐的事情。</p>
-<p>所以我们可以使用<code>Deployment</code>。</p>
-<h2 id="deployment">Deployment</h2>
-<p>窥一斑而知全豹，好好了解完<code>Pod</code>之后，再继续了解<code>k8s</code>的概念也就水到渠成了。我们一般不会直接创建<code>Pod</code>，毕竟通过创建<code>Deployment</code>资源可以很方便的创建管理<code>Pod</code>，并支持声明式地更新应用程序。</p>
-<p>本章第一小节<strong>引入</strong>部分就是以<code>Deployment</code>举例，当时启动配置文件我们看到了一个<code>Deployment</code>资源和一个<code>Pod</code>，查看命令如下：</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl get deployments
+<p>但是在实际使用中，我们并不会直接人工干预来管理<code>Pod</code>，为什么呢？当<code>Pod</code>健康出问题或者需要进行更新等操作时，人是没有精力来做这种维护管理工作的，但我们擅长创造工具来自动化这些繁琐的事情，所以我们可以使用后面介绍的<code>Deployment</code>。</p>
+<h3 id="外部访问">外部访问</h3>
+<p>此时我们已经启动了一个<code>nginx</code>，我们有哪些方法可以对<code>Pod</code>进行连接测试呢？</p>
+<p>可以使用如下命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl port-forward nginx 8088:80
 <span class="c1"># 输出</span>
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-deployment   0/1     <span class="m">1</span>            <span class="m">0</span>           4s
+Forwarding from 127.0.0.1:8088 -&gt; <span class="m">80</span>
+Forwarding from <span class="o">[</span>::1<span class="o">]</span>:8088 -&gt; <span class="m">80</span>
 
-kubectl get pods
-<span class="c1"># 输出 如果名字有变化不用在意，只是我重新创建了一个 Deployment </span>
-NAME                               READY   STATUS    RESTARTS   AGE
-nginx-deployment-585449566-mnrtn   1/1     Running   <span class="m">0</span>          2m1s
-</code></pre></div><p>这里我们再增加一条命令：</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl get replicasets.apps
+<span class="c1"># 再开一个终端访问测试或者打开浏览器</span>
+curl http://0.0.0.0:8088/
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210105230002954.png" alt="image-20210105230002954"  /></p>
+<p>显然，成功访问，但是这个有个问题就是此端口不会长期开放，一旦一定时间内没有访问，就会自动断掉，我们需要其他的方式来进行访问，比如后面会提到的<code>Service</code>，这里就简单运行个命令，大家感受一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 创建一个服务对象</span>
+<span class="c1"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
+kubectl expose po nginx --port<span class="o">=</span><span class="m">80</span> --target-port<span class="o">=</span><span class="m">80</span> --type<span class="o">=</span>NodePort  --name nginx-http
 <span class="c1"># 输出</span>
-NAME                         DESIRED   CURRENT   READY   AGE
-nginx-deployment-585449566   <span class="m">1</span>         <span class="m">1</span>         <span class="m">1</span>       10m
-</code></pre></div><p>嗯嗯~，让我们捋一捋，当我们创建一个<code>Deployment</code>对象时，<code>k8s</code>不会只创建一个<code>Deployment</code>资源，还会创建另外的<code>ReplicaSet </code>以及1个<code>Pod </code>对象。</p>
-<p>所以问题来了， <code>ReplicaSet</code>又是个是什么东西？说到<code>ReplicaSet</code>就得说到<code>ReplicationController</code>（弃用）。</p>
+service/nginx-http exposed
+
+<span class="c1"># 查看服务</span>
+kubectl get svc
+<span class="c1"># 输出</span>
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>        AGE
+kubernetes   ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        16d
+nginx-http   NodePort    10.102.141.232   &lt;none&gt;        80:32220/TCP   1s
+
+<span class="c1"># 终端访问测试</span>
+curl http://0.0.0.0:32220/
+<span class="c1"># 输出 html, 表示成功端口成功开放给外部</span>
+</code></pre></div><h2 id="service">Service</h2>
 <blockquote>
-<p><code>ReplicationController</code>是一种<code>k8s</code>资源，其会持续监控正在运行的pod列表，从而保证<code>Pod</code>的稳定（在现有<code>Pod</code>丢失时启动一个新<code>Pod</code>），也能轻松实现<code>Pod</code>的水平伸缩。</p>
-<p><code>ReplicaSet</code>的行为与<code>ReplicationController</code>完全相同，但Pod选择器的表达能力更强。</p>
+<p>Service 服务的主要作用就是替代 Pod 对外暴露一个不变的访问地址</p>
 </blockquote>
-<p>所以我们可以将<code>Deployment</code>当成一种更高阶的资源，用于部署应用程序，并以声明的方式管理应用，而不是通过<code>ReplicaSet</code>进行部署，上述命令的创建关系如下图：</p>
-<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210110174652178.png" alt="image-20210110174652178"  /></p>
-<h2 id="service">Service</h2>
 <p>在本文第二节<code>Pod</code>部分的<code>外部访问</code>小节，就已经提到并演示了<code>Service</code>，它很方便地将我们的服务端口成功开放给外部访问。</p>
 <h3 id="介绍">介绍</h3>
 <p>我们的<code>Pod</code>是有生命周期的，它们可以被创建、销毁，但是一旦被销毁，这个对象的相关痕迹就没有了，哪怕我们用<code>ReplicaSet</code>让他又<em>复生</em>了，但是新<code>Pod</code> 的<code>IP</code>我们是没法管控的。</p>
@@ -510,7 +495,13 @@ nginx-deployment-585449566   <span class="m">1</span>         <span class="m">1<
 </span><span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="m">8068</span><span class="w">
 </span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
 </span><span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
-</span></code></pre></div><p>相信上述配置，大部分的字段看起来都没什么问题了吧，这里我想强调的是<code>type</code>字段，说明如下：</p>
+</span></code></pre></div><p>相信上述配置，大部分的字段看起来都没什么问题了吧，先说一下端口这块的含义：</p>
+<ul>
+<li>nodePort：通过任意节点的<code>30068</code>端口来访问<code>Service</code></li>
+<li>port：集群内的其他容器组可通过<code>8068</code>端口访问<code>Service</code></li>
+<li>targetPort：<code>Pod</code>内容器的开发端口</li>
+</ul>
+<p>这里我想强调的是<code>type</code>字段，说明如下：</p>
 <ul>
 <li>ClusterIP：默认类型，服务只能够在集群内部可以访问</li>
 <li>NodePort：通过每个 Node 上的 IP 和静态端口（<code>NodePort</code>）暴露服务</li>
@@ -532,7 +523,45 @@ nginx        NodePort    10.110.245.214   &lt;none&gt;        8068:30068/TCP   1
 
 <span class="c1"># 终端测试</span>
 curl http://0.0.0.0:30068/
-</code></pre></div><h2 id="参考">参考</h2>
+</code></pre></div><p>除了前面提的两种方法（<code>NodePort</code>、<code>LoadBalancer</code>），还有另外一种方法——<code>Ingress</code>资源。我们为什么需要引入<code>Ingress</code>，最主要的原因是<code>LoadBalancer</code>需要公有的IP地址，自行搭建的就不要考虑了。</p>
+<p>而<code>Ingress</code>非常强大，它位于多个服务之前，充当集群中的<strong>智能路由器</strong>或入口点：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/ab886a9dd4e912cf6f5a1f3ed983ac4c.png" alt="Ingress.png"  /></p>
+<h2 id="deployment">Deployment</h2>
+<p>窥一斑而知全豹，好好了解完<code>Pod</code>之后，再继续了解<code>k8s</code>的概念也就水到渠成了。我们一般不会直接创建<code>Pod</code>，毕竟通过创建<code>Deployment</code>资源可以很方便的创建管理<code>Pod</code>（水平扩展、伸缩），并支持声明式地更新应用程序。</p>
+<h3 id="介绍-1">介绍</h3>
+<p>本章第一小节<strong>引入</strong>部分就是以<code>Deployment</code>举例，当时启动配置文件我们看到了一个<code>Deployment</code>资源和一个<code>Pod</code>，查看命令如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl get deployments
+<span class="c1"># 输出</span>
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   0/1     <span class="m">1</span>            <span class="m">0</span>           4s
+
+kubectl get pods
+<span class="c1"># 输出 如果名字有变化不用在意，只是我重新创建了一个 Deployment </span>
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-585449566-mnrtn   1/1     Running   <span class="m">0</span>          2m1s
+</code></pre></div><p>这里我们再增加一条命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl get replicasets.apps
+<span class="c1"># 输出</span>
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-585449566   <span class="m">1</span>         <span class="m">1</span>         <span class="m">1</span>       10m
+</code></pre></div><p>嗯嗯~，让我们捋一捋，当我们创建一个<code>Deployment</code>对象时，<code>k8s</code>不会只创建一个<code>Deployment</code>资源，还会创建另外的<code>ReplicaSet </code>以及1个<code>Pod </code>对象。所以问题来了， <code>ReplicaSet</code>又是个是什么东西？</p>
+<h3 id="replicaset">ReplicaSet</h3>
+<p>如果你更新了<code>Deployment</code>的<code>Pod</code>模板，那么<code>Deployment</code>就需要通过滚动更新（rolling update）的方式进行更新。</p>
+<p>而滚动更新，离不开<code>ReplicaSet</code>，说到<code>ReplicaSet</code>就得说到<code>ReplicationController</code>（弃用）。</p>
+<blockquote>
+<p><code>ReplicationController</code>是一种<code>k8s</code>资源，其会持续监控正在运行的pod列表，从而保证<code>Pod</code>的稳定（在现有<code>Pod</code>丢失时启动一个新<code>Pod</code>），也能轻松实现<code>Pod</code>的水平伸缩</p>
+</blockquote>
+<p><code>ReplicaSet</code>的行为与<code>ReplicationController</code>完全相同，但<code>Pod</code>选择器的表达能力更强（允许匹配缺少某个标签的Pod，或包含特定标签名的Pod）。所以我们可以将<code>Deployment</code>当成一种更高阶的资源，用于部署应用程序，并以声明的方式管理应用，而不是通过<code>ReplicaSet</code>进行部署，上述命令的创建关系如下图：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210110174652178.png" alt="image-20210110174652178"  /></p>
+<p>如上图，<code>Deployment</code>的控制器，实际上控制的是<code>ReplicaSet</code>的数目，以及每个<code>ReplicaSet</code>的属性。我们可以说<code>Deployment</code>是一个两层控制器：</p>
+<blockquote>
+<p>Deployment&ndash;&gt;ReplicaSet&ndash;&gt;Pod</p>
+</blockquote>
+<p>这种形式下滚动更新是极好的，但这里有个前提条件那就是<code>Pod</code>是无状态的，如果运行的容器必须依赖此时的相关运行数据，那么回滚后这些存在于容器的数据或者一些相关运行状态值就不存在了，对于这种情况，该怎么办？此时需要的就是<code>StatefulSet</code>（部署有状态的多副本应用）。</p>
+<h2 id="statefulset">StatefulSet</h2>
+<p>如果通过<code>ReplicaSet</code>创建多个<code>Pod</code>副本（其中描述了关联到特定持久卷声明的数据卷），那么这些副本都将共享这个持久卷声明的数据卷。</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/CB_3NC5VK5SeDyX6Np6Ln_00500.jpeg" alt="img"  /></p>
+<h2 id="参考">参考</h2>
 <p>本章的基本概念就介绍到这里了，谢谢！本部分内容有参考如下文章：</p>
 <ul>
 <li><a class="link" href="https://kuboard.cn/learning/k8s-basics/kubernetes-basics.html"  target="_blank" rel="noopener"
@@ -543,7 +572,9 @@ curl http://0.0.0.0:30068/
     >Kubernetes 中文指南</a>：Deployment</li>
 <li><a class="link" href="https://jimmysong.io/kubernetes-handbook/concepts/service.html"  target="_blank" rel="noopener"
     >Kubernetes 中文指南</a>：Service</li>
-<li>Kubernetes in Action中文版：第3、4、9章</li>
+<li><a class="link" href="https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D"  target="_blank" rel="noopener"
+    >深入剖析Kubernetes</a>：容器编排部分</li>
+<li>Kubernetes in Action中文版：第3、4、5、9章</li>
 </ul>
 <p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" alt="wechat_howie"  /></p>
 
@@ -608,7 +639,7 @@ curl http://0.0.0.0:30068/
                 
                     
 <article class="has-image">
-    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/">
         
         
             <div class="article-image">
@@ -619,7 +650,7 @@ curl http://0.0.0.0:30068/
         
 
         <div class="article-details">
-            <h2 class="article-title">k8s学习之路.[01.安装]</h2>
+            <h2 class="article-title">k8s学习之路.[01.走进Kubernetes]</h2>
         </div>
     </a>
 </article>

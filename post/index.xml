@@ -77,19 +77,23 @@ kubectl apply -f ./nginx-deployment.yaml # 输出 deployment.apps/nginx-deployme
     </item>
     
     <item>
-      <title>k8s学习之路.[01.安装]</title>
-      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</link>
+      <title>k8s学习之路.[01.走进Kubernetes]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</link>
       <pubDate>Mon, 11 Jan 2021 22:16:42 +0800</pubDate>
       
-      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E5%AE%89%E8%A3%85/</guid>
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</guid>
       <description>什么是Kubernetes 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：
- 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  安装 单机安装 关于单机安装k8s，我使用的相关环境如下：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+ Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+ Kubernetes控制节点主要由以下几个核心组件组成：
+ etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
+ kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 单机安装 关于单机安装k8s，我使用的相关环境如下：
  macOS：Catalina 10.15.1 Docker Desktop Vesion：3.0.2 Kubernetes：1.19.3  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
 k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3 k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3 k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3 k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3 k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0 k8s.gcr.io/pause:3.2=gotok8s/pause:3.2 k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0 随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
 不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
 如果状态一直处于Kubernetes starting状态，可在终端执行以下命令然后重启Docker：
 rm -rf ~/.kube rm -rf ~/Library/Group\ Containers/group.com.docker/pki/ 集群安装 准备   准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：
- 192.168.5.91：Master：  执行：  hostnamectl set-hostname master echo &amp;quot;127.0.0.1 $(hostname)&amp;quot; &amp;gt;&amp;gt; /etc/hosts     192.168.5.92：Node01  执行：  hostnamectl set-hostname node01 echo &amp;quot;127.</description>
+ 192.168.5.91：Master：  执行：  hostnamectl set-hostname master echo &amp;quot;127.</description>
     </item>
     
     <item>
