@@ -103,3 +103,5 @@ w_{n e w}=w_{\text {old }}+\eta \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)
 $$
 
 参数的更新方式就这样计算出来了，其实所谓的学习，就是确定一个目标函数用一定的计算方法让其算出最优的参数。
+
+![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)

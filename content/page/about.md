@@ -5,10 +5,12 @@ author : howie6879
 author : "Hugo Authors"
 lastmod : "2021-01-31"
 license : "CC BY-NC-ND"
-image: /images/thumbs/h_51.jpg
+image: /images/thumbs/h_60.jpg
 ---
 
-做一个努力的程序员：
+> 奇文共欣赏，疑义相与析
+
+就像我最喜欢的动漫《食梦者》里面的主角一样，朝着自己的梦想不懈努力：
 
 - Github : [howie6879](https://github.com/howie6879)
 - Email : howie6879@gmail.com
@@ -19,6 +21,7 @@ image: /images/thumbs/h_51.jpg
 - [owllook](https://github.com/howie6879/owllook)：毕业设计，目的是做成集搜索、阅读、追更、收藏、推荐于一体的小说搜索引擎和**小说推荐系统**，star数2K左右，fork数600+，演示网站月pv达到近50万，日ip4K左右
 - [mlhub123](https://github.com/howie6879/mlhub123)：机器学习深度学习导航交流项目，官网：[https://www.mlhub123.com](https://www.mlhub123.com)，目的是构建一个机器学习高质量交流群体，组织书籍共读交流活动
 - [Sanic-For-Pythoneer](https://github.com/howie6879/Sanic-For-Pythoneer)：结合自身使用经历，编写的一份sanic框架的开源书籍
+- ......
 
 #### 教程&笔记
 

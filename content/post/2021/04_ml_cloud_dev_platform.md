@@ -133,4 +133,4 @@ image: /images/thumbs/h_54.png
 - [awesome-lowcode](https://github.com/taowen/awesome-lowcode)
 - [Orchest](https://github.com/orchest/orchest)：A new kind of IDE for Data Science.
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)

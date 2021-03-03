@@ -412,6 +412,13 @@ nginx-deployment-585449566   1         1         1       10m
 
 ![img](https://gitee.com/howie6879/oss/raw/master/uPic/CB_3NC5VK5SeDyX6Np6Ln_00500.jpeg)
 
+那如何运行一个pod的多个副本，让每个pod都有独立的存储卷呢？对于这个问题，之前学习的相关知识都不能提供比较好的解决方案。`k8s`提供了`Statefulset`资源来运行这类Pod，它是专门定制的一类应用，这类应用中每一个实例都是不可替代的个体，都拥有稳定的名字和状态。
+
+对于有状态的应用（实例之间有不对等的关系或者依赖外部数据），主要需要对以下两种类型的状态进行复刻：
+
+- 存储状态：应用的多个实例分别绑定了不同的存储数据，也就是让每个Pod都有自己独立的存储卷
+- 拓扑状态：应用的多个实例之间不是完全对等的关系，各个Pod需要按照一定的顺序启动
+
 ## 参考
 
 本章的基本概念就介绍到这里了，谢谢！本部分内容有参考如下文章：
@@ -423,4 +430,4 @@ nginx-deployment-585449566   1         1         1       10m
 - [深入剖析Kubernetes](https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D)：容器编排部分
 - Kubernetes in Action中文版：第3、4、5、9章
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
