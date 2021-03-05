@@ -6,7 +6,32 @@
     <description>Recent content in k8s on 老胡的储物柜</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 11 Jan 2021 22:17:08 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 04 Mar 2021 22:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>k8s学习之路.[03.容器持久化存储]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Thu, 04 Mar 2021 22:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid>
+      <description>容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
+有了Pod后，我们的应用程序需要被创建和管理，这就引出了ReplicaSet和Deployment；然后需要将部署好的应用暴露给外部进行访问，Service可以提供一个固定的ip和端口让外部访问。
+对于有状态的应用，可以使用StatefulSet来进行状态的恢复，在上一节概念介绍里面有提到，有状态的应用是离不开持久化存储的。
+引子 在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
+对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在k8s里面可以通过定义存储卷来满足这个需求，它们不像Pod这样的顶级资源，而是被定义为Pod的一部分，并和Pod共享相同的生命周期。因此在Pod里面容器重新启动期间，卷的内容是不变的，
+卷 emptyDir 在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
+让我们实际操作一下，vim fortune-pod.yaml:
+apiVersion:v1kind:Podmetadata:name:fortunespec:containers:- image:luksa/fortunename:html-generatorvolumeMounts:- name:htmlmountPath:/var/htdocs- image:nginx:alpinename:web-servervolumeMounts:- name:htmlmountPath:/usr/share/nginx/htmlreadOnly:trueports:- containerPort:80protocol:TCPvolumes:- name:htmlemptyDir:{}说明一下上述配置文件的含义：fortune镜像是k8s in action书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为html的容器挂载在var/htdocs中；而nginx也挂载了相同的html卷，不过位置在/usr/share/nginx/html，上面两个容器共用的卷就是emptyDir: {}。
+启动来感受一下：
+kubectl create -f fortune-pod.yaml # 输出 pod/fortune created # 查看状态 kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE fortune 2/2 Running 0 2m27s # 暂时服务化 kubectl port-forward fortune 8080:80 此时服务就处于可用状态了，在终端输入curl http://localhost:8080/，基本上每隔10s，都会返回不同的响应，如下图：
+emptyDir卷是最简单的卷类型，但是其他类型的卷都是在它的基础上构建的，在创建空目录后，相应的容器会将数据写入。
+gitRepo 假设你有在github上开发项目，gitRepo卷允许你定义好相关配置然后直接从github上下拉项目将数据共享给其他容器使用。
+hostPath 前面说的卷都是停留在共享同一个Pod的文件，当其需要读取节点文件的时候，就需要hostPath卷出场了。和之前介绍的卷最大的不同之处是，hostPath是一个持久性存储的卷，其目录存在于对应节点主机的目录。
+所以，hostPath仅仅适用于在节点上读取数据，如果你的需求是跨Pod，那么NAS才是你的解决方案。
+NFS 目前相关的云商都会有一套自己的持久化方式，我目前是自己搭建的k8s，所以我只能实践一下NAS方案，新建文件vim mongodb-pod-nfs.yaml，输入以下内容：
+apiVersion:v1kind:Podmetadata:name:mongodb-nfsspec:volumes:- name:mongodb-datanfs:server:1.2.3.4path:/some/pathcontainers:- image:mongoname:mongodbvolumeMounts:- name:mongodb-datamountPath:/data/dbports:- containerPort:27017protocol:TCP启动：
+kubectl create -f mongodb-pod-nfs.</description>
+    </item>
+    
     <item>
       <title>k8s学习之路.[02.概念介绍]</title>
       <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
