@@ -8,7 +8,7 @@ description: "介绍k8s的基础概念"
 image: /images/thumbs/h_56.svg
 tags: ["k8s学习之路"]
 categories: ["k8s"]
-author: "howie6879"
+author: "howie.hu"
 toc: true
 ---
 

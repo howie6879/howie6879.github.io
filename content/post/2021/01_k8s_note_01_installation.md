@@ -7,7 +7,7 @@ keywords: ["k8s","单机安装","分布式安装"]
 description: "什么是Kubernetes，如何单机以及分布式安装"
 tags: ["k8s学习之路"]
 categories: ["k8s"]
-author: "howie6879"
+author: "howie.hu"
 toc: true
 image: /images/thumbs/h_57.png
 ---
