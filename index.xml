@@ -6,13 +6,185 @@
         <description>Recent content on 老胡的储物柜</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 04 Mar 2021 22:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>k8s学习之路.[03.容器持久化存储]</title>
-        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link>
+        <lastBuildDate>Thu, 11 Mar 2021 22:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>设计模式——基于容器的分布式系统</title>
+        <link>https://www.howie6879.cn/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/</link>
+        <pubDate>Thu, 11 Mar 2021 22:35:47 +0800</pubDate>
+        
+        <guid>https://www.howie6879.cn/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_62.jpg" alt="Featured image of post 设计模式——基于容器的分布式系统" /&gt;&lt;p&gt;20世纪80年代末至90年代初，面向对象编程思想给软件开发带来了一轮技术革新，就像润物细无声的春雨那般，向全世界的程序员们快速普及了模块化构建应用程序的方法，一直流行至今。&lt;/p&gt;
+&lt;p&gt;当下，我们可以看到类似的革新出现在了分布式系统开发，具体特点如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基于容器的微服务架构体系日益流行&lt;/li&gt;
+&lt;li&gt;容器天然隔离的属性非常适合作为分布式系统中的&lt;strong&gt;基本对象&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;基于面向对象，&lt;strong&gt;四人帮&lt;/strong&gt;基于经验提出和总结了对于一些常见软件设计问题的标准解决方案，其描述了一系列基于接口的模式，可以在各种环境中重用，这被称之为软件设计模式。历史一定程度上来说是重复的，随着这种架构模式的成熟，基于容器的分布式系统的设计模式也就自然而然地浮现了。&lt;/p&gt;
+&lt;p&gt;本篇主要阐述的是&lt;code&gt;Brendan Burns&lt;/code&gt;在基于容器的分布式系统中发现的三种设计模式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;single-container patterns for container management：容器管理之单容器模式&lt;/li&gt;
+&lt;li&gt;single-node patterns of closely cooperating containers：容器协调之单节点（多容器）模式&lt;/li&gt;
+&lt;li&gt;multi-node patterns for distributed algorithms：分布式算法之多节点模式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;基于容器分布式系统的设计模式会给分布式计算编码带来以下优势：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最佳实践，给没有经验的程序员带来相对正确的使用方式&lt;/li&gt;
+&lt;li&gt;简化开发&lt;/li&gt;
+&lt;li&gt;提升系统可靠性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;模式的价值&#34;&gt;模式的价值&lt;/h2&gt;
+&lt;p&gt;模式的目的是提供一般建议或结构来指导设计，这样做的好处有以下三点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;站在巨人的肩膀上，对于经验不怎么丰富的开发者，可以通过模式来指引走在正确的道路上，从而少采坑，提升项目质量&lt;/li&gt;
+&lt;li&gt;提供通用的名称和定义，有共同的领域语言进行交流是一件很重要的事情&lt;/li&gt;
+&lt;li&gt;方便识别并构建共享的通用组件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;单容器模式&#34;&gt;单容器模式&lt;/h2&gt;
+&lt;p&gt;就像对象会定义边界一样，容器为定义接口提供了天然的边界；它不仅可以暴露特定应用的功能，还可以通过钩子函数来管理系统。传统的容器管理接口是极其有限的，如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;run&lt;/li&gt;
+&lt;li&gt;pause&lt;/li&gt;
+&lt;li&gt;stop&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些接口只能说满足基础的使用需求，但是就目前的现状来看，更丰富的接口可以为系统开发者与操作者提供更多的功能。鉴于&lt;code&gt;HTTP&lt;/code&gt;和&lt;code&gt;JSON&lt;/code&gt;的普及程度，可以考虑通过容器在特定的节点托管一个&lt;code&gt;Web&lt;/code&gt;服务来实现。这样做的目的是什么，可以从下面两个角度来看待：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;upward：容器可以暴露丰富的应用信息，比如：
+&lt;ul&gt;
+&lt;li&gt;各类监控指标（QPS、应用健康等）&lt;/li&gt;
+&lt;li&gt;一些开发人员感兴趣的信息如（线程、堆栈、锁、网络消息统计等）&lt;/li&gt;
+&lt;li&gt;组件配置、日志等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;downward：任何开发者在编写软件组件的时候，都可以使用容器原生支持的生命周期接口来进行管控。比如一个集群管理系统通常会给任务分配对应的&lt;strong&gt;优先级&lt;/strong&gt;，高优先级的任务即使在集群被超额订阅的情况下也能保证运行，这种保证是通过逐出已经运行的低优先级任务来实现的，然后这些低优先级任务能否运行取决于后面是否还有资源分配过来；但是这样有个问题就是开发者需要承担一些没必要的复返，比如处理一些优先级比较低的任务被&lt;em&gt;抛弃&lt;/em&gt;的情况。相反，如果在应用程序和管理系统之间定义了正式的生命周期，那么应用程序组件将变得更易于管理，比如&lt;code&gt;k8s&lt;/code&gt;使用&lt;code&gt;Docker&lt;/code&gt; 的&lt;code&gt;graceful deletion&lt;/code&gt;功能，这就允许应用程序通过完成当前任务，把状态写入磁盘等等操作之后再终止，将这个功能扩展一下就可以使使有状态的分布式系统的状态管理更加容易。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;单节点多容器模式&#34;&gt;单节点（多容器）模式&lt;/h2&gt;
+&lt;p&gt;上面提到了单容器的接口，我们稍稍延伸一下，对于一个多容器组成的应用，会有怎样的设计模式呢？当然，此时我们仍旧有些限制条件需要讲清楚：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器都处于&lt;strong&gt;单节点&lt;/strong&gt;下&lt;/li&gt;
+&lt;li&gt;容器管理系统需要支持将多容器作为原子单元协调编排，这也侧面印证为什么&lt;code&gt;k8s&lt;/code&gt;需要有&lt;code&gt;Pod&lt;/code&gt;这个逻辑概念&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;边车模式sidecar-pattern&#34;&gt;边车模式（Sidecar pattern）&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;扩展和增强现有的应用容器&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;目前最常见的多容器部署模式就是边车模式，边车模式就是由两个容器组成的单节点模式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心是应用程序容器，这个就是应用程序的轴心&lt;/li&gt;
+&lt;li&gt;其次就是边车容器，作用就是改进和增强应用程序容器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210310145212203.png&#34; alt=&#34;image-20210310145212203&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;边车模式的一般方式如上图所示，可以看到应用程序容器和边车容器共享了许多资源：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;部分文件系统&lt;/li&gt;
+&lt;li&gt;主机名&lt;/li&gt;
+&lt;li&gt;网络&lt;/li&gt;
+&lt;li&gt;其他&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我们通过下面的例子来看一下边车容器存在的必要性以及好处，图示如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210310152144189.png&#34; alt=&#34;image-20210310152144189&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;其中主容器是一个&lt;code&gt;web&lt;/code&gt;服务，而&lt;code&gt;日志处理&lt;/code&gt;边车容器的工作就是收集本地磁盘的服务器日志，并将其流式传输至存储集群，这样做的好处有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器是资源计算和调度的基本单位，所以可以优先配置主&lt;code&gt;Web&lt;/code&gt;服务器的&lt;code&gt;cgroup&lt;/code&gt;使得其处理延时降低，而日志处理容器则在&lt;code&gt;web&lt;/code&gt;服务器空闲时使用&lt;code&gt;cpu&lt;/code&gt;时间片进行日志处理&lt;/li&gt;
+&lt;li&gt;将模块化和可重用的组件封装成边车，可达到功能内聚，应用可被划分明确的边界进行解耦（方便接入、测试调试、状态处理等），最重要的是可以被不同主容器作为边车容器复用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;大使模式ambassadors-pattern&#34;&gt;大使模式（Ambassadors pattern）&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;改变和管理应用容器与外部世界的通信方式&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;第一次看大使模式，很可能会想这不就是另一种形式的边车模式吗？其实不然，首先第一点，大使模式下所有的请求响应信息交换全部是大使容器来完成的，应用程序容器只能和大使容器进行&lt;em&gt;交流&lt;/em&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210310213608329.png&#34; alt=&#34;image-20210310213608329&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;这种模式主要利用的特性是&lt;strong&gt;同一&lt;code&gt;Pod&lt;/code&gt;中的容器可以共享相同的&lt;code&gt;localhost&lt;/code&gt;网络接口&lt;/strong&gt;，而且可以从两个角度看大使容器：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内到外：让我们以访问一个存储区域为例，假设该存储区域的大小不断增长，必须分成更多的子系统。在这种情况下，为了不干预主容器并且必须对所有受影响的服务实施相同的新访问逻辑，创建一个大使容器来调解对存储区域的访问是个不错的选择&lt;/li&gt;
+&lt;li&gt;外到内：让我们设想一下，我们要测试微服务的新版本，可以通过大使容器控制请求量到相关部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;h3 id=&#34;适配器模式adapter-pattern&#34;&gt;适配器模式（Adapter pattern）&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;确保应用程序实现统一的监控接口&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;真实世界的应用程序大概率会有出现下面列出的几种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一部分服务自行开发（可能有新老标准差异），一部分使用开源项目&lt;/li&gt;
+&lt;li&gt;服务的编写语言多样，日志记录、监控也多样&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;假设我们需要有效地监控和运维应用程序，这就要求应用程序可以提供统一的通用接口来进行指标收集。这就是适配器发挥作用的场景了，对于不同应用容器提供的不同接口，可以使用适配器适配这种异构性并转化为一致的接口且原有服务代码不需要做任何改动。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210310222109600.png&#34; alt=&#34;image-20210310222109600&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;主应用程序通过&lt;code&gt;localhost&lt;/code&gt;或者&lt;code&gt;volume&lt;/code&gt;与适配器容器通信，适配器经过一层处理提供统一的输出给外部使用者，一些常用的使用场景如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;监控：适配器将应用程序容器公开的监控接口转换为通用监控系统所期望的接口&lt;/li&gt;
+&lt;li&gt;日志：适配器提供统一的日志记录输出&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;多节点模式&#34;&gt;多节点模式&lt;/h2&gt;
+&lt;p&gt;不要将模块化容器局限于单机容器协调上，其实模块化容器还可以使构建协调的多节点分布式应用程序变得更加容易。接下来将描述其中的三种分布式系统模，与前一节中的模式一样，这些模式也需要对 &lt;code&gt;Pod&lt;/code&gt; 这个逻辑概念的支持。&lt;/p&gt;
+&lt;h3 id=&#34;领导选举模式leader-election-pattern&#34;&gt;领导选举模式（Leader election pattern）&lt;/h3&gt;
+&lt;p&gt;分布式系统中最常见的问题就是领导选举问题，副本被普遍使用在一个组件的多个相同的实例之间共享负载，副本的另一个更加复杂的作用就是使得某一特定副本作为整个部署集的&lt;strong&gt;leader&lt;/strong&gt;，其他副本作为热备（这个区分过程比较复杂），当原本Leader宕机时可以快速被选举为新的Leader，以恢复系统功能。系统甚至可以并行地进行领导者选举，例如多个分片均需要确定领导者。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311093811840.png&#34; alt=&#34;image-20210311093811840&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;上图介绍了一个简单的分布式选举的例子：图中三个副本，任何一个副本都有可能成为主副本，首先第一个副本为主，若其不巧发生故障，第二阶段就会通过选举将第三个副本变成主副本，最后，第一个副本回复，重新加入集群，第三副本依旧作为主节点运行调度。&lt;/p&gt;
+&lt;p&gt;现在确实有许多类库可以进行领导者选举，但它们通常比较复杂并且难以被正确理解和使用，此外，它们还受到特定编程语言实现的限制。&lt;/p&gt;
+&lt;p&gt;所以本部分探讨的就是将领导者选举机制从应用程序中剥离至领导者选举专属容器中，我们可以考虑提供一组领导者选举容器，每个容器都与需要进行领导者选举的应用程序共同调度，这样就可以在这些领导者选举容器之间执行选举。&lt;/p&gt;
+&lt;p&gt;同时，它们可以在&lt;code&gt;localhost &lt;/code&gt;上为需要进行领导者选举的应用程序容器提供一个简化的&lt;code&gt;HTTP API&lt;/code&gt; (例如&lt;code&gt;becomeLeader&lt;/code&gt;、&lt;code&gt;renewLeadership&lt;/code&gt; 等)。&lt;/p&gt;
+&lt;p&gt;这些领导者选举容器只需要由这个复杂领域的专家进行一次性构建即可，然后不管应用程序开发人员选择何种编程语言，都可以复用其简化的接口。这种方式代表了软件工程中最好的抽象和封装过程。&lt;/p&gt;
+&lt;h3 id=&#34;工作队列模式work-queue-pattern&#34;&gt;工作队列模式（Work queue pattern）&lt;/h3&gt;
+&lt;p&gt;一个简单通用的容器化工作队列图示如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311213759374.png&#34; alt=&#34;image-20210311213759374&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;最左侧提供了一组需要被执行的工作项，然后工作队列管理容器接受输入工作项，将其分发给多个执行器进行消费，并且多个执行器中间没有任何交互，这样的好处是可以根据实际运行情况增加执行器数量来赢取时间。&lt;/p&gt;
+&lt;p&gt;虽然工作队列和领导者选举一样，是一个研究得很透彻的课题并且有很多框架对它们进行了很好的实现，但这些分布式系统设计模式仍然是可以在面向容器的架构中获益。在以前的系统中，框架将程序限制在单一的语言环境中（如&lt;code&gt;Python&lt;/code&gt;中的&lt;code&gt;Celery&lt;/code&gt;）。&lt;/p&gt;
+&lt;p&gt;对于一个容器，由于&lt;code&gt;run()&amp;amp;mount()&lt;/code&gt;接口的实现，使得实现一个通用的工作队列框架变得简单直接，可以将任意的处理代码打包成一个容器，再结合任意数据就构建成了一个完整的工作队列系统。开发完整工作队列所涉及的所有其他工作都可以由通用工作队列框架处理，并且可以被任何有相同需求的系统复用，用户代码集成等细节让我们看看下面的图示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311214352035.png&#34; alt=&#34;image-20210311214352035&#34;  /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;通用工作队列的图示，可重用框架容器以深灰色显示，而开发人员容器以浅灰色显示。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;让我们结合上面的两张图一起看看，在我看来这就是一个从第一张图抽象出用户自定义代码从而形成第二张图的过程，且看我详细列出关键点。&lt;/p&gt;
+&lt;h4 id=&#34;源容器接口&#34;&gt;源容器接口&lt;/h4&gt;
+&lt;p&gt;用户定义的工作项由工作队列管理容器接收，此时涉及到一个论文中没有描述的点就是队列管理容器对于接收的工作项是默认进行了标准定义的，也就是说工作项都是定义好的标准输入。但实际情况并不可能让所有的输入项都有相同的输入标准，必须由一段用户自定义的处理代码来将输入标准化，不知机智的你是否想到了&lt;strong&gt;大使模式&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311220535339.png&#34; alt=&#34;image-20210311220535339&#34;  /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;执行器容器接口&#34;&gt;执行器容器接口&lt;/h4&gt;
+&lt;p&gt;当工作队列管理容器获取了对应的工作项，接下来的工作就是下发给执行器进行处理，具体做法是调用一次性&lt;code&gt;API&lt;/code&gt;触发工作流，并且在工作容器的整个生命周期是不会有其他调用产生的。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311221333727.png&#34; alt=&#34;image-20210311221333727&#34;  /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;分散聚集模式scattergather-pattern&#34;&gt;分散/聚集模式（Scatter/gather pattern）&lt;/h3&gt;
+&lt;p&gt;最后一个我们要着重介绍的设计模式是&lt;strong&gt;分散/收集模式&lt;/strong&gt;（终于是最后一个:face_with_thermometer:），首先简单介绍一下这个模式：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;分散/收集模式是一个树形模式，当外部客户端向根节点发送一个初始请求，根节点会将这个请求分发给大量服务器，每个服务器分片均返回部分数据，然后跟节点将这些部分结果组合起来形成一个针对原始请求的完整响应。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;对于上面这样一个流程，实际上可以抽象出以下几个标准出来：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分散请求（fanning out the requests）&lt;/li&gt;
+&lt;li&gt;收集响应（gathering the responses）&lt;/li&gt;
+&lt;li&gt;与客户端交互（interacting with the client）&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;上述流程的大部分代码都是通用的，就像面向对象编程中一样，我们可以将这个一个个拆分实现并进行容器化。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210311222807445.png&#34; alt=&#34;image-20210311222807445&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;值得一提的是要实现一个分散/收集系统，需要一个用户提供两个容器：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;第一种容器实现叶子节点计算，该容器执行部分计算并返回相应的结果&lt;/li&gt;
+&lt;li&gt;第二种容器是合并容器，该容器需要汇总所有叶子容器的计算结果，并组织成一个单一的响应后输出给用户&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
+&lt;p&gt;主体内容来自：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;论文《&lt;a class=&#34;link&#34; href=&#34;https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45406.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Design patterns for container-based distributed systems&lt;/a&gt;》&lt;/li&gt;
+&lt;li&gt;书籍《&lt;a class=&#34;link&#34; href=&#34;https://book.douban.com/subject/34844678/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Designing Distributed Systems&lt;/a&gt;》&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不错的资料：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.cnblogs.com/gaochundong/p/design-patterns-for-container-based-distributed-systems.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;[译] 基于容器的分布式系统设计模式&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最近一直在了解低代码开发平台相关知识，就是前面提到的&lt;a class=&#34;link&#34; href=&#34;https://www.howie6879.cn/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;一站式机器学习云研发平台&lt;/a&gt;，其中关于资源管理这块离不开&lt;code&gt;k8s&lt;/code&gt;的使用，因此花了不少精力在这上面，不出意外会出一个系列的学习笔记，而且在学习分布式设计模式的同时也对分布式系统产生了一些兴趣，这一块后续会一起好好研究研究。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>k8s学习之路.基础.[03.容器持久化存储]</title>
+        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link>
         <pubDate>Thu, 04 Mar 2021 22:35:47 +0800</pubDate>
         
-        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_61.png" alt="Featured image of post k8s学习之路.[03.容器持久化存储]" /&gt;&lt;p&gt;容器的本质是进程，对于进程，&lt;code&gt;Linux&lt;/code&gt;系统有进程组的概念来将其组织在一起。在&lt;code&gt;k8s&lt;/code&gt;里面，使用&lt;code&gt;Pod&lt;/code&gt;这个逻辑概念来维护容器间的关系。&lt;/p&gt;
+        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_61.png" alt="Featured image of post k8s学习之路.基础.[03.容器持久化存储]" /&gt;&lt;p&gt;容器的本质是进程，对于进程，&lt;code&gt;Linux&lt;/code&gt;系统有进程组的概念来将其组织在一起。在&lt;code&gt;k8s&lt;/code&gt;里面，使用&lt;code&gt;Pod&lt;/code&gt;这个逻辑概念来维护容器间的关系。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/16c095d6efb8d8c226ad9b098689f306.png&#34; alt=&#34;图来自极客时间&#34;  /&gt;&lt;/p&gt;
 &lt;p&gt;有了&lt;code&gt;Pod&lt;/code&gt;后，我们的应用程序需要被创建和管理，这就引出了&lt;code&gt;ReplicaSet&lt;/code&gt;和&lt;code&gt;Deployment&lt;/code&gt;；然后需要将部署好的应用暴露给外部进行访问，&lt;code&gt;Service&lt;/code&gt;可以提供一个固定的ip和端口让外部访问。&lt;/p&gt;
 &lt;p&gt;对于有状态的应用，可以使用&lt;code&gt;StatefulSet&lt;/code&gt;来进行状态的恢复，在上一节&lt;a class=&#34;link&#34; href=&#34;https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -499,12 +671,12 @@ w_{n e w}=w_{\text {old }}+\eta \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)
 </description>
         </item>
         <item>
-        <title>k8s学习之路.[02.概念介绍]</title>
-        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
+        <title>k8s学习之路.基础.[02.概念介绍]</title>
+        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
         <pubDate>Mon, 11 Jan 2021 22:17:08 +0800</pubDate>
         
-        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_56.svg" alt="Featured image of post k8s学习之路.[02.概念介绍]" /&gt;&lt;p&gt;俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。&lt;/p&gt;
+        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_56.svg" alt="Featured image of post k8s学习之路.基础.[02.概念介绍]" /&gt;&lt;p&gt;俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。&lt;/p&gt;
 &lt;p&gt;本文主要讲解以下四个概念：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;Pod&lt;/code&gt;&lt;/li&gt;
@@ -844,12 +1016,12 @@ nginx-deployment-585449566   &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;       
 </description>
         </item>
         <item>
-        <title>k8s学习之路.[01.走进Kubernetes]</title>
-        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</link>
+        <title>k8s学习之路.基础.[01.走进Kubernetes]</title>
+        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/</link>
         <pubDate>Mon, 11 Jan 2021 22:16:42 +0800</pubDate>
         
-        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.01.%E8%B5%B0%E8%BF%9Bkubernetes/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_57.png" alt="Featured image of post k8s学习之路.[01.走进Kubernetes]" /&gt;&lt;h2 id=&#34;什么是kubernetes&#34;&gt;什么是Kubernetes&lt;/h2&gt;
+        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_57.png" alt="Featured image of post k8s学习之路.基础.[01.走进Kubernetes]" /&gt;&lt;h2 id=&#34;什么是kubernetes&#34;&gt;什么是Kubernetes&lt;/h2&gt;
 &lt;p&gt;随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;服务发现和负载均衡&lt;/strong&gt;&lt;/li&gt;
@@ -9061,31 +9233,6 @@ Minor_axis axis: A to D
 &lt;p&gt;本次笔记主要记录&lt;code&gt;pandas&lt;/code&gt;数据结构，接下来将详细介绍用法。
 如果您也使用&lt;code&gt;jupyter notebook&lt;/code&gt;，可以下载本文源文件，点击&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/Mastering-Python/blob/master/Mastering%20Pandas/Mastering%20Pandas%2001.ipynb&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;这里&lt;/a&gt;&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>HTTP之旅</title>
-        <link>https://www.howie6879.cn/p/http%E4%B9%8B%E6%97%85/</link>
-        <pubDate>Fri, 21 Oct 2016 21:53:07 +0000</pubDate>
-        
-        <guid>https://www.howie6879.cn/p/http%E4%B9%8B%E6%97%85/</guid>
-        <description>&lt;blockquote&gt;
-&lt;p&gt;读书笔记，参考：&lt;strong&gt;《HTTP权威指南》 《图解HTTP》&lt;/strong&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;world-wide-web世界&#34;&gt;World Wide Web世界&lt;/h2&gt;
-&lt;p&gt;如果说万维网是一棵大树，那么其中一片片脉络鲜明的绿叶便是一个个web站点。&lt;/p&gt;
-&lt;p&gt;我们靠近它、欣赏它、甚至创造它。&lt;/p&gt;
-&lt;h3 id=&#34;1从打开页面开始&#34;&gt;1从打开页面开始&lt;/h3&gt;
-&lt;p&gt;某一刻，我们打开浏览器，弹指间输入一串url，按下&lt;code&gt;Enter&lt;/code&gt;键，长吁一口气，世界便在眼前缤纷多彩起来，对此，八九年前的我感慨一番后会继续玩我的暴力摩托，如今，我想尝试着解释一下。&lt;/p&gt;
-&lt;p&gt;刚刚说到打开url，那便从这里开始吧。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;&lt;strong&gt;问：什么是url&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;答：www.jianshu.com 这就是一个url（统一资源定位符），是&lt;strong&gt;URI&lt;/strong&gt;的一个子集。&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;问：什么是URI&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;答：任意一个&lt;strong&gt;服务器资源&lt;/strong&gt;都有名字，即URI（统一资源标识符）&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;问：什么是服务器资源&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;答：一个丰富的页面通过web浏览器发布一系列&lt;strong&gt;事务&lt;/strong&gt;获取并显示，页面资源存放于服务器，这就是服务器资源&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;问：什么是事务&lt;/strong&gt;&lt;/p&gt;
 </description>
         </item>
         <item>
