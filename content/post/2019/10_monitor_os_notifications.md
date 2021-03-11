@@ -5,7 +5,7 @@ categories:
 comments: true
 date: 2019-10-21T08:37:56+08:00
 image: /images/thumbs/h_50.jpg
-tags: [python,效率]
+tags: [Python,效率]
 title: "不论微信钉钉，我写了个通用消息监控处理机器人"
 toc: true
 ---

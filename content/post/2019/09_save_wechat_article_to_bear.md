@@ -5,7 +5,7 @@ categories:
 comments: true
 date: 2019-09-16T08:37:56+08:00
 image: /images/thumbs/h_07.jpg
-tags: [python,效率]
+tags: [Python,效率]
 title: "利用微信同步文章到Bear"
 toc: true
 ---

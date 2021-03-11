@@ -1,5 +1,5 @@
 ---
-title: "k8s学习之路.[01.走进Kubernetes]"
+title: "k8s学习之路.基础.[01.走进Kubernetes]"
 date: 2021-01-11T22:16:42+08:00
 lastmod: 2021-03-05T22:16:42+08:00
 draft: false

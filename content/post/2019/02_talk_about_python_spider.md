@@ -4,7 +4,7 @@ categories:
 comments: true
 date: 2019-01-10T08:37:56+08:00
 image: /images/thumbs/h_44.jpg
-tags: [python]
+tags: [Python,Spider]
 title: "谈谈对Python爬虫的理解"
 toc: true
 ---
