@@ -6,7 +6,341 @@
         <description>Recent content on 老胡的储物柜</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 11 Mar 2021 22:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 18 Mar 2021 20:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>k8s学习之路.基础.[04.配置应用程序]</title>
+        <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</link>
+        <pubDate>Thu, 18 Mar 2021 20:35:47 +0800</pubDate>
+        
+        <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_63.png" alt="Featured image of post k8s学习之路.基础.[04.配置应用程序]" /&gt;&lt;p&gt;使用&lt;code&gt;Docker&lt;/code&gt;部署应用程序时，一般常用的配置方式有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;配置内嵌&lt;/li&gt;
+&lt;li&gt;启动传参配置&lt;/li&gt;
+&lt;li&gt;环境变量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;gitRepo&lt;/li&gt;
+&lt;li&gt;hostPath&lt;/li&gt;
+&lt;li&gt;NFS&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于&lt;code&gt;Kubernetes&lt;/code&gt;的顶级资源对象中，那就是&lt;code&gt;ConfigMap&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;传递命令行参数&#34;&gt;传递命令行参数&lt;/h2&gt;
+&lt;p&gt;在上一节&lt;strong&gt;容器持久化存储&lt;/strong&gt;的&lt;code&gt;emptyDir&lt;/code&gt;概念介绍部分，我们引入了一个&lt;code&gt;fortune-pod&lt;/code&gt;的例子，再回顾一下之前的配置文件吧，如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Pod&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;fortune&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;containers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;luksa/fortune&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html-generator&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumeMounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;mountPath&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;/var/htdocs&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;nginx:alpine&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web-server&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumeMounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;mountPath&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;/usr/share/nginx/html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;readOnly&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ports&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;containerPort&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;protocol&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;TCP&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumes&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;emptyDir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;{}&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此应用程序设定了每隔&lt;code&gt;10s&lt;/code&gt;就会自动生成输出到&lt;code&gt;html&lt;/code&gt;，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。&lt;/p&gt;
+&lt;p&gt;创建文件&lt;code&gt;fortune-pod-args.yaml&lt;/code&gt;，输入以下内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Pod&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;fortune2s&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;containers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;luksa/fortune:args&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;args&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;2&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html-generator&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumeMounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;mountPath&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;/var/htdocs&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;nginx:alpine&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web-server&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumeMounts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;mountPath&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;/usr/share/nginx/html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;readOnly&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ports&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;containerPort&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;protocol&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;TCP&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;volumes&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;emptyDir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;{}&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;看到配置文件中的&lt;code&gt;args&lt;/code&gt;字段了么？这个就是传给镜像&lt;code&gt;luksa/fortune:args&lt;/code&gt;控制时间的参数，让我们启动看看吧。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create -f fortune-pod-args.yaml
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+pod/fortune2s created
+
+&lt;span class=&#34;c1&#34;&gt;# 查看状态&lt;/span&gt;
+kubectl get pods
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME      READY   STATUS    RESTARTS   AGE
+fortune   2/2     Running   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;          2m27s
+
+&lt;span class=&#34;c1&#34;&gt;# 暂时服务化&lt;/span&gt;
+kubectl port-forward fortune2s 8080:80
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;访问&lt;code&gt;127.0.0.1:8080&lt;/code&gt;就会发现输出的频率变成了&lt;code&gt;2s&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&amp;gt; curl 127.0.0.1:8080
+Stay away from flying saucers today.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;设置环境变量&#34;&gt;设置环境变量&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;与容器的命令和参数设置相同，环境变量列表无法在 pod 创建后被修改&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;设置环境变量非常简单，我们只需要在&lt;code&gt;pod&lt;/code&gt;中指定环境变量即可；当然，这里有个前提是你需要将修改镜像让其支持读取环境变量。&lt;/p&gt;
+&lt;p&gt;我们直接使用书中的例子：&lt;code&gt;vim fortune-pod-env.yaml&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      value: &lt;span class=&#34;s2&#34;&gt;&amp;#34;30&amp;#34;&lt;/span&gt;
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;
+    ports:
+    - containerPort: &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: &lt;span class=&#34;o&#34;&gt;{}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;可以看到配置中声明了&lt;code&gt;INTERVAL&lt;/code&gt;环境变量值为&lt;code&gt;30&lt;/code&gt;，在终端中实践一下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create -f fortune-pod-env.yaml
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+pod/fortune-env created
+
+&lt;span class=&#34;c1&#34;&gt;# 查看状态&lt;/span&gt;
+kubectl get pods
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME      READY   STATUS    RESTARTS   AGE
+fortune-env   2/2     Running   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;          10s
+
+&lt;span class=&#34;c1&#34;&gt;# 暂时服务化&lt;/span&gt;
+kubectl port-forward fortune-env 8080:80
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;访问&lt;code&gt;127.0.0.1:8080&lt;/code&gt;就会发现输出的频率变成了&lt;code&gt;30s&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;现在应用程序的所有配置基本上可以说是硬编码的形式进行配置，并且&lt;code&gt;yaml&lt;/code&gt;配置文件总是有配置相关的字段，有没有办法让镜像和配置文件解耦呢？&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;k8s&lt;/code&gt;提供了名为&lt;code&gt;ConfigMap&lt;/code&gt;的资源对象解决这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;configmap&#34;&gt;ConfigMap&lt;/h2&gt;
+&lt;p&gt;资源对象&lt;code&gt;ConﬁgMap&lt;/code&gt;提供了向容器中注入配置信息的机制，它本质上就是一个键/值对映射，可以用来保存单个值或者配置文件。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ConﬁgMap&lt;/code&gt;是不需要被读取的，它映射的内容通过环境变量或者卷文件的形式传给容器。一般直接在&lt;code&gt;pod&lt;/code&gt;的定义里面就可以声明&lt;code&gt;ConﬁgMap&lt;/code&gt;，这样就可以根据不同的环境创建不同的配置，流程交互如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210316203507993.png&#34; alt=&#34;image-20210316203507993&#34;  /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;创建&#34;&gt;创建&lt;/h3&gt;
+&lt;p&gt;还是用之前应用程序为例，配置专注于环境变量&lt;code&gt;INTERVAL&lt;/code&gt;，创建命令如下所示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create configmap fortune-config --from-literal&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;sleep-interval&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;25&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+configmap/fortune-config created
+
+&lt;span class=&#34;c1&#34;&gt;# 获取相关描述&lt;/span&gt;
+kubectl get configmap fortune-config -o yaml
+
+&lt;span class=&#34;c1&#34;&gt;# 查看 configmap&lt;/span&gt;
+kubectl get configmap
+
+&lt;span class=&#34;c1&#34;&gt;# 删除&lt;/span&gt;
+kubectl delete configmap fortune-config
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此外，&lt;code&gt;k8s&lt;/code&gt;还可以直接填写配置文件来进行创建&lt;code&gt;vim fortune-config.yaml&lt;/code&gt;，输入如下内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;ConfigMap&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;fortune-config&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;sleep-interval&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;25&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create -f fortune-config.yaml
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+configmap/fortune-config created
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其实还有更多的创建方式，大概提一下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 从文件内容创建ConfigMap条目&lt;/span&gt;
+kubectl create configmap my-config --from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;config-file.conf
+&lt;span class=&#34;c1&#34;&gt;# 从文件夹创建ConfigMap&lt;/span&gt;
+kubectl create configmap my-config --from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;/path/to/dir
+&lt;span class=&#34;c1&#34;&gt;# 合并不同选项&lt;/span&gt;
+kubectl create configmap my-config
+	--from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;foo.json
+	--from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;bar&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;foobar.conf
+	--from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;config-opts/
+	--from-literal&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;some&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;thing
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;作为环境变量传入容器&#34;&gt;作为环境变量传入容器&lt;/h3&gt;
+&lt;p&gt;如何将映射中的值传递给&lt;code&gt;pod&lt;/code&gt;的容器？最简单的方法是给容器设置环境变量，通过在配置中声明&lt;code&gt;valueFrom&lt;/code&gt;，具体操作&lt;code&gt;vim fortune-pod-env-configmap.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env-from-configmap
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom:
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;
+    ports:
+    - containerPort: &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: &lt;span class=&#34;o&#34;&gt;{}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;让我们启动&lt;code&gt;pod&lt;/code&gt;实践看看：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create -f fortune-pod-env-configmap.yaml
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+pod/fortune-env-from-configmap created
+
+&lt;span class=&#34;c1&#34;&gt;# 查看状态&lt;/span&gt;
+kubectl get pods
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME                         READY   STATUS    RESTARTS   AGE
+fortune-env-from-configmap   2/2     Running   &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;          19s
+
+&lt;span class=&#34;c1&#34;&gt;# 暂时服务化&lt;/span&gt;
+kubectl port-forward fortune-env-from-configmap 8080:80
+
+&lt;span class=&#34;c1&#34;&gt;# 删除pod&lt;/span&gt;
+kubectl delete pods fortune-env-from-configmap
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;现在我们已经成功在&lt;code&gt;pod&lt;/code&gt;中使用了&lt;code&gt;ConfigMap&lt;/code&gt;资源，不过这种使用方式是比较低效的，考虑这样一个情况：如果环境变量比较多，这样单独一个个环境变量的设置方式是个程序员都没法忍受的。&lt;/p&gt;
+&lt;p&gt;一般在框架里面加载一些环境变量都会利用前缀机制来进行批量加载，比如&lt;code&gt;Sanic&lt;/code&gt;框架会读取&lt;code&gt;SANIC_&lt;/code&gt;开头的环境变量自动加载。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;k8s&lt;/code&gt;也提供了这样类似的机制，配置声明如下图示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317214756738.png&#34; alt=&#34;image-20210317214756738&#34;  /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;configmap-卷&#34;&gt;ConfigMap 卷&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;环境变量或者命令行参数值作为配置值通常适用于变量值较短的场景。由于 ConfigMap 中可以包含完整的配置文件内容，当你想要将其暴露给容器时，可以借助前面章节提到过的一种称为 configMap 卷的特殊卷格式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;首先删除前面声明建立的&lt;code&gt;cf&lt;/code&gt;资源：&lt;code&gt;kubectl delete configmap fortune-config&lt;/code&gt;。然后建立文件夹&lt;code&gt;configmap-files&lt;/code&gt;，首先建立&lt;code&gt;Nginx&lt;/code&gt;配置文件：&lt;code&gt;vim my-nginx-config.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;server &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
+    listen              80&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    server_name         www.kubia-example.com&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+    gzip on&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    gzip_types text/plain application/xml&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+    location / &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
+        root   /usr/share/nginx/html&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        index  index.html index.htm&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;另外在该文件夹中添加一个名为&lt;code&gt;sleep-interval&lt;/code&gt;的文本文件，输入&lt;code&gt;25&lt;/code&gt;，类似前面声明环境变量。&lt;/p&gt;
+&lt;p&gt;接下来从文件夹创建&lt;code&gt;ConfigMap&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;kubectl create configmap fortune-config --from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;configmap-files
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+configmap/fortune-config created
+
+&lt;span class=&#34;c1&#34;&gt;# 验证&lt;/span&gt;
+kubectl get configmap fortune-config -o yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317215834820.png&#34; alt=&#34;image-20210317215834820&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;创建包含&lt;code&gt;ConfigMap&lt;/code&gt;条目内容的卷只需要创建一个引用&lt;code&gt;ConfigMap&lt;/code&gt;名称的卷并挂载到容器中：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317215931773-20210318145409491.png&#34; alt=&#34;image-20210317215931773&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;创建配置文件：&lt;code&gt;vim fortune-pod-configmap-volume.yaml&lt;/code&gt;，输入如下内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-configmap-volume
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom:
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;
+    - name: config
+      mountPath: /etc/nginx/conf.d
+      readOnly: &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;
+    - name: config
+      mountPath: /tmp/whole-fortune-config-volume
+      readOnly: &lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt;
+    ports:
+      - containerPort: &lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;
+        name: http
+        protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: &lt;span class=&#34;o&#34;&gt;{}&lt;/span&gt;
+  - name: config
+    configMap:
+      name: fortune-config
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;secret&#34;&gt;Secret&lt;/h2&gt;
+&lt;p&gt;前面说的，都是针对非敏感信息的配置数据，对于一些敏感数据，例如：密码、OAuth token、ssh 密钥等，就可以使用&lt;code&gt;Secret&lt;/code&gt;资源了。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Secret&lt;/code&gt;结构和使用方法都与&lt;code&gt;ConfigMap&lt;/code&gt;类似，&lt;code&gt;k8s&lt;/code&gt;通过仅仅将&lt;code&gt;Secret&lt;/code&gt;分发到需要访问&lt;code&gt;Secret&lt;/code&gt;的&lt;code&gt;pod&lt;/code&gt;所在的机器节点来保障其安全性。另外，&lt;code&gt;Secret&lt;/code&gt;只会存储在节点的内存中，永不写入物理存储。&lt;/p&gt;
+&lt;h3 id=&#34;创建-1&#34;&gt;创建&lt;/h3&gt;
+&lt;p&gt;以创建一个包含用户名密码的&lt;code&gt;secret&lt;/code&gt;资源为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 创建文件&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; -n &lt;span class=&#34;s1&#34;&gt;&amp;#39;admin&amp;#39;&lt;/span&gt; &amp;gt; ./username.txt
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; -n &lt;span class=&#34;s1&#34;&gt;&amp;#39;1f2d1e2e67df&amp;#39;&lt;/span&gt; &amp;gt; ./password.txt
+
+&lt;span class=&#34;c1&#34;&gt;# 创建资源&lt;/span&gt;
+kubectl create secret generic db-user-pass --from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;./username.txt --from-file&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;./password.txt
+
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+secret/db-user-pass created
+
+&lt;span class=&#34;c1&#34;&gt;# 查看&lt;/span&gt;
+kubectl get secrets
+
+&lt;span class=&#34;c1&#34;&gt;# 输出&lt;/span&gt;
+NAME                  TYPE                                  DATA   AGE
+db-user-pass          Opaque                                &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;      23s
+default-token-nlxkq   kubernetes.io/service-account-token   &lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;      54d
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;db-user-pass&lt;/code&gt;很好理解，就是刚才创建的&lt;code&gt;sevret&lt;/code&gt;资源，&lt;code&gt;default-token-nlxkq&lt;/code&gt;是什么呢？这是一种默认被挂载至所有容器的&lt;code&gt;Secret&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;本章关于配置应用程序就介绍到这里了，谢谢！本部分内容有参考如下文章：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-pod-configmap/&#34;  title=&#34;配置 Pod 使用 ConfigMap&#34;
+     target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;配置 Pod 使用 ConfigMap&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://kuboard.cn/learning/k8s-intermediate/config/secrets/&#34;  title=&#34;Secret概述&#34;
+     target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Secret 概述&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/luksa/kubernetes-in-action&#34;  title=&#34;Kubernetes in Action&#34;
+     target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Kubernetes in Action&lt;/a&gt;中文版：可以算是第 7 章的读书笔记&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>设计模式——基于容器的分布式系统</title>
         <link>https://www.howie6879.cn/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/</link>
         <pubDate>Thu, 11 Mar 2021 22:35:47 +0800</pubDate>
