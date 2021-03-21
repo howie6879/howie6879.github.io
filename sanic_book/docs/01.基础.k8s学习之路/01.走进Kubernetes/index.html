@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.80.0" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="走进Kubernetes #  什么是Kubernetes #  随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+ Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+ Kubernetes控制节点主要由以下几个核心组件组成：
+ etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
+ kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 #  单机安装 #  关于单机安装k8s，我使用的相关环境如下：
+ macOS：Catalina 10.15.1 Docker Desktop Vesion：3.0.2 Kubernetes：1.19.3  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3 k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3 k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3 k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3 k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0 k8s.gcr.io/pause:3.2=gotok8s/pause:3.2 k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0 随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+如果状态一直处于Kubernetes starting状态，可在终端执行以下命令然后重启Docker：
+rm -rf ~/.kube rm -rf ~/Library/Group\ Containers/group.com.docker/pki/ 集群安装 #  准备 #    准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="走进Kubernetes #  什么是Kubernetes #  随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+ Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+ Kubernetes控制节点主要由以下几个核心组件组成：
+ etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
+ kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 #  单机安装 #  关于单机安装k8s，我使用的相关环境如下：
+ macOS：Catalina 10.15.1 Docker Desktop Vesion：3.0.2 Kubernetes：1.19.3  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3 k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3 k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3 k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3 k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0 k8s.gcr.io/pause:3.2=gotok8s/pause:3.2 k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0 随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+如果状态一直处于Kubernetes starting状态，可在终端执行以下命令然后重启Docker：
+rm -rf ~/.kube rm -rf ~/Library/Group\ Containers/group.com.docker/pki/ 集群安装 #  准备 #    准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/01.%E8%B5%B0%E8%BF%9BKubernetes/" />
+
+<title>01.走进 Kubernetes | Kubernetes 学习之路</title>
+<link rel="manifest" href="/k8s/manifest.json">
+<link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/k8s/book.min.6c7c6446dfdee7c8c933e9bbc6e80ee3ed6c913b2a59519f2092c3c6a9d63e55.css" integrity="sha256-bHxkRt/e58jJM&#43;m7xugO4&#43;1skTsqWVGfIJLDxqnWPlU=">
+<script defer src="/k8s/en.search.min.1abee38d79c0464e24fb29d5a3d767d30e4964c211ad22d198112a35c3791610.js" integrity="sha256-Gr7jjXnARk4k&#43;ynVo9dn0w5JZMIRrSLRmBEqNcN5FhA="></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/k8s"><span>Kubernetes 学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基础</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/01.%E8%B5%B0%E8%BF%9BKubernetes/" class=" active">01.走进 Kubernetes</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class="">03.容器持久化存储</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/03.%E9%99%84%E5%BD%95.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var menu=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(event){localStorage.setItem("menu.scrollTop",menu.scrollTop);});menu.scrollTop=localStorage.getItem("menu.scrollTop");})();</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/k8s/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01.走进 Kubernetes</strong>
+
+  <label for="toc-control">
+    
+    <img src="/k8s/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#什么是kubernetes">什么是Kubernetes</a></li>
+    <li><a href="#安装">安装</a>
+      <ul>
+        <li><a href="#单机安装">单机安装</a></li>
+        <li><a href="#集群安装">集群安装</a></li>
+        <li><a href="#kubernetes-dashboard">Kubernetes Dashboard</a></li>
+        <li><a href="#部署镜像">部署镜像</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="走进kubernetes">
+  走进Kubernetes
+  <a class="anchor" href="#%e8%b5%b0%e8%bf%9bkubernetes">#</a>
+</h1>
+<h2 id="什么是kubernetes">
+  什么是Kubernetes
+  <a class="anchor" href="#%e4%bb%80%e4%b9%88%e6%98%afkubernetes">#</a>
+</h2>
+<p>随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：</p>
+<ul>
+<li><strong>服务发现和负载均衡</strong></li>
+<li><strong>存储编排</strong></li>
+<li><strong>自动发布和回滚</strong></li>
+<li><strong>自愈</strong></li>
+<li><strong>密钥及配置管理</strong></li>
+</ul>
+<p>通过下面架构图可以看到其有上下两部分对应的<code>Master&amp;Node</code>节点构成，这两种角色分别对应着控制节点和计算节点。</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/8ee9f2fa987eccb490cfaa91c6484f67.png" alt="全局架构" /></p>
+<blockquote>
+<p>Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业</p>
+</blockquote>
+<p>Kubernetes控制节点主要由以下几个核心组件组成：</p>
+<ul>
+<li>etcd保存了整个集群的状态</li>
+<li>apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制</li>
+<li>controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等</li>
+<li>scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上</li>
+</ul>
+<p>对于计算节点：</p>
+<ul>
+<li>kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理</li>
+<li>Container runtime负责镜像管理以及Pod和容器的真正运行（CRI）</li>
+<li>kube-proxy负责为Service提供cluster内部的服务发现和负载均衡</li>
+</ul>
+<h2 id="安装">
+  安装
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85">#</a>
+</h2>
+<h3 id="单机安装">
+  单机安装
+  <a class="anchor" href="#%e5%8d%95%e6%9c%ba%e5%ae%89%e8%a3%85">#</a>
+</h3>
+<p>关于单机安装<code>k8s</code>，我使用的相关环境如下：</p>
+<ul>
+<li>macOS：Catalina 10.15.1</li>
+<li>Docker Desktop Vesion：3.0.2</li>
+<li>Kubernetes：1.19.3</li>
+</ul>
+<p>由于镜像的下载涉及到网络原因，因此这里使用了开源项目<a href="https://github.com/gotok8s/k8s-docker-desktop-for-mac">k8s-docker-desktop-for-mac</a>来解决这个问题，需要注意的是要修改<code>images</code>的相关镜像的版本，要和此时<code>Kubernetes</code>配对上才行，比如我设置的是：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3
+k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3
+k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3
+k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3
+k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0
+k8s.gcr.io/pause:3.2=gotok8s/pause:3.2
+k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0
+</code></pre></div><p>随后打开<code>Docker</code>，进入设置界面，勾选<code>Enable Kubernetes</code>即可：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201220195307360.png" alt="image-20201220195307360" /></p>
+<p>不出意外，界面左下角会出现<code>Kubernetes running</code>的提示，这样就安装成功了。</p>
+<p>如果状态一直处于<code>Kubernetes starting</code>状态，可在终端执行以下命令然后重启<code>Docker</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">rm -rf ~/.kube
+rm -rf ~/Library/Group<span style="color:#ae81ff">\ </span>Containers/group.com.docker/pki/
+</code></pre></div><h3 id="集群安装">
+  集群安装
+  <a class="anchor" href="#%e9%9b%86%e7%be%a4%e5%ae%89%e8%a3%85">#</a>
+</h3>
+<h4 id="准备">
+  准备
+  <a class="anchor" href="#%e5%87%86%e5%a4%87">#</a>
+</h4>
+<ul>
+<li>
+<p>准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：</p>
+<ul>
+<li>192.168.5.91：Master：
+<ul>
+<li>执行：
+<ul>
+<li><code>hostnamectl set-hostname master</code></li>
+<li><code>echo &quot;127.0.0.1   $(hostname)&quot; &gt;&gt; /etc/hosts</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>192.168.5.92：Node01
+<ul>
+<li>执行：
+<ul>
+<li><code>hostnamectl set-hostname node01</code></li>
+<li><code>echo &quot;127.0.0.1   $(hostname)&quot; &gt;&gt; /etc/hosts</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>192.168.5.93：Node02
+<ul>
+<li>执行：
+<ul>
+<li><code>hostnamectl set-hostname node02</code></li>
+<li><code>echo &quot;127.0.0.1   $(hostname)&quot; &gt;&gt; /etc/hosts</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Kubernetes版本：v1.19.3</p>
+</li>
+<li>
+<p>Docker版本：19.03.12</p>
+</li>
+</ul>
+<p>开始前请检查以下事项：</p>
+<ul>
+<li><strong>CentOS 版本</strong>：&gt;= 7.6</li>
+<li><strong>CPU</strong>：&gt;=2</li>
+<li><em>IP</em>：互通</li>
+<li>关闭<strong>swap</strong>：<code>swapoff -a</code></li>
+</ul>
+<p>配置国内kubernetes源：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cat &gt; /etc/yum.repos.d/kubernetes.repo <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">[kubernetes]
+</span><span style="color:#e6db74">name=Kubernetes
+</span><span style="color:#e6db74">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+</span><span style="color:#e6db74">enabled=1
+</span><span style="color:#e6db74">gpgcheck=1
+</span><span style="color:#e6db74">repo_gpgcheck=1
+</span><span style="color:#e6db74">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+</span><span style="color:#e6db74">EOF</span>
+</code></pre></div><p>安装相关依赖工具：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum install -y kubelet-1.19.3 kubeadm-1.19.3 kubectl-1.19.3
+<span style="color:#75715e"># 设置开机启动</span>
+systemctl enable kubelet.service <span style="color:#f92672">&amp;&amp;</span> systemctl start kubelet.service
+<span style="color:#75715e"># 查看状态</span>
+systemctl status kubelet.service
+</code></pre></div><h4 id="初始化master">
+  初始化Master
+  <a class="anchor" href="#%e5%88%9d%e5%a7%8b%e5%8c%96master">#</a>
+</h4>
+<p>在主节点（<code>192.168.5.91</code>）执行以下命令：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
+export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
+export POD_SUBNET<span style="color:#f92672">=</span>10.100.0.1/16
+echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
+</code></pre></div><p>新建脚本<code>init_master.sh</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vim init_master.sh
+</code></pre></div><p>添加：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># 只在 master 节点执行</span>
+
+<span style="color:#75715e"># 脚本出错时终止执行</span>
+set -e
+
+<span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>POD_SUBNET<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>APISERVER_NAME<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+  echo -e <span style="color:#e6db74">&#34;\033[31;1m请确保您已经设置了环境变量 POD_SUBNET 和 APISERVER_NAME \033[0m&#34;</span>
+  echo 当前POD_SUBNET<span style="color:#f92672">=</span>$POD_SUBNET
+  echo 当前APISERVER_NAME<span style="color:#f92672">=</span>$APISERVER_NAME
+  exit <span style="color:#ae81ff">1</span>
+<span style="color:#66d9ef">fi</span>
+
+
+<span style="color:#75715e"># 查看完整配置选项 https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2</span>
+rm -f ./kubeadm-config.yaml
+cat <span style="color:#e6db74">&lt;&lt;EOF &gt; ./kubeadm-config.yaml
+</span><span style="color:#e6db74">apiVersion: kubeadm.k8s.io/v1beta2
+</span><span style="color:#e6db74">kind: ClusterConfiguration
+</span><span style="color:#e6db74"># k8s 版本
+</span><span style="color:#e6db74">kubernetesVersion: v1.19.3
+</span><span style="color:#e6db74">imageRepository: registry.aliyuncs.com/k8sxio
+</span><span style="color:#e6db74">controlPlaneEndpoint: &#34;${APISERVER_NAME}:6443&#34;
+</span><span style="color:#e6db74">networking:
+</span><span style="color:#e6db74">  serviceSubnet: &#34;10.96.0.0/16&#34;
+</span><span style="color:#e6db74">  podSubnet: &#34;${POD_SUBNET}&#34;
+</span><span style="color:#e6db74">  dnsDomain: &#34;cluster.local&#34;
+</span><span style="color:#e6db74">EOF</span>
+
+<span style="color:#75715e"># kubeadm init</span>
+<span style="color:#75715e"># 根据您服务器网速的情况，您需要等候 3 - 10 分钟</span>
+kubeadm config images pull --config<span style="color:#f92672">=</span>kubeadm-config.yaml
+kubeadm init --config<span style="color:#f92672">=</span>kubeadm-config.yaml --upload-certs
+
+<span style="color:#75715e"># 配置 kubectl</span>
+rm -rf /root/.kube/
+mkdir /root/.kube/
+cp -i /etc/kubernetes/admin.conf /root/.kube/config
+
+<span style="color:#75715e"># 安装 calico 网络插件</span>
+<span style="color:#75715e"># 参考文档 https://docs.projectcalico.org/v3.13/getting-started/kubernetes/self-managed-onprem/onpremises</span>
+echo <span style="color:#e6db74">&#34;安装calico-3.13.1&#34;</span>
+rm -f calico-3.13.1.yaml
+wget https://kuboard.cn/install-script/calico/calico-3.13.1.yaml
+kubectl apply -f calico-3.13.1.yaml
+</code></pre></div><p>如果出错：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># issue 01</span>
+<span style="color:#75715e"># [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1</span>
+<span style="color:#75715e"># 所有机器执行</span>
+echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-iptables
+echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-ip6tables
+</code></pre></div><p>检查<code>master</code>初始化结果：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 直到所有的容器组处于 Running 状态</span>
+watch kubectl get pod -n kube-system -o wide
+<span style="color:#75715e"># 查看 master 节点初始化结果</span>
+kubectl get nodes -o wide
+</code></pre></div><p>如下图：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201221165311482.png" alt="image-20201221165311482" /></p>
+<h4 id="获得join命令参数">
+  获得join命令参数
+  <a class="anchor" href="#%e8%8e%b7%e5%be%97join%e5%91%bd%e4%bb%a4%e5%8f%82%e6%95%b0">#</a>
+</h4>
+<p>直接在<code>master</code>执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubeadm token create --print-join-command
+</code></pre></div><p>比如此时输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 有效期两小时</span>
+kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
+</code></pre></div><h4 id="初始化node">
+  初始化Node
+  <a class="anchor" href="#%e5%88%9d%e5%a7%8b%e5%8c%96node">#</a>
+</h4>
+<p>在所有<code>node</code>执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
+export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
+echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
+
+<span style="color:#75715e"># 替换为 master 节点上 kubeadm token create 命令的输出</span>
+kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
+</code></pre></div><h4 id="检查初始化结果">
+  检查初始化结果
+  <a class="anchor" href="#%e6%a3%80%e6%9f%a5%e5%88%9d%e5%a7%8b%e5%8c%96%e7%bb%93%e6%9e%9c">#</a>
+</h4>
+<p>在<code>master</code>节点执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get nodes -o wide
+</code></pre></div><p>输出结果如下：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201221181016264.png" alt="image-20201221181016264" /></p>
+<h3 id="kubernetes-dashboard">
+  Kubernetes Dashboard
+  <a class="anchor" href="#kubernetes-dashboard">#</a>
+</h3>
+<p><a href="https://github.com/kubernetes/dashboard">Dashboard</a>可以将容器化应用程序部署到<code>Kubernetes</code>集群，对容器化应用程序进行故障排除，以及管理集群资源。</p>
+<h4 id="安装-1">
+  安装
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85-1">#</a>
+</h4>
+<p>安装命令如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/recommended.yaml -O recommended.yaml
+
+kubectl apply -f recommended.yaml
+kubectl get pods --namespace<span style="color:#f92672">=</span>kubernetes-dashboard -o wide
+</code></pre></div><p>此处执行完会发现<code>STATUS</code>都是<code>ContainerCreating</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">NAME                                         READY   STATUS    RESTARTS   AGE    IP          NODE             NOMINATED NODE   READINESS GATES
+dashboard-metrics-scraper-79c5968bdc-bdz9d   1/1     <span style="color:#e6db74">`</span>ContainerCreating<span style="color:#e6db74">`</span>   <span style="color:#ae81ff">0</span>          100m   10.1.0.20   docker-desktop   &lt;none&gt;           &lt;none&gt;
+kubernetes-dashboard-7448ffc97b-z8222        1/1     <span style="color:#e6db74">`</span>ContainerCreating<span style="color:#e6db74">`</span>   <span style="color:#ae81ff">0</span>          100m   10.1.0.19   docker-desktop   &lt;none&gt;           &lt;none&gt;
+</code></pre></div><p>查看日志找找原因（注意NAME）：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl describe pod dashboard-metrics-scraper-79c5968bdc-bdz9d --namespace<span style="color:#f92672">=</span>kubernetes-dashboard
+</code></pre></div><p>发现是因为<code>metrics-scraper:v1.0.6</code>镜像下载不下来，手动执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull kubernetesui/metrics-scraper:v1.0.1
+</code></pre></div><p>拉下来之后就妥了。</p>
+<p>最后我们需要将访问形式改为<code>NodePort</code>访问：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard edit service kubernetes-dashboard
+<span style="color:#75715e"># 将里面的 type: ClusterIP 改为 type: NodePort</span>
+</code></pre></div><p>保存后，执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard get service kubernetes-dashboard
+</code></pre></div><p>终端输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT<span style="color:#f92672">(</span>S<span style="color:#f92672">)</span>         AGE
+kubernetes-dashboard   NodePort   10.98.194.124   &lt;none&gt;        443:31213/TCP   107m
+</code></pre></div><h4 id="token">
+  Token
+  <a class="anchor" href="#token">#</a>
+</h4>
+<p>在浏览器访问：<code>https://0.0.0.0:31213/</code>:</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201220201125802.png" alt="image-20201220201125802" /></p>
+<p>看界面需要生成<code>Token</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vim admin-user.yaml
+<span style="color:#75715e"># 输入</span>
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+<span style="color:#75715e"># 保存退出</span>
+vim admin-user-role-binding.yaml
+<span style="color:#75715e"># 输入</span>
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+<span style="color:#75715e"># 保存退出</span>
+
+<span style="color:#75715e"># 执行命令加载配置</span>
+kubectl create -f admin-user.yaml
+kubectl create -f admin-user-role-binding.yaml
+
+<span style="color:#75715e"># 若出现已存在</span>
+<span style="color:#75715e"># 执行：kubectl delete -f xxx.yaml 即可</span>
+</code></pre></div><p>获取令牌：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl -n kubernetes-dashboard describe secret <span style="color:#66d9ef">$(</span>kubectl -n kubernetes-dashboard get secret | grep admin-user | awk <span style="color:#e6db74">&#39;{print $1}&#39;</span><span style="color:#66d9ef">)</span>
+</code></pre></div><p>复制<code>token</code>到刚才的界面登录即可，登录后界面如下：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201220201512486.png" alt="image-20201220201512486" /></p>
+<p>如果想延长<code>Token</code>的有效时间：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20201221204143993.png" alt="image-20201221204143993" /></p>
+<p>然后在<code>containners-&gt;args</code>加上<code>--token-ttl=43200</code>。</p>
+<h3 id="部署镜像">
+  部署镜像
+  <a class="anchor" href="#%e9%83%a8%e7%bd%b2%e9%95%9c%e5%83%8f">#</a>
+</h3>
+<p>下拉一个你自己想部署的镜像，具体命令如下（主节点执行）：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 部署</span>
+kubectl run hello --image<span style="color:#f92672">=</span>xxx/hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span>
+<span style="color:#75715e"># 列出 pod</span>
+kubectl get pods
+<span style="color:#75715e"># 创建一个服务对象</span>
+<span style="color:#75715e"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
+kubectl expose po hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --target-port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --type<span style="color:#f92672">=</span>NodePort  --name hello-http
+<span style="color:#75715e"># 列出服务</span>
+kubectl get services
+</code></pre></div><h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<p>本部分内容有参考如下文章：</p>
+<ul>
+<li><a href="https://kuboard.cn/install/install-k8s.html#%E6%A3%80%E6%9F%A5-centos-hostname">使用kubeadm安装kubernetes_v1.19.x</a></li>
+<li><a href="https://www.pomit.cn/p/2366402025269761#1010602">Web基础配置篇（十六）: Kubernetes集群的安装使用</a></li>
+<li><a href="https://jimmysong.io/kubernetes-handbook/concepts/">Kubernetes架构</a></li>
+<li><a href="https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D">深入剖析Kubernetes</a>：入门篇以及集群搭建部分</li>
+<li>Kubernetes in Action中文版：第1、2章</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'k8s_note',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname, 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#什么是kubernetes">什么是Kubernetes</a></li>
+    <li><a href="#安装">安装</a>
+      <ul>
+        <li><a href="#单机安装">单机安装</a></li>
+        <li><a href="#集群安装">集群安装</a></li>
+        <li><a href="#kubernetes-dashboard">Kubernetes Dashboard</a></li>
+        <li><a href="#部署镜像">部署镜像</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

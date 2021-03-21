@@ -6,8 +6,8 @@
 
 我的随笔、学习笔记、自己写的原创教程，都会放这里，目前已有的系列：
 
-- 1
-- 2
+- [k8s 学习之路](https://www.howie6879.cn/k8s/)
+- [Sanic 小书](https://www.howie6879.cn/sanic_book/)
 
 最后，欢迎一起交流：
 
