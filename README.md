@@ -1,7 +1,9 @@
 ## Howie's blog
 
+> 奇文共欣赏，疑义相与析
+
 我的博客：[howie6879](https://www.howie6879.cn/)
 
-我的随笔、学习笔记、自己写的原创教程，都会放这里：
+我的随笔、学习笔记、自己写的原创教程，都会放这里，欢迎一起交流：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190529083905.png)
+<div align=center><img width="300px" height="300px" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>
