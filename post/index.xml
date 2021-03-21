@@ -1,0 +1,1119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on 老胡的储物柜</title>
+    <link>https://www.howie6879.cn/post/</link>
+    <description>Recent content in Posts on 老胡的储物柜</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 18 Mar 2021 20:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>k8s学习之路.基础.[04.配置应用程序]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</link>
+      <pubDate>Thu, 18 Mar 2021 20:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</guid>
+      <description>使用Docker部署应用程序时，一般常用的配置方式有：
+ 配置内嵌 启动传参配置 环境变量  经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：
+ gitRepo hostPath NFS  再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于Kubernetes的顶级资源对象中，那就是ConfigMap。
+传递命令行参数 在上一节容器持久化存储的emptyDir概念介绍部分，我们引入了一个fortune-pod的例子，再回顾一下之前的配置文件吧，如下：
+apiVersion:v1kind:Podmetadata:name:fortunespec:containers:- image:luksa/fortunename:html-generatorvolumeMounts:- name:htmlmountPath:/var/htdocs- image:nginx:alpinename:web-servervolumeMounts:- name:htmlmountPath:/usr/share/nginx/htmlreadOnly:trueports:- containerPort:80protocol:TCPvolumes:- name:htmlemptyDir:{}此应用程序设定了每隔10s就会自动生成输出到html，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。
+创建文件fortune-pod-args.yaml，输入以下内容：
+apiVersion:v1kind:Podmetadata:name:fortune2sspec:containers:- image:luksa/fortune:argsargs:[&amp;#34;2&amp;#34;]name:html-generatorvolumeMounts:- name:htmlmountPath:/var/htdocs- image:nginx:alpinename:web-servervolumeMounts:- name:htmlmountPath:/usr/share/nginx/htmlreadOnly:trueports:- containerPort:80protocol:TCPvolumes:- name:htmlemptyDir:{}看到配置文件中的args字段了么？这个就是传给镜像luksa/fortune:args控制时间的参数，让我们启动看看吧。
+kubectl create -f fortune-pod-args.yaml # 输出 pod/fortune2s created # 查看状态 kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE fortune 2/2 Running 0 2m27s # 暂时服务化 kubectl port-forward fortune2s 8080:80 访问127.0.0.1:8080就会发现输出的频率变成了2s：
+&amp;gt; curl 127.0.0.1:8080 Stay away from flying saucers today.</description>
+    </item>
+    
+    <item>
+      <title>设计模式——基于容器的分布式系统</title>
+      <link>https://www.howie6879.cn/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Thu, 11 Mar 2021 22:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/</guid>
+      <description>20世纪80年代末至90年代初，面向对象编程思想给软件开发带来了一轮技术革新，就像润物细无声的春雨那般，向全世界的程序员们快速普及了模块化构建应用程序的方法，一直流行至今。
+当下，我们可以看到类似的革新出现在了分布式系统开发，具体特点如下：
+ 基于容器的微服务架构体系日益流行 容器天然隔离的属性非常适合作为分布式系统中的基本对象  基于面向对象，四人帮基于经验提出和总结了对于一些常见软件设计问题的标准解决方案，其描述了一系列基于接口的模式，可以在各种环境中重用，这被称之为软件设计模式。历史一定程度上来说是重复的，随着这种架构模式的成熟，基于容器的分布式系统的设计模式也就自然而然地浮现了。
+本篇主要阐述的是Brendan Burns在基于容器的分布式系统中发现的三种设计模式：
+ single-container patterns for container management：容器管理之单容器模式 single-node patterns of closely cooperating containers：容器协调之单节点（多容器）模式 multi-node patterns for distributed algorithms：分布式算法之多节点模式  基于容器分布式系统的设计模式会给分布式计算编码带来以下优势：
+ 最佳实践，给没有经验的程序员带来相对正确的使用方式 简化开发 提升系统可靠性  模式的价值 模式的目的是提供一般建议或结构来指导设计，这样做的好处有以下三点：
+ 站在巨人的肩膀上，对于经验不怎么丰富的开发者，可以通过模式来指引走在正确的道路上，从而少踩坑，提升项目质量 提供通用的名称和定义，有共同的领域语言进行交流是一件很重要的事情 方便识别并构建共享的通用组件  单容器模式 就像对象会定义边界一样，容器为定义接口提供了天然的边界；它不仅可以暴露特定应用的功能，还可以通过钩子函数来管理系统。传统的容器管理接口是极其有限的，如：
+ run pause stop  这些接口只能说满足基础的使用需求，但是就目前的现状来看，更丰富的接口可以为系统开发者与操作者提供更多的功能。鉴于HTTP和JSON的普及程度，可以考虑通过容器在特定的节点托管一个Web服务来实现。这样做的目的是什么，可以从下面两个角度来看待：
+ upward：容器可以暴露丰富的应用信息，比如：  各类监控指标（QPS、应用健康等） 一些开发人员感兴趣的信息如（线程、堆栈、锁、网络消息统计等） 组件配置、日志等   downward：任何开发者在编写软件组件的时候，都可以使用容器原生支持的生命周期接口来进行管控。比如一个集群管理系统通常会给任务分配对应的优先级，高优先级的任务即使在集群被超额订阅的情况下也能保证运行，这种保证是通过逐出已经运行的低优先级任务来实现的，然后这些低优先级任务能否运行取决于后面是否还有资源分配过来；但是这样有个问题就是开发者需要承担一些没必要的复返，比如处理一些优先级比较低的任务被抛弃的情况。相反，如果在应用程序和管理系统之间定义了正式的生命周期，那么应用程序组件将变得更易于管理，比如k8s使用Docker 的graceful deletion功能，这就允许应用程序通过完成当前任务，把状态写入磁盘等等操作之后再终止，将这个功能扩展一下就可以使使有状态的分布式系统的状态管理更加容易。  单节点（多容器）模式 上面提到了单容器的接口，我们稍稍延伸一下，对于一个多容器组成的应用，会有怎样的设计模式呢？当然，此时我们仍旧有些限制条件需要讲清楚：
+ 容器都处于单节点下 容器管理系统需要支持将多容器作为原子单元协调编排，这也侧面印证为什么k8s需要有Pod这个逻辑概念  边车模式（Sidecar pattern）  扩展和增强现有的应用容器</description>
+    </item>
+    
+    <item>
+      <title>k8s学习之路.基础.[03.容器持久化存储]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Thu, 04 Mar 2021 22:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid>
+      <description>容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
+有了Pod后，我们的应用程序需要被创建和管理，这就引出了ReplicaSet和Deployment；然后需要将部署好的应用暴露给外部进行访问，Service可以提供一个固定的ip和端口让外部访问。
+对于有状态的应用，可以使用StatefulSet来进行状态的恢复，在上一节概念介绍里面有提到，有状态的应用是离不开持久化存储的。
+引子 在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
+对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在k8s里面可以通过定义存储卷来满足这个需求，它们不像Pod这样的顶级资源，而是被定义为Pod的一部分，并和Pod共享相同的生命周期。因此在Pod里面容器重新启动期间，卷的内容是不变的，
+卷 emptyDir 在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
+让我们实际操作一下，vim fortune-pod.yaml:
+apiVersion:v1kind:Podmetadata:name:fortunespec:containers:- image:luksa/fortunename:html-generatorvolumeMounts:- name:htmlmountPath:/var/htdocs- image:nginx:alpinename:web-servervolumeMounts:- name:htmlmountPath:/usr/share/nginx/htmlreadOnly:trueports:- containerPort:80protocol:TCPvolumes:- name:htmlemptyDir:{}说明一下上述配置文件的含义：fortune镜像是k8s in action书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为html的容器挂载在var/htdocs中；而nginx也挂载了相同的html卷，不过位置在/usr/share/nginx/html，上面两个容器共用的卷就是emptyDir: {}。
+启动来感受一下：
+kubectl create -f fortune-pod.yaml # 输出 pod/fortune created # 查看状态 kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE fortune 2/2 Running 0 2m27s # 暂时服务化 kubectl port-forward fortune 8080:80 此时服务就处于可用状态了，在终端输入curl http://localhost:8080/，基本上每隔10s，都会返回不同的响应，如下图：
+emptyDir卷是最简单的卷类型，但是其他类型的卷都是在它的基础上构建的，在创建空目录后，相应的容器会将数据写入。
+gitRepo 假设你有在github上开发项目，gitRepo卷允许你定义好相关配置然后直接从github上下拉项目将数据共享给其他容器使用。
+hostPath 前面说的卷都是停留在共享同一个Pod的文件，当其需要读取节点文件的时候，就需要hostPath卷出场了。和之前介绍的卷最大的不同之处是，hostPath是一个持久性存储的卷，其目录存在于对应节点主机的目录。
+所以，hostPath仅仅适用于在节点上读取数据，如果你的需求是跨Pod，那么NAS才是你的解决方案。
+NFS 目前相关的云商都会有一套自己的持久化方式，我目前是自己搭建的k8s，所以我只能实践一下NAS方案，新建文件vim mongodb-pod-nfs.yaml，输入以下内容：
+apiVersion:v1kind:Podmetadata:name:mongodb-nfsspec:volumes:- name:mongodb-datanfs:server:1.2.3.4path:/some/pathcontainers:- image:mongoname:mongodbvolumeMounts:- name:mongodb-datamountPath:/data/dbports:- containerPort:27017protocol:TCP启动：
+kubectl create -f mongodb-pod-nfs.</description>
+    </item>
+    
+    <item>
+      <title>一站式机器学习云开发平台</title>
+      <link>https://www.howie6879.cn/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/</link>
+      <pubDate>Fri, 29 Jan 2021 22:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/</guid>
+      <description>本篇是关于自身在机器学习这块工作经验的思考总结
+ 我希望构建一个机器学习云开发平台，目标在于解决以下问题：
+ 团队协作：项目管理，技术&amp;amp;业务的共享如何体现在实际解决问题的过程中； 资源调度：数据处理、模型训练； 模块共享：低代码甚至无代码； 快速开发：快速试错、实践、测试、部署； 需求-&amp;gt;开发的闭环  背景 自17年毕业以来，我从事于游戏行业的风控领域，主要涉及的系统的是风控和画像这两块。尽管我从团队初始建立的时候就定义了各种服务模板以及脚手架，但在数据处理、模型构建、管理这块我并没有着重去管控，仅仅是设定了一些服务的标准（初始阶段需要的是快速响应需求），如今随着业务场景和团队成员的增加，有如下问题需要考虑：
+ 脚本模块共享问题，团队成员长期开发积累的技术脚本、模型等是否可以模块化用于给其他成员共用； 不同数据及不同模型快速试验的的效率问题，我理想的解决方案是类似工作流那样自由组合脚本，从数据提取到模型构建再到模型管控以作业流的形式来完成（这也意味着只要公有模块覆盖面足够广，就可以进行组件拖拽式开发）； 模型测试管理问题，每个模型有哪些版本？怎么快速测试？分别被哪些服务使用以及如何快速上线； 资源调度问题，公司的数据存于云商，本地开发涉及的资源问题如何解决。  一站式机器学习云研发平台 目标 上面提到的问题可能也和大数据计算领域有些交集，毕竟都涉及到了 ETL，这些问题实际上涵盖了一个数据模型从开发到上线完整的生命周期。对于上述的需求，其实我们可以分别拆开来看看会衍生出怎样的目标：
+ 第1、2两点在我看来可以归纳为一个问题，模块需要抽象，然后让开发者可以自由地从模块仓库选取自己需要的模块进行组合，最终形成一个从数据提取到模型构建再到模型管控的工作流；一个项目可以有多个工作流，工作流的最小元素是模块，工作流的运行参数可以自由定义，开发者可以通过调整参数来快速调优；模块（函数）即服务，组合完毕就意味着一个需求的实现； 第3点的实现离不开两个基础服务，一是模型自动API服务化，二是模型管控服务； 第4点可以从两个方向入手，引入资源管理系统，如k8s或者云商的资源管理服务。  最终目标呼之欲出了，总结下我的需求，我需要的是一个满足数据计算、训练、管理的一站式机器学习云研发平台；而这个平台具有管理一个模型生命周期且形成闭环的功能，核心功能如：
+ 数据的访问与计算是无限制的； 模块即服务且可多用户互相共享； 一个需求的解决方案是模块的自由组合，需求的最终产物是模型（也可以是数据）； 对于模型可配置、易管控，可自动API服务化且可快速测试上线。  对于一站式机器学习云研发平台，我们需要其具有怎样的功能已经描述的差不多，既然问题已经抛了出来，接下来就说说怎么解决。
+一切事情都有很多种解决方案，随着云原生的普及，容器技术的引入，中台在国内企业的覆盖率越来越广，该有的技术和业务的基础设施都开始有了一定的积累，怎么利用这些基础设施来进一步提升开发效率是接下来的一个方向，我期望最终解决方案有如下两个特性：
+  低代码（高层次人员无代码）：基于现有的基础设施（脚手架、模型代码库、模板）可以根据通用模块结合个性化配置形成工作流就可以构建一个机器学习应用，工作流为核心的低代码、甚至无代码工作方式是我的期望，那么代码谁来写？这又是一个值得深入探讨的问题，目前暂不探讨，现在就假设有底层程序员在持续奋斗；
+  云开发：因为涉及到资源的调度（数据计算、模型训练等），所以一个模型从数据输入到模型输出的开发流程都可以在云端完成（特别是数据处理和模型训练），浏览器在手，天下我有。
+  就目前垂直的机器学习数据科学领域，再结合最新的技术方向，我个人很看好这两块，我认为低代码、云开发是构建新一代云原生应用的新式武器！（如果一直往前走，容器技术暂且不谈，单单微服务架构是不适用于这种原生应用的构建了，目前有大佬在研究的云研发架构或许是个方向。）
+流程 先说说低代码，这里的低代码表达的是我们实现一个模型需求的方式，也就是说我们用低代码的方式来快速实现需求。
+前面提到的模块即服务，通过连接各个模块最终形成一个工作流就是一个友好的方式，这也是市面上大部分产品的实现方式；每个模块的展现形式应该是友好可定义的，然后根据输入参数的不同来展现不同的行为（比如通过DSL定义，再基于DSL构建交互式的界面进行快速低代码开发）。
+前面我们强调了闭环，那么在满足低代码这种特性下，我们的开发流程是怎样的呢？
+ 需求分析 方案确立（文档&amp;amp;会议讨论） 组件选择（通过DSL定义） 在机器学习云平台勾选组件、进行DSL配置，形成工作流（工作流的输出就是解决方案的核心） 验证&amp;amp;验收&amp;amp;部署（业务介入）  其实和传统方式一样，低代码的核心点也要求从需求分析到部署可以形成一个独立的闭环，不过在中间开发、验收、部署的过程都尽量实现低代码。低代码带来的效率提升是肉眼可见的，而实现低代码的关键点在于技术与业务的抽象，这里的表现为模块[函数]即服务；通过组合各个函数，就可以很方便地形成一个端到端的工作流以作为对某个需求的解决方案。
+再来说说云开发，在机器学习领域，计算资源是一个不可忽视的问题，特别是在大数据计算清洗以及模型训练这块，目前基本上绕不过几大云商。我的想法是数据在哪，我们的开发环境就可以在哪，结合k8s，我们可以轻松建立团队的云研发环境，比如：
+  code-server
+  jupyterlab
+  这两个是市面上比较成熟的远程开发工具，在之前的一年开发过程中，我在团队中主要就是引用了这两个工具（一些数据计算需求在本地没法做，因为数据都在云商且是动态数据，只能用这种形式远程调试开发）。
+搭建 目前开源社区都有不少机器学习相关的工具，我也对一些工具进行了调研，评估标准就是解决我上面背景部分提出的问题，但是最终比较和我心意的是：Orchest：A new kind of IDE for Data Science.</description>
+    </item>
+    
+    <item>
+      <title>梯度下降推导</title>
+      <link>https://www.howie6879.cn/p/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%8E%A8%E5%AF%BC/</link>
+      <pubDate>Thu, 14 Jan 2021 22:35:47 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%8E%A8%E5%AF%BC/</guid>
+      <description>以感知器为例，可以梯度下降来学习合适的权重和偏置：
+
+假设有n个样本，第i次的实际输出为y，对于样本的预测输出可以表示为：
+\[ \bar{y}^i = w_1x_1^i+w_2x_2^i+...+w_nx_n^i+b \]
+任意一个样本的实际输出和预测输出单个样本的误差，可以使用MES表示：
+\[ e^i=\frac{1}{2}(y^i-\bar{y}^i)^{2} \]
+那么所有误差的和可以表示为：
+\[ \begin{aligned} E &amp;= e^1+e^2+...+e^n \\ &amp;= \sum_{i=1}^ne^i \\ &amp;= \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 \end{aligned} \]
+想象一下，当你从山顶往下走，只要你沿着最陡峭的位置往下走，那么终将走到最底部（也可能是局部最低）：
+
+我们学习的目的就是在$E$尽量最小，然后得到此时的$w$和$b$，前面说的最陡峭的位置该怎么定义呢？我们可以引入梯度，这是一个向量，指的是函数值上升最快的方向，那么最陡峭的位置就可以用在最陡峭的方向迈出一步（步长，学习速率），用数学公式表示为：
+\[ \mathbf{x}_{n e w}=\mathbf{x}_{\text {old }}-\eta \nabla f(x) \]
+其中：
+ $\nabla$表示梯度算子 $\nabla f(x)$表示函数的梯度 $\eta$表示梯度、学习速率，可以理解为找准下山的方向后要迈多大步子  现在有了目标函数，也知道怎么找到让目标函数值最小的办法，对于参数$w$：
+\[ E_{(w)} = \frac{1}{2}\sum_{i=1}^n(y^i-w^Tx^i)^2 \]
+那么$W$值的更新公式为：
+\[ w_{n e w}=w_{\text {old }}-\eta \nabla E_{(w)} \]
+关键步骤来了，来看看$E_{(w)}$的推导吧：
+\[ \begin{aligned} \nabla E(\mathrm{w}) &amp;=\frac{\partial}{\partial \mathrm{w}} E(\mathrm{w}) \\ &amp;=\frac{\partial}{\partial \mathrm{w}} \frac{1}{2} \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)^{2} \\&amp;=\frac{1}{2}\frac{\partial}{\partial \mathrm{w}} \sum_{i=1}^{n} \left(y^{(i)2}-2y^{(i)}\bar{y}^{(i)}+\bar{y}^{(i)2}\right) \end{aligned} \]</description>
+    </item>
+    
+    <item>
+      <title>k8s学习之路.基础.[02.概念介绍]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
+      <pubDate>Mon, 11 Jan 2021 22:17:08 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</guid>
+      <description>俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。
+本文主要讲解以下四个概念：
+ Pod Deployment Service Namespace  引入 让我们使用Deployment运行一个无状态应用来开启此章节吧，比如运行一个nginx Deployment（创建文件：nginx-deployment.yaml）：
+apiVersion:apps/v1kind:Deploymentmetadata:name:nginx-deploymentlabels:app:nginxspec:replicas:1selector:matchLabels:app:nginxtemplate:metadata:labels:app:nginxspec:containers:- name:nginximage:nginx:latestports:- containerPort:80配置文件第二行，有个kind字段，表示的是此时yaml配置的类型，即Deployment。什么是Deployment？这里我先不做解释，让我们先实践，看能不能在使用过程中体会出这个类型的概念意义。
+在终端执行：
+kubectl apply -f ./nginx-deployment.yaml # 输出 deployment.apps/nginx-deployment created 然后通过以下命令分别查看集群中创建的 Deployment 和 Pod 的状态：
+# 查看 Deployment kubectl get deployments # 输出 NAME READY UP-TO-DATE AVAILABLE AGE nginx-deployment 1/1 1 1 2m29s # 查看 Pod kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE nginx-deployment-585449566-qslv5 1/1 Running 0 2m38s # 查看 Deployment 的信息 kubectl describe deployment nginx	# 删除 Deployment kubectl delete deployment nginx-deployment # 查看 Pod 的信息 # kubectl describe pod &amp;lt;pod-name&amp;gt; # 这里的 &amp;lt;pod-name&amp;gt; 是某一 Pod 的名称 kubectl describe pod nginx-deployment-585449566-qslv5 # 进入容器 kubectl exec -it nginx-deployment-585449566-qslv5 -- /bin/bash 此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词Pod，这又是什么？让我们带着疑问继续往下看吧。</description>
+    </item>
+    
+    <item>
+      <title>k8s学习之路.基础.[01.走进Kubernetes]</title>
+      <link>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/</link>
+      <pubDate>Mon, 11 Jan 2021 22:16:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/</guid>
+      <description>什么是Kubernetes 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下还需要让资源利用率更多且硬件成本相对更低，那么基于容器部署的微服务的一些自动化设施的需求就这样诞生了，于是就有了Kubernetes，其提供的特性有：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+ Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+ Kubernetes控制节点主要由以下几个核心组件组成：
+ etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
+ kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 单机安装 关于单机安装k8s，我使用的相关环境如下：
+ macOS：Catalina 10.15.1 Docker Desktop Vesion：3.0.2 Kubernetes：1.19.3  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+k8s.gcr.io/kube-proxy:v1.19.3=gotok8s/kube-proxy:v1.19.3 k8s.gcr.io/kube-controller-manager:v1.19.3=gotok8s/kube-controller-manager:v1.19.3 k8s.gcr.io/kube-scheduler:v1.19.3=gotok8s/kube-scheduler:v1.19.3 k8s.gcr.io/kube-apiserver:v1.19.3=gotok8s/kube-apiserver:v1.19.3 k8s.gcr.io/coredns:1.7.0=gotok8s/coredns:1.7.0 k8s.gcr.io/pause:3.2=gotok8s/pause:3.2 k8s.gcr.io/etcd:3.4.13-0=gotok8s/etcd:3.4.13-0 随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+如果状态一直处于Kubernetes starting状态，可在终端执行以下命令然后重启Docker：
+rm -rf ~/.kube rm -rf ~/Library/Group\ Containers/group.com.docker/pki/ 集群安装 准备   准备三台机器，比如（使用的配置是4核8G，IP换成你自己的）：
+ 192.168.5.91：Master：  执行：  hostnamectl set-hostname master echo &amp;quot;127.</description>
+    </item>
+    
+    <item>
+      <title>nndl_note: 深度神经⽹络为何很难训练</title>
+      <link>https://www.howie6879.cn/p/nndl_note-%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/</link>
+      <pubDate>Fri, 18 Dec 2020 21:13:58 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/nndl_note-%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/</guid>
+      <description>消失的梯度问题 导致梯度消失的原因 在更加复杂⽹络中的不稳定梯度 其它深度学习的障碍  上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。
+ 普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数
+ 而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：
+
+这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？
+
+随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？
+仔细研究会发现：
+ 如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前
+ 反之情况也会发生，前面层训练良好，后面停滞不前
+  实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。
+消失的梯度问题 我们在第一章识别手写字曾经以MNIST数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。
+简单回顾一下，之前我们的训练样本路径为/pylab/datasets/mnist.pkl.gz，相关案例代码在pylab都可以找到（我稍做了改动以支持Python3）。
+import mnist_loader import network2 training_data, validation_data, test_data = mnist_loader.load_data_wrapper() # 输入层 784 # 隐藏层 30 # 输出层 10 sizes = [784, 30, 10] net = network2.Network(sizes=sizes) # 随机梯度下降开始训练 net.SGD( training_data, 30, 10, 0.1, lmbda=5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, ) &amp;#34;&amp;#34;&amp;#34; Epoch 0 training complete Accuracy on evaluation data: 9280 / 10000 Epoch 1 training complete Accuracy on evaluation data: 9391 / 10000 .</description>
+    </item>
+    
+    <item>
+      <title>程序员如何提升个人的技术影响力</title>
+      <link>https://www.howie6879.cn/p/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A6%82%E4%BD%95%E6%8F%90%E5%8D%87%E4%B8%AA%E4%BA%BA%E7%9A%84%E6%8A%80%E6%9C%AF%E5%BD%B1%E5%93%8D%E5%8A%9B/</link>
+      <pubDate>Wed, 23 Sep 2020 21:00:39 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A6%82%E4%BD%95%E6%8F%90%E5%8D%87%E4%B8%AA%E4%BA%BA%E7%9A%84%E6%8A%80%E6%9C%AF%E5%BD%B1%E5%93%8D%E5%8A%9B/</guid>
+      <description>公司组织了个内训师培训班，进入前需要面试审核，以下是我的面试分享课题，这里分享出来以作记录。
+ 大家晚上好，我是howie6879，目前主要负责的工作是风控和画像这两块；我个人的话比较常用的语言是Python，个人技术领域主要面向后端、大数据、智能应用等领域方向。
+但是今天我不准备分享技术代码相关的，因为我前面在公司有过两场很偏技术的分享会。所以我今天挑了一个面向程序员群体的主题来进行分享，那就是程序员如何提升个人的技术影响力。
+我将根据以下两部分来分享如何提升个人的技术影响力：
+ 为什么要提升个人技术影响力 提升个人影响力的方式  为什么要提升个人技术影响力 为什么要提升个人的技术影响力？自然是能给作为程序员的我们带来好处，而且是无法拒绝的好处，比如：
+ 带来更多的机会：不论是赚钱还是工作，和35岁程序员的焦虑分水岭说拜拜，甚至可以财富自由~； 有自己的粉丝群体：在某个圈子具有一定的话语权； 持有不断进步、终生学习的生活态度。  相信大家现在应该已经感受到了，有自己的技术影响力真的可以带来很多好处，那么，对于这个目标，我们应该用什么方式来实现呢？让我们一起往下看。
+提升个人影响力的方式 接下来，我将通过三个方面来一一说明提升个人影响力的方式，这里我强调一点，下面说到的方式都是我已经尝试过并且有一定成效的方式我才会列进来，有一句话说的是实践是检验真理的唯一标准，我讲究的是这个哈，希望大家也不仅仅是听听，最好是自己也动手实践一番；所以接下来我都将以自己实践过的方式作为例子来和大家分享。
+开源项目 首先讲的第一种方式是开源，这个作为一名程序员大家都很清楚开源项目这块，那里的代码是自由的、是百花齐放的、是大而全的。
+对于开源，我推荐两种入局方式：
+ 作为贡献者参加市面上相对成熟的开源项目 作为核心开发者自行构建一个有一定人气的开源项目  贡献者方式 这种入局方式，需要自己找到一个自己感兴趣的项目，并且将这个项目源码都过一遍，然后可以通过以下方式入局：
+ 发现Bug然后PR 新功能开发然后PR  我当时第一个入局的项目是一个Python异步Web框架Sanic，如下图：
+我大概贡献了8个Commits：
+核心开发者方式 编写自己的开源项目，并且让它发展起来，这种方式说实在的比上面那种方式付出的精力要多得多，你需要考虑：
+ 编写的项目别的开发者是否有需求 除了写代码还需要写教程文档 还有社区维护等等  我当时写的是一个异步爬虫框架，那时候是16到17年，Python的异步正是大力宣传的时候，我当时抓到的点就是异步爬虫框架，于是我就编写了异步爬虫框架Ruia：
+这两种方式尝试下来，这是我目前在开源这块的成果：
+文章 除了开源项目的影响力输出，我们作为程序员还可以写技术文章发布到各种平台，上面这张图说明了我个人一篇文章会分享的平台。这块的核心点是要坚持，毕竟持续输出是一件很难的事情。
+除了写文章，还可以写教程&amp;amp;课程：
+我出这个目的完全是为了宣传我的Ruia异步爬虫框架。
+线下分享 前面两个说的分享只针对的是线上，其实还有一种方式，这种方式最能锻炼人，同样也会让人有更直接的反馈，大家可以猜一猜哈，没错！就是我现在正在做的事情，线下分享！
+总结 到这里，我今天的分享就结束了，总结一下就是，我们可以通过开源&amp;amp;文章&amp;amp;线下分享等形式扩展自己的技术影响力，从而可以通过技术影响力形成自己的粉丝群体、获得更多的机会等优势。
+这个主题其实可扩展的东西很多，大家可以私下好好研究一番。当然，我自身做的还远远不够，还有很大的进步空间，但是至少我自身是在往这个方向进步，这里我就先将自己的一些经验分享出来，算是抛砖引玉吧，诸位大佬多多包涵；谢谢，大家加油！</description>
+    </item>
+    
+    <item>
+      <title>程序员如何在工作中保持进步</title>
+      <link>https://www.howie6879.cn/p/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A6%82%E4%BD%95%E5%9C%A8%E5%B7%A5%E4%BD%9C%E4%B8%AD%E4%BF%9D%E6%8C%81%E8%BF%9B%E6%AD%A5/</link>
+      <pubDate>Sun, 29 Dec 2019 11:57:39 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A6%82%E4%BD%95%E5%9C%A8%E5%B7%A5%E4%BD%9C%E4%B8%AD%E4%BF%9D%E6%8C%81%E8%BF%9B%E6%AD%A5/</guid>
+      <description>&lt;p&gt;工作，对于大部分人都是不可避免的一件事，有的人是为了生存，有的人是为了自我价值的实现，也有人是为了将来不工作而现在努力工作，出发点可能各种各样，但是工作总是大部分人不可避免的一部分。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>nndl_note: 神经⽹络可以计算任何函数的可视化证明</title>
+      <link>https://www.howie6879.cn/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/</link>
+      <pubDate>Sat, 02 Nov 2019 21:13:58 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/</guid>
+      <description>两个预先声明 一个输入和一个输出的普遍性 多个输入变量 S型神经元的延伸 修补阶跃函数 结论  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 ...  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&amp;lt;\epsilon$，其中$\epsilon&amp;gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+\[ \sigma(z) \equiv 1 /\left(1+e^{-z}\right) \]
+其中：$z=wx+b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变 上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 + np.exp(-(w * x + b))) def plot_sigmoid(w, b): x = np.</description>
+    </item>
+    
+    <item>
+      <title>nndl_note: 改进神经⽹络的学习⽅法</title>
+      <link>https://www.howie6879.cn/p/nndl_note-%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/</link>
+      <pubDate>Wed, 30 Oct 2019 19:40:02 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/nndl_note-%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/</guid>
+      <description>交叉熵代价函数  引⼊交叉熵代价函数 交叉熵的含义？源⾃哪⾥？   过度拟合和规范化  规范化 为何规范化可以帮助减轻过度拟合 规范化的其他技术   权重初始化 如何选择神经⽹络的超参数 参考   万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
+ 前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
+ 交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数  交叉熵代价函数 通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
+对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：
+假设有这样一个神经元，我们希望当输入为1的时候，输出为0，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为0.6 和 0.9，前面我们说过，S型神经元的输出计算方式为：
+输⼊$x_{1},x_{2},&amp;hellip;,x_{j}$，权重为$w_{1},w_{2},&amp;hellip;,w_{j}$，和偏置b的S型神经元的输出是：
+$$ \frac{1}{1+\exp(-\sum_j w_j x_j-b)} $$
+将0.6 和 0.9带入，即可得到输出为：0.82，很显然和目标0相差甚远，那么就只能继续寻找最优解了，随着迭代期的增加，神经元的输出、权重、偏置和代价的变化如下⾯⼀系列图形所⽰：
+可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于0.5我们都可以归为0，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：
+这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。
+这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单
+ 权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
+ 让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
+ $x=1$ $y=0$  再结合前面第一章讲的代价函数的定义：
+$$ C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2 $$
+ w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output  类比一下，此时的代价函数为：</description>
+    </item>
+    
+    <item>
+      <title>不论微信钉钉，我写了个通用消息监控处理机器人</title>
+      <link>https://www.howie6879.cn/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/</link>
+      <pubDate>Mon, 21 Oct 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/</guid>
+      <description>上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到Bear。
+虽说那篇文章比较实用，也有很多朋友表示喜欢，但还有不少缺陷：
+ 对技术薄弱的朋友复现困难，项目很多配置需要手动生成，前期校验工作很多 二次开发比较困难，不能直接作为第三方包使用 项目兼容性不强，目前只支持Mac并且只支持微信这个APP，其他如钉钉就没辙 项目稳定性不强，微信更改机制可能又需要重头再来  对，问题很多，但在勉强能用的情况下我并不是很有动力进行新方案的开发。那么是什么原因促使我更新方案了呢~
+ 背景：在公司和数据打交道居多，运营那块每天会将一些表格数据发到钉钉群里面，然后我组内成员需要手动下载并找到对应的处理脚本进行处理
+ 然后我问了下两周需要耗费多长时间在这件事情上，答曰1小时，这确实不能忍了！
+于是我花了10小时做了这个处理方案！顺便解决上面说的四个问题，赚了。。。
+调研 开始之前，自然是先下决心将一切历史问题解决掉：
+ 跨系统！跨软件！ 程序能直接作为第三方包使用，并且傻瓜式！  好，flag已立，开始吧，核心技术点就是如何监控所有平台软件的消息。
+上一篇推文的方案只能支持微信，所以我目前的背景需求里面的监控对象是钉钉，难道我又要按照以前的方法去搞db文件么？
+总结来说，我监控的是消应用息，并且不只是微信、还需要钉钉、QQ等其他任意软件的消息，而且我也不能一个个地去破解（就算这次解密成功，如果下次需求是其他通信软件呢？），那该怎么办呢？
+所以这次处理问题的角度需要站在上帝视角，说来简单，做起来也简单，哈哈。
+话说我灵光一闪，既然目标对象是所有应用的消息，那我我为何不将视角从应用层面移到系统层面呢？
+我以我的Mac为例，这不有现成的通知中心么？
+可谓是柳暗花明又一村，老胡我这招隔山打牛，姿势还可以吧？
+现在问题很明确了：
+ 我管你微信、钉钉、还是QQ，我只看系统的通知中心 我管你怎么加密、怎么限制，你总不会限制系统吧，我还是只看系统的通知中心  我背靠操作系统老大，现在还害怕你几个小应用，一起上，我哭算我输。
+在操作系统的领域内，这个方案就是武侠世界的九阳神功，还配上了屠龙刀，可谓：十步杀一人，千里不留行。
+调研结束。
+实践 解决方案确立了，接下来无非就是验证加实现，这里还是以Mac为例。
+来来来，看看苹果的系统中心好不好攻占，首先，咋们来确立系统中心数据的存储方式，进入终端：
+cd `getconf DARWIN_USER_DIR`/com.apple.notificationcenter/db2 ls db db-shm db-wal 可以看到，有三个文件，哎，好熟悉，SQLite呗。
+打开：
+分别有以下几个表：
+ app categories dbinfo delivered displayed record requests snoozed  可能有点多，但我们只需要关注两个表就行：
+ app：应用id record：监控的应用消息  建表语句分别如下：
+create table app ( app_id INTEGER primary key, identifier VARCHAR, badge INTEGER ); create table record ( rec_id INTEGER primary key, app_id INTEGER, uuid BLOB, data BLOB, request_date REAL, request_last_date REAL, delivered_date REAL, presented Bool, style INTEGER, snooze_fire_date REAL ); 在app表的这行，可以看到微信应用的id是35。</description>
+    </item>
+    
+    <item>
+      <title>利用微信同步文章到Bear</title>
+      <link>https://www.howie6879.cn/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/</link>
+      <pubDate>Mon, 16 Sep 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/</guid>
+      <description>如果图片失效：见【教程&amp;amp;工具】微信同步文章到Bear
+ 在我日常工作中，我会将各种互联网以及生活中产出的信息汇总到Bear，再通过Bear的云同步使我各个终端的信息保持一致。
+以前在使用有道云笔记的时候，有个功能我很喜欢，就是当看到一篇想收藏的文章的话，就可以直接右上角发送到有道云笔记，如下图：
+ 顺便一提：熊掌记是一款优雅、灵活的写作笔记应用。
+回到正题，我现在面临的需求是能不能在看到喜欢的文章的时候，也通过类似于右上角分享一下就可以直接将文章同步到我各个终端上的Bear，最终成果如下：
+ 解决方案 要实现上述的需求，我大概思考了如下的解决方案：
+ 准备一个微信号（这里直接称作小号）专门接收待收藏到Bear的文章 编写一个服务监控小号的消息，比如收到推文类型的消息就进行内容提取 监控服务将提取后的内容发送到Bear（这里要求服务运行在Mac OS上）  所以在继续之前，你需要有以下条件：
+ 基本的Python基础知识（写小脚本Python真的很方便） 一台装有Bear的Mac OS  方案调研 上面的解决方案看起来还是挺好实现，第一步不用多说，这年头谁没个小号，第二点的话，我印象中Python是有个第三方库可以直接监听微信对应账号的消息。
+因为这些第三方库都是基于Web版的微信，所以在使用之前我想验证下此方案是否可行，刚准备登录网页版微信，就直接提示：
+&amp;lt;error&amp;gt;&amp;lt;ret&amp;gt;1203&amp;lt;/ret&amp;gt;&amp;lt;message&amp;gt;To protect your account, logging in to WeChat via the web has been suspended. Use WeChat for Windows or WeChat for Mac to log in on a computer. Download WeChat for Windows or Mac at http://wechat.com.&amp;lt;/message&amp;gt;&amp;lt;/error&amp;gt; 果不其然现在微信准备加强Web版本的限制了，心里凉凉的，第二步还没开始就已经被宣判死刑。
+只能换个思路了，怎么办。其实这一步走不通我还是能接受的，因为我一直觉得依赖Web版总有一天会挂掉，毕竟多了个依赖总是会增加复杂度。
+能不能依靠客户端？
+我们知道，微信数据是有同步功能的，开发过客户端的都知道，这就意味着微信的数据必然保存一份在客户端本地系统上。
+所以对于第二点的解决思路就转换成了如何获取微信保存在客户端本地的数据，找到某个软件的数据文件夹自然是很简单的事情，比如微信客户端的数据就存放在：
+# howie6879是我的用户名，请自行替换 /Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.</description>
+    </item>
+    
+    <item>
+      <title>nndl_note: 反向传播算法如何工作</title>
+      <link>https://www.howie6879.cn/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/</link>
+      <pubDate>Fri, 10 May 2019 16:36:44 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/</guid>
+      <description>热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程  输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函数关于⽹络中任意偏置的改变率 代价函数关于任何⼀个权重的改变率   反向传播算法 反向传播：全局观 参考  前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：
+ $L$ : 表示网络层数 $b_j^l$ : 表示第$l$层的第$j$个神经元的偏置 $a_j^l$ : 表示第$l$层的第$j$个神经元的激活值 $w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重 $w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重 $b^l$ : 第$l$层神经元的偏置向量 $z^l$ : 第$l$层神经元的带权输入向量 $a^l$ : 第$l$层每个神经元激活值构成的向量 $\delta_{j}^{l}$ : 第$l$层第$j$个神经元的**误差**  本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：
+ 很多看似显而易见的想法只有在事后才变得显而易见。
+ 热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：
+$$ a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right) $$
+举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：
+$$ \begin{aligned} a_3^2 &amp;amp;= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 ) \ &amp;amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2 \right) \end{aligned} $$</description>
+    </item>
+    
+    <item>
+      <title>nndl_note: 识别手写字</title>
+      <link>https://www.howie6879.cn/p/nndl_note-%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/</link>
+      <pubDate>Wed, 08 May 2019 16:36:44 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/nndl_note-%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/</guid>
+      <description>感知器 S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 随机梯度下降算法 实现数字分类模型 参考  Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
+神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？
+ 人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准  本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
+ 两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法  感知器 1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
+ 感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
+ 感知器的工作方式如下所示：
+$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。
+对于$x_{1},x_{2},&amp;hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&amp;hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：
+假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：
+ $x=(x_{1},x_{2},&amp;hellip;,x_{j})$ $w=(w_{1},w_{2},&amp;hellip;,w_{j})$  那么感知器的规则可以重写为:
+这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
+它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用python写的一个感知器自动学习实现与非门，代码在**nndl_chapter01**。
+说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
+   $x$ $y$ $output$     0 0 0   0 1 1   1 0 1   1 1 0    可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。</description>
+    </item>
+    
+    <item>
+      <title>oh-my-zsh：让终端飞</title>
+      <link>https://www.howie6879.cn/p/oh-my-zsh%E8%AE%A9%E7%BB%88%E7%AB%AF%E9%A3%9E/</link>
+      <pubDate>Mon, 15 Apr 2019 16:16:58 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/oh-my-zsh%E8%AE%A9%E7%BB%88%E7%AB%AF%E9%A3%9E/</guid>
+      <description>上一次推文写了JupyterLab：程序员的笔记本神器，介绍的是如何在web端打造一个便捷的开发环境，发出后反响还不错
+因此我决定再写几篇能提升程序员工作以及学习效率的文章，如果能形成一个系列那是最好~如果你有自己的效率工具以及方案，欢迎留言讨论
+什么是oh-my-zsh 诸位大佬都知道，Linux下shell默认是bash，但还有一种shell，叫做zsh它比bash更加强大，功能也更加完善，zsh虽说功能强大，但是配置比较复杂导致流行度不是很高
+但是好东西终究是好东西，开源界的大佬们是不会让明珠蒙尘，我等伸手党也是可以直接搭顺风车的，感谢robbyrussell大佬的开源项目 oh-my-zsh 吧，从此使用zsh也就几行命令的事情
+oh-my-zsh项目目前有80k+star，贡献者超过1300，并且提供了200多个可选插件（rails，git，OSX，hub，capistrano，brew，ant，php，python等），以及超过140个主题供你选择，安装后你将享受以下特性：
+ 首先兼容bash 自动cd：只需输入目录的名称即可 命令选项补齐，比如输入git，然后按Tab，即可显示出git都有哪些命令 目录一次性补全：比如输入Doc/doc按Tab键会自动变成Documents/document/ 插件和主题支持（插件能进一步提升效率）  安装oh-my-zsh 在安装oh-my-zsh之前，首先需要安装好zsh：
+yum install -y zsh 切换shell为zsh：
+chsh -s /bin/zsh 重启终端：
+# 查看当前shell echo $SHELL 输出/bin/zsh表示成功
+oh-my-zsh的安装非常简单，参考官网，执行如下命令即可：
+# curl sh -c &amp;#34;$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&amp;#34; # wegt  sh -c &amp;#34;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)&amp;#34; 输出如下表示成功：
+配置oh-my-zsh 和bash不同，zsh的配置文件是~/.zshrc，实际上oh-my-zsh的默认配置也够我们使用了，但是这样其真正的强大之处并不能得到很好的体现，因此我们可以继续看看对应的插件和主题功能
+关于主题 oh-my-zsh的主题非常丰富，可以用如下命令查看已有主题：
+ls .oh-my-zsh/themes 个人比较喜欢简单的，因此用了wedisagree主题，进入.zshrc配置文件进行修改
+vim ~/.zshrc 将第11行改为ZSH_THEME=&amp;quot;wedisagree&amp;quot;，然后:wq保存退出，主题就自动生效
+关于插件 oh-my-zsh的插件生态非常丰富，下面列出来的是我个人比较常用的插件，如果你有兴趣，可以取发掘能提高自身效率的插件~
+注意：如果操作过程中出现_arguments:448: _vim_files: function definition file not found错误，请执行：rm -f ~/.zcompdump即可</description>
+    </item>
+    
+    <item>
+      <title>JupyterLab：程序员的笔记本神器</title>
+      <link>https://www.howie6879.cn/p/jupyterlab%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%A5%9E%E5%99%A8/</link>
+      <pubDate>Wed, 20 Mar 2019 13:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/jupyterlab%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%A5%9E%E5%99%A8/</guid>
+      <description>JupyterLab对于Jupyter Notebook有着完全的支持
+ JupyterLab是一个交互式的开发环境，是jupyter notebook的下一代产品，集成了更多的功能，等其正式版发布，相信那时就是jupyter notebook被取代的时候
+通过使用JupyterLab，能够以灵活，集成和可扩展的方式处理文档和活动：
+ 可以开启终端，用于交互式运行代码，完全支持丰富的输出 支持Markdown，Python，R，LaTeX等任何文本文件 增强notebook功能 更多插件支持  如果你在日常生活中，有以下需求，我觉得你可以安装一个JupyterLab
+ 随时随地希望试验一些代码片段 多语言、多文档支持 有记笔记需求（文本+代码）   安装
+ 接下来，我将以Python为默认语言来搭建JupyterLab，首先确认你安装好了Python基本环境：
+# 一行命令搞定 pip install jupyterlab # 安装ipython pip install ipython 如果在服务器使用的话，个人建议还是设置一下密码，配置过程如下：
+# 进入ipython交互环境 ipython 生成密码：
+from notebook.auth import passwd passwd() # 输入你自己设置登录JupyterLab界面的密码 然后会有一串输出，记得复制下来，等会配置需要使用 修改JupyterLab 配置文件：
+jupyter lab --generate-config 修改以下配置：
+c.NotebookApp.allow_root = True c.NotebookApp.open_browser = False c.NotebookApp.password = &amp;#39;刚才复制的一串数字粘贴到这里&amp;#39; 为了后续能够方便地安装插件，请先安装好node环境，假设你安装好，接下来演示一下怎么安装插件：
+# 以安装一个生成目录的插件为例 jupyter labextension install @jupyterlab/toc # 查看安装的插件 jupyter labextension list 安装完毕后，打开JupyterLab：</description>
+    </item>
+    
+    <item>
+      <title>如何实现一个Python爬虫框架</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</link>
+      <pubDate>Fri, 15 Mar 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</guid>
+      <description>这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架
+2018年到如今，我花精力比较多的一个开源项目算是Ruia了，这是一个基于Python3.6+的异步爬虫框架，当时也获得一些推荐，比如Github Trending Python语言榜单第二，目前Ruia还在开发中，Star数目不过700+，如果各位有兴趣，欢迎一起开发，来波star我也不会拒绝哈~
+ 什么是爬虫框架
+ 说这个之前，得先说说什么是框架：
+ 是实现业界标准的组件规范：比如众所周知的MVC开发规范 提供规范所要求之基础功能的软件产品：比如Django框架就是MVC的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等  框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？
+很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章谈谈对Python爬虫的理解，下面总结一下爬虫流程：
+ 请求&amp;amp;响应 解析 持久化  这三个流程有没有可能以一种优雅的形式串联起来，Ruia目前是这样实现的，请看代码示例：
+可以看到，Item &amp;amp; Field类结合一起实现了字段的解析提取，Spider类结合Request * Response类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的item可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程
+实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些hook让用户编写爬虫更方便(比如ruia-motor)
+这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了
+ 如何踏出第一步
+ 首先，我对Ruia爬虫框架的定位很清楚，基于asyncio &amp;amp; aiohttp的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：
+ 轻量级，专注于抓取、解析和良好的API接口 插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件 速度，异步无阻塞框架，需要对速度有一定追求  什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：
+同时让我们结合上面一节的Ruia代码来从业务逻辑角度看看这几个模块到底是什么意思：
+ Request：请求 Response：响应 Item &amp;amp; Field：解析提取 Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来  这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆Ruia框架到本地：
+# 请确保本地Python环境是3.6+ git clone https://github.com/howie6879/ruia.git # 安装pipenv pip install pipenv # 安装依赖包 pipenv install --dev 然后用PyCharm打开Ruia项目：
+选择刚刚pipenv配置好的python解释器：
+此时可以完整地看到项目代码：
+好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程
+ Request &amp;amp; Response</description>
+    </item>
+    
+    <item>
+      <title>谈谈对Python爬虫的理解</title>
+      <link>https://www.howie6879.cn/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/</link>
+      <pubDate>Thu, 10 Jan 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/</guid>
+      <description>爬虫也可以称为Python爬虫
+ 不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
+所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：
+ Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）  任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
+什么是爬虫 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
+看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
+爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：
+ 通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面  不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
+ 模拟请求网页资源 从HTML提取目标元素 数据持久化  什么是爬虫，这就是爬虫：
+&amp;#34;&amp;#34;&amp;#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&amp;#34;&amp;#34;&amp;#34; import requests from bs4 import BeautifulSoup target_url = &amp;#39;http://www.baidu.com/s?wd=爬虫&amp;#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &amp;#34;lxml&amp;#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&amp;#39;title.</description>
+    </item>
+    
+    <item>
+      <title>神经网络基础</title>
+      <link>https://www.howie6879.cn/p/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/</link>
+      <pubDate>Thu, 03 Jan 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/</guid>
+      <description>要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，备份地址：
+ 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降  带着问题出发 在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对MNIST数据集进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念
+MNIST数据集是一份手写字训练集，出自MNIST，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：
+ 拥有60,000个示例的训练集，以及10,000个示例的测试集 图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示 图片分为10类， 分别对应从0～9，共10个阿拉伯数字  压缩包内容如下：
+ train-images-idx3-ubyte.gz: training set images (9912422 bytes) train-labels-idx1-ubyte.gz: training set labels (28881 bytes) t10k-images-idx3-ubyte.gz: test set images (1648877 bytes) t10k-labels-idx1-ubyte.gz: test set labels (4542 bytes)  上图：
+图片生成代码如下：
+%matplotlib inline import matplotlib import matplotlib.pyplot as plt import numpy as np from keras.datasets import mnist (train_images, train_labels), (test_images, test_labels) = mnist.</description>
+    </item>
+    
+    <item>
+      <title>如何用PEP 8编写优雅的Python代码</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8pep-8%E7%BC%96%E5%86%99%E4%BC%98%E9%9B%85%E7%9A%84python%E4%BB%A3%E7%A0%81/</link>
+      <pubDate>Wed, 26 Dec 2018 09:07:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8pep-8%E7%BC%96%E5%86%99%E4%BC%98%E9%9B%85%E7%9A%84python%E4%BB%A3%E7%A0%81/</guid>
+      <description>原文地址：How to Write Beautiful Python Code With PEP 8 作者：Jasmine Finer  翻译：howie6879  PEP 8有时候读作PEP8 或者PEP-8，是一份提供如何编写Python代码指南和最佳实践的文档，由Guido van Rossum, Barry Warsaw, Nick Coghlan在2001年完成。PEP 8主要注重于提高 Python 代码的可读性和一致性。
+PEP全称为：Python Enhancement Proposal，一个PEP是一份文档，它描述了为Python提出的新特性以及为社区编写的Python方面的文档，比如设计和风格。
+本教程概述了PEP 8中列出的关键指南，它的目标读者是初级到中级程序员，因此我没有涉及一些最高级的主题。不过你可以通过阅读完整的PEP 8 — Style Guide for Python Code | Python.org文档来学习高级主题。
+在本教程结束时，你将能够：
+ 编写遵从PEP 8规范的代码 理解PEP 8中列出的指导原则背后的原因 设置你的开发环境，以便开始编写符合PEP 8标准的Python代码  Why We Need PEP 8  可读性很重要
+ PEP 8规范存在的目的在于提高Python代码的可读性，但为什么可读性如此重要？为什么编写具有可读性的代码是Python语言的指导原则之一？
+正如Guido van Rossum所说：”代码阅读的频率远远高于编写的频率“。你可能花费几分钟或一整天时间编写一段代码来处理用户身份验证，一旦你写完它，你就再也不会重写一次，但是你肯定会再读一次，这段代码可能仍然是你正在进行的项目的一部分。每次你回到那个代码文件，你必须要记住那部分代码是做什么的以及你为什么要写它，所以可读性很重要。
+如果你是Python新手，在你编写代码之后的几天或几周内还要你记住代码片段的含义可能有点困难。如果你遵循PEP 8标准，你可以很确定你对你的变量命名得很好，你会知道你添加了足够的空格，因此更容易遵循代码中的逻辑步骤，你还可以对你的代码进行很好的注释，所有的这些都意味着你的代码具有更高的可读性，也更容易再次阅读。作为初学者，遵循PEP 8的规则可以使学习Python成为更愉快的任务。
+如果你正在找工作，那么遵循PEP 8标准尤为重要，编写清晰可读性高的代码更会突出你的专业性，这将会侧面告诉你的老板，你了解怎么很好地构建你的代码。
+如果你拥有很多编写Python代码的经验，然后你可能需要和其他人协作开发，编写可读性高的代码在这里至关重要，其他人可能此前从未看过你这样风格的代码，他必须重新阅读且理解你的代码风格，如果拥有你遵循和认可的指南将使其他人更容易阅读你的代码。
+Naming Conventions  明了胜于晦涩</description>
+    </item>
+    
+    <item>
+      <title>如何用Python创建一个简单的神经网络</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</link>
+      <pubDate>Thu, 13 Dec 2018 16:03:05 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</guid>
+      <description>如何用Python创建一个简单的神经网络  原文地址：How to Create a Simple Neural Network in Python 作者：Dr. Michael J. Garbade 翻译：howie6879   理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点
+ 神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。
+拥有五年以上经验的德国机器学习专家Andrey Bulezyuk说过：神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。
+基本上，一个ANN由以下组件构成：
+ 输入层：接受传递数据 隐藏层 输出层 各层之间的权重 每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用Sigmoid激活函数  神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据
+训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出
+下面展示了一个简单的神经网络结构图：
+而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。
+在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。
+问题 这里用表格列出了我们需要解决的问题：
+我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。
+如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。
+让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)
+创建一个神经网络类 我们将在Python中创建一个NeuralNetwork类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数
+尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入numpy包来协助计算。
+该库带有以下四个重要方法：
+ exp：用于生成自然指数 array：用于生成矩阵 dot：用于乘法矩阵 random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)  应用 Sigmoid 激活函数 该神经网络将使用Sigmoid function作为激活函数，其绘制了一个典型的S形曲线：
+此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。
+随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。
+一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是X，那么它的导数将是x * (1-x)。
+推导过程如下：
+训练模型 在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。
+这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值
+请记住，在最开始阶段我们会对每个权重分配一个随机值
+下面是我们在这个神经网络示例问题中使用的训练过程:
+ 从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来 我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异 根据误差程度，我们利用Error Weighted Derivative formula对权重进行微调 我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集  我们使用.</description>
+    </item>
+    
+    <item>
+      <title>统计学习方法笔记：3.k近邻法</title>
+      <link>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B03.k%E8%BF%91%E9%82%BB%E6%B3%95/</link>
+      <pubDate>Sat, 29 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B03.k%E8%BF%91%E9%82%BB%E6%B3%95/</guid>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第三章：k近邻法 开始时间：2018-09-29 结束时间：2018-10-23（比较忙） 目标：读完第三章，掌握基本概念，产出一篇笔记 博客地址  k近邻法（k-nearest neighbor，k-NN）是一种基本分类与回归方法，本书只讨论分类形式：
+ k近邻算法 k近邻模型 k近邻法的实现：kd树  k近邻算法 什么是k近邻算法？
+给定一个训练集：$T = {(x_1,y_1),(x_2,y_2),&amp;hellip;,(x_n,y_n)}$，其中$x_i$为实例的特征向量，$y_i\in \gamma =\{c_1,c_2,&amp;hellip;,c_k\}$，输入实例特征向量$x$，输出该实例特征向量的类别$y$
+关键点在于是如何进行类别的判断，描述如下：
+思想很简单，就是给定一个训练集，输入一个实例，就在训练集中找出与该实例最邻近的k个实例，然后进行多数表决，这k个实例的多数属于某个类，就把该输入实例分为这个类
+上面3.1的公式这里解释一下：随着变量j的递增，$c_j$代表不同的类别，每次$x_i$对应的$y_i$会和$c_j$进行比较，如果$y_i$等于$c_j$，该类别计数加一，直到$y_1,y_2,,,y_i$与$c_j$比较完毕，累加之和最高的$c_j$就是输出$y$（意思就是判断输入实例邻域的实例在此类别占据多少个数目），至此，分类成功
+k近邻模型 k近邻法使用的模型实际上对应于对特征空间的划分，模型由三个基本要素——距离 度量、k值的选择和分类决策规则决定
+模型 通过上面的叙述，当我们知道：
+ 训练集 距离度量（明可夫斯基距离） k值 分类决策规则（多数表决）  此时对于任何一个新的输入实例，都可以确定其所属的类
+什么是单元？
+特征空间中，对每个训练实例点$i_x$，距离该点比其他点更近的所有点组成一个区域，叫作单元（cell），最终会将特征空间划分为下图所示：
+距离度量 特征空间中两个实例点的距离是两个实例点相似程度的反映，k近邻模型的特征空间一般是n维实数向量空间$R^n$，使用的距离是欧氏距离，但也可以是其他距离，如更一般的$L_p$距离（$L_p$ distance）或Minkowski距离（Minkowski distance）
+k值的选择 k值的选择会对k近邻法的结果产生重大影响：
+ 如果较小：k值的减小就意味着整体模型变得复杂，容易发生过拟合 如果较大：k值的增大就意味着整体的模型变得简单  分类决策规则 k近邻法中的分类决策规则往往是多数表决（majority voting rule），即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类，实际上等价于经验风险最小化
+k近邻法的实现：kd树 实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻搜索
+k近邻法最简单的实现方法是线性扫描（linear scan），这时要计算输入实例与每一个训练实例的距离，当训练集很大时，计算非常耗时，这种方法是不可行的
+为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数，具体方法很多，下面介绍其中的kd树（kd tree）方法
+构造kd树 k-d树（k-dimensional树的简称），是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索（如：范围搜索和最近邻搜索）
+k-d树是二叉树，表示对k维空间的一个划分（partition），其中每个结点对应于一 个k维超矩形区域，且该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树
+实际做一道例题有助于对算法的理解：
+ 首先对数据集排序：(2,3)，(4,7)，(5,4)，(7,2)，(8,1)，(9,6)，其中值为(7,2) 根结点生成深度为1的左、右子结点，(2,3)，(4,7)，(5,4)挂在(7,2)节点的左子树，(8,1)，(9,6)挂在(7,2)节点的右子树 构建(7,2)节点的左子树，此时切分维度k=2（可以理解为y轴），中值(5,4)作为分割平面，(2,3)挂在其左子树，(4,7)挂在其右子树 构建(7,2)节点的右子树，此时切分维度k=2（可以理解为y轴），中值(6,6)作为分割平面 无法继续划分，k-d tree构建完成  搜索kd树 给定一个目标点，搜索其最近邻，首先找到包含目标点的叶结点；然后从该叶结点出发，依次回退到父结点；不断查找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提高</description>
+    </item>
+    
+    <item>
+      <title>统计学习方法笔记：2.感知机</title>
+      <link>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B02.%E6%84%9F%E7%9F%A5%E6%9C%BA/</link>
+      <pubDate>Tue, 18 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B02.%E6%84%9F%E7%9F%A5%E6%9C%BA/</guid>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第二章：感知机 开始时间：2018-09-18 结束时间：2018-09-21 目标：读完第二章，掌握基本概念，产出一篇笔记 博客地址  本章主要介绍了二类分类的线性分类模型：感知机：
+ 感知机模型 感知机学习策略 感知机学习算法  说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见这里
+感知机模型 感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取+1和–1值，属于判别模型
+注：+1 -1 分别代表正负类，有的可能用 1 0 表示
+在介绍感知机定义之前，下面几个概念需要说明一下：
+ 输入空间：输入所有可能取值的集合 输出空间：输出所有可能取值的集合 特征空间：每个具体的输入是一个实例，由特征向量表示  所以对于一个感知机模型，可以这样表示：
+ 输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$ 输出空间：$\gamma = \{+1,-1 \}$  那么感知机就是由输入空间到输出空间的函数：
+$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$
+其中：
+ $sign$: 符号函数 $w$: 权值（weight）或权值向量（weight vector） $b$: 偏置（bias）  感知机的几何解释如下：线性方程
+$$w\cdot x + b =0$$
+如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：
+ $w$: 超平面的法向量 $b$: 超平面的截距  感知机学习策略 数据集的线性可分性 什么是数据集的线性可分性，很简单，对于一个数据集：</description>
+    </item>
+    
+    <item>
+      <title>统计学习方法笔记：1.统计学习方法概论</title>
+      <link>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/</link>
+      <pubDate>Sun, 16 Sep 2018 17:54:42 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E7%AC%94%E8%AE%B01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/</guid>
+      <description>这是我参加mlhub123组织的书籍共读计划的读书笔记，活动见mlhub第一期读书计划
+ 阅读章节：第一章：统计学习方法概论 开始时间：2018-09-14 结束时间：2018-09-16 目标：读完第一章，掌握基本概念，产出一篇笔记 博客地址  第一章主要对全书内容做了一个内容的概括：
+ 统计学习：定义、研究对象和方法 监督学习 统计学习三要素：模型、策略、算法 模型评估与选择：包括正则化、交叉验证与学习的泛化能力 生成模型与判别模型 分类问题、标注问题与回归问题  统计学习 什么是统计学习
+统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习
+统计学习的特点
+ 统计学习以计算机及网络为平台，是建立在计算机及 网络之上的 统计学习以数据为研究对象，是数据驱动的学科 统计学习的目的是对数据进行预测与分析 统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析 统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论  什么是机器学习
+如果一个程序可以在任务T上，随着经验E的增加，效果P也可以随之增加，则称这个程序可以从经验中学习。 &amp;mdash; 卡内基美隆大学的Tom Michael Mitchell教授
+ 如果以垃圾邮件为例，一个程序指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；任务T指的是区分垃圾邮件的任务；经验E为已经区分过是否为垃圾邮件的历史邮件；效果P为机器学习算法在区分是否为垃圾邮件任务上的准确率
+ 统计学习的目的
+统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析
+统计学习的方法
+ 监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归 非监督学习（unsupervised learning）：聚类、降维 半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM） 强化学习（reinforcement learning）：蒙特卡洛方法  监督学习 基本概念  输入空间（input space）：输入所有可能取值的集合 输出空间（output space）：输出所有可能取值的集合 特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间 联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - 机器学习-联合概率分布笔记 假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）  人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：</description>
+    </item>
+    
+    <item>
+      <title>博客升级HTTPS方案</title>
+      <link>https://www.howie6879.cn/p/%E5%8D%9A%E5%AE%A2%E5%8D%87%E7%BA%A7https%E6%96%B9%E6%A1%88/</link>
+      <pubDate>Thu, 24 May 2018 11:40:18 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%8D%9A%E5%AE%A2%E5%8D%87%E7%BA%A7https%E6%96%B9%E6%A1%88/</guid>
+      <description>很早就想将博客升级为HTTPS，在心中也确立了方案，步骤也很简单：
+ 博文上传至Git Caddy结合Webhook自动更新，顺便上HTTPS  流程很简单，麻烦在于需要Caddy以及Webhook的设置，然后一台服务器也是必须的，这里本人推荐使用搬瓦工的年付19.9$方案，购买之后，选择CentOS7，安装后进入shell：
+yum install git vim wget # 创建用户 useradd howie # 设定密码 passwd username # 添加 sudo 权限 visudo # 找到  root ALL=(ALL) ALL # 添加  howie ALL=(ALL) ALL # 用刚创建的用户名登录 # 安装Caddy以及插件，这里我列出了我需要的插件 各位酌情选择 curl https://getcaddy.com | bash -s personal http.git,http.realip,http.ratelimit,http.ipfilter 首先是从git拉取代码，因为我们还是希望服务器可以自动从git远程拉取代码并且自动更新：
+mkdir git cd git git clone https://github.com/howie6879/howie6879.github.io.git 然后是编写Caddyfile，这是Caddy的配置文件，我将配置文件写在/etc/caddy/Caddyfile，贴上我的配置内容：
+cd ~ mkdir /etc/caddy/ vim /etc/caddy/Caddyfile # 输入 www.howie6879.cn { root /home/howie/git/howie6879.github.io tls xiaozizayang@gmail.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 6.常用的技巧</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/</link>
+      <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/</guid>
+      <description>结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上
+本文最新内容可到github上阅读 6.常用的技巧
+ Async Python 3.5+ web server that&amp;rsquo;s written to go fast
+ 此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
+ api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 5.数据库使用</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/</guid>
+      <description>介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键 下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt 建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL ); 一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &amp;#39;user&amp;#39;, metadata, sa.Column(&amp;#39;id&amp;#39;, sa.Integer, autoincrement=True, primary_key=True), sa.Column(&amp;#39;user_name&amp;#39;, sa.String(16), nullable=False), sa.Column(&amp;#39;pwd&amp;#39;, sa.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 4.展示一个页面</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/</link>
+      <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/</guid>
+      <description>前面一节介绍项目结构的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。
+相信你应该已经了解清楚，sanic是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+ 接收请求 找到对应的路由并执行路由对应的视图函数 Jinja2模板渲染返回视图  路由和视图函数 在此我假设你理解 python 中的装饰器，如果你并不清楚，可以看我另写的关于装饰器的介绍，回归正题，还记得第一节中的代码实例么？
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() # 此处将路由 / 与视图函数 test 关联起来 @app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) if __name__ == &amp;#34;__main__&amp;#34;: app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000) 在前言介绍里，出现这几个名词 路由 视图函数 视图 ,在上面那段代码中，test 就是视图函数。
+这是一段执行逻辑，比如客户端请求 0.0.0.0:8000/ 此时返回的内容就是由test 这个视图函数提供的。
+在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(sanic0.1.2源码)来分析下：
+@app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) 这个路由装饰器的作用很简单，就是将 / 这个 uri 与视图函数test关联起来，或许你可以将路由想象成一个 dict，当客户端若请求 0.0.0.0:8000/，路由就会get / 对应的视图函数test，然后执行。</description>
+    </item>
+    
+    <item>
+      <title>Sanic 源码阅读 - 基于0.1.2</title>
+      <link>https://www.howie6879.cn/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/</link>
+      <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/</guid>
+      <description>Sanic是一个可以使用async/await语法编写项目的异步非阻塞框架，它写法类似于Flask，但使用了异步特性，而且还使用uvloop作为事件循环，其底层使用的是libuv，从而使 Sanic的速度优势更加明显。
+如果你：
+ 想深入了解Sanic，迫切想知道它的运行机制 直接阅读源码，做一些定制 学习  将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：
+ 理解装饰器 理解协程  Sanic-0.1.2 的核心文件如下：
+. ├── __init__.py ├── blueprints.py ├── config.py ├── exceptions.py ├── log.py ├── request.py ├── response.py ├── router.py ├── sanic.py ├── server.py └── utils.py 通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。
+simple_server.py 让我们从simple_server开始吧，代码如下：
+from sanic_0_1_2.src import Sanic from sanic_0_1_2.src.response import json app = Sanic(__name__) @app.route(&amp;#34;/&amp;#34;) async def test(request): return json({&amp;#34;test&amp;#34;: True}) app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000) 或许你直接把sanic_annotation项目直接clone到本地比较方便调试+理解：
+git clone https://github.com/howie6879/sanic_annotation cd sanic_annotation/sanic_0_1_2/examples/ 那么，现在一切准备就绪，开始阅读吧。
+前两行代码导入包：
+ Sanic：构建一个 Sanic 服务必须要实例化的类 json：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：  text：content_type=&amp;quot;text/plain; charset=utf-8&amp;quot; html：content_type=&amp;quot;text/html; charset=utf-8&amp;quot;    实例化一个Sanic对象，app = Sanic(__name__)，可见sanic.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 3.项目结构</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/</guid>
+      <description>一个项目，在最外层他们应该是一样的，至少需要有:
+   文件夹 说明     docs 项目文档说明   src/pro_name 项目名称   tests 测试用例   README.md 项目介绍   requirements.txt 该项目依赖的第三方库   …&amp;hellip; …&amp;hellip;    那接下来需要讨论的，就是 src 的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+2.1.普通的项目结构 一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 2.配置</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-2.%E9%85%8D%E7%BD%AE/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-2.%E9%85%8D%E7%BD%AE/</guid>
+      <description>对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。
+新建文件夹 demo2 ，内部建立这样的文件结构：
+demo02 ├── config │ ├── __init__.py │ └── config.py └── run.py 其中 run.py 内容如下：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() @app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) if __name__ == &amp;#34;__main__&amp;#34;: app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000, debug=True) 代码示例中开启了 debug 模式，假设我们需要通过 config.py 配置文件来实现控制服务的 debug 模式开启与否，那该怎么实现呢。
+在 config.py 中添加一行：DEBUG=True ，然后 run.py 内容改为：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text from config import DEBUG app = Sanic() @app.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 1.初使用</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/</guid>
+      <description>在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字 async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36 若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic 通过上面的命令，你就可以在 python3.</description>
+    </item>
+    
+    <item>
+      <title>2.Docker - 实例演示 - owllook</title>
+      <link>https://www.howie6879.cn/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/</link>
+      <pubDate>Tue, 22 Aug 2017 20:18:06 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/</guid>
+      <description>上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;#34;help&amp;#34;, &amp;#34;copyright&amp;#34;, &amp;#34;credits&amp;#34; or &amp;#34;license&amp;#34; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6 有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像FROMpython:3.6MAINTAINERhowie6879 &amp;lt;howie6879@gmail.com&amp;gt;RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools# 设置环境变量ENV APP_ROOT /optWORKDIR${APP_ROOT}/COPY requirements.</description>
+    </item>
+    
+    <item>
+      <title>1.Docker - 初使用</title>
+      <link>https://www.howie6879.cn/p/1.docker-%E5%88%9D%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Tue, 15 Aug 2017 20:13:30 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/1.docker-%E5%88%9D%E4%BD%BF%E7%94%A8/</guid>
+      <description>自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。
+1.准备  系统：ubuntu16.04 or centos &amp;hellip;
+ 1.1.安装 1.1.1.ubuntu16.04 首先安装依赖包，在终端输入：
+sudo apt-get update sudo apt-get install apt-transport-https ca-certificates 安装Docker，自动安装脚本提供了非常简洁的安装方式：
+# 官方下载方式 curl -sSL https://get.docker.com/ | sh # 镜像站会提升下载速度 # 阿里云的安装脚本 curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh - # DaoCloud 的安装脚本 curl -sSL https://get.daocloud.io/docker | sh 安装完成后，输入sudo service docker status 可见Docker已经启动:
+● docker.service - Docker Application Container Engine Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled) Active: active (running) since 二 2017-08-15 15:34:46 CST; 26min ago Docs: https://docs.</description>
+    </item>
+    
+    <item>
+      <title>gRPC使用初试</title>
+      <link>https://www.howie6879.cn/p/grpc%E4%BD%BF%E7%94%A8%E5%88%9D%E8%AF%95/</link>
+      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/grpc%E4%BD%BF%E7%94%A8%E5%88%9D%E8%AF%95/</guid>
+      <description>1.前言 gRPC是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用 protocol buffer:
+ protocol buffer是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用protocol buffer(proto3)来进行定义，即根据protocol buffer language来定义你的protocol buffer data
+最后再利用protocol buffer编译定义的 .proto 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码
+２.实践 假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：
+demo └── proto └── lower.proto 接下来将编写proto文件，本例使用proto3语法进行编写，protobuf定义的语法请看这里
+lower.proto文件内容如下：
+syntax = &amp;#34;proto3&amp;#34;;package lower;service Lower { rpc Lower (LowerRequest) returns (LowerResult) { }}message LowerRequest { string message = 1;}message LowerResult { string lower_message = 1;}定义一个服务Lower，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件proto_compile.py，并安装相关的包：
+pip install grpcio pip install grpcio-tools # script proto_compile.py from grpc_tools import protoc # 或者在项目根目录运行： # python -m grpc_tools.protoc -I. --python_out=.</description>
+    </item>
+    
+    <item>
+      <title>talospider - 简单的爬虫框架</title>
+      <link>https://www.howie6879.cn/p/talospider-%E7%AE%80%E5%8D%95%E7%9A%84%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</link>
+      <pubDate>Wed, 07 Jun 2017 23:56:08 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/talospider-%E7%AE%80%E5%8D%95%E7%9A%84%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</guid>
+      <description>&lt;h3 id=&#34;为什么写这个&#34;&gt;为什么写这个？&lt;/h3&gt;
+&lt;p&gt;一些简单的页面，无需用比较大的框架来进行爬取，自己纯手写又比较麻烦&lt;/p&gt;
+&lt;p&gt;因此针对这个需求写了&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;talospider&lt;/a&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1.针对单页面的item提取 - 具体介绍点&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider/blob/master/docs/item.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2.spider模块 - 具体介绍点&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider/blob/master/docs/spider.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;介绍使用&#34;&gt;介绍&amp;amp;&amp;amp;使用&lt;/h3&gt;
+&lt;h4 id=&#34;item&#34;&gt;item&lt;/h4&gt;
+&lt;p&gt;这个模块是可以独立使用的，对于一些请求比较简单的网站（比如只需要&lt;code&gt;get&lt;/code&gt;请求），单单只用这个模块就可以快速地编写出你想要的爬虫，比如(以下使用python3，python2见examples目录)：&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>https://www.howie6879.cn/p/owllook-%E4%B8%80%E4%B8%AA%E7%AE%80%E6%B4%81%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/owllook-%E4%B8%80%E4%B8%AA%E7%AE%80%E6%B4%81%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34;  /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/owllook&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a class=&#34;link&#34; href=&#34;https://www.owllook.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/channelcat/sanic&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;n&#34;&gt;python&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;m&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pip&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sanic&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;sanic的&lt;a class=&#34;link&#34; href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>1.vscode搭建haskell环境</title>
+      <link>https://www.howie6879.cn/p/1.vscode%E6%90%AD%E5%BB%BAhaskell%E7%8E%AF%E5%A2%83/</link>
+      <pubDate>Sat, 11 Feb 2017 14:58:20 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/1.vscode%E6%90%AD%E5%BB%BAhaskell%E7%8E%AF%E5%A2%83/</guid>
+      <description>前言  An advanced, purely functional programming language
+ 为什么学习这门语言，现在我也讲不清楚，但如官网所说：这个是一门高级的纯函数式编程语言，本人也是刚刚接触，在此记录下使用vscode搭建环境的过程。
+安装 具体安装的话看这里就好，本人使用mac，经过后面的折腾，我建议直接安装stack，这个一些特性可以看下面：
+ Installing GHC automatically, in an isolated location. Installing packages needed for your project. Building your project. Testing your project. Benchmarking your project.
+ 安装的话很简单：brew install haskell-stack，虽然花的时间略长，但是好用又方便啊，如果不想使用satck，那么可以直接安装：
+brew install ghc brew install cabal-install 个人推荐使用stack，具体安装以及介绍可以看这里。 毕竟源在国外，所以我们首先必须要进行换源，幸好清华大学开源网站镜像站有提供，更具体一点可以看Stackage 镜像使用说明，这里记录下：
+vim ~/.stack/config.yaml # add package-indices: - name: Tsinghua download-prefix: https://mirrors.tuna.tsinghua.edu.cn/hackage/package/ http: https://mirrors.tuna.tsinghua.edu.cn/hackage/00-index.tar.gz setup-info: &amp;#34;http://mirrors.tuna.tsinghua.edu.cn/stackage/stack-setup.yaml&amp;#34; urls: latest-snapshot: http://mirrors.tuna.tsinghua.edu.cn/stackage/snapshots.json lts-build-plans: http://mirrors.tuna.tsinghua.edu.cn/stackage/lts-haskell/ nightly-build-plans: http://mirrors.tuna.tsinghua.edu.cn/stackage/stackage-nightly/ # 开始使用stack，这个命令需要稍稍等待 stack setup # 安装完成之后 stack ghci # 会出现以下输出 Configuring GHCi with the following packages: GHCi, version 8.</description>
+    </item>
+    
+    <item>
+      <title>CentOS7下使用Privoxy将socket5转http代理</title>
+      <link>https://www.howie6879.cn/p/centos7%E4%B8%8B%E4%BD%BF%E7%94%A8privoxy%E5%B0%86socket5%E8%BD%AChttp%E4%BB%A3%E7%90%86/</link>
+      <pubDate>Thu, 09 Feb 2017 15:59:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/centos7%E4%B8%8B%E4%BD%BF%E7%94%A8privoxy%E5%B0%86socket5%E8%BD%AChttp%E4%BB%A3%E7%90%86/</guid>
+      <description>shadowsocks是一个socket5的服务，对此，可以使用Privoxy将其转化为http
+部署shadowsocks # 安装 pip install shadowsocks # 创建配置文件 vim /etc/shadowsocks.json # 输入 { &amp;#34;server&amp;#34;: &amp;#34;*.*.*.*&amp;#34;, &amp;#34;server_port&amp;#34;: 443, &amp;#34;password&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;method&amp;#34;: &amp;#34;aes-256-cfb&amp;#34;, &amp;#34;local_address&amp;#34;: &amp;#34;0.0.0.0&amp;#34;, &amp;#34;local_port&amp;#34;: 1080, &amp;#34;workers&amp;#34;: 1 } # 运行 sslocal -c /etc/shadowsocks.json # 测试当前ip curl --socks5 127.0.0.1:1080 http://httpbin.org/ip #返回结果 { &amp;#34;origin&amp;#34;: &amp;#34;*.*.*.*&amp;#34; } 说明代理成功，接下来安装Privoxy：
+socket5转http yum install -y privoxy # 编辑配置文件 vim /etc/privoxy/config # 添加 forward-socks5 / 127.0.0.1:1080 . systemctl restart privoxy systemctl status privoxy 若果需要在外网访问，则需在/etc/privoxy/config添加listen-address 0.0.0.0:8118，同时还需要将8118端口开启，假设使用iptables:
+/etc/sysconfig/iptables # 添加 -A INPUT -p tcp -m state --state NEW -m tcp --dport 8118 -j ACCEPT # 重启 systemctl restart iptables systemctl status iptables # 测试 vim ~/.</description>
+    </item>
+    
+    <item>
+      <title>如今的生活—2017</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BB%8A%E7%9A%84%E7%94%9F%E6%B4%BB2017/</link>
+      <pubDate>Sun, 29 Jan 2017 21:03:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BB%8A%E7%9A%84%E7%94%9F%E6%B4%BB2017/</guid>
+      <description>高三时候，为了写作文
+背了这么一句话
+生活如同一朵玫瑰，每瓣花代表一根梦想，每根刺代表一个现实
+差不多已是三年过去
+刺不多，花香犹存
+ 2017年对我来说是具有挑战的一年
+我即将毕业
+有以下愿景我希望能实现
+温饱、进步、健康、爱
+读书、代码、拿得出手的东西
+16年大三暑假我就从学校跑了出来，毕业照回去了一次
+ 工作半年有余，体会不少
+总感慨自己就像波涛上的浮萍
+身不由己、随波逐流
+女朋友过来跟我一起生活
+在一起，知道了责任有多重
+我会对她好
+ 我是一个即将起程的士兵
+还没出发，就想回家
+但我不是逃兵，我并不害怕
+我只是不想长大
+但是，面对现实吧，拔掉那些刺
+因为我知道自己的能力有多强！</description>
+    </item>
+    
+    <item>
+      <title>Mastering Python 01</title>
+      <link>https://www.howie6879.cn/p/mastering-python-01/</link>
+      <pubDate>Fri, 27 Jan 2017 10:20:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/mastering-python-01/</guid>
+      <description>1.准备  1.说明：《Mastering Python》读书笔记
+2.要求：首先，希望你是处在python3版本，然后拥有一个干净的虚拟环境更是必要。
+3.virtualenv或者anaconda都是不错的选择
+ 2.Pythonic Syntax, Common Pitfalls, and Style Guide 2.1.Pythonic code 对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：
+- Clean - Simple - Beautiful - Explicit - Readable 具体的话请打开你的python解释器：
+import this 细细感受吧。
+2.1.2.Differences between value and identity comparisons 对于下面这个例子：
+a1 = 200 + 56 a2 = 256 b1 = -4 - 1 b2 = -5 c1 = 200 + 57 c2 = 257 d1 = -4 - 2 d2 = -6 print(&amp;#39;%r== %r: %r&amp;#39; % (a1, a2, a1 == a2)) print(&amp;#39;%ris %r: %r&amp;#39; % (a1, a2, a1 is a2)) print(&amp;#39;%r== %r: %r&amp;#39; % (b1, b2, b1 == b2)) print(&amp;#39;%ris %r: %r&amp;#39; % (b1, b2, b1 is b2)) print(&amp;#39;%r== %r: %r&amp;#39; % (c1, c2, c1 == c2)) print(&amp;#39;%ris %r: %r&amp;#39; % (c1, c2, c1 is c2)) print(&amp;#39;%r== %r: %r&amp;#39; % (d1, d2, d1 == d2)) print(&amp;#39;%ris %r: %r&amp;#39; % (d1, d2, d1 is d2)) 256 == 256: True 256 is 256: True -5 == -5: True -5 is -5: True 257 == 257: True 257 is 257: False -6 == -6: True -6 is -6: False 可以看到，在值相同的情况下，使用==比较都返回True自不必说，为何有的id相同有的id却不同？</description>
+    </item>
+    
+    <item>
+      <title>ITBooks—简单的书籍下载小工具</title>
+      <link>https://www.howie6879.cn/p/itbooks%E7%AE%80%E5%8D%95%E7%9A%84%E4%B9%A6%E7%B1%8D%E4%B8%8B%E8%BD%BD%E5%B0%8F%E5%B7%A5%E5%85%B7/</link>
+      <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/itbooks%E7%AE%80%E5%8D%95%E7%9A%84%E4%B9%A6%E7%B1%8D%E4%B8%8B%E8%BD%BD%E5%B0%8F%E5%B7%A5%E5%85%B7/</guid>
+      <description>1.前言 我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。
+很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。
+下面展示下0.1版本的成果，比如说检索Mastering python，空格用+代替。 python abook.py search Mastering+python Hattem
+2.说明 项目名称叫做ITBooks，当然不准备只做IT方面书籍，文学名著也是可以的。
+ITBooks，是一个查询和下载书籍的python脚本。 目前只存储了allitebooks blah网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用 scrapy爬取信息，具体看ITBooks/spider/allitebooks，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。 添加爬虫只需要在ITBooks/spider/allitebooks/spider，下新建一个scrapy的爬虫脚本即可，对于数据的存储，具体在ITBooks/database，当然，你可以直接新建一个库。 这里放个allitebooks的爬虫脚本，这里说明下，这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完。
+# -*- coding: utf-8 -*- import datetime import sys import scrapy from scrapy.loader import ItemLoader from scrapy.loader.processors import MapCompose, TakeFirst, Join from scrapy.http import Request from allitebooks.items import AllitebooksItem from allitebooks.pipelines import AllitebooksPipeline if sys.version_info[0] &amp;gt; 2: from urllib.parse import urljoin else: from urlparse import urljoin class AllitebooksSpider(scrapy.Spider): name = &amp;#34;allitebooks&amp;#34; allowed_domains = [&amp;#34;allitebooks.</description>
+    </item>
+    
+    <item>
+      <title>对于python抓取google搜索结果的一些了解</title>
+      <link>https://www.howie6879.cn/p/%E5%AF%B9%E4%BA%8Epython%E6%8A%93%E5%8F%96google%E6%90%9C%E7%B4%A2%E7%BB%93%E6%9E%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%86%E8%A7%A3/</link>
+      <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%AF%B9%E4%BA%8Epython%E6%8A%93%E5%8F%96google%E6%90%9C%E7%B4%A2%E7%BB%93%E6%9E%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%86%E8%A7%A3/</guid>
+      <description>大学时期博文
+ 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉
+本人前段时间有个脚本用到了谷歌搜索，具体见python之由公司名推算出公司官网(余弦相似度)当时直接使用的是一个python开源项目
+但在使用过程中，单ip的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进
+说一说爬取谷歌搜索结果的问题：
+ 1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。 2.访问过快就会出现流量异常  2.如何解决 对于第一个问题：
+应该有看到审查元素出来的都是js，然后检索的url是这样的：
+https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT
+这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：
+然后再看url： https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1
+对于这个url，相信机智的你应该会明白些什么
+这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的html，简单写下：
+URL_SEARCH = &amp;#34;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;#34; URL_NUM = &amp;#34;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;#34; def search_page(query, language=&amp;#39;en&amp;#39;, num=None, start=0, pause=2): &amp;#34;&amp;#34;&amp;#34; Google search :param query: Keyword :param language: Language :return: result &amp;#34;&amp;#34;&amp;#34; time.sleep(pause) domain = self.get_random_domain() if num is None: url = URL_SEARCH url = url.format( domain=domain, language=language, query=quote_plus(query)) else: url = URL_NUM url = url.format( domain=domain, language=language, query=quote_plus(query), num=num) try: requests.</description>
+    </item>
+    
+    <item>
+      <title>Mastering Pandas 01</title>
+      <link>https://www.howie6879.cn/p/mastering-pandas-01/</link>
+      <pubDate>Mon, 21 Nov 2016 14:23:27 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/mastering-pandas-01/</guid>
+      <description>1.pandas特性 对于python开发者来说，在面对海量数据时，pandas可谓是数据分析的首选，以下关键特性是它如此热门的原因： 1. 可以处理各种不同格式的数据集：时间序列，表格，矩阵数据 2. 促进csv、DB/SQL等来源数据的加载/导入 3. 可以在很大数据集的基础上进行一些过滤、合并、切片等一系列操作 4. 可以根据使用的自定义的规则来处理缺失数据 &amp;hellip; 更多信息可移步pandas进一步了解。
+1.1.安装 # 可使用 anaconda 集成环境 自带科学计算包 pip install pandas 1.2.说明 建议使用ipython，本人使用jupyter notebook
+2.pandas 数据结构 看完本篇文章后，您将了解以下数据结构： 1. pandas是基于NumPy构建的，所以numpy.ndarray数据结构必不可少 2. pandas.Series：一维数据结构 3. pandas.DataFrame：二维数据结构 4. pandas.Panel：三维数据结构
+2.1.NumPy ndarray 在数值计算中，NumPy非常重要，其中最重要的数据结构便是ndarray多维数组对象，NumPy提供了许多方法来创造数组。
+首先导入numpy模块
+import numpy as np 2.1.1.numpy.array data_01 = [0, 1, 2, 3] data_02 = [-1, -2, 5.5, 6] # 一维数组 arr_01 = np.array(data_01) arr_01 out: array([0, 1, 2, 3])  # 二维数组 arr_02 = np.</description>
+    </item>
+    
+    <item>
+      <title>CentOS7分布式部署pyspider</title>
+      <link>https://www.howie6879.cn/p/centos7%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2pyspider/</link>
+      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/centos7%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2pyspider/</guid>
+      <description>搭建环境：  系统版本：Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+python版本：Python 3.5.1 
+ 搭建python3环境： 本人在尝试过后选择集成环境Anaconda
+编译 # 下载依赖 yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve # 下载python版本 wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz # 或者使用国内源 wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src # 解压 tar -zxf Python-3.5.1.tgz;cd Python-3.5.1 # 编译安装 ./configure --prefix=/usr/local/python3.5 --enable-shared make &amp;amp;&amp;amp; make install # 建立软链接 ln -s /usr/local/python3.</description>
+    </item>
+    
+    <item>
+      <title>祝你生日快乐</title>
+      <link>https://www.howie6879.cn/p/%E7%A5%9D%E4%BD%A0%E7%94%9F%E6%97%A5%E5%BF%AB%E4%B9%90/</link>
+      <pubDate>Wed, 28 Sep 2016 22:28:16 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E7%A5%9D%E4%BD%A0%E7%94%9F%E6%97%A5%E5%BF%AB%E4%B9%90/</guid>
+      <description>很荣幸，能将你写到我的生命里
+生命不过百年，你我相识六年有余
+记忆中我为你过了四次生日，高一、大一、大二、大三
+第五次，祝你生日快乐
+这次却有些不同，因为我们相爱了，我可以加上一句，我爱你
+或许有些矫情，可在这夜晚中我毫不介意
+我爱你
+如果把生命想象成一条线，我们早已经在某个点相交，然后相互环绕
+越来越乱，直至一团，哪怕是世界上最好的手艺人
+这两条交织在一起的线，也无法被分开
+不论过去
+或未来
+忘不了16年，初牵着你手的心动
+看电影，压马路，鼓浪屿
+很抱歉没能好好带你去玩
+还记得年后情人节的美人鱼
+开学前期四月一日的愚人节
+每次见面，都是纪念日
+暑假上海宾馆的蜗居
+南京古城的鸭血粉丝汤
+你念念叨叨的老冰棍
+总统府、中山路、那所大学的典礼
+我们的回忆有很多
+今天，你生日，我会亲口对你说
+亲爱的，生日快乐，我爱你
+一直爱到
+未来的某天，我们老眼昏花
+你依旧读着我写的这些话</description>
+    </item>
+    
+    <item>
+      <title>Python之由公司名推算出公司官网(余弦相似度)</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E7%94%B1%E5%85%AC%E5%8F%B8%E5%90%8D%E6%8E%A8%E7%AE%97%E5%87%BA%E5%85%AC%E5%8F%B8%E5%AE%98%E7%BD%91%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E5%BA%A6/</link>
+      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E7%94%B1%E5%85%AC%E5%8F%B8%E5%90%8D%E6%8E%A8%E7%AE%97%E5%87%BA%E5%85%AC%E5%8F%B8%E5%AE%98%E7%BD%91%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E5%BA%A6/</guid>
+      <description>1.问题 对展会数据分类后，我的新任务是如何通过公司名、公司地址、国家等海关数据推断出该公司的官网网站（若官网不存在则不考虑） 以下数据仅供参考：
+   公司名 国家 地址     JPW INDUSTRIES INC  427 NEW SANFORD RD LAVERGNE TN 37086 US   Fujian Xishi Co., Ltd CN, CHINA    BusinessPartner Co.,ltd     BENKAI Co.,Ltd     GOLD INC  18245 E 40TH AVE AURORA CO 80011 US    需要得到结果：
+   公司名 官方网站     JPW INDUSTRIES INC http://http://www.</description>
+    </item>
+    
+    <item>
+      <title>Python之朴素贝叶斯对展会数据分类</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/</link>
+      <pubDate>Wed, 28 Sep 2016 20:34:40 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/</guid>
+      <description>目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等 思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;#34; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&amp;#39;配件&amp;#39;, &amp;#39;各类&amp;#39;, &amp;#39;家具&amp;#39;, &amp;#39;五金&amp;#39;, &amp;#39;照明&amp;#39;, &amp;#39;浴室&amp;#39;, &amp;#39;淋浴房&amp;#39;, &amp;#39;浴缸&amp;#39;] 那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39; 以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39; 这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).</description>
+    </item>
+    
+    <item>
+      <title>PythonTip</title>
+      <link>https://www.howie6879.cn/p/pythontip/</link>
+      <pubDate>Wed, 28 Sep 2016 20:32:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/pythontip/</guid>
+      <description>给你一个list L, 如 L=[2,8,3,50], 对L进行升序排序并输出,如样例L的结果为[2,3,8,50]
+ L.sort() print(L)  给你一个字符串 a， 如a=‘12345’，对a进行逆序输出a。
+ print(a[::-1])  给你一字典a，如a={1:1,2:2,3:3}，输出字典a的key，以&#39;,&amp;lsquo;链接，如‘1,2,3&amp;rsquo;。
+ print(&amp;#39;,&amp;#39;.join(str(i) for i in a.keys()))  给你一个字符串 a， 输出字符奇数位置的字符串。如a=‘12345’，则输出135。
+ print(a[::2])  输出100以内的所有素数，素数之间以一个空格区分
+ def prime(num): for i in range(2,num): if not num%i:return num print(&amp;#39; &amp;#39;.join(str(i) for i in set(range(2,101))-set(map(prime,range(2,101)))))  已知矩形长a,宽b,输出其面积和周长，面积和周长以一个空格隔开
+ print(&amp;#34;%d%d&amp;#34;%(a*b,(a+b)*2))  给你一个list L, 如 L=[0,1,2,3,4], 输出L的中位数（若结果为小数，则保留一位小数）。
+ L.sort() if len(L)%2==0: print(sum(L[int((len(L))/2-1):int((len(L))/2+1)])/2.0) else: print(L[int((len(L)-1)/2)])  给你两个正整数a和b， 输出它们的最大公约数
+ def GCD(a,b): if a%b==0:return b return GCD(b,a%b) print(GCD(a,b))  给你两个正整数a和b， 输出它们的最小公倍数</description>
+    </item>
+    
+    <item>
+      <title>cx_Freeze打包py文件</title>
+      <link>https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/</link>
+      <pubDate>Wed, 28 Sep 2016 20:30:57 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/</guid>
+      <description>最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist 如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;#34;packages&amp;#34;: [&amp;#34;os&amp;#34;], &amp;#34;excludes&amp;#34;: [&amp;#34;tkinter&amp;#34;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;#34;win32&amp;#34;: base = &amp;#34;Win32GUI&amp;#34; setup( name = &amp;#34;guifoo&amp;#34;, version = &amp;#34;0.1&amp;#34;, description = &amp;#34;My GUI application!</description>
+    </item>
+    
+    <item>
+      <title>Markdown简明教程</title>
+      <link>https://www.howie6879.cn/p/markdown%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</link>
+      <pubDate>Wed, 28 Sep 2016 20:27:02 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/markdown%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</guid>
+      <description>1.概述 本教程的目的是让你读完本教程后，能够使用Markdown来应付一些日常的书写；Markdown的目标是实现易读易写，在这里我觉得还要加上一点，那就是易学，既然易学，那为什么还要写教程呢？因为我必须让我女朋友也学会Markdown啊，哈哈。
+ 参考： Markdown 语法说明
+  使用环境：可以自己下载Markdown编辑器，也可以使用简书，设置方式如下：设置-&amp;gt;基础设置-&amp;gt;选择常用的编辑器切换到Markdown，然后在编辑文章时候就默认是Markdown。
+  阅读：本篇教程一共九个 Markdown的基本语法，看完后足够你应付日常书写，Markdown语法和显示效果一一对应，可以使用简书自带的编辑器进行练习。
+  2.基本语法 2-1.分级标题 为什么叫做分级标题呢？因为标题可以分为数个等级，一种是用#... title表示，注意那个#的省略号代表#的个数可以为1~6个，如# title表示一级标题， ## title表示二级标题，以此类推;还有一种是用任何数量的=和-具体效果如下所示： Markdown语法：
+# 一级标题 ## 二级标题 ### 三级标题 #### 四级标题 ##### 五级标题 ###### 六级标题  这也是一级标题 ====== 这也是二级标题 ------ 显示效果：
+一级标题 二级标题 三级标题 四级标题 五级标题 六级标题 这也是一级标题 这也是二级标题  2-2.粗体和斜体 使用**和*表示粗体和斜体,还可以用__和_表示，具体效果如下：
+Markdown语法：
+**我是粗体** *我是斜体* __我也是粗体__ _我也是斜体_ 显示效果：
+我是粗体
+我是斜体
+我也是粗体
+我也是斜体
+ 2-3.链接和图像 链接是你将要转向的链接，可以使用\[描述](链接地址)来为文字增加外链接; 图像是你要引用的图像，可以使用\!\[描述](图片链接地址)来插入图像，当然也可以直接使用简书编辑器提供的功能，直接拖入图像即可上传图像;具体如下所示:
+Markdown语法：
+这是[简书](http://www.jianshu.com/)网页地址,点击即可进入 这是引入图片的使用方法：![描述](图片链接地址) ![shqs.png](http://upload-images.jianshu.io/upload_images/1157824-2c21b95ba4faf4bb.png) //引用的图片是参加简书三行情书活动时候写的^_^ 显示效果： 这是简书网页地址,点击即可进入</description>
+    </item>
+    
+    <item>
+      <title>python之装饰器</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E8%A3%85%E9%A5%B0%E5%99%A8/</link>
+      <pubDate>Wed, 28 Sep 2016 20:24:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E8%A3%85%E9%A5%B0%E5%99%A8/</guid>
+      <description>认识装饰器 在python中，对于一个函数，若想在其运行前后做点什么，那么装饰器是再好不过的选择，话不多说，上代码。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 01.py __author__ = &amp;#39;howie&amp;#39; from functools import wraps def decorator(func): @wraps(func) def wrapper(*args, **kwargs): print(&amp;#34;%swas called&amp;#34; % func.__name__) func(*args, **kwargs) return wrapper @decorator def hello(name=&amp;#34;howie&amp;#34;): print(&amp;#34;Hello %s!&amp;#34; % name) hello() outputs: hello was called Hello howie! 这段代码，初看之下，确实不是很理解，接下来一步一步分析，看看装饰器到底是怎么工作的。
+装饰器原理 在python中，方法允许作为参数传递，想在某个函数执行前后加点料，也可以这样简单实现。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 02-1.py __author__ = &amp;#39;howie&amp;#39; def decorator(func): print(&amp;#34;%swas called&amp;#34; % func.__name__) func() def hello(name=&amp;#34;howie&amp;#34;): print(&amp;#34;Hello %s!&amp;#34; % name) decorator(hello) 由此，上面代码也可以这样写：</description>
+    </item>
+    
+    <item>
+      <title>MySQL基本操作命令汇总</title>
+      <link>https://www.howie6879.cn/p/mysql%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</link>
+      <pubDate>Wed, 28 Sep 2016 20:21:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/mysql%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</guid>
+      <description>一、基本操作  对数据库以及表的一些基本操作
+  1-1.关于数据库 //创建数据库 create database h_test; //查看数据库 show databases; //查看数据库信息 show create database h_test; //修改数据库的编码，可使用上一条语句查看是否修改成功 alter database h_test default character set gbk collate gbk_bin; //删除数据库 drop database h_test; //综上，可以直接创建数据库且设置编码方式 CREATE DATABASE h_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;  1-2.关于数据表 //首先选定操作的数据库 use h_test; //创建表student create table student( id int(11), name varchar(20), age int(11) ); //查看数据表 show tables; //查看数据表信息，后面加上参数/G可使结果更加美观 show create table student; //查看表的的字段信息 desc student; //修改表名 alter table student rename [to] h_student; //修改字段名 alter table h_student change name stu_name varchar(20); //修改字段的数据类型 alter table h_student modify id int(20); //添加字段 alter table h_student add grade float; //删除字段 alter table h_student drop grade; //修改字段的位置 alter table h_student modify stu_name varchar(20) first; alter table h_student modify id int(11) after age; //删除数据表 drop table h_student; 1-3表的约束    约束条件 说明     PRIMARY KEY 主键约束，用于唯一标识对应的记录   FOREIGN KEY 外键约束   NOT NULL 非空约束   UNIQUE 唯一性约束   DEFAULT 默认值约束，用于设置字段的默认值    1-4索引  作用：提高表中数据的查询速度 1.</description>
+    </item>
+    
+  </channel>
+</rss>

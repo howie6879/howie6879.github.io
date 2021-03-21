@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='如何用Python创建一个简单的神经网络  原文地址：How to Create a Simple Neural Network in Python 作者：Dr. Michael J. Garbade 翻译：howie6879   理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点
+ 神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。
+拥有五年以上经验的德国机器学习专家Andrey Bulezyuk说过：神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。
+基本上，一个ANN由以下组件构成：
+ 输入层：接受传递数据 隐藏层 输出层 各层之间的权重 每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用Sigmoid激活函数  神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据
+训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出
+下面展示了一个简单的神经网络结构图：
+而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。
+在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。
+问题 这里用表格列出了我们需要解决的问题：
+我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。
+如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。
+让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)
+创建一个神经网络类 我们将在Python中创建一个NeuralNetwork类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数
+尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入numpy包来协助计算。
+该库带有以下四个重要方法：
+ exp：用于生成自然指数 array：用于生成矩阵 dot：用于乘法矩阵 random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)  应用 Sigmoid 激活函数 该神经网络将使用Sigmoid function作为激活函数，其绘制了一个典型的S形曲线：
+此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。
+随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。
+一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是X，那么它的导数将是x * (1-x)。
+推导过程如下：
+训练模型 在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。
+这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值
+请记住，在最开始阶段我们会对每个权重分配一个随机值
+下面是我们在这个神经网络示例问题中使用的训练过程:
+ 从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来 我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异 根据误差程度，我们利用Error Weighted Derivative formula对权重进行微调 我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集  我们使用.'><title>如何用Python创建一个简单的神经网络</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='如何用Python创建一个简单的神经网络'>
+<meta property='og:description' content='如何用Python创建一个简单的神经网络  原文地址：How to Create a Simple Neural Network in Python 作者：Dr. Michael J. Garbade 翻译：howie6879   理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点
+ 神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。
+拥有五年以上经验的德国机器学习专家Andrey Bulezyuk说过：神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。
+基本上，一个ANN由以下组件构成：
+ 输入层：接受传递数据 隐藏层 输出层 各层之间的权重 每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用Sigmoid激活函数  神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据
+训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出
+下面展示了一个简单的神经网络结构图：
+而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。
+在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。
+问题 这里用表格列出了我们需要解决的问题：
+我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。
+如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。
+让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)
+创建一个神经网络类 我们将在Python中创建一个NeuralNetwork类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数
+尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入numpy包来协助计算。
+该库带有以下四个重要方法：
+ exp：用于生成自然指数 array：用于生成矩阵 dot：用于乘法矩阵 random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)  应用 Sigmoid 激活函数 该神经网络将使用Sigmoid function作为激活函数，其绘制了一个典型的S形曲线：
+此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。
+随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。
+一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是X，那么它的导数将是x * (1-x)。
+推导过程如下：
+训练模型 在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。
+这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值
+请记住，在最开始阶段我们会对每个权重分配一个随机值
+下面是我们在这个神经网络示例问题中使用的训练过程:
+ 从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来 我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异 根据误差程度，我们利用Error Weighted Derivative formula对权重进行微调 我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集  我们使用.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='翻译' /><meta property='article:tag' content='神经网络与深度学习' /><meta property='article:published_time' content='2018-12-13T16:03:05&#43;08:00'/><meta property='article:modified_time' content='2018-12-13T16:03:05&#43;08:00'/><meta property='og:image' content='https://www.howie6879.cn/images/post/33/01.jpg' />
+<meta name="twitter:title" content="如何用Python创建一个简单的神经网络">
+<meta name="twitter:description" content="如何用Python创建一个简单的神经网络  原文地址：How to Create a Simple Neural Network in Python 作者：Dr. Michael J. Garbade 翻译：howie6879   理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点
+ 神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。
+拥有五年以上经验的德国机器学习专家Andrey Bulezyuk说过：神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。
+基本上，一个ANN由以下组件构成：
+ 输入层：接受传递数据 隐藏层 输出层 各层之间的权重 每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用Sigmoid激活函数  神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据
+训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出
+下面展示了一个简单的神经网络结构图：
+而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。
+在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。
+问题 这里用表格列出了我们需要解决的问题：
+我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。
+如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。
+让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)
+创建一个神经网络类 我们将在Python中创建一个NeuralNetwork类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数
+尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入numpy包来协助计算。
+该库带有以下四个重要方法：
+ exp：用于生成自然指数 array：用于生成矩阵 dot：用于乘法矩阵 random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)  应用 Sigmoid 激活函数 该神经网络将使用Sigmoid function作为激活函数，其绘制了一个典型的S形曲线：
+此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。
+随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。
+一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是X，那么它的导数将是x * (1-x)。
+推导过程如下：
+训练模型 在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。
+这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值
+请记住，在最开始阶段我们会对每个权重分配一个随机值
+下面是我们在这个神经网络示例问题中使用的训练过程:
+ 从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来 我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异 根据误差程度，我们利用Error Weighted Derivative formula对权重进行微调 我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集  我们使用."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/post/33/01.jpg' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
+                
+                    <img src="/images/post/33/01.jpg" loading="lazy" alt="Featured image of post 如何用Python创建一个简单的神经网络" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/deep-learning/" style="background-color: #338daf; color: #fff;">
+                Deep Learning
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">如何用Python创建一个简单的神经网络</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Dec 13, 2018</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <h2 id="如何用python创建一个简单的神经网络">如何用Python创建一个简单的神经网络</h2>
+<ul>
+<li>原文地址：<a class="link" href="https://www.kdnuggets.com/2018/10/simple-neural-network-python.html"  target="_blank" rel="noopener"
+    >How to Create a Simple Neural Network in Python</a></li>
+<li>作者：<a class="link" href="https://www.linkedin.com/in/garbade"  target="_blank" rel="noopener"
+    >Dr. Michael J. Garbade</a></li>
+<li>翻译：<a class="link" href="https://github.com/howie6879"  target="_blank" rel="noopener"
+    >howie6879</a></li>
+</ul>
+<blockquote>
+<p>理解神经网络如何工作的最好方式是自己动手创建一个，这篇文章将会给你演示怎么做到这一点</p>
+</blockquote>
+<p>神经网络(NN)，也称之为人工神经网络(ANN)，它是机器学习领域中学习算法集合中的子集，其核心概念略似生物神经网络的概念。</p>
+<p>拥有五年以上经验的德国机器学习专家<a class="link" href="https://www.education-ecosystem.com/andreybu/REaxr-machine-learning-model-python-sklearn-kera/oPGdP-machine-learning-model-python-sklearn-kera/"  target="_blank" rel="noopener"
+    >Andrey Bulezyuk</a>说过：<strong>神经网络正在使机器学习发生革命性的巨变，因为他们能够跨越广泛的学科和行业来高效地建模复杂的抽象。</strong></p>
+<p>基本上，一个ANN由以下组件构成：</p>
+<ul>
+<li>输入层：接受传递数据</li>
+<li>隐藏层</li>
+<li>输出层</li>
+<li>各层之间的权重</li>
+<li>每个隐藏层都会有一个精心设计的激活函数，对于此教程，我们将会使用<code>Sigmoid</code>激活函数</li>
+</ul>
+<p>神经网络的类型有很多，在这个项目中，我们准备创建一个前馈神经网络，此类型的ANN将会直接从前到后传递数据</p>
+<p>训练前馈神经元往往需要反向传播，反向传播为神经网络提供了相应的输入和输出集合，输入数据在被传递到神经元的时候被处理，然后产生一个输出</p>
+<p>下面展示了一个简单的神经网络结构图：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/1A5B0640-9C9D-4DE6-B15D-249B9A77DC3E.png" alt=""  /></p>
+<p>而且，理解神经网络如何工作做好的办法就是去学习从头开始构建一个神经网络(不使用任何第三方库，作者意思应该是不使用任何机器学习库)。</p>
+<p>在本文中，我们将演示如何使用Python编程语言创建一个简单的神经网络。</p>
+<h3 id="问题">问题</h3>
+<p>这里用表格列出了我们需要解决的问题：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/CD5280AA-A4F7-4994-8AB5-13A5B9E60248.png" alt=""  /></p>
+<p>我们将会训练一个特定的神经网络模型，当提供一组新数据的时候，使其能够准确地预测输出值。</p>
+<p>如你在表中所见，输出值总是等于输入数据的第一个值，因此我们期望的表中输出(?)值是1。</p>
+<p>让我们思考看看能不能使用一些Python代码来给出相同的结果(再继续阅读之前，你可以在文章末尾仔细地阅读此项目的代码)</p>
+<h3 id="创建一个神经网络类">创建一个神经网络类</h3>
+<p>我们将在Python中创建一个<code>NeuralNetwork</code>类来训练神经元以提供准确的预测，该类还具有一些其他的辅助函数</p>
+<p>尽管我们没有使用任何一个神经网络库用于这个简单的神经网络示例，我们也会导入<code>numpy</code>包来协助计算。</p>
+<p>该库带有以下四个重要方法：</p>
+<ul>
+<li>exp：用于生成自然指数</li>
+<li>array：用于生成矩阵</li>
+<li>dot：用于乘法矩阵</li>
+<li>random：用于生成随机数(注意：我们将对随机数进行播种以确保其有效分布)</li>
+</ul>
+<h4 id="应用-sigmoid-激活函数">应用 Sigmoid 激活函数</h4>
+<p>该神经网络将使用<a class="link" href="https://en.wikipedia.org/wiki/Sigmoid_function"  target="_blank" rel="noopener"
+    >Sigmoid function</a>作为激活函数，其绘制了一个典型的<code>S</code>形曲线：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/A7595F2F-C760-4FCC-8653-62D3EC408632.png" alt=""  /></p>
+<p>此函数可以将任意值映射到区间0~1之间，它将帮助我们规范化输入值的和权重乘积之和。</p>
+<p>随后，我们将创建Sigmoid函数的导数来帮助计算机对权重进行必要的调整。</p>
+<p>一个Sigmoid函数的输出可以用来生成它的导数，例如，如果输出变量是<code>X</code>，那么它的导数将是<code>x * (1-x)</code>。</p>
+<p>推导过程如下：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/112BFD8F-A294-4C1E-BC7A-673D6E3D7BDB.png" alt=""  /></p>
+<h4 id="训练模型">训练模型</h4>
+<p>在这个阶段我们将教导神经网络进行准确预测，每个输入都有一个权重 - 正面或负面。</p>
+<p>这意味着，如果输入包含一个大的正面或者负面的权重数值将会更多地影响输出值</p>
+<p>请记住，在最开始阶段我们会对每个权重分配一个随机值</p>
+<p>下面是我们在这个神经网络示例问题中使用的训练过程:</p>
+<ul>
+<li>从训练集获取输入数据，根据他们的权重进行调整，然后通过计算人工神经网络输出的方法将它们抽取出来</li>
+<li>我们计算了反向传播的错误率，在这种情况下，它是神经元预测值和实际期望值之间的差异</li>
+<li>根据误差程度，我们利用<a class="link" href="https://en.wikipedia.org/wiki/Backpropagation#Finding_the_derivative_of_the_error"  target="_blank" rel="noopener"
+    >Error Weighted Derivative formula</a>对权重进行微调</li>
+<li>我们对这个过程重复15,000次，在每次迭代中都会同时处理整个训练集</li>
+</ul>
+<p>我们使用<code>.T</code>函数将矩阵从水平位置转换到垂直位置，因此数据会被这样排序：</p>
+<p><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/B1600115-CEA5-4729-8025-73D503B485D1.png" alt=""  /></p>
+<p>最终，神经元的权重将会被提供的训练集优化，因此，如果神经元被要求去思考一个新的情况，而这个情况和前面的情况是一样的，那么神经元就可以做出准确的预测，这就是反向传播的发生方式。</p>
+<h3 id="总结">总结</h3>
+<p>最终我们初始化了<code>NeuralNetwork</code>类并且运行代码</p>
+<p>下面就是整体的项目代码，如何在Python项目中创建神经网络：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="k">class</span> <span class="nc">NeuralNetwork</span><span class="p">():</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># seeding for random number generation</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># converting weights to a 3 by 1 matrix with values from -1 to 1 and mean of 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synaptic_weights</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1">#applying the sigmoid function</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">sigmoid_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1">#computing derivative to the Sigmoid function</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_inputs</span><span class="p">,</span> <span class="n">training_outputs</span><span class="p">,</span> <span class="n">training_iterations</span><span class="p">):</span>
+        
+        <span class="c1">#training the model to make accurate predictions while adjusting weights continually</span>
+        <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">training_iterations</span><span class="p">):</span>
+            <span class="c1">#siphon the training data via  the neuron</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">think</span><span class="p">(</span><span class="n">training_inputs</span><span class="p">)</span>
+
+            <span class="c1">#computing error rate for back-propagation</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">training_outputs</span> <span class="o">-</span> <span class="n">output</span>
+            
+            <span class="c1">#performing weight adjustments</span>
+            <span class="n">adjustments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">training_inputs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">error</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid_derivative</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">synaptic_weights</span> <span class="o">+=</span> <span class="n">adjustments</span>
+
+    <span class="k">def</span> <span class="nf">think</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="c1">#passing the inputs via the neuron to get output   </span>
+        <span class="c1">#converting values to floats</span>
+        
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">synaptic_weights</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+
+    <span class="c1">#initializing the neuron class</span>
+    <span class="n">neural_network</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">()</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;Beginning Randomly Generated Weights: &#34;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">neural_network</span><span class="o">.</span><span class="n">synaptic_weights</span><span class="p">)</span>
+
+    <span class="c1">#training data consisting of 4 examples--3 input values and 1 output</span>
+    <span class="n">training_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">training_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1">#training taking place</span>
+    <span class="n">neural_network</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">training_inputs</span><span class="p">,</span> <span class="n">training_outputs</span><span class="p">,</span> <span class="mi">15000</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;Ending Weights After Training: &#34;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">neural_network</span><span class="o">.</span><span class="n">synaptic_weights</span><span class="p">)</span>
+
+    <span class="n">user_input_one</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&#34;User Input One: &#34;</span><span class="p">))</span>
+    <span class="n">user_input_two</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&#34;User Input Two: &#34;</span><span class="p">))</span>
+    <span class="n">user_input_three</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&#34;User Input Three: &#34;</span><span class="p">))</span>
+    
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;Considering New Situation: &#34;</span><span class="p">,</span> <span class="n">user_input_one</span><span class="p">,</span> <span class="n">user_input_two</span><span class="p">,</span> <span class="n">user_input_three</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;New Output data: &#34;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">neural_network</span><span class="o">.</span><span class="n">think</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">user_input_one</span><span class="p">,</span> <span class="n">user_input_two</span><span class="p">,</span> <span class="n">user_input_three</span><span class="p">])))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;Wow, we did it!&#34;</span><span class="p">)</span>
+</code></pre></div><p>我们设法创建了一个简单的神经网络。</p>
+<p>这个神经网络开始于自己给自己分配了一些随机的权重，此后，它使用训练数据训练自己。</p>
+<p>因此，如果出现新情况[1,0,0]，则其值为0.9999584。</p>
+<p>你记得我们想要的正确答案是1吗？</p>
+<p>那么，这就非常接近了 —— 思考下<code>S</code>形函数的输出值在0到1之间。</p>
+<p>当然，我们只使用一个神经网络来执行这个简单的任务，如果我们连接数千个人工神经网络起来会怎样？我们能否100% 地模仿人类大脑的工作方式么？</p>
+<p>如果你有任何疑问，请留言</p>
+<p>个人简历：<a class="link" href="https://www.linkedin.com/in/garbade"  target="_blank" rel="noopener"
+    >Dr. Michael J. Garbade</a></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+        
+            <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%8E%A8%E5%AF%BC/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_55.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_55.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">梯度下降推导</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/nndl_note-%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_58.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_58.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 深度神经⽹络为何很难训练</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 神经⽹络可以计算任何函数的可视化证明</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/nndl_note-%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 改进神经⽹络的学习⽅法</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_49.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_49.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 反向传播算法如何工作</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>1.Docker - 初使用 - 老胡的储物柜</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="howie6879" /><meta name="description" content="自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。 1.准备 系统：ubu" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.80.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.howie6879.cn/post/2017/26/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+<link href="/dist/even.7700d289.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="1.Docker - 初使用" />
+<meta property="og:description" content="自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。 1.准备 系统：ubu" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/post/2017/26/" />
+<meta property="article:published_time" content="2017-08-15T20:13:30+00:00" />
+<meta property="article:modified_time" content="2017-08-15T20:13:30+00:00" />
+<meta itemprop="name" content="1.Docker - 初使用">
+<meta itemprop="description" content="自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。 1.准备 系统：ubu">
+<meta itemprop="datePublished" content="2017-08-15T20:13:30+00:00" />
+<meta itemprop="dateModified" content="2017-08-15T20:13:30+00:00" />
+<meta itemprop="wordCount" content="998">
+
+
+
+<meta itemprop="keywords" content="Docker," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="1.Docker - 初使用"/>
+<meta name="twitter:description" content="自己很少使用Docker，也没有机会使用，毕业开始工作后，进的公司使用Docker进行部署，这是我的一些笔记，以便翻阅。 1.准备 系统：ubu"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">howie.hu</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a><a href="/friends/">
+        <li class="mobile-menu-item">友链</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">howie.hu</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/friends/">友链</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">1.Docker - 初使用</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-08-15 </span>
+        <div class="post-category">
+            <a href="/categories/docker/"> Docker </a>
+            </div>
+          <span class="more-meta"> 998 words </span>
+          <span class="more-meta"> 2 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1准备">1.准备</a></li>
+        <li><a href="#2使用">2.使用</a></li>
+        <li><a href="#3最后">3.最后</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p><img src="http://oe7yjec8x.bkt.clouddn.com/howie/2017-08-15-docker.png-blog.howie" alt="docker"></p>
+<p>自己很少使用<code>Docker</code>，也没有机会使用，毕业开始工作后，进的公司使用<code>Docker</code>进行部署，这是我的一些笔记，以便翻阅。</p>
+<h3 id="1准备">1.准备</h3>
+<blockquote>
+<p>系统：ubuntu16.04 or centos &hellip;</p>
+</blockquote>
+<h4 id="11安装">1.1.安装</h4>
+<h5 id="111ubuntu1604">1.1.1.ubuntu16.04</h5>
+<p>首先安装依赖包，在终端输入：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates
+</code></pre></td></tr></table>
+</div>
+</div><p>安装<code>Docker</code>，自动安装脚本提供了非常简洁的安装方式：</p>
+<!-- raw HTML omitted -->
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 官方下载方式</span>
+curl -sSL https://get.docker.com/ <span class="p">|</span> sh
+
+<span class="c1"># 镜像站会提升下载速度</span>
+<span class="c1"># 阿里云的安装脚本</span>
+curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet <span class="p">|</span> sh -
+
+<span class="c1"># DaoCloud 的安装脚本</span>
+curl -sSL https://get.daocloud.io/docker <span class="p">|</span> sh
+</code></pre></td></tr></table>
+</div>
+</div><p>安装完成后，输入<code>sudo service docker status</code> 可见<code>Docker</code>已经启动:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">● docker.service - Docker Application Container Engine
+   Loaded: loaded <span class="o">(</span>/lib/systemd/system/docker.service<span class="p">;</span> enabled<span class="p">;</span> vendor preset: enabled<span class="o">)</span>
+   Active: active <span class="o">(</span>running<span class="o">)</span> since 二 2017-08-15 15:34:46 CST<span class="p">;</span> 26min ago
+     Docs: https://docs.docker.com
+ Main PID: <span class="m">16890</span> <span class="o">(</span>dockerd<span class="o">)</span>
+    Tasks: <span class="m">25</span>
+   Memory: 60.1M
+      CPU: 1.980s
+   CGroup: /system.slice/docker.service
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="112centos7">1.1.2.centos7</h5>
+<p>完全可以参照上面的自动安装</p>
+<h4 id="12镜像加速器">1.2.镜像加速器</h4>
+<p>配置镜像加速器的目的是为了在使用<code>Docker</code>的过程中能提升速度，比如使用<a href="https://www.daocloud.io/mirror#accelerator-doc">DaoCloud 加速器</a>，输入网址，点击立即使用，按照官网的教程，一行命令搞定:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">curl -sSL https://get.daocloud.io/daotools/set_mirror.sh <span class="p">|</span> sh -s http://<span class="o">{</span>修改分配给你的id<span class="o">}</span>.m.daocloud.io
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="2使用">2.使用</h3>
+<p>下面将简单的获取一个镜像并输出一个<code>Hello World</code>来简单演示下<code>Docker</code>的使用，首先介绍下<code>Docker</code>的三个基本概念，掌握了这三个基本概念，也就理解了<code>Docker</code>的生命周期</p>
+<p><strong>什么是镜像(Image)？</strong></p>
+<blockquote>
+<p>引用《第一本Docker书》</p>
+<p>镜像是构建<code>Docker</code>世界的基石，用户基于镜像来运行自己的容器，镜像是基于联合（Union）文件系统的一种层式，由一系列指令一步一步构建出来</p>
+</blockquote>
+<p><strong>什么是容器(Container)？</strong></p>
+<p><em>容器基于镜像启动，里面可以运行一个或者多个进程</em></p>
+<p><strong>什么是仓库(Repository)？</strong></p>
+<p><em>想象下<code>github</code>就很容易理解，托管你自己创建的镜像，默认使用<a href="https://hub.docker.com/">Docker Hub</a></em></p>
+<h4 id="21hello-world">2.1.Hello World</h4>
+<p>运行一条命令 <code>docker run hello-world</code>，会发现并没有运行成功，因为我是在非<code>root</code>的情况下运行的，会报如下错误：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">docker: Got permission denied <span class="k">while</span> trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock/v1.30/containers/create: dial unix /var/run/docker.sock: connect: permission denied.
+</code></pre></td></tr></table>
+</div>
+</div><p>至于为什么有这个错误，具体可以看<a href="https://yeasy.gitbooks.io/docker_practice/content/install/ubuntu.html">这里</a>，介绍得非常清楚，下面说下解决办法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 一定要重新登录才会生效</span>
+sudo usermod -aG docker <span class="nv">$USER</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>用户重新登陆过后，就能成功运行了!</p>
+<h4 id="22简单例子">2.2.简单例子</h4>
+<p><strong>获取镜像</strong>:</p>
+<p><code>docker pull howie6879/cn_ubuntu</code>，这条命令就是从<code>Docker Hub</code>拉取一个镜像到本地，下面就可以使用这个镜像了,<strong>运行</strong>:</p>
+<p><code>docker run howie6879/cn_ubuntu:latest /bin/echo &quot;Hello World</code></p>
+<p>终端就会输出<code>Hello World</code></p>
+<h3 id="3最后">3.最后</h3>
+<blockquote>
+<p>参考1：<a href="https://yeasy.gitbooks.io/docker_practice/content/index.html">《Docker-从入门到实践》</a></p>
+<p>参考2：《第一本Docker书》</p>
+<p>gist看<a href="https://gist.github.com/83685e04e191079c56d36900e0839a3d">这里</a></p>
+<p>图片来自网络</p>
+</blockquote>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">howie6879</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-08-15
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/wechat.png">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/docker/">Docker</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2017/27/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">2.Docker - 实例演示 - owllook</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2017/25/">
+            <span class="next-text nav-default">gRPC使用初试</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:xiaozizayang@email.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/howie6879" class="iconfont icon-github" title="github"></a>
+      <a href="https://www.zhihu.com/people/howie6879/activities" class="iconfont icon-zhihu" title="zhihu"></a>
+  <a href="https://www.howie6879.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">howie6879</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

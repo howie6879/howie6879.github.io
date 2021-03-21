@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键 下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt 建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL ); 一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &amp;#39;user&amp;#39;, metadata, sa.Column(&amp;#39;id&amp;#39;, sa.Integer, autoincrement=True, primary_key=True), sa.Column(&amp;#39;user_name&amp;#39;, sa.String(16), nullable=False), sa.Column(&amp;#39;pwd&amp;#39;, sa.'><title>Sanic 使用教程 - 5.数据库使用</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='Sanic 使用教程 - 5.数据库使用'>
+<meta property='og:description' content='介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键 下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt 建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL ); 一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &amp;#39;user&amp;#39;, metadata, sa.Column(&amp;#39;id&amp;#39;, sa.Integer, autoincrement=True, primary_key=True), sa.Column(&amp;#39;user_name&amp;#39;, sa.String(16), nullable=False), sa.Column(&amp;#39;pwd&amp;#39;, sa.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Sanic' /><meta property='article:published_time' content='2018-01-12T10:50:30&#43;08:00'/><meta property='article:modified_time' content='2018-01-12T10:50:30&#43;08:00'/><meta property='og:image' content='https://www.howie6879.cn/images/thumbs/h_07.jpg' />
+<meta name="twitter:title" content="Sanic 使用教程 - 5.数据库使用">
+<meta name="twitter:description" content="介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键 下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt 建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL ); 一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &amp;#39;user&amp;#39;, metadata, sa.Column(&amp;#39;id&amp;#39;, sa.Integer, autoincrement=True, primary_key=True), sa.Column(&amp;#39;user_name&amp;#39;, sa.String(16), nullable=False), sa.Column(&amp;#39;pwd&amp;#39;, sa."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_07.jpg' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/">
+                
+                    <img src="/images/thumbs/h_07.jpg" loading="lazy" alt="Featured image of post Sanic 使用教程 - 5.数据库使用" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" style="background-color: #2a9d8f; color: #fff;">
+                Python
+            </a>
+        
+            <a href="/categories/sanic/" >
+                Sanic
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/">Sanic 使用教程 - 5.数据库使用</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Jan 12, 2018</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>介绍中说的很明白，<code>Sanic</code> 是一个可以使用 <code>async/await</code> 语法编写项目的<strong>异步</strong>非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用<code>aihttp</code>而非<code>requests</code>，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。</p>
+<h3 id="操作mysql">操作Mysql</h3>
+<p>对于mysql数据库的异步操作，我只在一些脚本中用过，用的是<a class="link" href="https://github.com/aio-libs/aiomysql"  target="_blank" rel="noopener"
+    >aiomysql</a>，其中官方文档中讲得很清楚，也支持结合<code>sqlalchemy</code>编写<code>ORM</code>，然后aiomysql提供了自己编写的异步引擎。</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">aiomysql.sa</span> <span class="kn">import</span> <span class="n">create_engine</span>
+<span class="c1"># 这个才是关键</span>
+</code></pre></div><p>下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：</p>
+<pre><code class="language-shel" data-lang="shel">aio_mysql
+├── demo.py
+├── model.py
+└── requirements.txt
+</code></pre><p>建立表：</p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="k">create</span> <span class="k">database</span> <span class="n">test_mysql</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">user</span>
+<span class="p">(</span>
+  <span class="n">id</span>        <span class="kt">INT</span> <span class="kp">AUTO_INCREMENT</span>
+    <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+  <span class="n">user_name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span> <span class="k">NOT</span> <span class="no">NULL</span><span class="p">,</span>
+  <span class="n">pwd</span>       <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span> <span class="k">NOT</span> <span class="no">NULL</span><span class="p">,</span>
+  <span class="n">real_name</span> <span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>  <span class="k">NOT</span> <span class="no">NULL</span>
+<span class="p">);</span>
+</code></pre></div><p>一切准备就绪，下面编写代码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># script: model.py</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="kn">as</span> <span class="nn">sa</span>
+
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">MetaData</span><span class="p">()</span>
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;user_name&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;pwd&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;real_name&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># script: demo.py</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="kn">from</span> <span class="nn">aiomysql.sa</span> <span class="kn">import</span> <span class="n">create_engine</span>
+
+<span class="kn">from</span> <span class="nn">model</span> <span class="kn">import</span> <span class="n">user</span><span class="p">,</span><span class="n">metadata</span>
+
+
+<span class="n">async</span> <span class="k">def</span> <span class="nf">go</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    aiomysql项目地址：https://github.com/aio-libs/aiomysql
+</span><span class="s2">    :param loop:
+</span><span class="s2">    :return:
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">await</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s1">&#39;test_mysql&#39;</span><span class="p">,</span>
+                                 <span class="n">host</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;123456&#39;</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="n">async</span> <span class="k">with</span> <span class="n">engine</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+        <span class="n">await</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="s1">&#39;user_name01&#39;</span><span class="p">,</span> <span class="n">pwd</span><span class="o">=</span><span class="s1">&#39;123456&#39;</span><span class="p">,</span> <span class="n">real_name</span><span class="o">=</span><span class="s1">&#39;real_name01&#39;</span><span class="p">))</span>
+        <span class="n">await</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;commit&#39;</span><span class="p">)</span>
+
+        <span class="n">async</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">select</span><span class="p">()):</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">user_name</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">pwd</span><span class="p">)</span>
+
+    <span class="n">engine</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">await</span> <span class="n">engine</span><span class="o">.</span><span class="n">wait_closed</span><span class="p">()</span>
+
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">go</span><span class="p">(</span><span class="n">loop</span><span class="p">))</span>
+
+</code></pre></div><p>运行 python demo.py，会看到如下输出：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">user_name01 <span class="m">123456</span>
+</code></pre></div><p>很简单吧，具体示例见<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql"  target="_blank" rel="noopener"
+    >aio_mysql</a></p>
+<h3 id="操作mongodb">操作MongoDB</h3>
+<p>我业余写的一个项目，基本用的就是<code>MongoDB</code>来储存数据，对于异步操作<code>MongoDB</code>，目前Python主要用的是<a class="link" href="https://motor.readthedocs.io/en/stable/index.html"  target="_blank" rel="noopener"
+    >motor</a>，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">aio_mongo
+├── demo.py
+└── requirements.txt
+</code></pre></div><p><code>MongoDB</code>是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开<code>demo.py</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="kn">from</span> <span class="nn">motor.motor_asyncio</span> <span class="kn">import</span> <span class="n">AsyncIOMotorClient</span>
+
+<span class="n">MONGODB</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">MONGO_HOST</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MONGO_HOST&#39;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">),</span>
+    <span class="n">MONGO_PORT</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MONGO_PORT&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">),</span>
+    <span class="n">MONGO_USERNAME</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MONGO_USERNAME&#39;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">),</span>
+    <span class="n">MONGO_PASSWORD</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MONGO_PASSWORD&#39;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">),</span>
+    <span class="n">DATABASE</span><span class="o">=</span><span class="s1">&#39;test_mongodb&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MotorBaseOld</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    默认实现了一个db只创建一次，缺点是更换集合麻烦
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">_db</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">MONGODB</span> <span class="o">=</span> <span class="n">MONGODB</span>
+
+    <span class="k">def</span> <span class="nf">client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+        <span class="c1"># motor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">motor_uri</span> <span class="o">=</span> <span class="s1">&#39;mongodb://{account}{host}:{port}/{database}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">account</span><span class="o">=</span><span class="s1">&#39;{username}:{password}@&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_USERNAME&#39;</span><span class="p">],</span>
+                <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PASSWORD&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_USERNAME&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_HOST&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_HOST&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PORT&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PORT&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">27017</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AsyncIOMotorClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">motor_uri</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;DATABASE&#39;</span><span class="p">])[</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;DATABASE&#39;</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span>
+</code></pre></div><p>我最开始，使用的是这样种方式来连接<code>MongoDB</code>，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python">
+<span class="k">def</span> <span class="nf">singleton</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/</span><span class="si">%E</span><span class="s2">9</span><span class="si">%99%</span><span class="s2">84</span><span class="si">%E</span><span class="s2">5%BD</span><span class="si">%95%</span><span class="s2">EF%BC%9A</span><span class="si">%E</span><span class="s2">5</span><span class="si">%85%</span><span class="s2">B3</span><span class="si">%E</span><span class="s2">4%BA</span><span class="si">%8E%E</span><span class="s2">8%A3</span><span class="si">%85%</span><span class="s2">E9%A5%B0</span><span class="si">%E</span><span class="s2">5</span><span class="si">%99%</span><span class="s2">A8.md
+</span><span class="s2">    :param cls: cls
+</span><span class="s2">    :return: instance
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">_instances</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">instance</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_instances</span><span class="p">:</span>
+            <span class="n">_instances</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_instances</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">instance</span>
+
+<span class="nd">@singleton</span>
+<span class="k">class</span> <span class="nc">MotorBase</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    更改mongodb连接方式 单例模式下支持多库操作
+</span><span class="s2">    About motor&#39;s doc: https://github.com/mongodb/motor
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">_db</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_collection</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">MONGODB</span> <span class="o">=</span> <span class="n">MONGODB</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">motor_uri</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+        <span class="c1"># motor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">motor_uri</span> <span class="o">=</span> <span class="s1">&#39;mongodb://{account}{host}:{port}/{database}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">account</span><span class="o">=</span><span class="s1">&#39;{username}:{password}@&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_USERNAME&#39;</span><span class="p">],</span>
+                <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PASSWORD&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_USERNAME&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_HOST&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_HOST&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PORT&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;MONGO_PORT&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">27017</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AsyncIOMotorClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">motor_uri</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">MONGODB</span><span class="p">[</span><span class="s1">&#39;DATABASE&#39;</span><span class="p">]):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        获取一个db实例
+</span><span class="s2">        :param db: database name
+</span><span class="s2">        :return: the motor db instance
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="k">if</span> <span class="n">db</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="p">[</span><span class="n">db</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="n">db</span><span class="p">)[</span><span class="n">db</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="p">[</span><span class="n">db</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        获取一个集合实例
+</span><span class="s2">        :param db_name: database name
+</span><span class="s2">        :param collection: collection name
+</span><span class="s2">        :return: the motor collection instance
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="n">collection_key</span> <span class="o">=</span> <span class="n">db_name</span> <span class="o">+</span> <span class="n">collection</span>
+        <span class="k">if</span> <span class="n">collection_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">[</span><span class="n">collection_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_db</span><span class="p">(</span><span class="n">db_name</span><span class="p">)[</span><span class="n">collection</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">[</span><span class="n">collection_key</span><span class="p">]</span>
+
+</code></pre></div><p>为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo"  target="_blank" rel="noopener"
+    >aio_mongo</a></p>
+<h3 id="操作redis">操作Redis</h3>
+<p>对于Redis的异步操作，我选用的是<code>asyncio_redis</code>，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">aio_redis
+├── demo.py
+└── requirements.txt
+</code></pre></div><p>建立一个redis连接池：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">asyncio_redis</span>
+
+<span class="n">REDIS_DICT</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">IS_CACHE</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">REDIS_ENDPOINT</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REDIS_ENDPOINT&#39;</span><span class="p">,</span> <span class="s2">&#34;localhost&#34;</span><span class="p">),</span>
+    <span class="n">REDIS_PORT</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REDIS_PORT&#39;</span><span class="p">,</span> <span class="mi">6379</span><span class="p">),</span>
+    <span class="n">REDIS_PASSWORD</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REDIS_PASSWORD&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+    <span class="n">DB</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">POOLSIZE</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">RedisSession</span><span class="p">:</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    建立redis连接池
+</span><span class="s2">    &#34;&#34;&#34;</span>
+    <span class="n">_pool</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">get_redis_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio_redis</span><span class="o">.</span><span class="n">Pool</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">host</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REDIS_ENDPOINT&#39;</span><span class="p">,</span> <span class="s2">&#34;localhost&#34;</span><span class="p">)),</span> <span class="n">port</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REDIS_PORT&#39;</span><span class="p">,</span> <span class="mi">6379</span><span class="p">)),</span>
+                <span class="n">poolsize</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;POOLSIZE&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)),</span> <span class="n">password</span><span class="o">=</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REDIS_PASSWORD&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                <span class="n">db</span><span class="o">=</span><span class="n">REDIS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DB&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span>
+
+</code></pre></div><p>具体见<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py"  target="_blank" rel="noopener"
+    >aio_redis</a>，使用起来很简单，不做多叙述。</p>
+<h3 id="说明">说明</h3>
+<p>如果你使用其它类型的数据库，其实使用方式也是类似。
+本章代码地址，见<a class="link" href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05"  target="_blank" rel="noopener"
+    >demo05</a></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/sanic/">Sanic</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_08.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_08.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 6.常用的技巧</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_01.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_01.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 4.展示一个页面</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_02.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_02.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 源码阅读 - 基于0.1.2</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_03.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_03.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 3.项目结构</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-2.%E9%85%8D%E7%BD%AE/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_04.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_04.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Sanic 使用教程 - 2.配置</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

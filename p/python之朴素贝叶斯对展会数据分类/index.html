@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等 思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;#34; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&amp;#39;配件&amp;#39;, &amp;#39;各类&amp;#39;, &amp;#39;家具&amp;#39;, &amp;#39;五金&amp;#39;, &amp;#39;照明&amp;#39;, &amp;#39;浴室&amp;#39;, &amp;#39;淋浴房&amp;#39;, &amp;#39;浴缸&amp;#39;] 那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39; 以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39; 这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).'><title>Python之朴素贝叶斯对展会数据分类</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='Python之朴素贝叶斯对展会数据分类'>
+<meta property='og:description' content='目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等 思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;#34; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&amp;#39;配件&amp;#39;, &amp;#39;各类&amp;#39;, &amp;#39;家具&amp;#39;, &amp;#39;五金&amp;#39;, &amp;#39;照明&amp;#39;, &amp;#39;浴室&amp;#39;, &amp;#39;淋浴房&amp;#39;, &amp;#39;浴缸&amp;#39;] 那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39; 以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39; 这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).'>
+<meta property='og:url' content='https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='机器学习' /><meta property='article:published_time' content='2016-09-28T20:34:40&#43;00:00'/><meta property='article:modified_time' content='2016-09-28T20:34:40&#43;00:00'/>
+<meta name="twitter:title" content="Python之朴素贝叶斯对展会数据分类">
+<meta name="twitter:description" content="目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等 思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;#34; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&amp;#39;配件&amp;#39;, &amp;#39;各类&amp;#39;, &amp;#39;家具&amp;#39;, &amp;#39;五金&amp;#39;, &amp;#39;照明&amp;#39;, &amp;#39;浴室&amp;#39;, &amp;#39;淋浴房&amp;#39;, &amp;#39;浴缸&amp;#39;] 那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39; 以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39; 这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).">
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" style="background-color: #2a9d8f; color: #fff;">
+                Python
+            </a>
+        
+            <a href="/categories/machine-learning/" style="background-color: #f78fc8; color: #fff;">
+                Machine Learning
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/">Python之朴素贝叶斯对展会数据分类</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Sep 28, 2016</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <h2 id="目的">目的</h2>
+<p>在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：</p>
+<p><img src="/images/post/08/01.png" alt="01.png"  /></p>
+<p>国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：</p>
+<p><img src="/images/post/08/02.png" alt="02.png"  /></p>
+<p>国外网站展会数据将近五万多条，跟分类有关的只有<code>categories</code>这一列数据，都是一些标签词，还偏少。</p>
+<p>现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个<strong>朴素贝叶斯分类器</strong>。</p>
+<h2 id="数据">数据</h2>
+<p>朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。</p>
+<h3 id="数据的准备">数据的准备</h3>
+<p>获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：</p>
+<p><img src="/images/post/08/03.png" alt="03.png"  /></p>
+<p>训练数据主要是这两列，<strong>所属行业</strong>以及<strong>展会范围</strong>，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为<strong>训练集</strong>。</p>
+<p>那么相对应，国外待分类的展会数据便是<strong>测试集</strong>。</p>
+<p>我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。</p>
+<p>可是现在有个问题，作为<strong>训练集</strong>的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终<strong>训练集</strong>达到了<code>39555</code>条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？</p>
+<h3 id="分词提取">分词&amp;&amp;提取</h3>
+<p>不积小流，无以成江海，以小见大，咱们看这样一条数据:</p>
+<pre><code>所属行业：建材五金
+展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等
+</code></pre><p>思考一下，这一条数据的<strong>所属行业</strong>和<strong>展会范围</strong>有什么关系，我们将从这里得到编写分类器的出发点。</p>
+<p>在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。</p>
+<p>那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># 可以利用结巴分词</span>
+<span class="kn">import</span> <span class="nn">jieba.analyse</span>
+<span class="n">con</span> <span class="o">=</span> <span class="s2">&#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&#34;</span>
+<span class="n">feature</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">analyse</span><span class="o">.</span><span class="n">extract_tags</span><span class="p">(</span><span class="n">con</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+<span class="c1"># output：[&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;]</span>
+</code></pre></div><p>那么刚刚那条数据可以这样看：</p>
+<pre><code># data_01
+所属行业：建材五金
+描述关键词：'配件', '各类', '家具', '五金', '照明', '浴室', '淋浴房', '浴缸'
+</code></pre><p>以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。</p>
+<p>但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：</p>
+<pre><code># data_02
+所属行业：未知
+描述关键词：'配件','家具'
+</code></pre><p>这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。</p>
+<p>大三的时候学过概率统计，也记得一个公式名为<strong>贝叶斯定理</strong>。</p>
+<p><img src="/images/post/08/04.jpg" alt="04.jpg"  /></p>
+<p>这表示计算条件概率的公式:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">P</span><span class="p">(</span><span class="n">A</span>\<span class="n">B</span><span class="p">)</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">B</span>\<span class="n">A</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">/</span><span class="n">P</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">==</span> <span class="err">后验概率</span> <span class="o">=</span> <span class="err">先验概率</span> <span class="err">ｘ</span> <span class="err">调整因子</span>
+<span class="c1"># 这样写会不会更加清晰</span>
+<span class="n">P</span><span class="p">(</span><span class="n">category</span>\<span class="n">keywords</span><span class="p">)</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">*</span> <span class="n">P</span><span class="p">(</span><span class="n">keywords</span>\<span class="n">category</span><span class="p">)</span><span class="o">/</span> <span class="n">P</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
+<span class="c1">## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。</span>
+<span class="n">P</span><span class="p">(</span><span class="n">category</span>\<span class="n">keywords</span><span class="p">)</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">*</span> <span class="n">P</span><span class="p">(</span><span class="n">keyword1</span>\<span class="n">category</span><span class="p">)</span><span class="n">P</span><span class="p">(</span><span class="n">keyword2</span>\<span class="n">category</span><span class="p">)</span><span class="o">...</span><span class="n">P</span><span class="p">(</span><span class="n">keywordn</span>\<span class="n">category</span><span class="p">)</span><span class="o">/</span> <span class="n">P</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div><p>总结就是，我们先求出样本空间中每个分类的概率<em>P(category)</em>——<strong>先验概率</strong></p>
+<p>再求出一组待分类数据的关键词在各个类别中的概率<em>P(keywords\category)</em>——<strong>调整因子</strong></p>
+<p>最后<strong>先验概率</strong> <strong>*</strong>  <strong>调整因子</strong>得出<strong>后验概率</strong>，再经过比较，后验概率最大的，便是待分类数据最可能的类别。</p>
+<p>我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。</p>
+<p>2.2.1.确定训练数据有多少类别</p>
+<p>2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为<strong>id:word</strong>的格式存为<em>id_word.txt</em></p>
+<p><img src="/images/post/08/05.png" alt="05.png"  /></p>
+<p>2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为**category=id:pro(id)**的格式存为<em>tf_id_word.txt</em></p>
+<p><img src="https://ws1.sinaimg.cn/large/007i3XCUgy1fyk9hhcy1cj30yg0ir4qp.jpg" alt=""  /></p>
+<p>2.2.4.求出样本空间中每个分类的概率<em>P(category)</em>——<strong>先验概率</strong>，将其转为**category:pro(category)**的格式存为<em>type_pro.txt</em></p>
+<p><img src="/images/post/08/07.png" alt="07.png"  /></p>
+<h2 id="编码">编码</h2>
+<p>经过前面的步骤，现在编写代码实在简单，不过有两点要注意。</p>
+<p>其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。</p>
+<p>其二是若每个调整因子的数值都很小，大家都知道很小的值相乘，会导致结果变得更小，这样子表现出各个分类结果的后验概率便会出现问题，这个问题便是下溢出问题，解决办法便是将其转化为对数，对数相乘便是对数相加，这样便很巧妙的解决了这个问题。</p>
+<p>好了，直接上代码，让我们看看分类的结果吧。</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># -*-coding:utf-8-*-</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;howie&#39;</span>
+
+<span class="kn">import</span> <span class="nn">jieba.analyse</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<span class="k">class</span> <span class="nc">Pridict</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">    利用txt/中数据进行朴素贝叶斯算法训练
+</span><span class="s2">    &#34;&#34;&#34;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 初始化结果字典</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resultData</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">getKeyword</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        通过结巴分词进行关键词提取
+</span><span class="s2">        :param path: 待分词文件路径 相关参数可更改 也可不调用直接写
+</span><span class="s2">        :return: keywordDic = {index:[&#39;word1&#39;,&#39;word2&#39;...]}
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="n">keywordDic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">des</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="n">jieba</span><span class="o">.</span><span class="n">analyse</span><span class="o">.</span><span class="n">set_idf_path</span><span class="p">(</span><span class="s1">&#39;txt/type_dict.txt&#39;</span><span class="p">)</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">analyse</span><span class="o">.</span><span class="n">extract_tags</span><span class="p">(</span><span class="n">des</span><span class="p">[</span><span class="mi">15</span><span class="p">],</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">keywordDic</span><span class="p">[</span><span class="n">des</span><span class="p">[</span><span class="mi">16</span><span class="p">]]</span> <span class="o">=</span> <span class="n">feature</span>
+        <span class="k">return</span> <span class="n">keywordDic</span>
+
+    <span class="k">def</span> <span class="nf">idDic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywordDic</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        将每条待分类关键词替换成对应的单词向量
+</span><span class="s2">        :param keywordDic:格式 keywordDic = {index:[&#39;word1&#39;,&#39;word2&#39;...]}
+</span><span class="s2">        :return: keywordDic = {&#39;1&#39;: [&#39;12198&#39;, &#39;16311&#39;, &#39;6253&#39;, &#39;8302&#39;]}
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;txt/id_word.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">of</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">keywordDic</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">id_word</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">eachValue</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">id_word</span> <span class="o">+=</span> <span class="p">[</span><span class="n">eachLine</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">eachLine</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">eachValue</span> <span class="o">==</span> <span class="n">eachLine</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">keywordDic</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_word</span>
+        <span class="k">return</span> <span class="n">keywordDic</span>
+
+    <span class="k">def</span> <span class="nf">calPro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywordDic</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        计算每一组待分类数据关键词对应概率总和
+</span><span class="s2">        :param keywordDic:格式 keywordDic = {&#39;1&#39;: [&#39;12198&#39;, &#39;16311&#39;, &#39;6253&#39;, &#39;8302&#39;]}
+</span><span class="s2">        :return: result = {&#39;1&#39;: {&#39;type1&#39;: -33.23204707236557, &#39;type3&#39;: -31.376043125934267, &#39;type3&#39;: -27.385192803356617...}
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># print(keywordDic)</span>
+        <span class="c1"># 获取每个类别关键词出现概率</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;txt/tf_id_word.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">of</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># 循环待分类数据</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">keywordDic</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># 读取分类概率文件中读取每行数据</span>
+            <span class="k">for</span> <span class="n">eachLine</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="n">valLen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">valPro</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">valLen</span><span class="p">)]))</span>
+                <span class="n">laplace</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="c1"># 分类名称 该分类下关键词概率</span>
+                <span class="n">lineData</span> <span class="o">=</span> <span class="n">eachLine</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;=&#34;</span><span class="p">)</span>
+                <span class="c1"># 该分类下每个关键词概率</span>
+                <span class="n">eachLineData</span> <span class="o">=</span> <span class="n">lineData</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;#&#34;</span><span class="p">)</span>
+                <span class="c1"># 循环每个待分类字典的关键字向量</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span><span class="n">eachValue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+                    <span class="c1"># 每个关键词对应的词向量以及词概率 得到所有关键词该分类下的概率列表</span>
+                    <span class="n">resPro</span> <span class="o">=</span> <span class="p">[</span><span class="n">eachPro</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">eachPro</span> <span class="ow">in</span> <span class="n">eachLineData</span> <span class="k">if</span> <span class="n">eachValue</span> <span class="o">==</span> <span class="n">eachPro</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="c1"># 防止待分类关键词概率为0，添加拉普拉斯平滑</span>
+                    <span class="n">laplace</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">valLen</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">eachLineData</span><span class="p">)))</span>
+                    <span class="n">valPro</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">resPro</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">resPro</span> <span class="k">else</span> <span class="n">laplace</span><span class="p">)</span>
+                <span class="n">valPrlLen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">valLen</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="c1"># 处理关键词为空 增加限制条件，排除小概率分类影响后验概率大小</span>
+                <span class="k">if</span> <span class="n">valPro</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">valPro</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">laplace</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">valPrlLen</span><span class="p">:</span>
+                        <span class="c1"># 防止下溢出转化为对数相加</span>
+                        <span class="n">typePro</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">valPro</span><span class="p">])</span>
+                        <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">lineData</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">typePro</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># 将该待分类数据标记为None</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">resPro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;
+</span><span class="s2">        为各个分类乘上先验概率 提高分类成功率
+</span><span class="s2">        :param result: 格式 result = {&#39;1&#39;: {&#39;type1&#39;: -33.23204707236557, &#39;type3&#39;: -31.376043125934267, &#39;type3&#39;: -27.385192803356617...}
+</span><span class="s2">        :return: resultData = {&#39;1&#39;: {&#39;type&#39;: -28.135469210164924}}
+</span><span class="s2">        &#34;&#34;&#34;</span>
+        <span class="k">for</span> <span class="n">eachKey</span><span class="p">,</span> <span class="n">eachVal</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># 初始化每个待分类数据字典 储存最可能分类的概率</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resultData</span><span class="p">[</span><span class="n">eachKey</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># 初始化最终分类结果概率</span>
+            <span class="n">allPro</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">eachVal</span><span class="p">:</span>
+                <span class="c1"># print(eachVal)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;txt/type_pro.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="n">of</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="n">lineData</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                    <span class="c1"># 乘上该分类概率 即先验概率</span>
+                    <span class="n">allPro</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">allPro</span><span class="p">,</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:(</span><span class="n">value</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lineData</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">eachVal</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">lineData</span><span class="p">[</span><span class="mi">0</span><span class="p">]})</span>
+                    <span class="c1"># 返回各个分类对应后验概率最大值</span>
+                    <span class="n">largest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allPro</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span><span class="n">allPro</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resultData</span><span class="p">[</span><span class="n">eachKey</span><span class="p">][</span><span class="n">largest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">largest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># 无法分类</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resultData</span><span class="p">[</span><span class="n">eachKey</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;failed&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resultData</span>
+
+
+<span class="k">def</span> <span class="nf">mainPri</span><span class="p">(</span><span class="n">keywordDic</span><span class="p">):</span>
+    <span class="n">pri</span> <span class="o">=</span> <span class="n">Pridict</span><span class="p">()</span>
+    <span class="n">dic</span> <span class="o">=</span> <span class="n">pri</span><span class="o">.</span><span class="n">idDic</span><span class="p">(</span><span class="n">keywordDic</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">pri</span><span class="o">.</span><span class="n">calPro</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span>
+    <span class="n">resultData</span> <span class="o">=</span> <span class="n">pri</span><span class="o">.</span><span class="n">resPro</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resultData</span>
+
+</code></pre></div><p>初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。</p>
+<p>让我们看看分类器的分类效果：</p>
+<p><img src="/images/post/08/08.png" alt="08.png"  /></p>
+<p>可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_54.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_54.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">一站式机器学习云开发平台</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_50.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_50.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">不论微信钉钉，我写了个通用消息监控处理机器人</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_07.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_07.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">利用微信同步文章到Bear</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_45.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_45.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">如何实现一个Python爬虫框架</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_44.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_44.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">谈谈对Python爬虫的理解</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

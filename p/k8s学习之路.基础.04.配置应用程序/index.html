@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='配置应用程序'><title>k8s学习之路.基础.[04.配置应用程序]</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='k8s学习之路.基础.[04.配置应用程序]'>
+<meta property='og:description' content='配置应用程序'>
+<meta property='og:url' content='https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='k8s学习之路' /><meta property='article:published_time' content='2021-03-18T20:35:47&#43;08:00'/><meta property='article:modified_time' content='2021-03-18T20:35:47&#43;08:00'/><meta property='og:image' content='https://www.howie6879.cn/images/thumbs/h_63.png' />
+<meta name="twitter:title" content="k8s学习之路.基础.[04.配置应用程序]">
+<meta name="twitter:description" content="配置应用程序"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_63.png' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/">
+                
+                    <img src="/images/thumbs/h_63.png" loading="lazy" alt="Featured image of post k8s学习之路.基础.[04.配置应用程序]" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/k8s/" style="background-color: #2a9d8f; color: #fff;">
+                k8s
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/">k8s学习之路.基础.[04.配置应用程序]</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        配置应用程序
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Mar 18, 2021</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>使用<code>Docker</code>部署应用程序时，一般常用的配置方式有：</p>
+<ul>
+<li>配置内嵌</li>
+<li>启动传参配置</li>
+<li>环境变量</li>
+</ul>
+<p>经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：</p>
+<ul>
+<li>gitRepo</li>
+<li>hostPath</li>
+<li>NFS</li>
+</ul>
+<p>再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于<code>Kubernetes</code>的顶级资源对象中，那就是<code>ConfigMap</code>。</p>
+<h2 id="传递命令行参数">传递命令行参数</h2>
+<p>在上一节<strong>容器持久化存储</strong>的<code>emptyDir</code>概念介绍部分，我们引入了一个<code>fortune-pod</code>的例子，再回顾一下之前的配置文件吧，如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">fortune</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">luksa/fortune</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html-generator</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/htdocs</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx:alpine</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">web-server</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/usr/share/nginx/html</span><span class="w">
+</span><span class="w">      </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">    </span><span class="nt">emptyDir</span><span class="p">:</span><span class="w"> </span>{}<span class="w">
+</span></code></pre></div><p>此应用程序设定了每隔<code>10s</code>就会自动生成输出到<code>html</code>，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。</p>
+<p>创建文件<code>fortune-pod-args.yaml</code>，输入以下内容：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">fortune2s</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">luksa/fortune:args</span><span class="w">
+</span><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;2&#34;</span><span class="p">]</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html-generator</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/htdocs</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx:alpine</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">web-server</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/usr/share/nginx/html</span><span class="w">
+</span><span class="w">      </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">    </span><span class="nt">emptyDir</span><span class="p">:</span><span class="w"> </span>{}<span class="w">
+</span></code></pre></div><p>看到配置文件中的<code>args</code>字段了么？这个就是传给镜像<code>luksa/fortune:args</code>控制时间的参数，让我们启动看看吧。</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-args.yaml
+<span class="c1"># 输出</span>
+pod/fortune2s created
+
+<span class="c1"># 查看状态</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME      READY   STATUS    RESTARTS   AGE
+fortune   2/2     Running   <span class="m">0</span>          2m27s
+
+<span class="c1"># 暂时服务化</span>
+kubectl port-forward fortune2s 8080:80
+</code></pre></div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>2s</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">&gt; curl 127.0.0.1:8080
+Stay away from flying saucers today.
+</code></pre></div><h2 id="设置环境变量">设置环境变量</h2>
+<blockquote>
+<p>与容器的命令和参数设置相同，环境变量列表无法在 pod 创建后被修改</p>
+</blockquote>
+<p>设置环境变量非常简单，我们只需要在<code>pod</code>中指定环境变量即可；当然，这里有个前提是你需要将修改镜像让其支持读取环境变量。</p>
+<p>我们直接使用书中的例子：<code>vim fortune-pod-env.yaml</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      value: <span class="s2">&#34;30&#34;</span>
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: <span class="nb">true</span>
+    ports:
+    - containerPort: <span class="m">80</span>
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span class="o">{}</span>
+</code></pre></div><p>可以看到配置中声明了<code>INTERVAL</code>环境变量值为<code>30</code>，在终端中实践一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env.yaml
+<span class="c1"># 输出</span>
+pod/fortune-env created
+
+<span class="c1"># 查看状态</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME      READY   STATUS    RESTARTS   AGE
+fortune-env   2/2     Running   <span class="m">0</span>          10s
+
+<span class="c1"># 暂时服务化</span>
+kubectl port-forward fortune-env 8080:80
+</code></pre></div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>30s</code>。</p>
+<p>现在应用程序的所有配置基本上可以说是硬编码的形式进行配置，并且<code>yaml</code>配置文件总是有配置相关的字段，有没有办法让镜像和配置文件解耦呢？</p>
+<p><code>k8s</code>提供了名为<code>ConfigMap</code>的资源对象解决这个问题。</p>
+<h2 id="configmap">ConfigMap</h2>
+<p>资源对象<code>ConﬁgMap</code>提供了向容器中注入配置信息的机制，它本质上就是一个键/值对映射，可以用来保存单个值或者配置文件。</p>
+<p><code>ConﬁgMap</code>是不需要被读取的，它映射的内容通过环境变量或者卷文件的形式传给容器。一般直接在<code>pod</code>的定义里面就可以声明<code>ConﬁgMap</code>，这样就可以根据不同的环境创建不同的配置，流程交互如下图所示：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210316203507993.png" alt="image-20210316203507993"  /></p>
+<h3 id="创建">创建</h3>
+<p>还是用之前应用程序为例，配置专注于环境变量<code>INTERVAL</code>，创建命令如下所示：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-literal<span class="o">=</span>sleep-interval<span class="o">=</span><span class="m">25</span>
+<span class="c1"># 输出</span>
+configmap/fortune-config created
+
+<span class="c1"># 获取相关描述</span>
+kubectl get configmap fortune-config -o yaml
+
+<span class="c1"># 查看 configmap</span>
+kubectl get configmap
+
+<span class="c1"># 删除</span>
+kubectl delete configmap fortune-config
+</code></pre></div><p>此外，<code>k8s</code>还可以直接填写配置文件来进行创建<code>vim fortune-config.yaml</code>，输入如下内容：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ConfigMap</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">fortune-config</span><span class="w">
+</span><span class="w"></span><span class="nt">data</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">sleep-interval</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;25&#34;</span><span class="w">
+</span></code></pre></div><p>然后执行：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f fortune-config.yaml
+<span class="c1"># 输出</span>
+configmap/fortune-config created
+</code></pre></div><p>其实还有更多的创建方式，大概提一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 从文件内容创建ConfigMap条目</span>
+kubectl create configmap my-config --from-file<span class="o">=</span>config-file.conf
+<span class="c1"># 从文件夹创建ConfigMap</span>
+kubectl create configmap my-config --from-file<span class="o">=</span>/path/to/dir
+<span class="c1"># 合并不同选项</span>
+kubectl create configmap my-config
+	--from-file<span class="o">=</span>foo.json
+	--from-file<span class="o">=</span><span class="nv">bar</span><span class="o">=</span>foobar.conf
+	--from-file<span class="o">=</span>config-opts/
+	--from-literal<span class="o">=</span><span class="nv">some</span><span class="o">=</span>thing
+</code></pre></div><h3 id="作为环境变量传入容器">作为环境变量传入容器</h3>
+<p>如何将映射中的值传递给<code>pod</code>的容器？最简单的方法是给容器设置环境变量，通过在配置中声明<code>valueFrom</code>，具体操作<code>vim fortune-pod-env-configmap.yaml</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env-from-configmap
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom:
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: <span class="nb">true</span>
+    ports:
+    - containerPort: <span class="m">80</span>
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span class="o">{}</span>
+
+</code></pre></div><p>让我们启动<code>pod</code>实践看看：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env-configmap.yaml
+<span class="c1"># 输出</span>
+pod/fortune-env-from-configmap created
+
+<span class="c1"># 查看状态</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME                         READY   STATUS    RESTARTS   AGE
+fortune-env-from-configmap   2/2     Running   <span class="m">0</span>          19s
+
+<span class="c1"># 暂时服务化</span>
+kubectl port-forward fortune-env-from-configmap 8080:80
+
+<span class="c1"># 删除pod</span>
+kubectl delete pods fortune-env-from-configmap
+</code></pre></div><p>现在我们已经成功在<code>pod</code>中使用了<code>ConfigMap</code>资源，不过这种使用方式是比较低效的，考虑这样一个情况：如果环境变量比较多，这样单独一个个环境变量的设置方式是个程序员都没法忍受的。</p>
+<p>一般在框架里面加载一些环境变量都会利用前缀机制来进行批量加载，比如<code>Sanic</code>框架会读取<code>SANIC_</code>开头的环境变量自动加载。</p>
+<p><code>k8s</code>也提供了这样类似的机制，配置声明如下图示：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317214756738.png" alt="image-20210317214756738"  /></p>
+<h3 id="configmap-卷">ConfigMap 卷</h3>
+<blockquote>
+<p>环境变量或者命令行参数值作为配置值通常适用于变量值较短的场景。由于 ConfigMap 中可以包含完整的配置文件内容，当你想要将其暴露给容器时，可以借助前面章节提到过的一种称为 configMap 卷的特殊卷格式。</p>
+</blockquote>
+<p>首先删除前面声明建立的<code>cf</code>资源：<code>kubectl delete configmap fortune-config</code>。然后建立文件夹<code>configmap-files</code>，首先建立<code>Nginx</code>配置文件：<code>vim my-nginx-config.conf</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">server <span class="o">{</span>
+    listen              80<span class="p">;</span>
+    server_name         www.kubia-example.com<span class="p">;</span>
+
+    gzip on<span class="p">;</span>
+    gzip_types text/plain application/xml<span class="p">;</span>
+
+    location / <span class="o">{</span>
+        root   /usr/share/nginx/html<span class="p">;</span>
+        index  index.html index.htm<span class="p">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div><p>另外在该文件夹中添加一个名为<code>sleep-interval</code>的文本文件，输入<code>25</code>，类似前面声明环境变量。</p>
+<p>接下来从文件夹创建<code>ConfigMap</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-file<span class="o">=</span>configmap-files
+<span class="c1"># 输出</span>
+configmap/fortune-config created
+
+<span class="c1"># 验证</span>
+kubectl get configmap fortune-config -o yaml
+</code></pre></div><p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317215834820.png" alt="image-20210317215834820"  /></p>
+<p>创建包含<code>ConfigMap</code>条目内容的卷只需要创建一个引用<code>ConfigMap</code>名称的卷并挂载到容器中：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210317215931773-20210318145409491.png" alt="image-20210317215931773"  /></p>
+<p>创建配置文件：<code>vim fortune-pod-configmap-volume.yaml</code>，输入如下内容：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-configmap-volume
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom:
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: <span class="nb">true</span>
+    - name: config
+      mountPath: /etc/nginx/conf.d
+      readOnly: <span class="nb">true</span>
+    - name: config
+      mountPath: /tmp/whole-fortune-config-volume
+      readOnly: <span class="nb">true</span>
+    ports:
+      - containerPort: <span class="m">80</span>
+        name: http
+        protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span class="o">{}</span>
+  - name: config
+    configMap:
+      name: fortune-config
+</code></pre></div><h2 id="secret">Secret</h2>
+<p>前面说的，都是针对非敏感信息的配置数据，对于一些敏感数据，例如：密码、OAuth token、ssh 密钥等，就可以使用<code>Secret</code>资源了。</p>
+<p><code>Secret</code>结构和使用方法都与<code>ConfigMap</code>类似，<code>k8s</code>通过仅仅将<code>Secret</code>分发到需要访问<code>Secret</code>的<code>pod</code>所在的机器节点来保障其安全性。另外，<code>Secret</code>只会存储在节点的内存中，永不写入物理存储。</p>
+<h3 id="创建-1">创建</h3>
+<p>以创建一个包含用户名密码的<code>secret</code>资源为例：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 创建文件</span>
+<span class="nb">echo</span> -n <span class="s1">&#39;admin&#39;</span> &gt; ./username.txt
+<span class="nb">echo</span> -n <span class="s1">&#39;1f2d1e2e67df&#39;</span> &gt; ./password.txt
+
+<span class="c1"># 创建资源</span>
+kubectl create secret generic db-user-pass --from-file<span class="o">=</span>./username.txt --from-file<span class="o">=</span>./password.txt
+
+<span class="c1"># 输出</span>
+secret/db-user-pass created
+
+<span class="c1"># 查看</span>
+kubectl get secrets
+
+<span class="c1"># 输出</span>
+NAME                  TYPE                                  DATA   AGE
+db-user-pass          Opaque                                <span class="m">2</span>      23s
+default-token-nlxkq   kubernetes.io/service-account-token   <span class="m">3</span>      54d
+</code></pre></div><p><code>db-user-pass</code>很好理解，就是刚才创建的<code>sevret</code>资源，<code>default-token-nlxkq</code>是什么呢？这是一种默认被挂载至所有容器的<code>Secret</code>。</p>
+<h2 id="参考">参考</h2>
+<p>本章关于配置应用程序就介绍到这里了，谢谢！本部分内容有参考如下文章：</p>
+<ul>
+<li><a class="link" href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-pod-configmap/"  title="配置 Pod 使用 ConfigMap"
+     target="_blank" rel="noopener"
+    >配置 Pod 使用 ConfigMap</a></li>
+<li><a class="link" href="https://kuboard.cn/learning/k8s-intermediate/config/secrets/"  title="Secret概述"
+     target="_blank" rel="noopener"
+    >Secret 概述</a></li>
+<li><a class="link" href="https://github.com/luksa/kubernetes-in-action"  title="Kubernetes in Action"
+     target="_blank" rel="noopener"
+    >Kubernetes in Action</a>中文版：可以算是第 7 章的读书笔记</li>
+</ul>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" alt="qrcode_for_gh_3f02ace79dfb_258"  /></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_62.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_62.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">设计模式——基于容器的分布式系统</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_61.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_61.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[03.容器持久化存储]</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_56.svg" loading="lazy" data-key="" data-hash="/images/thumbs/h_56.svg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[02.概念介绍]</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_57.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_57.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[01.走进Kubernetes]</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

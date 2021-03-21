@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='两个预先声明 一个输入和一个输出的普遍性 多个输入变量 S型神经元的延伸 修补阶跃函数 结论  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 ...  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&amp;lt;\epsilon$，其中$\epsilon&amp;gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+\[ \sigma(z) \equiv 1 /\left(1&#43;e^{-z}\right) \]
+其中：$z=wx&#43;b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变 上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 &#43; np.exp(-(w * x &#43; b))) def plot_sigmoid(w, b): x = np.'><title>nndl_note: 神经⽹络可以计算任何函数的可视化证明</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='nndl_note: 神经⽹络可以计算任何函数的可视化证明'>
+<meta property='og:description' content='两个预先声明 一个输入和一个输出的普遍性 多个输入变量 S型神经元的延伸 修补阶跃函数 结论  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 ...  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&amp;lt;\epsilon$，其中$\epsilon&amp;gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+\[ \sigma(z) \equiv 1 /\left(1&#43;e^{-z}\right) \]
+其中：$z=wx&#43;b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变 上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 &#43; np.exp(-(w * x &#43; b))) def plot_sigmoid(w, b): x = np.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='神经网络与深度学习' /><meta property='article:tag' content='nndl-book' /><meta property='article:published_time' content='2019-11-02T21:13:58&#43;08:00'/><meta property='article:modified_time' content='2019-11-22T21:13:58&#43;08:00'/>
+<meta name="twitter:title" content="nndl_note: 神经⽹络可以计算任何函数的可视化证明">
+<meta name="twitter:description" content="两个预先声明 一个输入和一个输出的普遍性 多个输入变量 S型神经元的延伸 修补阶跃函数 结论  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 ...  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&amp;lt;\epsilon$，其中$\epsilon&amp;gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+\[ \sigma(z) \equiv 1 /\left(1&#43;e^{-z}\right) \]
+其中：$z=wx&#43;b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变 上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 &#43; np.exp(-(w * x &#43; b))) def plot_sigmoid(w, b): x = np.">
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/deep-learning/" style="background-color: #338daf; color: #fff;">
+                Deep Learning
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/nndl_note-%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/">nndl_note: 神经⽹络可以计算任何函数的可视化证明</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Nov 02, 2019</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+<ul>
+<li><a href="#两个预先声明">两个预先声明</a></li>
+<li><a href="#一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</a></li>
+<li><a href="#多个输入变量">多个输入变量</a></li>
+<li><a href="#s型神经元的延伸">S型神经元的延伸</a></li>
+<li><a href="#修补阶跃函数">修补阶跃函数</a></li>
+<li><a href="#结论">结论</a></li>
+</ul>
+
+<!-- /code_chunk_output -->
+
+<p>本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。</p>
+
+<p>主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：</p>
+
+<blockquote>
+<p>不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它</p>
+</blockquote>
+
+<p>试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：</p>
+
+<ul>
+<li>比如将中文翻译成英文</li>
+<li>比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题</li>
+<li>...</li>
+</ul>
+
+<p>现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？</p>
+
+<p>前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。</p>
+
+<h2 id="两个预先声明">两个预先声明</h2>
+
+<p>在解释为何普遍性定理成⽴前，关于<strong>神经⽹络可以计算任何函数</strong>有两个预先声明需要注意一下：</p>
+
+<ul>
+<li>这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&lt;\epsilon$，其中$\epsilon&gt;0$</li>
+<li>按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数</li>
+</ul>
+
+<blockquote>
+<p>普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数</p>
+</blockquote>
+
+<p>接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。</p>
+
+<h2 id="一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</h2>
+
+<p>先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191106093257.png" alt=""></figure></p>
+
+<p>第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数<strong>舞动起来</strong>，比如下面这个有一个隐藏层、两个隐藏神经元的网络：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191106093617.png" alt=""></figure></p>
+
+<p>第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：</p>
+
+<p><span  class="math">\[
+\sigma(z) \equiv 1 /\left(1+e^{-z}\right)
+\]</span></p>
+
+<p>其中：$z=wx+b$，参见右上角的图，让我们考虑一下几个情况：</p>
+
+<ol>
+<li>当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变</li>
+<li>上述情况让$b$键减小，图像会右移，同样图像形状不变</li>
+<li>当$b$不变，$w$减小，很显然，图像的<code>陡峭</code>程度会下降，反之亦然</li>
+</ol>
+
+<p>下图是书中给出的图示：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191107172558.png" alt=""></figure></p>
+
+<p>其实我们完全可以自己绘制这个过程，利用<code>Python</code>的<code>matplotlib</code>可以很好地完成这个事情：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">b</span><span class="p">)))</span>
+
+
+<span class="k">def</span> <span class="nf">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code></pre></div>
+<p>先看下$b$增减下图像的移动情况：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="c1"># 绘制原始图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 8 b = -4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="c1"># b增加的图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 8 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 8 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="c1"># b减小的图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 8 b = 1&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191108084652.png" alt=""></figure></p>
+
+<p>再看下$w$增减下图像的伸缩情况：</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="c1"># 绘制原始图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 8 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="c1"># w减小的图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 3 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 3 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="c1"># w增加的图像</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&#34;w = 105 b = 4&#34;</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plot_sigmoid</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191108084950.png" alt=""></figure></p>
+
+<p>首先通过这两张图验证了上面的三点结论，最后可以看到我们得到的图像就像是一个阶跃函数</p>
+
+<p>为什么需要千方百计地引出阶跃函数出来，这是因为在输出层我们在将所有隐藏神经元的贡献值叠加在一起的时候，分析阶跃函数比<code>S</code>型函数容易。我们该怎么做？结合前面的经验，只要将$w$设置成一个比较大的值，然后通过修改$b$就可以左右移动来定义阶跃函数的位置</p>
+
+<p>思考下，阶跃发生的点在哪？让我们令$wx+b=0$，即可得出阶跃发生的点可以用$s=-b/w$进行表示，现在我们就可以使用$s$来极大简化我们描述神经元的方式</p>
+
+<p>目前为止我们专注于仅仅从顶部隐藏神经元输出，让我们看看整个网络的行为，尤其，我们假设隐藏神经元在计算以阶跃点$s_1$（顶部神经元）和$s_2$（底部神经元参数化的阶跃函数，它们各自有输出权重$w_1$和$w_2$：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191108094016.png" alt=""></figure></p>
+
+<p>为何隐藏层的加权输出如上图，这理解一下，隐藏层的两个神经元的输出可以想象成阶跃函数，那么:</p>
+
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出就是<code>1.8</code></li>
+<li>x介于两者之间，输出就是<code>0.6</code></li>
+</ul>
+
+<p>接下来，我们进行这样一个设置：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191108095019.png" alt=""></figure></p>
+
+<p>说明一下：</p>
+
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出还是<code>0</code></li>
+<li>x介于两者之间，输出就是<code>0.8</code></li>
+</ul>
+
+<p>这边主要得出的一个结论是，我们可以通过$w_1,w_2$来定义加权输出图像中凸起的位置和高度，为了减少混乱，用一个参数$h$表示高度：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191114091159.png" alt=""></figure></p>
+
+<blockquote>
+<p>现在我们脑中应该有个清晰的概念，那就是对于神经元的加权输出组合$\sum_{j} w_{j} a_{j}$，我们可以通过对$s$和$h$的调整来控制输出函数，从而让加权输出变成我们心目中的输出</p>
+</blockquote>
+
+<p>好了，说明结束，接下来看看最开始绘制出来而函数：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191106093257.png" alt=""></figure></p>
+
+<p>这个函数的表达式为：</p>
+
+<p><span  class="math">\[
+f(x)=0.2+0.4 x^{2}+0.3 x \sin (15 x)+0.05 \cos (50 x)
+\]</span></p>
+
+<p>现在面临的问题是使用一个神经网络来计算它，前面我们着重分析了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是要注意，虽然我们经过参数的调整，得到了我们想要的目标函数，此时这个函数是隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是实际上网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$，也就是说：</p>
+
+<ul>
+<li>第一步：我们将隐藏神经元的加权组合$\sum_{j} w_{j} a_{j}$近似成了$f(x)$</li>
+<li>第二步：但是神经网络的输出却是$\sigma(f(x))$</li>
+</ul>
+
+<p>$\sigma(f(x))$的函数输出和$f(x)$的函数输出那可是大相径庭</p>
+
+<blockquote>
+<p>我们控制住了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是没有控制住网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+</blockquote>
+
+<p>那么此时我们面临的问题就是怎么让$\sigma(\sum_{j} w_{j} a_{j}+b)$近似于$f(x)$</p>
+
+<p>在上述情况下，可操作性的无非就是在加权输出上面做文章，所以我们可以设计一个神经网络，其隐藏层有个加权输出：</p>
+
+<p><span  class="math">\[
+\sigma^{-1} \circ f(x)
+\]</span></p>
+
+<p>其中$\sigma^{-1}$是$\sigma$的反函数</p>
+
+<p>很容易可以得出$\sigma^{-1} \circ f(x)$的结果输入到$\sigma$中输出还是$f(x)$，所以我们控制住了$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+
+<p>接下来就是调节参数直到拟合到我们满意的程度（⽬标函数和⽹络实际计算函数的平均偏差来衡量）</p>
+
+<h2 id="多个输入变量">多个输入变量</h2>
+
+<p>上一节已经说明了一个输入和一个输出的普遍性，接下来可以尝试考虑多个输入变量的情况，假设有两个输入：$x,y$，分别对应权重$w_1,w_2$，以及一个神经元上的偏置$b$，看看他们如何影响神经元的输出：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122172304.png" alt=""></figure></p>
+
+<blockquote>
+<p>思考：将$w_2$设置为0，再不断调整$w1$，输出会怎样变化？</p>
+</blockquote>
+
+<p>首先，输出不受输入$y$影响，其次，按照上一节的惯性，图像应该是会变<code>陡峭</code>，会接近到类似阶跃函数，不同的是此时图像是三维的：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122172954.png" alt=""></figure></p>
+
+<p>和上面一样，我们可以通过修改偏置的位置来设置移动阶跃点：</p>
+
+<p><span  class="math">\[
+s_{x} \equiv-b / w_{1}
+\]</span></p>
+
+<p>凸起的期望高度用相应的权重$h$表示，可以通过分别设置<code>x</code>或<code>y</code>输入神经元的权重为<code>0</code>来分别控制<code>y</code>或<code>x</code>方向的凹凸函数</p>
+
+<p>让我们考虑当我们叠加两个凹凸函数时会发⽣什么，⼀个沿$x$⽅向，另⼀个沿$y$⽅向，两者都有⾼度$h$：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122175706.png" alt=""></figure></p>
+
+<p>试着改变参数<code>h</code>，正如你能看到，这引起输出权重的变化，以及<code>x</code>和<code>y</code>上凹凸函数的⾼度：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122180038.png" alt=""></figure></p>
+
+<p>我们构建的有点像是<strong>塔形</strong>函数，如果我们能构建这样的塔型函数，那么我们能使⽤它们来近似任意的函数，仅仅通过在不同位置累加许多不同⾼度的塔</p>
+
+<p>以此类推，三个变量的四位函数也不在话下，在发散一下思维，$m$维也可以用完全相同的思想来实现。</p>
+
+<h2 id="s型神经元的延伸">S型神经元的延伸</h2>
+
+<p>我们已经证明了由$S$型神经元构成的⽹络可以计算任何函数，若输入为: $x_1, x_2 ...x_j$，输出为：</p>
+
+<p><span  class="math">\[
+\sigma\left(\sum_{j} w_{j} x_{j}+b\right)
+\]</span></p>
+
+<p>其中$\sigma$是$S$型函数，函数图像如下：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122221101.png" alt=""></figure></p>
+
+<p>如果我们考虑⼀个不同类型的神经元，它使⽤其它激活函数，⽐如如下的$s(z)$，会怎样？</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122221806.png" alt=""></figure></p>
+
+<p>此时神经元的输出为：</p>
+
+<p><span  class="math">\[
+s\left(\sum_{j} w_{j} x_{j}+b\right)
+\]</span></p>
+
+<p>同样的，我们依然可以利用这个函数来通过对权重和偏置的修改来得到一个阶跃函数的近似：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122222028.png" alt=""></figure></p>
+
+<p>这样我们可以和前面一样来推出任何目标函数，当然，这要求$s(z)$具有以下条件：</p>
+
+<ul>
+<li>$s(z)$ 在 $z \rightarrow-\infty$ 和 $z \rightarrow \infty$时是定义明确的</li>
+<li>这两个界限是在我们的阶跃函数上取的两个值，并且这两个界限彼此不同，否则就只能一马平川了哈哈</li>
+</ul>
+
+<h2 id="修补阶跃函数">修补阶跃函数</h2>
+
+<p>我们用神经元近似阶跃函数的时候，实际上有一个很窄的故障窗口，如下图说明，在这⾥函数会表现得和阶跃函数⾮常不同：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191122223022.png" alt=""></figure></p>
+
+<p>其实理论上来说，只要权重够大，情况可以随着变好，刚刚是从函数本身出发，避免拟合的函数有问题，换个角度，我们可以从拟合的函数出发，我们利用$1/M$的神经元来模拟目标函数的$1/M$，其实也是变相地将目标函数的权重变大，从而达到效果</p>
+
+<h2 id="结论">结论</h2>
+
+<blockquote>
+<p>普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数</p>
+</blockquote>
+
+<p>本章主要解答了是否使⽤⼀个神经⽹络可以计算任意特定函数的问题，这个自然是的。理论上我们只要两个隐藏层就可以计算任何函数，但深度学习又是什么情况呢？</p>
+
+<p>正如在第⼀章中表明过，深度⽹络有⼀个分级结构，使其尤其适⽤于学习分级的知识，这看上去可⽤于解决现实世界的问题，我个人觉得是单层虽然能拟合各种目标函数，这没错，但是一样的数据，单层网络并不能找到理想中的那个函数，虽然有可能对目前的数据拟合得很好，但是使用深度网络却可以更好地提升泛化能力。</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+</ul>
+
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+
+<p><figure><img src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" alt="wechat_howie"></figure></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+        
+            <a href="/tags/nndl-book/">nndl-book</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    <section class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span class="article-time--modified">
+            最后更新于 Nov 22, 2019 21:13 CST
+        </span>
+    </section></footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%8E%A8%E5%AF%BC/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_55.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_55.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">梯度下降推导</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/nndl_note-%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_58.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_58.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 深度神经⽹络为何很难训练</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/nndl_note-%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 改进神经⽹络的学习⽅法</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_49.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_49.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 反向传播算法如何工作</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/nndl_note-%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_48.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_48.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">nndl_note: 识别手写字</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

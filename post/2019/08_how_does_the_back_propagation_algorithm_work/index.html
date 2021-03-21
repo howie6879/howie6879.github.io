@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>nndl_note: 反向传播算法如何工作 - 老胡的储物柜</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="howie6879" /><meta name="description" content="热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程 输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.80.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+<link href="/dist/even.7700d289.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="nndl_note: 反向传播算法如何工作" />
+<meta property="og:description" content="热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程 输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/" />
+<meta property="article:published_time" content="2019-05-10T16:36:44+08:00" />
+<meta property="article:modified_time" content="2019-05-10T16:36:44+08:00" />
+<meta itemprop="name" content="nndl_note: 反向传播算法如何工作">
+<meta itemprop="description" content="热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程 输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函">
+<meta itemprop="datePublished" content="2019-05-10T16:36:44+08:00" />
+<meta itemprop="dateModified" content="2019-05-10T16:36:44+08:00" />
+<meta itemprop="wordCount" content="2722">
+
+
+
+<meta itemprop="keywords" content="神经网络与深度学习," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="nndl_note: 反向传播算法如何工作"/>
+<meta name="twitter:description" content="热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法 关于代价函数的两个假设 反向传播的四个基本方程 输出层误差的⽅程 使用下一层的误差表示当前层的误差 代价函"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">howie.hu</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a><a href="/friends/">
+        <li class="mobile-menu-item">友链</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">howie.hu</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/friends/">友链</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">nndl_note: 反向传播算法如何工作</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-05-10 </span>
+        <div class="post-category">
+            <a href="/categories/deep-learning/"> Deep Learning </a>
+            <a href="/categories/nndl_note/"> nndl_note </a>
+            </div>
+          <span class="more-meta"> 2722 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    
+  </div>
+</div>
+    <div class="post-content">
+      <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+<ul>
+<li><a href="#热身神经网络中使用矩阵快速计算输出的方法">热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法</a></li>
+<li><a href="#关于代价函数的两个假设">关于代价函数的两个假设</a></li>
+<li><a href="#反向传播的四个基本方程">反向传播的四个基本方程</a>
+
+<ul>
+<li><a href="#输出层误差的方程">输出层误差的⽅程</a></li>
+<li><a href="#使用下一层的误差表示当前层的误差">使用下一层的误差表示当前层的误差</a></li>
+<li><a href="#代价函数关于网络中任意偏置的改变率">代价函数关于⽹络中任意偏置的改变率</a></li>
+<li><a href="#代价函数关于任何一个权重的改变率">代价函数关于任何⼀个权重的改变率</a></li>
+</ul></li>
+<li><a href="#反向传播算法">反向传播算法</a></li>
+<li><a href="#反向传播全局观">反向传播：全局观</a></li>
+<li><a href="#参考">参考</a></li>
+</ul>
+
+<!-- /code_chunk_output -->
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png" alt=""></figure></p>
+
+<p>前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：</p>
+
+<ul>
+<li>$L$ : 表示网络层数</li>
+<li>$b_j^l$ : 表示第$l$层的第$j$个神经元的偏置</li>
+<li>$a_j^l$ : 表示第$l$层的第$j$个神经元的激活值</li>
+<li>$w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重</li>
+<li>$w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重</li>
+<li>$b^l$ : 第$l$层神经元的偏置向量</li>
+<li>$z^l$ : 第$l$层神经元的带权输入向量</li>
+<li>$a^l$ : 第$l$层每个神经元激活值构成的向量</li>
+<li>$\delta_{j}^{l}$ : 第$l$层第$j$个神经元的<strong>误差</strong></li>
+</ul>
+
+<p>本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：</p>
+
+<blockquote>
+<p>很多看似显而易见的想法只有在事后才变得显而易见。</p>
+</blockquote>
+
+<h2 id="热神经络中使矩阵快速计算输出的法">热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法</h2>
+
+<p>通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：</p>
+
+<p><span  class="math">\[
+a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right)
+\]</span></p>
+
+<p>举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：</p>
+
+<p><span  class="math">\[
+\begin{aligned}
+a_3^2 &= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 )
+\\ &= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2  \right)
+\end{aligned}
+\]</span></p>
+
+<p>可以看到例子中的结果满足表达式，接下来，让我们将表达式改成向量形式：</p>
+
+<p><span  class="math">\[
+\begin{aligned}
+a^{l} &= \sigma\left(w^{l} a^{l-1}+b^{l}\right) 
+\\ &= \sigma\left(z^l \right) 
+\end{aligned}
+\]</span></p>
+
+<p>这个式子是正确的么，我们实际根据第一层到第二层的计算来看看：</p>
+
+<p>首先定义第一层的激活函数输出值向量$a^1$:</p>
+
+<p><span  class="math">\[
+{a^1} = \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right]
+\]</span></p>
+
+<p>然后是第一层神经元连接到第二层神经元的权重矩阵：</p>
+
+<p><span  class="math">\[
+{w^2} = \left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right]
+\]</span></p>
+
+<p>同理，第二层神经元的偏置向量：</p>
+
+<p><span  class="math">\[
+{b^2} = \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]
+\]</span></p>
+
+<p>我们的目标是求得第二层神经元激活值构成的向量$a^2$:</p>
+
+<p><span  class="math">\[
+{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]
+\]</span></p>
+
+<p>激活值计算如下：</p>
+
+<p><span  class="math">\[
+\begin{aligned}
+a^2 &= \sigma(w^2a^1 + b^2)
+\\&= \sigma\left(\left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \\ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \\ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \\ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right] \left[ \begin{array}{c}{a_1^1} \\ {a_2^1} \\ {a_3^1} \end{array}\right] + \left[ \begin{array}{c}{b_1^2} \\ {b_2^2} \\ {b_3^2} \\ {b_4^2} \end{array}\right]\right)
+\end{aligned}
+\]</span></p>
+
+<p><span  class="math">\[
+{a^2} = \left[ \begin{array}{c}{a_1^2} \\ {a_2^2} \\ {a_3^2} \\ {a_4^2} \end{array}\right]=\sigma\left(\left[ \begin{array}{c}{w_{1 1}^2 a_1^1+w_{1 2}^2 a_2^1+w_{1 3}^2 a_3^1}+b_1^2 \\ {w_{2 1}^2 a_1^1+w_{2 2}^2 a_2^1+w_{2 3}^2 a_3^1}+b_2^2 \\ {w_{3 1}^2 a_1^1+w_{3 2}^2 a_2^1+w_{3 3}^2 a_3^1}+b_3^2 \\ {w_{4 1}^2 a_1^1+w_{4 2}^2 a_2^1+w_{4 3}^2 a_3^1}+b_4^2 \end{array}\right]\right)
+\]</span></p>
+
+<p>可以看到$a_3^2$的值和前面第一次举例子算出来的值一致。</p>
+
+<h2 id="关于代价函数的两个假设">关于代价函数的两个假设</h2>
+
+<p>我们以均方误差得出的代价函数如下：</p>
+
+<p><span  class="math">\[
+C=\frac{1}{2 n} \sum_{x}\left\|y(x)-a^{L}(x)\right\|^{2}
+\]</span></p>
+
+<p>公式说明：</p>
+
+<ul>
+<li>$y(x)$是目标输出</li>
+<li>$a^{L}(x)$是当输入是$x$时候网络输出的激活值向量</li>
+</ul>
+
+<p>好了，为了应⽤反向传播，我们需要对代价函数 $C$ 做出什么样的前提假设呢？</p>
+
+<p>第一：代价函数可以被写成⼀个在每个训练样本 $x$ 上的代价函数 $C_x$ 的均值:</p>
+
+<p><span  class="math">\[
+C=\frac{1}{n} \sum_{x} C_{x}
+\]</span></p>
+
+<p>第⼆：代价可以写成神经⽹络输出的函数：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524120302.png" alt=""></figure></p>
+
+<p>为对于⼀个单独的训练样本 $x$ 其⼆次代价函数可以写作：</p>
+
+<p><span  class="math">\[
+C=\frac{1}{2}\left\|y-a^{L}\right\|^{2}=\frac{1}{2} \sum_{j}\left(y_{j}-a_{j}^{L}\right)^{2}
+\]</span></p>
+
+<h2 id="反向传播的四个基本方程">反向传播的四个基本方程</h2>
+
+<p>反向传播其实是对权重和偏置变化影响代价函数过程的理解，最终极的含义其实就是计算偏导数 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$。</p>
+
+<p>为了计算这些值，我们引入一个中间量$\delta_{j}^{l}$ ，其表示的是第$l$层第$j$个神经元的<strong>误差</strong>，其中$\delta^l$表示第$l$层的误差向量，对于这个误差，我们应该怎样表示呢：</p>
+
+<p><span  class="math">\[
+\delta_{j}^{l} \equiv \frac{\partial C}{\partial z_{j}^{l}}
+\]</span></p>
+
+<p>接下来要做的就是将这些误差和 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$ 联系起来，解决方案就是反向传播基于四个基本⽅程：</p>
+
+<h3 id="输出层误差的程">输出层误差的⽅程</h3>
+
+<p><strong>输出层误差的⽅程</strong>，$\delta^L$ ： 每个元素定义如下：</p>
+
+<p><span  class="math">\[
+\delta_{j}^{L}=\frac{\partial C}{\partial a_{j}^{L}} \sigma^{\prime}\left(z_{j}^{L}\right)
+\]</span></p>
+
+<p>矩阵形式重写⽅程：</p>
+
+<p><span  class="math">\[
+\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)
+\]</span></p>
+
+<p>其中$\nabla_{a}$就是梯度向量，其元素就是偏导数$\partial C / \partial a_{j}^{L}$的所有元素，以上述二次代价函数为例：</p>
+
+<p><span  class="math">\[
+C_{x}=\frac{1}{2}\left\|y-a^{L}\right\|^{2}
+\]</span></p>
+
+<p>可以得出：</p>
+
+<p><span  class="math">\[
+\nabla_{a} C=\left(a^{L}-y\right)
+\]</span></p>
+
+<p>因此方程的矩阵形式可以改成：</p>
+
+<p><span  class="math">\[
+\delta^{L}=\left(a^{L}-y\right) \odot \sigma^{\prime}\left(z^{L}\right)
+\]</span></p>
+
+<p>推导过程如下：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528115627.png" alt=""></figure></p>
+
+<h3 id="使用下一层的误差表示当前层的误差">使用下一层的误差表示当前层的误差</h3>
+
+<p><span  class="math">\[
+\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)
+\]</span></p>
+
+<p>推导过程如下：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528120156.png" alt=""></figure></p>
+
+<h3 id="代价函数关于络中任意偏置的改变率">代价函数关于⽹络中任意偏置的改变率</h3>
+
+<p><span  class="math">\[
+\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}
+\]</span></p>
+
+<p>推导过程如下：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528140657.png" alt=""></figure></p>
+
+<h3 id="代价函数关于任何个权重的改变率">代价函数关于任何⼀个权重的改变率</h3>
+
+<p><span  class="math">\[
+\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}
+\]</span></p>
+
+<p>推导过程如下：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528142309.png" alt=""></figure></p>
+
+<p>反向传播的四个基本公式，靠着一个链式法则，就全都推下来了，没有什么难度</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524150849.png" alt=""></figure></p>
+
+<h2 id="反向传播算法">反向传播算法</h2>
+
+<p>反向传播算法给出了一种计算代价函数梯度的方法，算法描述如下：</p>
+
+<ul>
+<li>输入特征x：为输⼊层设置对应的激活值$a^1$</li>
+<li>前向传播：对每个<span  class="math">\(l=2,3,...,L\)</span>计算相应的<span  class="math">\(z^l\)</span>和<span  class="math">\(a^l\)</span>
+
+<ul>
+<li><span  class="math">\(z^l=w^{l} a^{l-1}+b^{l}\)</span></li>
+<li><span  class="math">\(a^l=\sigma(z^l)\)</span></li>
+</ul></li>
+<li>输出层误差：<span  class="math">\(\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)\)</span></li>
+<li>反向误差传播：对每个<span  class="math">\(l=L-1,L-2,...,2\)</span>，计算<span  class="math">\(\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)\)</span></li>
+<li>输出：代价函数的梯度由<span  class="math">\(\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}\)</span>和<span  class="math">\(\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}\)</span>得出</li>
+</ul>
+
+<h2 id="反向传播全局观">反向传播：全局观</h2>
+
+<p>假设我们已经对⼀些⽹络中的 $w_{j k}^l$ 做⼀点⼩⼩的变动 <span  class="math">\(\Delta w_{j k}^{l}\)</span></p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150559.png" alt=""></figure></p>
+
+<p>显然，这样会造成输出激活值的改变：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150804.png" alt=""></figure></p>
+
+<p>然后，会让下一层所有的激活值产生改变：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150841.png" alt=""></figure></p>
+
+<p>接着，这些改变都将影响到⼀个个下⼀层，到达输出层，最终影响代价函数：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528150904.png" alt=""></figure></p>
+
+<p>根据求导的思想，我们可以得出下面公式：</p>
+
+<p><span  class="math">\[
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p>我们知道，<span  class="math">\(\Delta w_{j k}^{l}\)</span>造成了第<span  class="math">\(l\)</span>层的第<span  class="math">\(j\)</span>神经元的激活值的变化<span  class="math">\(\Delta a_{j}^{l}\)</span>，这个变化由下⾯的公式给出：</p>
+
+<p><span  class="math">\[
+\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p><span  class="math">\(\Delta a_{j}^{l}\)</span>的变化会造成下一层所有神经元激活值的变化，我们聚焦到其中⼀个激活值上看看影响的情况，不防设<span  class="math">\(a_q^{l+1}\)</span>：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190528151606.png" alt=""></figure></p>
+
+<p>实际上，这会导致下⾯的变化：</p>
+
+<p><span  class="math">\[
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \Delta a_{j}^{l}
+\]</span></p>
+
+<p>我们已经知道<span  class="math">\(\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}\)</span>，我们可以得到：</p>
+
+<p><span  class="math">\[
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p>就这样一直传播下去，最终将所有的影响汇聚到输出层代价的变化，假设<span  class="math">\(a_{j}^{l}, a_{q}^{l+1}, \ldots, a_{n}^{L-1}, a_{m}^{L}\)</span>，那么结果的表达式就是：</p>
+
+<p><span  class="math">\[
+\Delta C \approx \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p>影响输出层代价的权重值有很多，所以我们需要进行求和：</p>
+
+<p><span  class="math">\[
+\Delta C \approx \sum_{m n p_{\ldots q}} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p>因为：</p>
+
+<p><span  class="math">\[
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+\]</span></p>
+
+<p>带入上面式子，得出：</p>
+
+<p><span  class="math">\[
+\begin{aligned}
+\frac{\partial C}{\partial w_{j k}^{l}}&=\sum_{m n p \ldots q} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \cdots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}}
+\\&=a_{k}^{l-1} \delta_{j}^{l}
+\end{aligned}
+\]</span></p>
+
+<p>想起一句歌词，又回到最初的起点，我们竟然就是在做反向传播，神奇。</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/26765585">知乎上另外一篇笔记</a></li>
+</ul>
+
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+
+<p><figure><img src="https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/howie_wechat.png" alt=""></figure></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">howie6879</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-05-10
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/wechat.png">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/images/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2019/09_save_wechat_article_to_bear/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">利用微信同步文章到Bear</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/2019/07_use_neural_network_recognize_handwriting/">
+            <span class="next-text nav-default">nndl_note: 识别手写字</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:xiaozizayang@email.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/howie6879" class="iconfont icon-github" title="github"></a>
+      <a href="https://www.zhihu.com/people/howie6879/activities" class="iconfont icon-zhihu" title="zhihu"></a>
+  <a href="https://www.howie6879.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">howie6879</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', '6MOOsWAEAomrK0SbuyIj5qHKPmawJXdNtiWbB-6DO3U', 'auto');
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+
+</body>
+</html>

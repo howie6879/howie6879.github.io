@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;#34;help&amp;#34;, &amp;#34;copyright&amp;#34;, &amp;#34;credits&amp;#34; or &amp;#34;license&amp;#34; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6 有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像FROMpython:3.6MAINTAINERhowie6879 &amp;lt;howie6879@gmail.com&amp;gt;RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools# 设置环境变量ENV APP_ROOT /optWORKDIR${APP_ROOT}/COPY requirements.'><title>2.Docker - 实例演示 - owllook</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='2.Docker - 实例演示 - owllook'>
+<meta property='og:description' content='上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;#34;help&amp;#34;, &amp;#34;copyright&amp;#34;, &amp;#34;credits&amp;#34; or &amp;#34;license&amp;#34; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6 有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像FROMpython:3.6MAINTAINERhowie6879 &amp;lt;howie6879@gmail.com&amp;gt;RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools# 设置环境变量ENV APP_ROOT /optWORKDIR${APP_ROOT}/COPY requirements.'>
+<meta property='og:url' content='https://www.howie6879.cn/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Docker' /><meta property='article:published_time' content='2017-08-22T20:18:06&#43;00:00'/><meta property='article:modified_time' content='2017-08-22T20:18:06&#43;00:00'/><meta property='og:image' content='https://www.howie6879.cn/images/thumbs/h_00.jpg' />
+<meta name="twitter:title" content="2.Docker - 实例演示 - owllook">
+<meta name="twitter:description" content="上一篇笔记1.Docker - 初使用 主要介绍了Docker的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些Docker镜像以及容器的基本操作
+1.目标 之前的毕设owllook是用python编写的，我将它开源在github上，正借此机会，将其制作成Docker镜像，以便部署
+本次笔记就以此项目为中心，目标是将该项目制作成Docker镜像，并从过程中一步步熟悉Docker
+2.定制镜像 上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如owllook基于python3.6，那么我第一步便是从镜像仓库获取python镜像
+运行命令：docker pull python:3.6
+稍等片刻，就会拉取一个python3.6的镜像下来，让我们以这个镜像为基础来启动一个容器：
+# 具体可参考 dcker run --help 来了解详细命令 docker run -it --rm python:3.6 python # 终端会有如下输出 此时进入了容器中的3.6环境 Python 3.6.2 (default, Jul 24 2017, 19:47:39) [GCC 4.9.2] on linux Type &amp;#34;help&amp;#34;, &amp;#34;copyright&amp;#34;, &amp;#34;credits&amp;#34; or &amp;#34;license&amp;#34; for more information. &amp;gt;&amp;gt;&amp;gt; #　也可以直接进入容器 docker run -it --rm python:3.6 有了基础镜像，下面我们有两种方案构建owllook镜像：
+ 使用docker commit 命令 Dockerfile(使用此方案)  Dockerfile内容如下：
+# 基于python3.6镜像来构建owllook镜像FROMpython:3.6MAINTAINERhowie6879 &amp;lt;howie6879@gmail.com&amp;gt;RUN apt update -y &amp;amp;&amp;amp; apt-get install -y net-tools# 设置环境变量ENV APP_ROOT /optWORKDIR${APP_ROOT}/COPY requirements."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_00.jpg' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/">
+                
+                    <img src="/images/thumbs/h_00.jpg" loading="lazy" alt="Featured image of post 2.Docker - 实例演示 - owllook" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/docker/" >
+                Docker
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/2.docker-%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%A4%BA-owllook/">2.Docker - 实例演示 - owllook</a>
+    </h2>
+
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Aug 22, 2017</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>上一篇笔记<a class="link" href="http://blog.howie6879.cn/2017/08/15/26/"  target="_blank" rel="noopener"
+    >1.Docker - 初使用</a> 主要介绍了<code>Docker</code>的安装以及一个简单的运行例子，本次笔记主要通过具体的实例来介绍一些<code>Docker</code>镜像以及容器的基本操作</p>
+<h3 id="1目标">1.目标</h3>
+<p>之前的毕设<a class="link" href="https://github.com/howie6879/owllook"  target="_blank" rel="noopener"
+    >owllook</a>是用<code>python</code>编写的，我将它开源在<code>github</code>上，正借此机会，将其制作成<code>Docker</code>镜像，以便部署</p>
+<p>本次笔记就以此项目为中心，目标是将该项目制作成<code>Docker</code>镜像，并从过程中一步步熟悉<code>Docker</code></p>
+<h3 id="2定制镜像">2.定制镜像</h3>
+<p>上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如<code>owllook</code>基于<code>python3.6</code>，那么我第一步便是从镜像仓库获取<code>python</code>镜像</p>
+<!-- raw HTML omitted -->
+<p>运行命令：<code>docker pull python:3.6</code></p>
+<p>稍等片刻，就会拉取一个<code>python3.6</code>的镜像下来，让我们以这个镜像为基础来启动一个容器：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 具体可参考 dcker run --help 来了解详细命令</span>
+docker run -it --rm python:3.6 python
+
+<span class="c1"># 终端会有如下输出 此时进入了容器中的3.6环境</span>
+Python 3.6.2 <span class="o">(</span>default, Jul <span class="m">24</span> 2017, 19:47:39<span class="o">)</span> 
+<span class="o">[</span>GCC 4.9.2<span class="o">]</span> on linux
+Type <span class="s2">&#34;help&#34;</span>, <span class="s2">&#34;copyright&#34;</span>, <span class="s2">&#34;credits&#34;</span> or <span class="s2">&#34;license&#34;</span> <span class="k">for</span> more information.
+&gt;&gt;&gt; 
+
+<span class="c1">#　也可以直接进入容器</span>
+docker run -it --rm python:3.6 
+</code></pre></div><p>有了基础镜像，下面我们有两种方案构建<code>owllook</code>镜像：</p>
+<ul>
+<li>使用<code>docker commit</code> 命令</li>
+<li><code>Dockerfile</code>(使用此方案)</li>
+</ul>
+<p>Dockerfile内容如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="c"># 基于python3.6镜像来构建owllook镜像</span><span class="err">
+</span><span class="err"></span><span class="k">FROM</span><span class="s"> python:3.6</span><span class="err">
+</span><span class="err"></span><span class="k">MAINTAINER</span><span class="s"> howie6879 &lt;howie6879@gmail.com&gt;</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> apt update -y <span class="o">&amp;&amp;</span> apt-get install -y net-tools<span class="err">
+</span><span class="err"></span><span class="c"># 设置环境变量</span><span class="err">
+</span><span class="err"></span><span class="k">ENV</span> APP_ROOT /opt<span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> ${APP_ROOT}/</span><span class="err">
+</span><span class="err"></span><span class="k">COPY</span> requirements.txt <span class="si">${</span><span class="nv">APP_ROOT</span><span class="si">}</span>/<span class="err">
+</span><span class="err"></span><span class="c"># 安装依赖</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> pip install --no-cache-dir --trusted-host mirrors.aliyun.com -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt<span class="err">
+</span><span class="err"></span><span class="k">COPY</span> . <span class="si">${</span><span class="nv">APP_ROOT</span><span class="si">}</span><span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> ${APP_ROOT}/owllook/</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> find . -name <span class="s2">&#34;*.pyc&#34;</span> -delete<span class="err">
+</span><span class="err"></span><span class="c"># 启动</span><span class="err">
+</span><span class="err"></span><span class="k">CMD</span> <span class="p">[</span><span class="s2">&#34;gunicorn&#34;</span><span class="p">,</span><span class="s2">&#34;-c&#34;</span><span class="p">,</span><span class="s2">&#34;config/dev_gunicorn.py&#34;</span><span class="p">,</span><span class="s2">&#34;--worker-class&#34;</span><span class="p">,</span><span class="s2">&#34;sanic.worker.GunicornWorker&#34;</span><span class="p">,</span><span class="s2">&#34;server:app&#34;</span><span class="p">]</span><span class="err">
+</span></code></pre></div><p>构建镜像：</p>
+<p><code>docker build -t owllook:0.1 .</code></p>
+<p>构建成功后，可直接运行，不过针对<code>owllook</code>这个项目，我设置了几个环境变量，可运行如下命令运行：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 运行并将docker的8001端口映射到主机的8001</span>
+<span class="c1"># 在dev_owllook.env里面填上数据库配置 数据库ip需要注意 不得填localhost</span>
+docker run --env-file ./dev_owllook.env -d -p 8001:8001 owllook:0.1
+</code></pre></div><p>仅仅是达到使用<code>Docker</code>的程度，所花费时间真的不多，所以说<code>Docker</code>还是很简单方便的，下一步就是上传到镜像仓库。</p>
+<h3 id="3上传镜像">3.上传镜像</h3>
+<p>首先请注册<a class="link" href="https://hub.docker.com/"  target="_blank" rel="noopener"
+    ><em>Docker Hub</em></a>账号，然后创建自己的仓库之后，比如这里创建好<code>howie6879/owllook</code>，随即在终端输入：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 重新打包下 或者改下tag也没问题</span>
+docker build -t howie6879/owllook:0.1 .
+<span class="c1"># 根据提示登录</span>
+docker login
+docker push howie6879/owllook:0.1
+</code></pre></div><p>稍等即大功告成</p>
+<h3 id="4最后">4.最后</h3>
+<p>现在可以根据<code>Dockerfile</code>自己构建<code>owllook</code>镜像或者直接<code>docker pull owllook</code>镜像，确实十分方便</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/docker/">Docker</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/1.docker-%E5%88%9D%E4%BD%BF%E7%94%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">1.Docker - 初使用</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

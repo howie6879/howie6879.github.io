@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Python on 老胡的储物柜</title>
+    <link>https://www.howie6879.cn/categories/python/</link>
+    <description>Recent content in Python on 老胡的储物柜</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 21 Oct 2019 08:37:56 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/categories/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>不论微信钉钉，我写了个通用消息监控处理机器人</title>
+      <link>https://www.howie6879.cn/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/</link>
+      <pubDate>Mon, 21 Oct 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E4%B8%8D%E8%AE%BA%E5%BE%AE%E4%BF%A1%E9%92%89%E9%92%89%E6%88%91%E5%86%99%E4%BA%86%E4%B8%AA%E9%80%9A%E7%94%A8%E6%B6%88%E6%81%AF%E7%9B%91%E6%8E%A7%E5%A4%84%E7%90%86%E6%9C%BA%E5%99%A8%E4%BA%BA/</guid>
+      <description>上一篇推文中提到，我希望通过监控微信对应的聊天记录，来实现一个消息自动处理的机器人，上篇文章实现的就是自动保存感兴趣的文章到Bear。
+虽说那篇文章比较实用，也有很多朋友表示喜欢，但还有不少缺陷：
+ 对技术薄弱的朋友复现困难，项目很多配置需要手动生成，前期校验工作很多 二次开发比较困难，不能直接作为第三方包使用 项目兼容性不强，目前只支持Mac并且只支持微信这个APP，其他如钉钉就没辙 项目稳定性不强，微信更改机制可能又需要重头再来  对，问题很多，但在勉强能用的情况下我并不是很有动力进行新方案的开发。那么是什么原因促使我更新方案了呢~
+ 背景：在公司和数据打交道居多，运营那块每天会将一些表格数据发到钉钉群里面，然后我组内成员需要手动下载并找到对应的处理脚本进行处理
+ 然后我问了下两周需要耗费多长时间在这件事情上，答曰1小时，这确实不能忍了！
+于是我花了10小时做了这个处理方案！顺便解决上面说的四个问题，赚了。。。
+调研 开始之前，自然是先下决心将一切历史问题解决掉：
+ 跨系统！跨软件！ 程序能直接作为第三方包使用，并且傻瓜式！  好，flag已立，开始吧，核心技术点就是如何监控所有平台软件的消息。
+上一篇推文的方案只能支持微信，所以我目前的背景需求里面的监控对象是钉钉，难道我又要按照以前的方法去搞db文件么？
+总结来说，我监控的是消应用息，并且不只是微信、还需要钉钉、QQ等其他任意软件的消息，而且我也不能一个个地去破解（就算这次解密成功，如果下次需求是其他通信软件呢？），那该怎么办呢？
+所以这次处理问题的角度需要站在上帝视角，说来简单，做起来也简单，哈哈。
+话说我灵光一闪，既然目标对象是所有应用的消息，那我我为何不将视角从应用层面移到系统层面呢？
+我以我的Mac为例，这不有现成的通知中心么？
+可谓是柳暗花明又一村，老胡我这招隔山打牛，姿势还可以吧？
+现在问题很明确了：
+ 我管你微信、钉钉、还是QQ，我只看系统的通知中心 我管你怎么加密、怎么限制，你总不会限制系统吧，我还是只看系统的通知中心  我背靠操作系统老大，现在还害怕你几个小应用，一起上，我哭算我输。
+在操作系统的领域内，这个方案就是武侠世界的九阳神功，还配上了屠龙刀，可谓：十步杀一人，千里不留行。
+调研结束。
+实践 解决方案确立了，接下来无非就是验证加实现，这里还是以Mac为例。
+来来来，看看苹果的系统中心好不好攻占，首先，咋们来确立系统中心数据的存储方式，进入终端：
+cd `getconf DARWIN_USER_DIR`/com.apple.notificationcenter/db2 ls db db-shm db-wal 可以看到，有三个文件，哎，好熟悉，SQLite呗。
+打开：
+分别有以下几个表：
+ app categories dbinfo delivered displayed record requests snoozed  可能有点多，但我们只需要关注两个表就行：
+ app：应用id record：监控的应用消息  建表语句分别如下：
+create table app ( app_id INTEGER primary key, identifier VARCHAR, badge INTEGER ); create table record ( rec_id INTEGER primary key, app_id INTEGER, uuid BLOB, data BLOB, request_date REAL, request_last_date REAL, delivered_date REAL, presented Bool, style INTEGER, snooze_fire_date REAL ); 在app表的这行，可以看到微信应用的id是35。</description>
+    </item>
+    
+    <item>
+      <title>利用微信同步文章到Bear</title>
+      <link>https://www.howie6879.cn/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/</link>
+      <pubDate>Mon, 16 Sep 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%88%A9%E7%94%A8%E5%BE%AE%E4%BF%A1%E5%90%8C%E6%AD%A5%E6%96%87%E7%AB%A0%E5%88%B0bear/</guid>
+      <description>如果图片失效：见【教程&amp;amp;工具】微信同步文章到Bear
+ 在我日常工作中，我会将各种互联网以及生活中产出的信息汇总到Bear，再通过Bear的云同步使我各个终端的信息保持一致。
+以前在使用有道云笔记的时候，有个功能我很喜欢，就是当看到一篇想收藏的文章的话，就可以直接右上角发送到有道云笔记，如下图：
+ 顺便一提：熊掌记是一款优雅、灵活的写作笔记应用。
+回到正题，我现在面临的需求是能不能在看到喜欢的文章的时候，也通过类似于右上角分享一下就可以直接将文章同步到我各个终端上的Bear，最终成果如下：
+ 解决方案 要实现上述的需求，我大概思考了如下的解决方案：
+ 准备一个微信号（这里直接称作小号）专门接收待收藏到Bear的文章 编写一个服务监控小号的消息，比如收到推文类型的消息就进行内容提取 监控服务将提取后的内容发送到Bear（这里要求服务运行在Mac OS上）  所以在继续之前，你需要有以下条件：
+ 基本的Python基础知识（写小脚本Python真的很方便） 一台装有Bear的Mac OS  方案调研 上面的解决方案看起来还是挺好实现，第一步不用多说，这年头谁没个小号，第二点的话，我印象中Python是有个第三方库可以直接监听微信对应账号的消息。
+因为这些第三方库都是基于Web版的微信，所以在使用之前我想验证下此方案是否可行，刚准备登录网页版微信，就直接提示：
+&amp;lt;error&amp;gt;&amp;lt;ret&amp;gt;1203&amp;lt;/ret&amp;gt;&amp;lt;message&amp;gt;To protect your account, logging in to WeChat via the web has been suspended. Use WeChat for Windows or WeChat for Mac to log in on a computer. Download WeChat for Windows or Mac at http://wechat.com.&amp;lt;/message&amp;gt;&amp;lt;/error&amp;gt; 果不其然现在微信准备加强Web版本的限制了，心里凉凉的，第二步还没开始就已经被宣判死刑。
+只能换个思路了，怎么办。其实这一步走不通我还是能接受的，因为我一直觉得依赖Web版总有一天会挂掉，毕竟多了个依赖总是会增加复杂度。
+能不能依靠客户端？
+我们知道，微信数据是有同步功能的，开发过客户端的都知道，这就意味着微信的数据必然保存一份在客户端本地系统上。
+所以对于第二点的解决思路就转换成了如何获取微信保存在客户端本地的数据，找到某个软件的数据文件夹自然是很简单的事情，比如微信客户端的数据就存放在：
+# howie6879是我的用户名，请自行替换 /Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.</description>
+    </item>
+    
+    <item>
+      <title>JupyterLab：程序员的笔记本神器</title>
+      <link>https://www.howie6879.cn/p/jupyterlab%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%A5%9E%E5%99%A8/</link>
+      <pubDate>Wed, 20 Mar 2019 13:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/jupyterlab%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%A5%9E%E5%99%A8/</guid>
+      <description>JupyterLab对于Jupyter Notebook有着完全的支持
+ JupyterLab是一个交互式的开发环境，是jupyter notebook的下一代产品，集成了更多的功能，等其正式版发布，相信那时就是jupyter notebook被取代的时候
+通过使用JupyterLab，能够以灵活，集成和可扩展的方式处理文档和活动：
+ 可以开启终端，用于交互式运行代码，完全支持丰富的输出 支持Markdown，Python，R，LaTeX等任何文本文件 增强notebook功能 更多插件支持  如果你在日常生活中，有以下需求，我觉得你可以安装一个JupyterLab
+ 随时随地希望试验一些代码片段 多语言、多文档支持 有记笔记需求（文本+代码）   安装
+ 接下来，我将以Python为默认语言来搭建JupyterLab，首先确认你安装好了Python基本环境：
+# 一行命令搞定 pip install jupyterlab # 安装ipython pip install ipython 如果在服务器使用的话，个人建议还是设置一下密码，配置过程如下：
+# 进入ipython交互环境 ipython 生成密码：
+from notebook.auth import passwd passwd() # 输入你自己设置登录JupyterLab界面的密码 然后会有一串输出，记得复制下来，等会配置需要使用 修改JupyterLab 配置文件：
+jupyter lab --generate-config 修改以下配置：
+c.NotebookApp.allow_root = True c.NotebookApp.open_browser = False c.NotebookApp.password = &amp;#39;刚才复制的一串数字粘贴到这里&amp;#39; 为了后续能够方便地安装插件，请先安装好node环境，假设你安装好，接下来演示一下怎么安装插件：
+# 以安装一个生成目录的插件为例 jupyter labextension install @jupyterlab/toc # 查看安装的插件 jupyter labextension list 安装完毕后，打开JupyterLab：</description>
+    </item>
+    
+    <item>
+      <title>如何实现一个Python爬虫框架</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</link>
+      <pubDate>Fri, 15 Mar 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AApython%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</guid>
+      <description>这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架
+2018年到如今，我花精力比较多的一个开源项目算是Ruia了，这是一个基于Python3.6+的异步爬虫框架，当时也获得一些推荐，比如Github Trending Python语言榜单第二，目前Ruia还在开发中，Star数目不过700+，如果各位有兴趣，欢迎一起开发，来波star我也不会拒绝哈~
+ 什么是爬虫框架
+ 说这个之前，得先说说什么是框架：
+ 是实现业界标准的组件规范：比如众所周知的MVC开发规范 提供规范所要求之基础功能的软件产品：比如Django框架就是MVC的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等  框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？
+很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章谈谈对Python爬虫的理解，下面总结一下爬虫流程：
+ 请求&amp;amp;响应 解析 持久化  这三个流程有没有可能以一种优雅的形式串联起来，Ruia目前是这样实现的，请看代码示例：
+可以看到，Item &amp;amp; Field类结合一起实现了字段的解析提取，Spider类结合Request * Response类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的item可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程
+实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些hook让用户编写爬虫更方便(比如ruia-motor)
+这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了
+ 如何踏出第一步
+ 首先，我对Ruia爬虫框架的定位很清楚，基于asyncio &amp;amp; aiohttp的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：
+ 轻量级，专注于抓取、解析和良好的API接口 插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件 速度，异步无阻塞框架，需要对速度有一定追求  什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：
+同时让我们结合上面一节的Ruia代码来从业务逻辑角度看看这几个模块到底是什么意思：
+ Request：请求 Response：响应 Item &amp;amp; Field：解析提取 Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来  这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆Ruia框架到本地：
+# 请确保本地Python环境是3.6+ git clone https://github.com/howie6879/ruia.git # 安装pipenv pip install pipenv # 安装依赖包 pipenv install --dev 然后用PyCharm打开Ruia项目：
+选择刚刚pipenv配置好的python解释器：
+此时可以完整地看到项目代码：
+好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程
+ Request &amp;amp; Response</description>
+    </item>
+    
+    <item>
+      <title>谈谈对Python爬虫的理解</title>
+      <link>https://www.howie6879.cn/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/</link>
+      <pubDate>Thu, 10 Jan 2019 08:37:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E8%B0%88%E8%B0%88%E5%AF%B9python%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/</guid>
+      <description>爬虫也可以称为Python爬虫
+ 不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
+所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：
+ Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）  任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
+什么是爬虫 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
+看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
+爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：
+ 通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面  不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
+ 模拟请求网页资源 从HTML提取目标元素 数据持久化  什么是爬虫，这就是爬虫：
+&amp;#34;&amp;#34;&amp;#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&amp;#34;&amp;#34;&amp;#34; import requests from bs4 import BeautifulSoup target_url = &amp;#39;http://www.baidu.com/s?wd=爬虫&amp;#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &amp;#34;lxml&amp;#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&amp;#39;title.</description>
+    </item>
+    
+    <item>
+      <title>如何用PEP 8编写优雅的Python代码</title>
+      <link>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8pep-8%E7%BC%96%E5%86%99%E4%BC%98%E9%9B%85%E7%9A%84python%E4%BB%A3%E7%A0%81/</link>
+      <pubDate>Wed, 26 Dec 2018 09:07:56 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%A6%82%E4%BD%95%E7%94%A8pep-8%E7%BC%96%E5%86%99%E4%BC%98%E9%9B%85%E7%9A%84python%E4%BB%A3%E7%A0%81/</guid>
+      <description>原文地址：How to Write Beautiful Python Code With PEP 8 作者：Jasmine Finer  翻译：howie6879  PEP 8有时候读作PEP8 或者PEP-8，是一份提供如何编写Python代码指南和最佳实践的文档，由Guido van Rossum, Barry Warsaw, Nick Coghlan在2001年完成。PEP 8主要注重于提高 Python 代码的可读性和一致性。
+PEP全称为：Python Enhancement Proposal，一个PEP是一份文档，它描述了为Python提出的新特性以及为社区编写的Python方面的文档，比如设计和风格。
+本教程概述了PEP 8中列出的关键指南，它的目标读者是初级到中级程序员，因此我没有涉及一些最高级的主题。不过你可以通过阅读完整的PEP 8 — Style Guide for Python Code | Python.org文档来学习高级主题。
+在本教程结束时，你将能够：
+ 编写遵从PEP 8规范的代码 理解PEP 8中列出的指导原则背后的原因 设置你的开发环境，以便开始编写符合PEP 8标准的Python代码  Why We Need PEP 8  可读性很重要
+ PEP 8规范存在的目的在于提高Python代码的可读性，但为什么可读性如此重要？为什么编写具有可读性的代码是Python语言的指导原则之一？
+正如Guido van Rossum所说：”代码阅读的频率远远高于编写的频率“。你可能花费几分钟或一整天时间编写一段代码来处理用户身份验证，一旦你写完它，你就再也不会重写一次，但是你肯定会再读一次，这段代码可能仍然是你正在进行的项目的一部分。每次你回到那个代码文件，你必须要记住那部分代码是做什么的以及你为什么要写它，所以可读性很重要。
+如果你是Python新手，在你编写代码之后的几天或几周内还要你记住代码片段的含义可能有点困难。如果你遵循PEP 8标准，你可以很确定你对你的变量命名得很好，你会知道你添加了足够的空格，因此更容易遵循代码中的逻辑步骤，你还可以对你的代码进行很好的注释，所有的这些都意味着你的代码具有更高的可读性，也更容易再次阅读。作为初学者，遵循PEP 8的规则可以使学习Python成为更愉快的任务。
+如果你正在找工作，那么遵循PEP 8标准尤为重要，编写清晰可读性高的代码更会突出你的专业性，这将会侧面告诉你的老板，你了解怎么很好地构建你的代码。
+如果你拥有很多编写Python代码的经验，然后你可能需要和其他人协作开发，编写可读性高的代码在这里至关重要，其他人可能此前从未看过你这样风格的代码，他必须重新阅读且理解你的代码风格，如果拥有你遵循和认可的指南将使其他人更容易阅读你的代码。
+Naming Conventions  明了胜于晦涩</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 6.常用的技巧</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/</link>
+      <pubDate>Sat, 13 Jan 2018 19:12:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/</guid>
+      <description>结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上
+本文最新内容可到github上阅读 6.常用的技巧
+ Async Python 3.5+ web server that&amp;rsquo;s written to go fast
+ 此篇我将将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
+ api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 5.数据库使用</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Fri, 12 Jan 2018 10:50:30 +0800</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/</guid>
+      <description>介绍中说的很明白，Sanic 是一个可以使用 async/await 语法编写项目的异步非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用aihttp而非requests，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。
+操作Mysql 对于mysql数据库的异步操作，我只在一些脚本中用过，用的是aiomysql，其中官方文档中讲得很清楚，也支持结合sqlalchemy编写ORM，然后aiomysql提供了自己编写的异步引擎。
+from aiomysql.sa import create_engine # 这个才是关键 下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：
+aio_mysql ├── demo.py ├── model.py └── requirements.txt 建立表：
+create database test_mysql; CREATE TABLE user ( id INT AUTO_INCREMENT PRIMARY KEY, user_name VARCHAR(16) NOT NULL, pwd VARCHAR(32) NOT NULL, real_name VARCHAR(6) NOT NULL ); 一切准备就绪，下面编写代码：
+# script: model.py import sqlalchemy as sa metadata = sa.MetaData() user = sa.Table( &amp;#39;user&amp;#39;, metadata, sa.Column(&amp;#39;id&amp;#39;, sa.Integer, autoincrement=True, primary_key=True), sa.Column(&amp;#39;user_name&amp;#39;, sa.String(16), nullable=False), sa.Column(&amp;#39;pwd&amp;#39;, sa.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 4.展示一个页面</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/</link>
+      <pubDate>Fri, 05 Jan 2018 09:20:14 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/</guid>
+      <description>前面一节介绍项目结构的时候，很粗略地讲了下如何将rss的文章内容在网页上进行展示。
+相信你应该已经了解清楚，sanic是怎么接收请求并返回被请求的资源的，简单来说概括如下：
+ 接收请求 找到对应的路由并执行路由对应的视图函数 Jinja2模板渲染返回视图  路由和视图函数 在此我假设你理解 python 中的装饰器，如果你并不清楚，可以看我另写的关于装饰器的介绍，回归正题，还记得第一节中的代码实例么？
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() # 此处将路由 / 与视图函数 test 关联起来 @app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) if __name__ == &amp;#34;__main__&amp;#34;: app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000) 在前言介绍里，出现这几个名词 路由 视图函数 视图 ,在上面那段代码中，test 就是视图函数。
+这是一段执行逻辑，比如客户端请求 0.0.0.0:8000/ 此时返回的内容就是由test 这个视图函数提供的。
+在我看来，视图函数就是一个纽带，它起到承上启下的作用，那么，到底是怎样的承上启下呢？让我们结合代码(sanic0.1.2源码)来分析下：
+@app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) 这个路由装饰器的作用很简单，就是将 / 这个 uri 与视图函数test关联起来，或许你可以将路由想象成一个 dict，当客户端若请求 0.0.0.0:8000/，路由就会get / 对应的视图函数test，然后执行。</description>
+    </item>
+    
+    <item>
+      <title>Sanic 源码阅读 - 基于0.1.2</title>
+      <link>https://www.howie6879.cn/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/</link>
+      <pubDate>Wed, 20 Dec 2017 10:10:49 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%9F%BA%E4%BA%8E0.1.2/</guid>
+      <description>Sanic是一个可以使用async/await语法编写项目的异步非阻塞框架，它写法类似于Flask，但使用了异步特性，而且还使用uvloop作为事件循环，其底层使用的是libuv，从而使 Sanic的速度优势更加明显。
+如果你：
+ 想深入了解Sanic，迫切想知道它的运行机制 直接阅读源码，做一些定制 学习  将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：
+ 理解装饰器 理解协程  Sanic-0.1.2 的核心文件如下：
+. ├── __init__.py ├── blueprints.py ├── config.py ├── exceptions.py ├── log.py ├── request.py ├── response.py ├── router.py ├── sanic.py ├── server.py └── utils.py 通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。
+simple_server.py 让我们从simple_server开始吧，代码如下：
+from sanic_0_1_2.src import Sanic from sanic_0_1_2.src.response import json app = Sanic(__name__) @app.route(&amp;#34;/&amp;#34;) async def test(request): return json({&amp;#34;test&amp;#34;: True}) app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000) 或许你直接把sanic_annotation项目直接clone到本地比较方便调试+理解：
+git clone https://github.com/howie6879/sanic_annotation cd sanic_annotation/sanic_0_1_2/examples/ 那么，现在一切准备就绪，开始阅读吧。
+前两行代码导入包：
+ Sanic：构建一个 Sanic 服务必须要实例化的类 json：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：  text：content_type=&amp;quot;text/plain; charset=utf-8&amp;quot; html：content_type=&amp;quot;text/html; charset=utf-8&amp;quot;    实例化一个Sanic对象，app = Sanic(__name__)，可见sanic.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 3.项目结构</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:38 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/</guid>
+      <description>一个项目，在最外层他们应该是一样的，至少需要有:
+   文件夹 说明     docs 项目文档说明   src/pro_name 项目名称   tests 测试用例   README.md 项目介绍   requirements.txt 该项目依赖的第三方库   …&amp;hellip; …&amp;hellip;    那接下来需要讨论的，就是 src 的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+2.1.普通的项目结构 一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 2.配置</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-2.%E9%85%8D%E7%BD%AE/</link>
+      <pubDate>Fri, 06 Oct 2017 08:04:29 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-2.%E9%85%8D%E7%BD%AE/</guid>
+      <description>对于一个项目来说，配置是一个很严肃的问题，比如说：在开发环境和生产环境中，配置是不同的，那么一个项目该如何自由地在不同的配置环境中进行切换呢，思考下，然后带着答案或者疑问往下阅读。
+新建文件夹 demo2 ，内部建立这样的文件结构：
+demo02 ├── config │ ├── __init__.py │ └── config.py └── run.py 其中 run.py 内容如下：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text app = Sanic() @app.route(&amp;#34;/&amp;#34;) async def test(request): return text(&amp;#39;Hello World!&amp;#39;) if __name__ == &amp;#34;__main__&amp;#34;: app.run(host=&amp;#34;0.0.0.0&amp;#34;, port=8000, debug=True) 代码示例中开启了 debug 模式，假设我们需要通过 config.py 配置文件来实现控制服务的 debug 模式开启与否，那该怎么实现呢。
+在 config.py 中添加一行：DEBUG=True ，然后 run.py 内容改为：
+#!/usr/bin/env python from sanic import Sanic from sanic.response import text from config import DEBUG app = Sanic() @app.</description>
+    </item>
+    
+    <item>
+      <title>Sanic 使用教程 - 1.初使用</title>
+      <link>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/</link>
+      <pubDate>Fri, 06 Oct 2017 08:03:15 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B-1.%E5%88%9D%E4%BD%BF%E7%94%A8/</guid>
+      <description>在安装Sanic之前，让我们一起来看看Python在支持异步的过程中，都经历了哪些比较重大的更新。
+首先是Python3.4版本引入了asyncio，这让Python有了支持异步IO的标准库，而后3.5版本又提供了两个新的关键字 async/await，目的是为了更好地标识异步IO，让异步编程看起来更加友好，最后3.6版本更进一步，推出了稳定版的asyncio，从这一系列的更新可以看出，Python社区正迈着坚定且稳重的步伐向异步编程靠近。
+安装 Sanic是一个支持 async/await 语法的异步无阻塞框架，这意味着我们可以依靠其处理异步请求的新特性来提升服务性能，如果你有Flask框架的使用经验，那么你可以迅速地使用Sanic来构建出心中想要的应用，并且性能会提升不少，我将同一服务分别用Flask和Sanic编写，再将压测的结果进行对比，发现Sanic编写的服务大概是Falsk的1.5倍。
+仅仅是Sanic的异步特性就让它的速度得到这么大的提升么？是的，但这个答案并不标准，更为关键的是Sanic使用了uvloop作为asyncio的事件循环，uvloop由Cython编写，它的出现让asyncio更快，快到什么程度？这篇文章中有介绍，其中提出速度至少比 nodejs、gevent 和其他Python异步框架要快两倍，并且性能接近于用Go编写的程序，顺便一提，Sanic的作者就是受这篇文章影响，这才有了Sanic。
+怎么样？有没有激起你学习Sanic的兴趣，如果有，就让我们一起开始学习吧，在开始之前，你只需要有一台安装了Python的电脑即可。
+ 说明：由于Windows下暂不支持安装uvloop，故在此建议使用Mac或Linux
+ 虚拟环境 程序世界一部分是对应着现实的，在生活中，我们会在不同的环境完成不同的任务，比如在厨房做饭、卧室休息，分工极其明确。
+其实用Python编写应用服务也是如此，它们同样希望应用服务与开发环境是一对一的关系，这样做的好处在于，每个独立的环境都可以简洁高效地管理自身对应服务所依赖的第三方库，如若不然，各个服务都安排在同一环境，这样不仅会造成管理上的麻烦，还会使第三方库之间产生冲突。
+通过上面的叙述，我们是不是可以得出这样一个核心观点：应该在不同的环境下做不同的事 ，以此类推，写项目的时候，我们也需要为每个不同的项目构建一个无干扰的的环境，发散思维，总结一下：
+ 不同的项目，需要为其构建不同的虚拟环境，以免互相干扰
+ 构建虚拟环境的工具很多，如下：
+ virtualenv pyenv anaconda  …&amp;hellip;
+以上三个工具都可以快速地帮助我们构建当前需要的Python环境，如果你之前没有使用过，可直接点开链接进行下载，如果你正在使用其它的环境管理工具，也不要紧，因为不论你使用哪一种方式，我们最终目的都是针对一个新项目构建一个新的环境。
+安装配置好之后，简单看看官方提供的使用方法，就可以开始了，比如我本机使用的是anaconda ，安装完成后可以很方便地创建一个虚拟环境，比如这里使用Python3.6来作为本书项目的默认环境：
+# 新建一个python3.6环境 conda create --name python36 python=3.6 # 安装好之后 输入下面命令进入名为python36的环境 source activate python36 若安装速度比较慢，可以考虑换国内源，比如 国内镜像 ，至于为什么选择python3.6作为默认环境，一是因为Sanic只支持Python3.5+，二则是我们构建的项目最终是要在生产环境下运行的，所以建议最好安装Python3.6下稳定版本的asyncio。
+安装Sanic Python安装第三方模块都是利用pip工具进行安装，这里也不例外，首先进入上一步我们新建的 python3.6 虚拟环境，然后安装：
+# 安装Sanic，请先使用 source activate python36 进入虚拟环境 pip install sanic # 如果不想使用uvloop和ujson 可以这样安装 SANIC_NO_UVLOOP=true SANIC_NO_UJSON=true pip install sanic 通过上面的命令，你就可以在 python3.</description>
+    </item>
+    
+    <item>
+      <title>gRPC使用初试</title>
+      <link>https://www.howie6879.cn/p/grpc%E4%BD%BF%E7%94%A8%E5%88%9D%E8%AF%95/</link>
+      <pubDate>Thu, 03 Aug 2017 20:57:28 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/grpc%E4%BD%BF%E7%94%A8%E5%88%9D%E8%AF%95/</guid>
+      <description>1.前言 gRPC是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用 protocol buffer:
+ protocol buffer是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用protocol buffer(proto3)来进行定义，即根据protocol buffer language来定义你的protocol buffer data
+最后再利用protocol buffer编译定义的 .proto 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码
+２.实践 假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：
+demo └── proto └── lower.proto 接下来将编写proto文件，本例使用proto3语法进行编写，protobuf定义的语法请看这里
+lower.proto文件内容如下：
+syntax = &amp;#34;proto3&amp;#34;;package lower;service Lower { rpc Lower (LowerRequest) returns (LowerResult) { }}message LowerRequest { string message = 1;}message LowerResult { string lower_message = 1;}定义一个服务Lower，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件proto_compile.py，并安装相关的包：
+pip install grpcio pip install grpcio-tools # script proto_compile.py from grpc_tools import protoc # 或者在项目根目录运行： # python -m grpc_tools.protoc -I. --python_out=.</description>
+    </item>
+    
+    <item>
+      <title>talospider - 简单的爬虫框架</title>
+      <link>https://www.howie6879.cn/p/talospider-%E7%AE%80%E5%8D%95%E7%9A%84%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</link>
+      <pubDate>Wed, 07 Jun 2017 23:56:08 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/talospider-%E7%AE%80%E5%8D%95%E7%9A%84%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</guid>
+      <description>&lt;h3 id=&#34;为什么写这个&#34;&gt;为什么写这个？&lt;/h3&gt;
+&lt;p&gt;一些简单的页面，无需用比较大的框架来进行爬取，自己纯手写又比较麻烦&lt;/p&gt;
+&lt;p&gt;因此针对这个需求写了&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;talospider&lt;/a&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1.针对单页面的item提取 - 具体介绍点&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider/blob/master/docs/item.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2.spider模块 - 具体介绍点&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/talospider/blob/master/docs/spider.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这里&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;介绍使用&#34;&gt;介绍&amp;amp;&amp;amp;使用&lt;/h3&gt;
+&lt;h4 id=&#34;item&#34;&gt;item&lt;/h4&gt;
+&lt;p&gt;这个模块是可以独立使用的，对于一些请求比较简单的网站（比如只需要&lt;code&gt;get&lt;/code&gt;请求），单单只用这个模块就可以快速地编写出你想要的爬虫，比如(以下使用python3，python2见examples目录)：&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>owllook -- 一个简洁的网络小说搜索引擎</title>
+      <link>https://www.howie6879.cn/p/owllook-%E4%B8%80%E4%B8%AA%E7%AE%80%E6%B4%81%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/</link>
+      <pubDate>Fri, 10 Mar 2017 19:09:50 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/owllook-%E4%B8%80%E4%B8%AA%E7%AE%80%E6%B4%81%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;http://oe7yjec8x.bkt.clouddn.com/howie/2017-03-08-owllook.gif-blog.howie&#34; alt=&#34;owllook-demo&#34;  /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;上一篇介绍了自己在使用&lt;code&gt;sanic&lt;/code&gt;过程中遇到的一些问题，这次就想介绍下这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/owllook&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;owllook&lt;/a&gt;，上面是演示demo，具体可以见&lt;a class=&#34;link&#34; href=&#34;https://www.owllook.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.owllook.net/&lt;/a&gt;
+&lt;strong&gt;本项目纯属共享学习之用，不得用于商业！&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>sanic使用记录</title>
+      <link>https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/</link>
+      <pubDate>Tue, 28 Feb 2017 16:33:44 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/sanic%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/</guid>
+      <description>&lt;p&gt;在使用python异步的时候，我了解到了sanic这个据说是最快的web服务框架，其支持异步请求处理机制，这意味你可以使用python3.5的&lt;code&gt;async/await&lt;/code&gt;来编写无阻塞的异步程序。
+于是我利用业余时间使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/channelcat/sanic&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;sanic&lt;/a&gt;编写了这个项目。&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;在使用过程中，我尽量将程序编写成异步的，首先进行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;n&#34;&gt;python&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;m&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pip&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sanic&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;sanic的&lt;a class=&#34;link&#34; href=&#34;http://sanic.readthedocs.io/en/latest/index.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;文档&lt;/a&gt;写得很详细，但是在使用过程中我还是有些问题。
+下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1.blueprint&lt;/li&gt;
+&lt;li&gt;2.html templates编写（引入jinja2）&lt;/li&gt;
+&lt;li&gt;3.session（引入sanic_session）&lt;/li&gt;
+&lt;li&gt;4.缓存（引入aiocache）&lt;/li&gt;
+&lt;li&gt;5.api接口验证（自定义一个装饰器）&lt;/li&gt;
+&lt;li&gt;6.恶意将其他域名绑定到你的网站独立ip&lt;/li&gt;
+&lt;li&gt;7.注意&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Mastering Python 01</title>
+      <link>https://www.howie6879.cn/p/mastering-python-01/</link>
+      <pubDate>Fri, 27 Jan 2017 10:20:31 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/mastering-python-01/</guid>
+      <description>1.准备  1.说明：《Mastering Python》读书笔记
+2.要求：首先，希望你是处在python3版本，然后拥有一个干净的虚拟环境更是必要。
+3.virtualenv或者anaconda都是不错的选择
+ 2.Pythonic Syntax, Common Pitfalls, and Style Guide 2.1.Pythonic code 对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：
+- Clean - Simple - Beautiful - Explicit - Readable 具体的话请打开你的python解释器：
+import this 细细感受吧。
+2.1.2.Differences between value and identity comparisons 对于下面这个例子：
+a1 = 200 + 56 a2 = 256 b1 = -4 - 1 b2 = -5 c1 = 200 + 57 c2 = 257 d1 = -4 - 2 d2 = -6 print(&amp;#39;%r== %r: %r&amp;#39; % (a1, a2, a1 == a2)) print(&amp;#39;%ris %r: %r&amp;#39; % (a1, a2, a1 is a2)) print(&amp;#39;%r== %r: %r&amp;#39; % (b1, b2, b1 == b2)) print(&amp;#39;%ris %r: %r&amp;#39; % (b1, b2, b1 is b2)) print(&amp;#39;%r== %r: %r&amp;#39; % (c1, c2, c1 == c2)) print(&amp;#39;%ris %r: %r&amp;#39; % (c1, c2, c1 is c2)) print(&amp;#39;%r== %r: %r&amp;#39; % (d1, d2, d1 == d2)) print(&amp;#39;%ris %r: %r&amp;#39; % (d1, d2, d1 is d2)) 256 == 256: True 256 is 256: True -5 == -5: True -5 is -5: True 257 == 257: True 257 is 257: False -6 == -6: True -6 is -6: False 可以看到，在值相同的情况下，使用==比较都返回True自不必说，为何有的id相同有的id却不同？</description>
+    </item>
+    
+    <item>
+      <title>ITBooks—简单的书籍下载小工具</title>
+      <link>https://www.howie6879.cn/p/itbooks%E7%AE%80%E5%8D%95%E7%9A%84%E4%B9%A6%E7%B1%8D%E4%B8%8B%E8%BD%BD%E5%B0%8F%E5%B7%A5%E5%85%B7/</link>
+      <pubDate>Thu, 26 Jan 2017 23:07:42 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/itbooks%E7%AE%80%E5%8D%95%E7%9A%84%E4%B9%A6%E7%B1%8D%E4%B8%8B%E8%BD%BD%E5%B0%8F%E5%B7%A5%E5%85%B7/</guid>
+      <description>1.前言 我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。
+很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。
+下面展示下0.1版本的成果，比如说检索Mastering python，空格用+代替。 python abook.py search Mastering+python Hattem
+2.说明 项目名称叫做ITBooks，当然不准备只做IT方面书籍，文学名著也是可以的。
+ITBooks，是一个查询和下载书籍的python脚本。 目前只存储了allitebooks blah网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用 scrapy爬取信息，具体看ITBooks/spider/allitebooks，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。 添加爬虫只需要在ITBooks/spider/allitebooks/spider，下新建一个scrapy的爬虫脚本即可，对于数据的存储，具体在ITBooks/database，当然，你可以直接新建一个库。 这里放个allitebooks的爬虫脚本，这里说明下，这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完。
+# -*- coding: utf-8 -*- import datetime import sys import scrapy from scrapy.loader import ItemLoader from scrapy.loader.processors import MapCompose, TakeFirst, Join from scrapy.http import Request from allitebooks.items import AllitebooksItem from allitebooks.pipelines import AllitebooksPipeline if sys.version_info[0] &amp;gt; 2: from urllib.parse import urljoin else: from urlparse import urljoin class AllitebooksSpider(scrapy.Spider): name = &amp;#34;allitebooks&amp;#34; allowed_domains = [&amp;#34;allitebooks.</description>
+    </item>
+    
+    <item>
+      <title>对于python抓取google搜索结果的一些了解</title>
+      <link>https://www.howie6879.cn/p/%E5%AF%B9%E4%BA%8Epython%E6%8A%93%E5%8F%96google%E6%90%9C%E7%B4%A2%E7%BB%93%E6%9E%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%86%E8%A7%A3/</link>
+      <pubDate>Wed, 25 Jan 2017 22:25:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/%E5%AF%B9%E4%BA%8Epython%E6%8A%93%E5%8F%96google%E6%90%9C%E7%B4%A2%E7%BB%93%E6%9E%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%86%E8%A7%A3/</guid>
+      <description>大学时期博文
+ 1.问题 目前主流的搜索引擎，非google莫属，但其对于非法（流量异常、爬虫）请求的封锁也是异常严厉
+本人前段时间有个脚本用到了谷歌搜索，具体见python之由公司名推算出公司官网(余弦相似度)当时直接使用的是一个python开源项目
+但在使用过程中，单ip的情况下爬取速度可谓感人，稍不留神还会被封，所以对于获取谷歌搜索结果的爬虫有必要进行改进
+说一说爬取谷歌搜索结果的问题：
+ 1.正常打开谷歌搜索，然后审查元素想获取目标内容的时候，会发现是一大串js。 2.访问过快就会出现流量异常  2.如何解决 对于第一个问题：
+应该有看到审查元素出来的都是js，然后检索的url是这样的：
+https://www.google.com.hk/search?q=hello&amp;amp;oq=hello&amp;amp;aqs=chrome..69i57j69i60l2j69i65j69i60j0.876j0j7&amp;amp;sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;google_abuse=GOOGLE_ABUSE_EXEMPTION%3DID%3Daa946d8c657cf359:TM%3D1484917472:C%3Dr:IP%3D118.193.241.44-:S%3DAPGng0tGiKFaIr7YCaivUEmmEHOYJhG4jg%3B+path%3D/%3B+domain%3Dgoogle.com%3B+expires%3DFri,+20-Jan-2017+16:04:32+GMT
+这里解决办法很粗暴，禁止掉js就好，让我们看看禁止js后是什么样的：
+然后再看url： https://www.google.com.hk/search?q=hello&amp;amp;btnG=Search&amp;amp;safe=active&amp;amp;gbv=1
+对于这个url，相信机智的你应该会明白些什么
+这里可以写个简单的脚本，比如说获取，谷歌搜索第一页所有结果的html，简单写下：
+URL_SEARCH = &amp;#34;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;#34; URL_NUM = &amp;#34;https://{domain}/search?hl={language}&amp;amp;q={query}&amp;amp;btnG=Search&amp;amp;gbv=1&amp;amp;num={num}&amp;#34; def search_page(query, language=&amp;#39;en&amp;#39;, num=None, start=0, pause=2): &amp;#34;&amp;#34;&amp;#34; Google search :param query: Keyword :param language: Language :return: result &amp;#34;&amp;#34;&amp;#34; time.sleep(pause) domain = self.get_random_domain() if num is None: url = URL_SEARCH url = url.format( domain=domain, language=language, query=quote_plus(query)) else: url = URL_NUM url = url.format( domain=domain, language=language, query=quote_plus(query), num=num) try: requests.</description>
+    </item>
+    
+    <item>
+      <title>Mastering Pandas 01</title>
+      <link>https://www.howie6879.cn/p/mastering-pandas-01/</link>
+      <pubDate>Mon, 21 Nov 2016 14:23:27 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/mastering-pandas-01/</guid>
+      <description>1.pandas特性 对于python开发者来说，在面对海量数据时，pandas可谓是数据分析的首选，以下关键特性是它如此热门的原因： 1. 可以处理各种不同格式的数据集：时间序列，表格，矩阵数据 2. 促进csv、DB/SQL等来源数据的加载/导入 3. 可以在很大数据集的基础上进行一些过滤、合并、切片等一系列操作 4. 可以根据使用的自定义的规则来处理缺失数据 &amp;hellip; 更多信息可移步pandas进一步了解。
+1.1.安装 # 可使用 anaconda 集成环境 自带科学计算包 pip install pandas 1.2.说明 建议使用ipython，本人使用jupyter notebook
+2.pandas 数据结构 看完本篇文章后，您将了解以下数据结构： 1. pandas是基于NumPy构建的，所以numpy.ndarray数据结构必不可少 2. pandas.Series：一维数据结构 3. pandas.DataFrame：二维数据结构 4. pandas.Panel：三维数据结构
+2.1.NumPy ndarray 在数值计算中，NumPy非常重要，其中最重要的数据结构便是ndarray多维数组对象，NumPy提供了许多方法来创造数组。
+首先导入numpy模块
+import numpy as np 2.1.1.numpy.array data_01 = [0, 1, 2, 3] data_02 = [-1, -2, 5.5, 6] # 一维数组 arr_01 = np.array(data_01) arr_01 out: array([0, 1, 2, 3])  # 二维数组 arr_02 = np.</description>
+    </item>
+    
+    <item>
+      <title>CentOS7分布式部署pyspider</title>
+      <link>https://www.howie6879.cn/p/centos7%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2pyspider/</link>
+      <pubDate>Mon, 10 Oct 2016 17:33:51 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/centos7%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2pyspider/</guid>
+      <description>搭建环境：  系统版本：Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+python版本：Python 3.5.1 
+ 搭建python3环境： 本人在尝试过后选择集成环境Anaconda
+编译 # 下载依赖 yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve # 下载python版本 wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz # 或者使用国内源 wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz mv Python-3.5.1.tgz /usr/local/src;cd /usr/local/src # 解压 tar -zxf Python-3.5.1.tgz;cd Python-3.5.1 # 编译安装 ./configure --prefix=/usr/local/python3.5 --enable-shared make &amp;amp;&amp;amp; make install # 建立软链接 ln -s /usr/local/python3.</description>
+    </item>
+    
+    <item>
+      <title>Python之由公司名推算出公司官网(余弦相似度)</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E7%94%B1%E5%85%AC%E5%8F%B8%E5%90%8D%E6%8E%A8%E7%AE%97%E5%87%BA%E5%85%AC%E5%8F%B8%E5%AE%98%E7%BD%91%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E5%BA%A6/</link>
+      <pubDate>Wed, 28 Sep 2016 20:38:22 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E7%94%B1%E5%85%AC%E5%8F%B8%E5%90%8D%E6%8E%A8%E7%AE%97%E5%87%BA%E5%85%AC%E5%8F%B8%E5%AE%98%E7%BD%91%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E5%BA%A6/</guid>
+      <description>1.问题 对展会数据分类后，我的新任务是如何通过公司名、公司地址、国家等海关数据推断出该公司的官网网站（若官网不存在则不考虑） 以下数据仅供参考：
+   公司名 国家 地址     JPW INDUSTRIES INC  427 NEW SANFORD RD LAVERGNE TN 37086 US   Fujian Xishi Co., Ltd CN, CHINA    BusinessPartner Co.,ltd     BENKAI Co.,Ltd     GOLD INC  18245 E 40TH AVE AURORA CO 80011 US    需要得到结果：
+   公司名 官方网站     JPW INDUSTRIES INC http://http://www.</description>
+    </item>
+    
+    <item>
+      <title>Python之朴素贝叶斯对展会数据分类</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/</link>
+      <pubDate>Wed, 28 Sep 2016 20:34:40 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AF%B9%E5%B1%95%E4%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB/</guid>
+      <description>目的 在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：
+国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：
+国外网站展会数据将近五万多条，跟分类有关的只有categories这一列数据，都是一些标签词，还偏少。
+现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个朴素贝叶斯分类器。
+数据 朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。
+数据的准备 获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：
+训练数据主要是这两列，所属行业以及展会范围，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为训练集。
+那么相对应，国外待分类的展会数据便是测试集。
+我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。
+可是现在有个问题，作为训练集的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终训练集达到了39555条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？
+分词&amp;amp;&amp;amp;提取 不积小流，无以成江海，以小见大，咱们看这样一条数据:
+所属行业：建材五金 展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等 思考一下，这一条数据的所属行业和展会范围有什么关系，我们将从这里得到编写分类器的出发点。
+在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。
+那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。
+# 可以利用结巴分词 import jieba.analyse con = &amp;#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&amp;#34; feature = jieba.analyse.extract_tags(con, 8) print(feature) # output：[&amp;#39;配件&amp;#39;, &amp;#39;各类&amp;#39;, &amp;#39;家具&amp;#39;, &amp;#39;五金&amp;#39;, &amp;#39;照明&amp;#39;, &amp;#39;浴室&amp;#39;, &amp;#39;淋浴房&amp;#39;, &amp;#39;浴缸&amp;#39;] 那么刚刚那条数据可以这样看：
+# data_01 所属行业：建材五金 描述关键词：&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39; 以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。
+但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：
+# data_02 所属行业：未知 描述关键词：&#39;配件&#39;,&#39;家具&#39; 这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。
+大三的时候学过概率统计，也记得一个公式名为贝叶斯定理。
+这表示计算条件概率的公式:
+P(A\B) = P(B\A)*P(A)/P(B) == 后验概率 = 先验概率 ｘ 调整因子 # 这样写会不会更加清晰 P(category\keywords) = P(category) * P(keywords\category)/ P(keywords) ## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。 P(category\keywords) = P(category) * P(keyword1\category)P(keyword2\category).</description>
+    </item>
+    
+    <item>
+      <title>PythonTip</title>
+      <link>https://www.howie6879.cn/p/pythontip/</link>
+      <pubDate>Wed, 28 Sep 2016 20:32:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/pythontip/</guid>
+      <description>给你一个list L, 如 L=[2,8,3,50], 对L进行升序排序并输出,如样例L的结果为[2,3,8,50]
+ L.sort() print(L)  给你一个字符串 a， 如a=‘12345’，对a进行逆序输出a。
+ print(a[::-1])  给你一字典a，如a={1:1,2:2,3:3}，输出字典a的key，以&#39;,&amp;lsquo;链接，如‘1,2,3&amp;rsquo;。
+ print(&amp;#39;,&amp;#39;.join(str(i) for i in a.keys()))  给你一个字符串 a， 输出字符奇数位置的字符串。如a=‘12345’，则输出135。
+ print(a[::2])  输出100以内的所有素数，素数之间以一个空格区分
+ def prime(num): for i in range(2,num): if not num%i:return num print(&amp;#39; &amp;#39;.join(str(i) for i in set(range(2,101))-set(map(prime,range(2,101)))))  已知矩形长a,宽b,输出其面积和周长，面积和周长以一个空格隔开
+ print(&amp;#34;%d%d&amp;#34;%(a*b,(a+b)*2))  给你一个list L, 如 L=[0,1,2,3,4], 输出L的中位数（若结果为小数，则保留一位小数）。
+ L.sort() if len(L)%2==0: print(sum(L[int((len(L))/2-1):int((len(L))/2+1)])/2.0) else: print(L[int((len(L)-1)/2)])  给你两个正整数a和b， 输出它们的最大公约数
+ def GCD(a,b): if a%b==0:return b return GCD(b,a%b) print(GCD(a,b))  给你两个正整数a和b， 输出它们的最小公倍数</description>
+    </item>
+    
+    <item>
+      <title>cx_Freeze打包py文件</title>
+      <link>https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/</link>
+      <pubDate>Wed, 28 Sep 2016 20:30:57 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/</guid>
+      <description>最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。
+首先进行下载，需要注意对应的版本号，比如本人使用python3.4，64位，故下载cx_Freeze-4.3.3.win-amd64-py3.4.msi这个版本，下载后在python安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图： cxfreeze有两种打包方式，一是cxfreeze script,这种方式很简单，只要打开cmd，cd到python文件所在目录，比如文件名为hello.py,执行：
+cxfreeze hello.py --target-dir dist 如果要生成可安装包文件，就要用到这种打包方式，名为distutils setup script，这种方式必须创建一个setup.py文件，可以使用官方提供的：
+import sysfrom cx_Freeze import setup, Executable # Dependencies are automatically detected, but it might need fine tuning. build_exe_options = {&amp;#34;packages&amp;#34;: [&amp;#34;os&amp;#34;], &amp;#34;excludes&amp;#34;: [&amp;#34;tkinter&amp;#34;]} # GUI applications require a different base on Windows (the default is for a console application). base = None if sys.platform == &amp;#34;win32&amp;#34;: base = &amp;#34;Win32GUI&amp;#34; setup( name = &amp;#34;guifoo&amp;#34;, version = &amp;#34;0.1&amp;#34;, description = &amp;#34;My GUI application!</description>
+    </item>
+    
+    <item>
+      <title>python之装饰器</title>
+      <link>https://www.howie6879.cn/p/python%E4%B9%8B%E8%A3%85%E9%A5%B0%E5%99%A8/</link>
+      <pubDate>Wed, 28 Sep 2016 20:24:53 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/p/python%E4%B9%8B%E8%A3%85%E9%A5%B0%E5%99%A8/</guid>
+      <description>认识装饰器 在python中，对于一个函数，若想在其运行前后做点什么，那么装饰器是再好不过的选择，话不多说，上代码。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 01.py __author__ = &amp;#39;howie&amp;#39; from functools import wraps def decorator(func): @wraps(func) def wrapper(*args, **kwargs): print(&amp;#34;%swas called&amp;#34; % func.__name__) func(*args, **kwargs) return wrapper @decorator def hello(name=&amp;#34;howie&amp;#34;): print(&amp;#34;Hello %s!&amp;#34; % name) hello() outputs: hello was called Hello howie! 这段代码，初看之下，确实不是很理解，接下来一步一步分析，看看装饰器到底是怎么工作的。
+装饰器原理 在python中，方法允许作为参数传递，想在某个函数执行前后加点料，也可以这样简单实现。
+#!/usr/bin/env # -*-coding:utf-8-*- # script: 02-1.py __author__ = &amp;#39;howie&amp;#39; def decorator(func): print(&amp;#34;%swas called&amp;#34; % func.__name__) func() def hello(name=&amp;#34;howie&amp;#34;): print(&amp;#34;Hello %s!&amp;#34; % name) decorator(hello) 由此，上面代码也可以这样写：</description>
+    </item>
+    
+  </channel>
+</rss>

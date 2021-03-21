@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='容器持久化存储'><title>k8s学习之路.基础.[03.容器持久化存储]</title>
+
+<link rel='canonical' href='https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='k8s学习之路.基础.[03.容器持久化存储]'>
+<meta property='og:description' content='容器持久化存储'>
+<meta property='og:url' content='https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/'>
+<meta property='og:site_name' content='老胡的储物柜'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='k8s学习之路' /><meta property='article:published_time' content='2021-03-04T22:35:47&#43;08:00'/><meta property='article:modified_time' content='2021-03-04T22:35:47&#43;08:00'/><meta property='og:image' content='https://www.howie6879.cn/images/thumbs/h_61.png' />
+<meta name="twitter:title" content="k8s学习之路.基础.[03.容器持久化存储]">
+<meta name="twitter:description" content="容器持久化存储"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://www.howie6879.cn/images/thumbs/h_61.png' />
+    <link rel="shortcut icon" href="https://gitee.com/howie6879/oss/raw/master/uPic/favicon.png" />
+
+    </head>
+    <body class="">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.body.dataset.scheme = 'dark';
+        } else {
+            document.body.dataset.scheme = 'light';
+        }
+    })();
+</script><div class="container main-container flex on-phone--column extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hucd9f74259c13f4f54eb445d99cbdf60f_62464_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+
+                
+                    <span class="emoji">🌈</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://www.howie6879.cn">老胡的储物柜</a></h1>
+        <h2 class="site-description">但行好事，莫问前程</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/friends'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Friends</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        
+            <li id="dark-mode-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                <span>暗色模式</span>
+            </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://www.howie6879.cn" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/">
+                
+                    <img src="/images/thumbs/h_61.png" loading="lazy" alt="Featured image of post k8s学习之路.基础.[03.容器持久化存储]" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/k8s/" style="background-color: #2a9d8f; color: #fff;">
+                k8s
+            </a>
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/">k8s学习之路.基础.[03.容器持久化存储]</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        容器持久化存储
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Mar 04, 2021</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>容器的本质是进程，对于进程，<code>Linux</code>系统有进程组的概念来将其组织在一起。在<code>k8s</code>里面，使用<code>Pod</code>这个逻辑概念来维护容器间的关系。</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/16c095d6efb8d8c226ad9b098689f306.png" alt="图来自极客时间"  /></p>
+<p>有了<code>Pod</code>后，我们的应用程序需要被创建和管理，这就引出了<code>ReplicaSet</code>和<code>Deployment</code>；然后需要将部署好的应用暴露给外部进行访问，<code>Service</code>可以提供一个固定的ip和端口让外部访问。</p>
+<p>对于有状态的应用，可以使用<code>StatefulSet</code>来进行状态的恢复，在上一节<a class="link" href="https://www.howie6879.cn/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/"  target="_blank" rel="noopener"
+    >概念介绍</a>里面有提到，有状态的应用是离不开<strong>持久化存储</strong>的。</p>
+<h2 id="引子">引子</h2>
+<p>在<code>Docker</code>中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。</p>
+<p>对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在<code>k8s</code>里面可以通过定义<strong>存储卷</strong>来满足这个需求，它们不像<code>Pod</code>这样的顶级资源，而是被定义为<code>Pod</code>的一部分，并和<code>Pod</code>共享相同的生命周期。因此在<code>Pod</code>里面容器重新启动期间，卷的内容是不变的，</p>
+<h2 id="卷">卷</h2>
+<h3 id="emptydir">emptyDir</h3>
+<p>在<code>Pod</code>中如何定义卷？让我们从<code>emptyDir</code>开始。设想一个这样的例子，一个<code>Pod</code>应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。</p>
+<p>让我们实际操作一下，<code>vim fortune-pod.yaml</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">fortune</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">luksa/fortune</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html-generator</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/htdocs</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx:alpine</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">web-server</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/usr/share/nginx/html</span><span class="w">
+</span><span class="w">      </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">html</span><span class="w">
+</span><span class="w">    </span><span class="nt">emptyDir</span><span class="p">:</span><span class="w"> </span>{}<span class="w">
+</span></code></pre></div><p>说明一下上述配置文件的含义：<code>fortune</code>镜像是<code>k8s in action</code>书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为<code>html</code>的容器挂载在<code>var/htdocs</code>中；而<code>nginx</code>也挂载了相同的<code>html</code>卷，不过位置在<code>/usr/share/nginx/html</code>，上面两个容器共用的卷就是<code>emptyDir: {}</code>。</p>
+<p>启动来感受一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod.yaml
+<span class="c1"># 输出</span>
+pod/fortune created
+
+<span class="c1"># 查看状态</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME      READY   STATUS    RESTARTS   AGE
+fortune   2/2     Running   <span class="m">0</span>          2m27s
+
+<span class="c1"># 暂时服务化</span>
+kubectl port-forward fortune 8080:80
+</code></pre></div><p>此时服务就处于可用状态了，在终端输入<code>curl http://localhost:8080/</code>，基本上每隔<code>10s</code>，都会返回不同的响应，如下图：</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210305144115418.png" alt="image-20210305144115418"  /></p>
+<p><code>emptyDir</code>卷是最简单的卷类型，但是其他类型的卷都是在它的基础上构建的，在创建空目录后，相应的容器会将数据写入。</p>
+<h3 id="gitrepo">gitRepo</h3>
+<p>假设你有在<code>github</code>上开发项目，<code>gitRepo</code>卷允许你定义好相关配置然后直接从<code>github</code>上下拉项目将数据共享给其他容器使用。</p>
+<h3 id="hostpath">hostPath</h3>
+<p>前面说的卷都是停留在共享同一个<code>Pod</code>的文件，当其需要读取节点文件的时候，就需要<code>hostPath</code>卷出场了。和之前介绍的卷最大的不同之处是，<code>hostPath</code>是一个持久性存储的卷，其目录存在于对应节点主机的目录。</p>
+<p>所以，<code>hostPath</code>仅仅适用于在节点上读取数据，如果你的需求是跨<code>Pod</code>，那么<code>NAS</code>才是你的解决方案。</p>
+<h3 id="nfs">NFS</h3>
+<p>目前相关的云商都会有一套自己的持久化方式，我目前是自己搭建的<code>k8s</code>，所以我只能实践一下<code>NAS</code>方案，新建文件<code>vim mongodb-pod-nfs.yaml</code>，输入以下内容：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb-nfs</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb-data</span><span class="w">
+</span><span class="w">    </span><span class="nt">nfs</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="m">1.2.3.4</span><span class="w">
+</span><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/some/path</span><span class="w">
+</span><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">mongo</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb-data</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/data/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">27017</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span></code></pre></div><p>启动：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pod-nfs.yaml
+
+<span class="c1"># 查看状态</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME          READY   STATUS    RESTARTS   AGE
+mongodb-nfs   1/1     Running   <span class="m">0</span>          3m13s
+</code></pre></div><p>我们来验证一下数据持久化是否生效，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">&gt; use test_data
+switched to db test_data
+
+<span class="c1"># 插入</span>
+&gt; db.test.insert<span class="o">({</span><span class="s2">&#34;name&#34;</span>: <span class="s2">&#34;howie&#34;</span><span class="o">})</span>
+WriteResult<span class="o">({</span> <span class="s2">&#34;nInserted&#34;</span> : <span class="m">1</span> <span class="o">})</span>
+
+<span class="c1"># 查询</span>
+&gt; db.test.find<span class="o">({})</span>
+<span class="o">{</span> <span class="s2">&#34;_id&#34;</span> : ObjectId<span class="o">(</span><span class="s2">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span class="o">)</span>, <span class="s2">&#34;name&#34;</span> : <span class="s2">&#34;howie&#34;</span> <span class="o">}</span>
+</code></pre></div><p>接下来重新创建<code>Pod</code>看一下数据是不是还在：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl delete pod mongodb-nfs
+
+<span class="c1"># 重新创建</span>
+kubectl create -f mongodb-pod-nfs.yaml
+<span class="c1"># 输出</span>
+pod/mongodb-nfs created
+
+<span class="c1"># 查看</span>
+kubectl get pods
+<span class="c1"># 输出</span>
+NAME          READY   STATUS    RESTARTS   AGE
+mongodb-nfs   1/1     Running   <span class="m">0</span>          28s
+</code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">&gt; use test_data
+switched to db test_data
+
+<span class="c1"># 查询</span>
+&gt; db.test.find<span class="o">({})</span>
+<span class="o">{</span> <span class="s2">&#34;_id&#34;</span> : ObjectId<span class="o">(</span><span class="s2">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span class="o">)</span>, <span class="s2">&#34;name&#34;</span> : <span class="s2">&#34;howie&#34;</span> <span class="o">}</span>
+</code></pre></div><p>虽然我们成功让多个<code>Pod</code>享用了同一份数据，但这样做法有点问题，让开发人员在配置里面写具体<code>NFS</code>地址是很不友好的事情，我们可以使用<strong>持久卷</strong>来解决此问题。</p>
+<h2 id="持久卷持久卷声明">持久卷&amp;持久卷声明</h2>
+<h3 id="介绍">介绍</h3>
+<p>前面<code>NFS</code>用来做持久化存储是一个反面的例子，对于真实的基础设施，其详细配置应该是被隐藏的；但是<code>k8s</code>又实实在在需要对一些基础设施进行访问，怎么办？引入新的资源：</p>
+<ul>
+<li>持久卷（PersistentVolume）</li>
+<li>持久卷声明（PersistentVolumeClaim）</li>
+</ul>
+<p>持久卷由管理员创建（各种配置信息），然后用户创建持久卷声明，提交后<code>k8s</code>就会找到匹配的持久卷并将其绑定到持久卷声明。</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210305175203591.png" alt="image-20210305175203591"  /></p>
+<p>这样做的好处在于，对于用户只需要关注声明一下需要多大的存储、需要什么权限（读写）等，然后pod通过其中一个卷的名称来引用声明就可以了，将细节完美地进行了隐藏。</p>
+<h3 id="实践">实践</h3>
+<p>首先建立一个<code>NFS</code>类型的<code>PV</code>（一般是管理员进行创建），在终端输入<code>vim mongodb-pv-nfs.yaml</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">PersistentVolume</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">nfs-pv</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">capacity</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l">10Mi</span><span class="w">
+</span><span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="l">ReadWriteMany</span><span class="w">
+</span><span class="w">  </span><span class="nt">nfs</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="m">1.2.3.4</span><span class="w">
+</span><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/&#34;</span><span class="w">
+</span></code></pre></div><p>接下来创建持久卷：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pv-nfs.yaml
+<span class="c1"># 输出</span>
+persistentvolume/nfs created
+
+<span class="c1"># 查看</span>
+kubectl get pv
+<span class="c1"># 输出</span>
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+nfs-pv   10Mi       RWX            Retain           Available                                   6s
+
+<span class="c1"># 关于删除</span>
+<span class="c1"># kubectl delete pv nfs-pv</span>
+</code></pre></div><p>可以看到状态已经生效。</p>
+<p>接下来就轮到使用者随意使用<code>PV</code>了，如果作为使用者，部署的<code>Pod</code>需要持久化存储，那么其需要做的就是创建<code>PVC</code>，在终端输入<code>vim mongodb-pvc-nfs.yaml</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">PersistentVolumeClaim</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">nfs-pvc</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="l">ReadWriteMany</span><span class="w">
+</span><span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">requests</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l">10Mi</span><span class="w">
+</span><span class="w">  </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span></code></pre></div><p>然后创建持久化声明：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pvc-nfs.yaml
+<span class="c1"># 输出</span>
+persistentvolumeclaim/nfs created
+
+<span class="c1"># 查看 pvc</span>
+kubectl get pvc
+<span class="c1"># 输出，注意状态是绑定</span>
+NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Bound    nfs-pv   10Mi       RWX                           6s
+
+<span class="c1"># 查看 pv</span>
+kubectl get pv
+<span class="c1"># 输出，状态是绑定</span>
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
+nfs-pv   10Mi       RWX            Retain           Bound    default/nfs-pvc                           3m6s
+<span class="c1"># 关于删除</span>
+<span class="c1"># kubectl delete pvc nfs-pvc</span>
+</code></pre></div><p>对于<code>ACCESS MODES</code>，主要分为以下几种：</p>
+<ul>
+<li>RWO：ReadWriteOnce（仅允许单个节点挂载读写）</li>
+<li>ROX：ReadOnlyMany（允许多个节点挂载只读）</li>
+<li>RWX：ReadWriteMany（允许多个节点挂载读写这个卷）</li>
+</ul>
+<p>现在，准备工作就绪，在<code>Pod</code>中使用持久卷就是引用持久卷名称，在终端输入<code>vim mongo-pod-pvc.yaml</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">mongo</span><span class="w">
+</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb</span><span class="w">
+</span><span class="w">    </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb-data</span><span class="w">
+</span><span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/data/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">27017</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">mongodb-data</span><span class="w">
+</span><span class="w">    </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l">nfs-pvc</span><span class="w">
+</span></code></pre></div><p>创建<code>Pod</code>：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 先删除原先创建的 mongo Pod</span>
+kubectl delete pod mongodb-nfs
+<span class="c1"># 创建引用持久卷声明的 Pod</span>
+kubectl create -f mongodb-pod-pvc.yaml
+<span class="c1"># 输出</span>
+pod/mongodb created
+</code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb mongo</code>进入：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">&gt; use test_data
+switched to db test_data
+
+<span class="c1"># 查询</span>
+&gt; db.test.find<span class="o">({})</span>
+<span class="o">{</span> <span class="s2">&#34;_id&#34;</span> : ObjectId<span class="o">(</span><span class="s2">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span class="o">)</span>, <span class="s2">&#34;name&#34;</span> : <span class="s2">&#34;howie&#34;</span> <span class="o">}</span>
+</code></pre></div><p>没问题，引用了之前的<code>NFS</code>下的对应目录。</p>
+<h2 id="动态卷">动态卷</h2>
+<p>前面提到，<code>PV</code>需要管理人员进行创建，在实际生产环境下，这个<code>PV</code>的需求量可能是非常大的，所以这种协调方式是不合理的。所以，<code>k8s</code>提供了一套可以自动创建<code>PV</code>的机制——<strong>动态卷</strong>。</p>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/image-20210305213129142.png" alt="image-20210305213129142"  /></p>
+<p>这张图将使用<code>StorageClass</code>的流程描述地很清楚，管理员创建一个或多个<code>StorageClass</code>，用户创建<code>Pod</code>引用<code>PVC</code>声明相关的<code>storageClassName</code>就会通过管理员创建的<code>StorageClass</code>自动创建<code>PV</code>。</p>
+<h2 id="参考">参考</h2>
+<p>本章关于容器持久化就介绍到这里了，谢谢！本部分内容有参考如下文章：</p>
+<ul>
+<li><a class="link" href="https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D"  target="_blank" rel="noopener"
+    >深入剖析Kubernetes</a>：持久化存储部分</li>
+<li><a class="link" href="https://github.com/luksa/kubernetes-in-action"  target="_blank" rel="noopener"
+    >Kubernetes in Action</a>中文版：可以算是第6章的读书笔记</li>
+</ul>
+<p><img src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" alt="qrcode_for_gh_3f02ace79dfb_258"  /></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title">相关文章</h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_63.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_63.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[04.配置应用程序]</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_62.jpg" loading="lazy" data-key="" data-hash="/images/thumbs/h_62.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">设计模式——基于容器的分布式系统</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_56.svg" loading="lazy" data-key="" data-hash="/images/thumbs/h_56.svg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[02.概念介绍]</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="has-image">
+    <a href="/p/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF.%E5%9F%BA%E7%A1%80.01.%E8%B5%B0%E8%BF%9Bkubernetes/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/thumbs/h_57.png" loading="lazy" data-key="" data-hash="/images/thumbs/h_57.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">k8s学习之路.基础.[01.走进Kubernetes]</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    <footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2016 - 
+        
+        2021 老胡的储物柜
+    </section>
+    
+    <section class="powerby">
+        
+            浮浮沉沉，努力就好 <br/>
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="2.2.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer="true"
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                defer="false"
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
