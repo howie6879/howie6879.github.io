@@ -3,7 +3,7 @@ categories:
   - Python
 date: 2019-03-15T08:37:56+08:00
 image: /images/thumbs/h_45.png
-tags: [Python,Spider]
+tags: [Python,Spider,项目]
 title: "如何实现一个Python爬虫框架"
 toc: true
 ---
