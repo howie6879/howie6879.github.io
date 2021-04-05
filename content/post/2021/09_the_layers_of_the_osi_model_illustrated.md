@@ -10,7 +10,7 @@ author: "howie.hu"
 image: /images/thumbs/h_65.gif
 ---
 
-![osi_gif](https://gitee.com/howie6879/oss/raw/master/uPic/osi_gif.gif)
+<div align=center><img width="70%" src="https://gitee.com/howie6879/oss/raw/master/uPic/osi_gif.gif" /></div>
 
 > 翻译自[Bradley Mitchell](https://www.lifewire.com/bradley-mitchell-816228)的《[The Layers of the OSI Model Illustrated](https://www.lifewire.com/layers-of-the-osi-model-illustrated-818017)》
 
@@ -84,3 +84,5 @@ Open Systems Interconnection(OSI)定义了一个网络框架，其以层为单�
 - [图解TCP/IP](https://book.douban.com/subject/24737674/)
 
 大家有兴趣的可以看一看。
+
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>

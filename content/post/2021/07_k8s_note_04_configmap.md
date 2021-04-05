@@ -420,4 +420,4 @@ default-token-nlxkq   kubernetes.io/service-account-token   3      54d
 - [Secret 概述](https://kuboard.cn/learning/k8s-intermediate/config/secrets/ "Secret概述")
 - [Kubernetes in Action](https://github.com/luksa/kubernetes-in-action "Kubernetes in Action")中文版：可以算是第 7 章的读书笔记
 
-![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>

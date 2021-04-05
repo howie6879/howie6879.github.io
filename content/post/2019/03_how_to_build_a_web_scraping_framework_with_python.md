@@ -3,7 +3,7 @@ categories:
   - Python
 date: 2019-03-15T08:37:56+08:00
 image: /images/thumbs/h_45.png
-tags: [Python,Spider,项目]
+tags: [Python,Spider,项目,Ruia]
 title: "如何实现一个Python爬虫框架"
 toc: true
 ---
@@ -393,4 +393,4 @@ if __name__ == '__main__':
 
 如果觉得写得不错，点个好看来个`star`呗~
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>

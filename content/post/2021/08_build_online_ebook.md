@@ -167,4 +167,4 @@ Press Ctrl+C to stop
 
 第一本已经完结，`ml`和`k8s`希望今年可以完结（好像整了个 flag??），加油吧。 
 
-![qrcode_for_gh_3f02ace79dfb_258](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
