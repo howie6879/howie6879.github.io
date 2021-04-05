@@ -3,11 +3,13 @@ categories:
   - Python
 comments: true
 date: 2019-01-10T08:37:56+08:00
-image: /images/thumbs/h_44.jpg
+image: /images/thumbs/h_66.png
 tags: [Python,Spider]
 title: "谈谈对Python爬虫的理解"
 toc: true
 ---
+
+# 谈谈对Python爬虫的理解
 
 > 爬虫也可以称为Python爬虫  
 
@@ -20,11 +22,11 @@ toc: true
 
 任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
 
-### 什么是爬虫
+## 什么是爬虫
 
 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125084953.png)
+![CzlHyF](https://gitee.com/howie6879/oss/raw/master/uPic/CzlHyF.jpg)
 
 看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
 
@@ -66,7 +68,7 @@ with open('title.txt', 'w') as fp:
 
 加上注释不到20行代码，你就完成了一个爬虫，简单吧
 
-### 怎么写爬虫
+## 怎么写爬虫
 
 网页世界多姿多彩、亿万网页资源供你选择，面对不同的页面，怎么使自己编写的爬虫程序够稳健、持久，这是一个值得讨论的问题
 
@@ -104,7 +106,7 @@ with open('title.txt', 'w') as fp:
 
 通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 [电影-肖申克的救赎](https://movie.douban.com/subject/1292052/) 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085136.png)
+![O2l4f1](https://gitee.com/howie6879/oss/raw/master/uPic/O2l4f1.jpg)
 
 在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：`#content > h1 > span:nth-child(1)`，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：
 
@@ -113,100 +115,133 @@ import asyncio
 
 from ruia import Item, TextField
 
+
 class DoubanItem(Item):
+    """
+    定义爬虫的目标字段
+    """
     title = TextField(css_select='#content > h1 > span:nth-child(1)')
+
 
 async_func = DoubanItem.get_item(url="https://movie.douban.com/subject/1292052/")
 item = asyncio.get_event_loop().run_until_complete(async_func)
-print(item.title)
+print(item)
 ```
 
 多页面多目标就是此情况下多个url的衍生情况
 
 > 单页面多目标  
 
-假设现在的需求是抓取 [豆瓣电影250](https://movie.douban.com/top250) 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，因此目标需要循环获取，这就是所谓的单页面多目标了：
+假设现在的需求是抓取 [豆瓣电影250](https://movie.douban.com/top250) 第一页中的所有电影名称，你需要提取25个电影名称，因为这个目标页的目标数据是多个item的，所以目标需要循环获取。
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085148.png)
+![HdWKWD](https://gitee.com/howie6879/oss/raw/master/uPic/HdWKWD.jpg)
+
+对于这个情况，我在`Item`中限制了一点，当你定义的爬虫需要在某一页面循环获取你的目标时，则需要定义`target_item`属性（就是截图中的红框）
+
+对于豆瓣250这个页面，我们的目标是25部电影信息，所以该这样定义：
+
+|      field      |  css_select   |
+| :-------------: | :-----------: |
+| target_item（必须） |   div.item    |
+|      title      |  span.title   |)
+
+代码实现如下：
 
 ```python
 import asyncio
 
 from ruia import Item, TextField
 
+
 class DoubanItem(Item):
-    target_item = TextField(css_select='div.item')
-    title = TextField(css_select='span.title')
+    """
+    定义爬虫的目标字段
+    """
+
+    target_item = TextField(css_select="div.item")
+    title = TextField(css_select="span.title")
 
     async def clean_title(self, title):
+        """
+        对提取的目标数据进行清洗 可选
+        :param title: 初步提取的目标数据
+        :return:
+        """
         if isinstance(title, str):
             return title
         else:
-            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
+            return "".join([i.text.strip().replace("\xa0", "") for i in title])
 
 
-async_func = DoubanItem.get_items(url="https://movie.douban.com/top250")
-items = asyncio.get_event_loop().run_until_complete(async_func)
-for item in items:
-    print(item)
+async def run_item(url: str):
+    async for item in DoubanItem.get_items(url=url):
+        print(item)
+
+
+items = asyncio.get_event_loop().run_until_complete(
+    run_item("https://movie.douban.com/top250")
+)
 ```
 
 > 多页面多目标  
 
 多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085208.png)
+![QrGkFX](https://gitee.com/howie6879/oss/raw/master/uPic/QrGkFX.jpg)
 
 ```python
-from ruia import TextField, Item, Request, Spider
+from ruia import Item, Request, Spider, TextField
 
 
 class DoubanItem(Item):
     """
     定义爬虫的目标字段
     """
-    target_item = TextField(css_select='div.item')
-    title = TextField(css_select='span.title')
+
+    target_item = TextField(css_select="div.item")
+    title = TextField(css_select="span.title")
 
     async def clean_title(self, title):
         if isinstance(title, str):
             return title
         else:
-            return ''.join([i.text.strip().replace('\xa0', '') for i in title])
+            return "".join([i.text.strip().replace("\xa0", "") for i in title])
 
 
 class DoubanSpider(Spider):
-    start_urls = ['https://movie.douban.com/top250']
+    start_urls = ["https://movie.douban.com/top250"]
     concurrency = 10
 
     async def parse(self, res):
-        etree = res.html_etree
-        pages = ['?start=0&filter='] + [i.get('href') for i in etree.cssselect('.paginator>a')]
+        etree = res.html_etree(html=await res.text())
+        pages = ["?start=0&filter="] + [
+            i.get("href") for i in etree.cssselect(".paginator>a")
+        ]
 
         for index, page in enumerate(pages):
             url = self.start_urls[0] + page
             yield Request(
                 url,
                 callback=self.parse_item,
-                metadata={'index': index},
-                request_config=self.request_config
+                metadata={"index": index},
+                request_config=self.request_config,
             )
 
     async def parse_item(self, res):
-        items_data = await DoubanItem.get_items(html=res.html)
         res_list = []
-        for item in items_data:
+        async for item in DoubanItem.get_items(html=await res.text()):
             res_list.append(item.title)
         return res_list
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DoubanSpider.start()
+
 ```
 
 如果网络没问题的话，会得到如下输出：
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085229.png)
+![](https://gitee.com/howie6879/oss/raw/master/uPic/20191125085229.png)
 
 注意爬虫运行时间，1s不到，这就是异步的魅力
 
@@ -219,7 +254,7 @@ if __name__ == '__main__':
 
 一个爬虫程序就成型了，顺便一提，爬虫这东西，可以说是防君子不防小人，`robots.txt`大部分网站都有（它的目的是告诉爬虫什么可以爬取什么不可以爬取，比如：`https://www.baidu.com/robots.txt`），各位想怎么爬取，自己衡量
 
-### 如何进阶
+## 如何进阶
 
 不要以为写好一个爬虫程序就可以出师了，此时还有更多的问题在前面等着你，你要含情脉脉地看着你的爬虫程序，问自己三个问题：
 
@@ -256,13 +291,16 @@ if __name__ == '__main__':
 - Scrapy
 - PySpider
 - Portia
+- **Ruia**：容我自荐一波
 
 这里不过多介绍，框架只是工具，是一种提升效率的方式，看你选择
 
-### 说明
+## 说明
 
 任何事物都有两面性，爬虫自然也不例外，因此我送诸位一张图，关键时刻好好想想
 
-![](https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191125085250.png)
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/khRyqh.jpg" /></div>
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+最后，欢迎一起交流：
+
+<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>

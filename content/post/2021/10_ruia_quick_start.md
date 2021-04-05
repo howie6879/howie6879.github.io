@@ -4,8 +4,8 @@ date: 2021-04-04T21:35:47+08:00
 lastmod: 2021-04-04T21:35:47+08:00
 keywords: []
 description: "快速入门Ruia异步爬虫框架"
-tags: ["Python"]
-categories: [Python,Spider,Ruia]
+tags: [Python,Spider,Ruia]
+categories: [Python]
 author: "howie.hu"
 image: /images/thumbs/h_66.png
 ---
