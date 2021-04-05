@@ -6,13 +6,359 @@
         <description>Recent content on 老胡的储物柜</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 01 Apr 2021 21:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 04 Apr 2021 21:35:47 +0800</lastBuildDate><atom:link href="https://www.howie6879.cn/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Ruia异步爬虫框架——快速开始</title>
+        <link>https://www.howie6879.cn/p/ruia%E5%BC%82%E6%AD%A5%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/</link>
+        <pubDate>Sun, 04 Apr 2021 21:35:47 +0800</pubDate>
+        
+        <guid>https://www.howie6879.cn/p/ruia%E5%BC%82%E6%AD%A5%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/</guid>
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_66.png" alt="Featured image of post Ruia异步爬虫框架——快速开始" /&gt;&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/9fsLGa.jpg&#34; /&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;基于&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ruia&lt;/a&gt;快速实现一个以&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;为目标的爬虫&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本文主要通过对&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;的爬取示例来展示如何使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;Ruia&lt;/strong&gt;&lt;/a&gt;，下图红框中的数据就是爬虫脚本需要爬取的目标：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/5tjtPq.jpg&#34; alt=&#34;5tjtPq&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;开始前的准备工作：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 确定已经安装&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;Ruia&lt;/strong&gt;&lt;/a&gt;：&lt;code&gt;pip install ruia -U&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 确定可以访问&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;第一步定义-item&#34;&gt;第一步：定义 Item&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Item&lt;/code&gt;的目的是定义目标网站中你需要爬取的数据，此时，爬虫的目标数据就是页面中的&lt;code&gt;Title&lt;/code&gt;和&lt;code&gt;Url&lt;/code&gt;，怎么提取数据，&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;Ruia&lt;/strong&gt;&lt;/a&gt;的&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/blob/master/ruia/field.py&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Field&lt;/a&gt;类提供了以下三种方式提取目标数据：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.w3schools.com/xml/xpath_intro.asp&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;XPath&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.w3schools.com/python/python_regex.asp&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Re&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.w3schools.com/cssref/css_selectors.asp&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;CSS Selector&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这里我们使用&lt;code&gt;CSS Selector&lt;/code&gt;来提取目标数据，用浏览器打开&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;，右键审查元素：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/ykAo8i.jpg&#34; alt=&#34;ykAo8i&#34;  /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Notice: 本教程爬虫例子都默认使用CSS Selector的规则来提取目标数据&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;显而易见，每页包含&lt;code&gt;30&lt;/code&gt;条资讯，那么目标数据的规则可以总结为：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;Param&lt;/th&gt;
+&lt;th&gt;Rule&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;target_item&lt;/td&gt;
+&lt;td&gt;tr.athing&lt;/td&gt;
+&lt;td&gt;表示每条资讯&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;title&lt;/td&gt;
+&lt;td&gt;a.storylink&lt;/td&gt;
+&lt;td&gt;表示每条资讯里的标题&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;url&lt;/td&gt;
+&lt;td&gt;a.storylink-&amp;gt;href&lt;/td&gt;
+&lt;td&gt;表示每条资讯里标题的链接&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;规则明确之后，就可以用&lt;code&gt;Item&lt;/code&gt;来实现一个针对于目标数据的ORM，创建文件&lt;code&gt;items.py&lt;/code&gt;，复制下面代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;tr.athing&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;href&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这段代码含义是：针对我们提取的目标&lt;code&gt;HTML&lt;/code&gt;，我们定义了一个&lt;code&gt;HackerNewsItem&lt;/code&gt;类，其包含了两个&lt;code&gt;field&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;title&lt;/code&gt;：直接从文本提取&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;url&lt;/code&gt;：从属性提取&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;等等！&lt;code&gt;target_item&lt;/code&gt;是什么？对于一个&lt;code&gt;Item&lt;/code&gt;类来说，当其定义好网页目标数据后，&lt;code&gt;Ruia&lt;/code&gt;提供两种方式进行获取&lt;code&gt;Item&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;get_item：获取网页的单目标，比如目标网页的标题，此时无需定义&lt;code&gt;target_item&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;get_items：获取网页的多目标，比如当前目标网页&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;中的&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;一共有&lt;code&gt;30&lt;/code&gt;个，这时就必须定义&lt;code&gt;target_item&lt;/code&gt;来寻找多个目标块；&lt;code&gt;target_item&lt;/code&gt;的作用就是针对这样的工作而诞生的，开发者只要定义好这个属性（此时Ruia会自动获取网页中&lt;code&gt;30&lt;/code&gt;个&lt;code&gt;target_item&lt;/code&gt;），然后每个&lt;code&gt;target_item&lt;/code&gt;里面包含的&lt;code&gt;title&lt;/code&gt;和&lt;code&gt;url&lt;/code&gt;就会被提取出来。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;第二步测试-item&#34;&gt;第二步：测试 Item&lt;/h2&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;Ruia&lt;/strong&gt;&lt;/a&gt;为了方便扩展以及自由地组合使用，本身各个模块之间耦合度是极低的，每个模块都可以在你的项目中单独使用；你甚至只使用&lt;code&gt;ruia.Item&lt;/code&gt;、&lt;code&gt;Ruia.TextField&lt;/code&gt;和&lt;code&gt;ruia.AttrField&lt;/code&gt;来编写一个简单的爬虫。&lt;/p&gt;
+&lt;h3 id=&#34;脚本调试&#34;&gt;脚本调试&lt;/h3&gt;
+&lt;p&gt;基于这个特性，我们可以直接在脚本里面测试&lt;code&gt;HackerNewsItem&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;asyncio&lt;/span&gt;
+
+&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;tr.athing&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;href&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;test_item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;():&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;https://news.ycombinator.com/news?p=1&amp;#39;&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;{}: {}&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;format&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;vm&#34;&gt;__name__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# Python 3.7 Required.&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;asyncio&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;run&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;test_item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt; 
+
+    &lt;span class=&#34;c1&#34;&gt;# For Python 3.6&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# loop = asyncio.get_event_loop()&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# loop.run_until_complete(test_item())&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接下来，终端会输出以下日志：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;2021:04:04 21:37:23&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; INFO  Request &amp;lt;GET: https://news.ycombinator.com/news?p&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1&amp;gt;
+How to bypass Cloudflare bot protection: https://jychp.medium.com/how-to-bypass-cloudflare-bot-protection-1f2c6c0c36fb
+The EU has archived all of the “Euromyths” printed in UK media: https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/
+Laser: Learning a Latent Action Space &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; Efficient Reinforcement Learning: https://arxiv.org/abs/2103.15793
+StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery: https://github.com/orpatashnik/StyleCLIP
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;终端调试&#34;&gt;终端调试&lt;/h3&gt;
+&lt;p&gt;为了使&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;Ruia&lt;/strong&gt;&lt;/a&gt;的脚本调试过程更加方便优雅，开发者还可以直接使用&lt;a class=&#34;link&#34; href=&#34;https://github.com/python-ruia/ruia-shell&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ruia-shell&lt;/a&gt;插件进行调试，首先进行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;pip install -U ruia-shell
+pip install ipython
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;具体使用如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;➜  ~  ruia_shell https://news.ycombinator.com/news&lt;span class=&#34;se&#34;&gt;\?&lt;/span&gt;p&lt;span class=&#34;se&#34;&gt;\=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+            ✨ Write less, run faster&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;0.8.2&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;.
+__________      .__                .__           .__  .__
+&lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;_____   &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;_ __&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;__&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;____      _____&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;__   ____ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       _/  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;se&#34;&gt;\ &lt;/span&gt; &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;_  &lt;span class=&#34;se&#34;&gt;\ &lt;/span&gt;   /  ___/  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;/ __ &lt;span class=&#34;se&#34;&gt;\|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;   &lt;span class=&#34;se&#34;&gt;\ &lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  /  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;/ __ &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;  &lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;__ &lt;span class=&#34;se&#34;&gt;\|&lt;/span&gt;   Y  &lt;span class=&#34;se&#34;&gt;\ &lt;/span&gt; ___/&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;_&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;__
+ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;____&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;_  /____/&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;__&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;____  / /____  &amp;gt;___&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  /&lt;span class=&#34;se&#34;&gt;\_&lt;/span&gt;__  &amp;gt;____/____/
+        &lt;span class=&#34;se&#34;&gt;\/&lt;/span&gt;              &lt;span class=&#34;se&#34;&gt;\/&lt;/span&gt;       &lt;span class=&#34;se&#34;&gt;\/&lt;/span&gt;     &lt;span class=&#34;se&#34;&gt;\/&lt;/span&gt;     &lt;span class=&#34;se&#34;&gt;\/&lt;/span&gt;
+Available Objects   :
+    response            :   ruia.Response
+    request             :   ruia.Request
+Available Functions :
+    attr_field          :   Extract attribute elements by using css selector or xpath
+    text_field          :   Extract text elements by using css selector or xpath
+    fetch               :   Fetch a URL or ruia.Request
+In &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: request
+Out&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: &amp;lt;GET https://news.ycombinator.com/news?p&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1&amp;gt;
+In &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;2&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: response
+Out&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;2&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: &amp;lt;Response url&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;GET&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: https://news.ycombinator.com/news?p&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; status:200&amp;gt;
+In &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;3&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: text_field&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+Out&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;3&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;The EU has archived all of the “Euromyths” printed in UK media&amp;#39;&lt;/span&gt;
+In &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;4&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: attr_field&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;, &lt;span class=&#34;nv&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;href&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+Out&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;4&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果文字不清楚，可看下图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/hHjQsh.png&#34; alt=&#34;hHjQsh&#34;  /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;第三步编写-spider&#34;&gt;第三步：编写 Spider&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Ruia.Spider&lt;/code&gt;是&lt;code&gt;Ruia&lt;/code&gt;框架里面的核心控制类，它作用在于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;控制目标网页的请求&lt;code&gt;Ruia.Request&lt;/code&gt;和响应&lt;code&gt;Ruia.Response&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;可加载自定义钩子、插件、以及相关配置等，让开发效率更高&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来会基于前面的&lt;code&gt;Item&lt;/code&gt;脚本继续开发，具体代码如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt; Target: https://news.ycombinator.com/
+&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt; pip install aiofiles
+&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;aiofiles&lt;/span&gt;
+
+&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;tr.athing&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;href&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    
+    &lt;span class=&#34;n&#34;&gt;start_urls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;https://news.ycombinator.com/news?p={index}&amp;#39;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;index&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;range&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;concurrency&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# 设置代理&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# aiohttp_kwargs = {&amp;#34;proxy&amp;#34;: &amp;#34;http://0.0.0.0:8765&amp;#34;}&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;parse&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()):&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;yield&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;process_item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Ruia build-in method&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;with&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;aiofiles&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;open&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;./hacker_news.txt&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;write&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;本段代码的作用是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;爬取&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;的前三页内容，设置并发数为&lt;code&gt;3&lt;/code&gt;，然后全部持久化到文件&lt;code&gt;hacker_news.txt&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;开发者实现&lt;code&gt;HackerNewsSpider&lt;/code&gt;必须是&lt;code&gt;Spider&lt;/code&gt;的子类，代码中出现的两个方法都是&lt;code&gt;Spider&lt;/code&gt;内置的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;parse：此方法是&lt;code&gt;Spider&lt;/code&gt;的入口，每一个&lt;code&gt;start_urls&lt;/code&gt;的响应必然会被&lt;code&gt;parse&lt;/code&gt;方法捕捉并执行；&lt;/li&gt;
+&lt;li&gt;process_item：此方法作用是抽离出对&lt;code&gt;Item&lt;/code&gt;提取结果的处理过程，比如这里会接受自定义&lt;code&gt;Item&lt;/code&gt;类作为输入，然后进行处理持久化到文件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;第四步运行-start&#34;&gt;第四步：运行 Start&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;希望&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ruia&lt;/a&gt;可以为你带来编写爬虫的乐趣 ：)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一切准备就绪，启动你的爬虫脚本吧！&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;aiofiles&lt;/span&gt;
+
+&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;tr.athing&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;href&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;start_urls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;https://news.ycombinator.com/news?p={index}&amp;#34;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;index&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;range&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;concurrency&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;parse&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()):&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;yield&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;process_item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Ruia build-in method&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;with&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;aiofiles&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;open&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;./hacker_news.txt&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;write&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;vm&#34;&gt;__name__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;__main__&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;Tips：如果你想在异步函数里面调用，执行&lt;code&gt;await HackerNewsSpider.start() &lt;/code&gt;即可&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;不到&lt;code&gt;30&lt;/code&gt;行代码，你就实现了对&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;的爬虫脚本，并且脚本带有自动重试、并发控制、语法简单等特性。&lt;/p&gt;
+&lt;p&gt;通过这个例子，你已经基本掌握了&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ruia&lt;/a&gt;中&lt;code&gt;Item&lt;/code&gt;、&lt;code&gt;Middleware&lt;/code&gt;、&lt;code&gt;Request&lt;/code&gt;等模块的用法，结合自身需求，你可以编写任何爬虫，例子代码见&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/blob/master/examples/topics_examples/hacker_news_spider.py&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;hacker_news_spider&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;第五步扩展&#34;&gt;第五步：扩展&lt;/h2&gt;
+&lt;h3 id=&#34;middleware&#34;&gt;Middleware&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Middleware&lt;/code&gt;的目的是对每次请求前后进行一番处理，分下面两种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在每次请求之前做一些事&lt;/li&gt;
+&lt;li&gt;在每次请求后做一些事&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;比如此时爬取&lt;a class=&#34;link&#34; href=&#34;https://news.ycombinator.com/news&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Hacker News&lt;/a&gt;，若希望在每次请求时候自动添加&lt;code&gt;Headers&lt;/code&gt;的&lt;code&gt;User-Agent&lt;/code&gt;，可以添加以下代码引入中间件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Middleware&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;
+
+&lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Middleware&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+
+
+&lt;span class=&#34;nd&#34;&gt;@middleware.request&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;print_on_request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;spider_ins&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ua&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;ruia user-agent&amp;#34;&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;headers&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;update&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;User-Agent&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ua&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;request&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;tr.athing&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;href&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;start_urls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;https://news.ycombinator.com/news?p={index}&amp;#34;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;index&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;range&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;concurrency&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;parse&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()):&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;yield&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;vm&#34;&gt;__name__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;__main__&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样，程序会在爬虫请求网页资源之前自动加上&lt;code&gt;User-Agent&lt;/code&gt;，针对自动&lt;code&gt;UA&lt;/code&gt;的功能点，&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ruia&lt;/a&gt;已经专门编写了一个名为&lt;a class=&#34;link&#34; href=&#34;https://github.com/python-ruia/ruia-ua&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ruia-ua&lt;/a&gt;的插件来为开发者提升效率，使用非常简单，代码示例如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;
+&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia_ua&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;tr.athing&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a.storylink&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;href&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;start_urls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;https://news.ycombinator.com/news?p=1&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;https://news.ycombinator.com/news?p=2&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;parse&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;c1&#34;&gt;# Do something...&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;vm&#34;&gt;__name__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;middleware&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;mongodb&#34;&gt;MongoDB&lt;/h3&gt;
+&lt;p&gt;对于数据持久化，你可以按照自己喜欢的方式去做，前面实例中介绍了如何将目标&lt;code&gt;Item&lt;/code&gt;持久化到文件中。&lt;/p&gt;
+&lt;p&gt;如果想将数据持久化到数据库（MongoDB）中，该怎么做？此时就到了凸显&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ruia/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ruia&lt;/a&gt;插件优势的时候了，你只需要安装&lt;a class=&#34;link&#34; href=&#34;https://github.com/python-ruia/ruia-motor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ruia-motor&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;pip install -U ruia-motor
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后再代码中引入&lt;code&gt;ruia-motor&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia_motor&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;RuiaMotorInsert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;init_spider&lt;/span&gt;
+
+&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ruia&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Item&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;target_item&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;tr.athing&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TextField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;url&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;AttrField&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;css_select&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;a.storylink&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;attr&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;href&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;start_urls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;https://news.ycombinator.com/news?p={index}&amp;#34;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;index&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;range&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;concurrency&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# aiohttp_kwargs = {&amp;#34;proxy&amp;#34;: &amp;#34;http://0.0.0.0:1087&amp;#34;}&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;parse&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;item&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;HackerNewsItem&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;await&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()):&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;yield&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;RuiaMotorInsert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;collection&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;news&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;item&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;results&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;n&#34;&gt;async&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;init_plugins_after_start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;spider_ins&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;spider_ins&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;mongodb_config&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;host&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;127.0.0.1&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;port&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;27017&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;db&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;ruia_motor&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;init_spider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;spider_ins&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;spider_ins&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;vm&#34;&gt;__name__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;__main__&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;HackerNewsSpider&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;after_start&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;init_plugins_after_start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;数据库中可以看到目标字段：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/ipuxKH.jpg&#34; alt=&#34;ipuxKH&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;是不是更简单了呢？&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
+</description>
+        </item>
+        <item>
         <title>简单图解OSI七层网络模型</title>
         <link>https://www.howie6879.cn/p/%E7%AE%80%E5%8D%95%E5%9B%BE%E8%A7%A3osi%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/</link>
         <pubDate>Thu, 01 Apr 2021 21:35:47 +0800</pubDate>
         
         <guid>https://www.howie6879.cn/p/%E7%AE%80%E5%8D%95%E5%9B%BE%E8%A7%A3osi%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_65.gif" alt="Featured image of post 简单图解OSI七层网络模型" /&gt;&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/osi_gif.gif&#34; alt=&#34;osi_gif&#34;  /&gt;&lt;/p&gt;
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_65.gif" alt="Featured image of post 简单图解OSI七层网络模型" /&gt;&lt;div align=center&gt;&lt;img width=&#34;70%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/osi_gif.gif&#34; /&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;翻译自&lt;a class=&#34;link&#34; href=&#34;https://www.lifewire.com/bradley-mitchell-816228&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Bradley Mitchell&lt;/a&gt;的《&lt;a class=&#34;link&#34; href=&#34;https://www.lifewire.com/layers-of-the-osi-model-illustrated-818017&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -65,7 +411,7 @@
     &gt;图解TCP/IP&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;大家有兴趣的可以看一看。&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>三分钟将文集转成在线电子书</title>
@@ -195,8 +541,7 @@ Press Ctrl+C to stop
     &gt;https://www.howie6879.cn/k8s/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;第一本已经完结，&lt;code&gt;ml&lt;/code&gt;和&lt;code&gt;k8s&lt;/code&gt;希望今年可以完结（好像整了个 flag??），加油吧。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>k8s学习之路.基础.[04.配置应用程序]</title>
@@ -529,8 +874,7 @@ default-token-nlxkq   kubernetes.io/service-account-token   &lt;span class=&#34;
      target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Kubernetes in Action&lt;/a&gt;中文版：可以算是第 7 章的读书笔记&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>设计模式——基于容器的分布式系统</title>
@@ -623,7 +967,7 @@ default-token-nlxkq   kubernetes.io/service-account-token   &lt;span class=&#34;
 &lt;li&gt;内到外：让我们以访问一个存储区域为例，假设该存储区域的大小不断增长，必须分成更多的子系统。在这种情况下，为了不干预主容器并且必须对所有受影响的服务实施相同的新访问逻辑，创建一个大使容器来调解对存储区域的访问是个不错的选择&lt;/li&gt;
 &lt;li&gt;外到内：让我们设想一下，我们要测试微服务的新版本，可以通过大使容器控制请求量到相关部署&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/1*-aeeNrASuzA8SMkOxyhmcw.png&#34; alt=&#34;Image for post&#34; style=&#34;zoom: 50%;&#34; /&gt;&lt;/p&gt;
 &lt;h3 id=&#34;适配器模式adapter-pattern&#34;&gt;适配器模式（Adapter pattern）&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;确保应用程序实现统一的监控接口&lt;/p&gt;
@@ -701,8 +1045,7 @@ default-token-nlxkq   kubernetes.io/service-account-token   &lt;span class=&#34;
 &lt;/ul&gt;
 &lt;p&gt;最近一直在了解低代码开发平台相关知识，就是前面提到的&lt;a class=&#34;link&#34; href=&#34;https://www.howie6879.cn/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;一站式机器学习云研发平台&lt;/a&gt;，其中关于资源管理这块离不开&lt;code&gt;k8s&lt;/code&gt;的使用，因此花了不少精力在这上面，不出意外会出一个系列的学习笔记，而且在学习分布式设计模式的同时也对分布式系统产生了一些兴趣，这一块后续会一起好好研究研究。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>k8s学习之路.基础.[03.容器持久化存储]</title>
@@ -949,8 +1292,7 @@ switched to db test_data
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/luksa/kubernetes-in-action&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Kubernetes in Action&lt;/a&gt;中文版：可以算是第6章的读书笔记&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>一站式机器学习云开发平台</title>
@@ -1091,8 +1433,7 @@ switched to db test_data
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/orchest/orchest&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Orchest&lt;/a&gt;：A new kind of IDE for Data Science.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>梯度下降推导</title>
@@ -1193,7 +1534,7 @@ w_{n e w}=w_{\text {old }}+\eta \sum_{i=1}^{n}\left(y^{(i)}-\bar{y}^{(i)}\right)
 
 &lt;p&gt;参数的更新方式就这样计算出来了，其实所谓的学习，就是确定一个目标函数用一定的计算方法让其算出最优的参数。&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -1538,8 +1879,7 @@ nginx-deployment-585449566   &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;       
     &gt;深入剖析Kubernetes&lt;/a&gt;：容器编排部分&lt;/li&gt;
 &lt;li&gt;Kubernetes in Action中文版：第3、4、5、9章&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>k8s学习之路.基础.[01.走进Kubernetes]</title>
@@ -1843,8 +2183,7 @@ kubectl get services
     &gt;深入剖析Kubernetes&lt;/a&gt;：入门篇以及集群搭建部分&lt;/li&gt;
 &lt;li&gt;Kubernetes in Action中文版：第1、2章&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg&#34; alt=&#34;qrcode_for_gh_3f02ace79dfb_258&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>nndl_note: 深度神经⽹络为何很难训练</title>
@@ -2065,7 +2404,7 @@ $$
 &lt;li&gt;&lt;a href=&#34;chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fwww.cs.toronto.edu%2F~hinton%2Fabsps%2Fmomentum.pdf&#34;&gt;On the importance of initialization and momentum in deep learning&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -2125,7 +2464,7 @@ $$
 &lt;p&gt;这两种方式尝试下来，这是我目前在开源这块的成果：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/2yQI1G.jpg&#34; alt=&#34;2yQI1G&#34;  /&gt;&lt;/p&gt;
 &lt;h3 id=&#34;文章&#34;&gt;文章&lt;/h3&gt;
-&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/%E5%88%9B%E4%BD%9C%E5%B9%B3%E5%8F%B0.png&#34; alt=&#34;创作平台&#34; style=&#34;zoom:50%;&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;除了开源项目的影响力输出，我们作为程序员还可以写技术文章发布到各种平台，上面这张图说明了我个人一篇文章会分享的平台。这块的核心点是要坚持，毕竟持续输出是一件很难的事情。&lt;/p&gt;
 &lt;p&gt;除了写文章，还可以写教程&amp;amp;课程：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/image-20200908230637723.png&#34; alt=&#34;image-20200908230637723&#34;  /&gt;&lt;/p&gt;
@@ -2135,8 +2474,7 @@ $$
 &lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
 &lt;p&gt;到这里，我今天的分享就结束了，总结一下就是，我们可以通过开源&amp;amp;文章&amp;amp;线下分享等形式扩展自己的技术影响力，从而可以通过技术影响力形成自己的粉丝群体、获得更多的机会等优势。&lt;/p&gt;
 &lt;p&gt;这个主题其实可扩展的东西很多，大家可以私下好好研究一番。当然，我自身做的还远远不够，还有很大的进步空间，但是至少我自身是在往这个方向进步，这里我就先将自己的一些经验分享出来，算是抛砖引玉吧，诸位大佬多多包涵；谢谢，大家加油！&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>程序员如何在工作中保持进步</title>
@@ -2220,7 +2558,7 @@ $$
 &lt;p&gt;所以，在工作中持续进步依赖于和所在公司有一个很好的工作关系，从而互相产出、进步，而产出则依赖于你认真的工作态度和超出常人的开发效率，开发效率的提升必不可少的前提是你拥有一个不安现状善于改变的心。&lt;/p&gt;
 &lt;p&gt;而这所有的前提，是找到一个你愿意了解并接受然后融入的公司，各位，祝好。&lt;/p&gt;
 &lt;p&gt;欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>nndl_note: 神经⽹络可以计算任何函数的可视化证明</title>
@@ -2547,7 +2885,7 @@ s\left(\sum_{j} w_{j} x_{j}+b\right)
 
 &lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
 
-&lt;p&gt;&lt;figure&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -2556,8 +2894,8 @@ s\left(\sum_{j} w_{j} x_{j}+b\right)
         <pubDate>Wed, 30 Oct 2019 19:40:02 +0800</pubDate>
         
         <guid>https://www.howie6879.cn/p/nndl_note-%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/</guid>
-        <description>&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+        <description>&lt;!-- @import &#34;[TOC]&#34; {cmd=&#34;toc&#34; depthFrom=1 depthTo=6 orderedList=false} --&gt;
+&lt;!-- code_chunk_output --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e4%ba%a4%e5%8f%89%e7%86%b5%e4%bb%a3%e4%bb%b7%e5%87%bd%e6%95%b0&#34; &gt;交叉熵代价函数&lt;/a&gt;
 &lt;ul&gt;
@@ -2576,7 +2914,7 @@ s\left(\sum_{j} w_{j} x_{j}+b\right)
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e7%9a%84%e8%b6%85%e5%8f%82%e6%95%b0&#34; &gt;如何选择神经⽹络的超参数&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%8f%82%e8%80%83&#34; &gt;参考&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- /code_chunk_output --&gt;
 &lt;blockquote&gt;
 &lt;p&gt;万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2773,7 +3111,7 @@ $$&lt;/p&gt;
     &gt;Neural Networks and Deep Learning 中文版&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -2903,7 +3241,7 @@ pipenv install --python&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;/Users/howie6
 &lt;p&gt;自己可以慢慢玩，一般会这样输出：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;老胡的储物柜&amp;#39;&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;subtitle&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;body&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;测试消息监控，任何应用都行&amp;#39;&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;delivered_date&amp;#39;&lt;/span&gt;: datetime.datetime&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;2019, 10, 20, 21, 40, 26, 428654&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;presented&amp;#39;&lt;/span&gt;: 1, &lt;span class=&#34;s1&#34;&gt;&amp;#39;app_identifier&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;com.tencent.xinwechat&amp;#39;&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;app_name&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;WeChat&amp;#39;&lt;/span&gt;, &lt;span class=&#34;s1&#34;&gt;&amp;#39;md5&amp;#39;&lt;/span&gt;: &lt;span class=&#34;s1&#34;&gt;&amp;#39;75e24e2ccc502f01c101fcbd3637950b&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -3066,7 +3404,7 @@ Loading .env environment variables…
 &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;2019:09:13 09:16:35&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; INFO  w2b  目标表 Chat_f965739b676114fxxxxc394322e1e826 存在于库 msg_5.db
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;好，代码跑起来后，接下来电脑上登录你的小号（也就是接收微信文章的微信号），然后在手机上登录发送文章的微信号，最终成功就和文章一开始的动图一样了~&lt;/p&gt;
 &lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -3075,8 +3413,8 @@ Loading .env environment variables…
         <pubDate>Fri, 10 May 2019 16:36:44 +0800</pubDate>
         
         <guid>https://www.howie6879.cn/p/nndl_note-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_49.jpg" alt="Featured image of post nndl_note: 反向传播算法如何工作" /&gt;&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_49.jpg" alt="Featured image of post nndl_note: 反向传播算法如何工作" /&gt;&lt;!-- @import &#34;[TOC]&#34; {cmd=&#34;toc&#34; depthFrom=1 depthTo=6 orderedList=false} --&gt;
+&lt;!-- code_chunk_output --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e7%83%ad%e8%ba%ab%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e4%b8%ad%e4%bd%bf%e7%94%a8%e7%9f%a9%e9%98%b5%e5%bf%ab%e9%80%9f%e8%ae%a1%e7%ae%97%e8%be%93%e5%87%ba%e7%9a%84%e6%96%b9%e6%b3%95&#34; &gt;热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%85%b3%e4%ba%8e%e4%bb%a3%e4%bb%b7%e5%87%bd%e6%95%b0%e7%9a%84%e4%b8%a4%e4%b8%aa%e5%81%87%e8%ae%be&#34; &gt;关于代价函数的两个假设&lt;/a&gt;&lt;/li&gt;
@@ -3092,7 +3430,7 @@ Loading .env environment variables…
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%8f%8d%e5%90%91%e4%bc%a0%e6%92%ad%e5%85%a8%e5%b1%80%e8%a7%82&#34; &gt;反向传播：全局观&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%8f%82%e8%80%83&#34; &gt;参考&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- /code_chunk_output --&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20190524092154.png&#34; alt=&#34;&#34;  /&gt;&lt;/p&gt;
 &lt;p&gt;前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：&lt;/p&gt;
 &lt;ul&gt;
@@ -3299,7 +3637,7 @@ $$&lt;/p&gt;
     &gt;知乎上另外一篇笔记&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -3308,8 +3646,8 @@ $$&lt;/p&gt;
         <pubDate>Wed, 08 May 2019 16:36:44 +0800</pubDate>
         
         <guid>https://www.howie6879.cn/p/nndl_note-%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/</guid>
-        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_48.png" alt="Featured image of post nndl_note: 识别手写字" /&gt;&lt;!-- raw HTML omitted --&gt;
-&lt;!-- raw HTML omitted --&gt;
+        <description>&lt;img src="https://www.howie6879.cn/images/thumbs/h_48.png" alt="Featured image of post nndl_note: 识别手写字" /&gt;&lt;!-- @import &#34;[TOC]&#34; {cmd=&#34;toc&#34; depthFrom=1 depthTo=6 orderedList=false} --&gt;
+&lt;!-- code_chunk_output --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e6%84%9f%e7%9f%a5%e5%99%a8&#34; &gt;感知器&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#s%e5%9e%8b%e7%a5%9e%e7%bb%8f%e5%85%83&#34; &gt;S型神经元&lt;/a&gt;&lt;/li&gt;
@@ -3319,7 +3657,7 @@ $$&lt;/p&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%ae%9e%e7%8e%b0%e6%95%b0%e5%ad%97%e5%88%86%e7%b1%bb%e6%a8%a1%e5%9e%8b&#34; &gt;实现数字分类模型&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;#%e5%8f%82%e8%80%83&#34; &gt;参考&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- /code_chunk_output --&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.howie6879.cn/images/post/33/01.jpg&#34; alt=&#34;from Unsplash&#34;  /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://neuralnetworksanddeeplearning.com/index.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Neural Networks and Deep Learning&lt;/a&gt; 是由 &lt;a class=&#34;link&#34; href=&#34;http://michaelnielsen.org/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -3569,7 +3907,7 @@ $$&lt;/p&gt;
     &gt;neural-networks-and-deep-learning 官方git仓库&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;搞定收工，有兴趣欢迎关注我的公众号：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;
 </description>
         </item>
         <item>
@@ -4111,8 +4449,7 @@ pipenv install --dev
 &lt;/ul&gt;
 &lt;p&gt;项目地址点击阅读原文或者在&lt;code&gt;github&lt;/code&gt;搜索&lt;code&gt;ruia&lt;/code&gt;，如果你有兴趣，请参与进来吧！&lt;/p&gt;
 &lt;p&gt;如果觉得写得不错，点个好看来个&lt;code&gt;star&lt;/code&gt;呗~&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; alt=&#34;wechat_howie&#34;  /&gt;&lt;/p&gt;
-</description>
+&lt;div align=center&gt;&lt;img width=&#34;60%&#34; src=&#34;https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png&#34; /&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>谈谈对Python爬虫的理解</title>
@@ -6705,7 +7042,7 @@ mkdir ~/supervisor/
 &lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://jinja.pocoo.org/docs/2.10/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Jinja2&lt;/a&gt;模板渲染返回视图&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!--- more ---&gt;
 &lt;h3 id=&#34;路由和视图函数&#34;&gt;路由和视图函数&lt;/h3&gt;
 &lt;p&gt;在此我假设你理解 &lt;code&gt;python&lt;/code&gt; 中的装饰器，如果你并不清楚，可以看我另写的关于&lt;a class=&#34;link&#34; href=&#34;http://blog.howie6879.cn/2016/09/28/04/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;装饰器&lt;/a&gt;的介绍，回归正题，还记得第一节中的代码实例么？&lt;/p&gt;
@@ -6892,7 +7229,7 @@ python run.py
     &gt;装饰器&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;理解协程&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!--- more ---&gt;
 &lt;p&gt;Sanic-0.1.2 的核心文件如下：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;.
 ├── __init__.py
@@ -7167,7 +7504,7 @@ python run.py
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;那接下来需要讨论的，就是 &lt;code&gt;src&lt;/code&gt; 的内部结构该是什么样的呢？&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;p&gt;本章将写一个 &lt;code&gt;rss&lt;/code&gt; 解析展示的项目用做演示。&lt;/p&gt;
 &lt;h3 id=&#34;21普通的项目结构&#34;&gt;2.1.普通的项目结构&lt;/h3&gt;
 &lt;p&gt;一个普通的项目：&lt;/p&gt;
@@ -7335,7 +7672,7 @@ python run.py
 │   ├── __init__.py
 │   └── config.py
 └── run.py
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;!-- raw HTML omitted --&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;!-- more --&gt;
 &lt;p&gt;其中 &lt;code&gt;run.py&lt;/code&gt; 内容如下：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;ch&#34;&gt;#!/usr/bin/env python&lt;/span&gt;
 &lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;sanic&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Sanic&lt;/span&gt;
@@ -7699,7 +8036,7 @@ python
 &lt;p&gt;本次笔记就以此项目为中心，目标是将该项目制作成&lt;code&gt;Docker&lt;/code&gt;镜像，并从过程中一步步熟悉&lt;code&gt;Docker&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id=&#34;2定制镜像&#34;&gt;2.定制镜像&lt;/h3&gt;
 &lt;p&gt;上一篇笔记中说了，镜像是由一系列指令一步一步构建出来，但是，最初的镜像我们还是需要从镜像仓库获取，比如&lt;code&gt;owllook&lt;/code&gt;基于&lt;code&gt;python3.6&lt;/code&gt;，那么我第一步便是从镜像仓库获取&lt;code&gt;python&lt;/code&gt;镜像&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;p&gt;运行命令：&lt;code&gt;docker pull python:3.6&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;稍等片刻，就会拉取一个&lt;code&gt;python3.6&lt;/code&gt;的镜像下来，让我们以这个镜像为基础来启动一个容器：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 具体可参考 dcker run --help 来了解详细命令&lt;/span&gt;
@@ -7771,7 +8108,7 @@ docker push howie6879/owllook:0.1
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;安装&lt;code&gt;Docker&lt;/code&gt;，自动安装脚本提供了非常简洁的安装方式：&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 官方下载方式&lt;/span&gt;
 curl -sSL https://get.docker.com/ &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sh
 
@@ -7844,7 +8181,7 @@ sudo usermod -aG docker &lt;span class=&#34;nv&#34;&gt;$USER&lt;/span&gt;
     &gt;gRPC&lt;/a&gt;是一个开源的高性能并且能在任何环境中运行的RPC框架，其采用&lt;code&gt; protocol buffer&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt; protocol buffer&lt;/code&gt;是一个用于结构化数据序列化的一个灵活的、有效率的自动化机制，类似于XML(但比其更简单、小巧且简单)，对于某个服务需要定义的数据结构，可以使用&lt;code&gt;protocol buffer&lt;/code&gt;(&lt;code&gt;proto3&lt;/code&gt;)来进行定义，即根据&lt;code&gt;protocol buffer language&lt;/code&gt;来定义你的&lt;code&gt;protocol buffer data&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;最后再利用&lt;code&gt;protocol buffer&lt;/code&gt;编译定义的 &lt;code&gt;.proto&lt;/code&gt; 文件生成客户端和服务端代码，本文将举一个小例子进行介绍，且默认站在python的角度来编写代码&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h2 id=&#34;２实践&#34;&gt;２.实践&lt;/h2&gt;
 &lt;p&gt;假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;demo
@@ -8483,7 +8820,7 @@ sanic更新换代还是很快的。&lt;/p&gt;
 &lt;p&gt;An advanced, purely functional programming language&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;为什么学习这门语言，现在我也讲不清楚，但如官网所说：这个是一门高级的纯函数式编程语言，本人也是刚刚接触，在此记录下使用vscode搭建环境的过程。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more--&gt;
 &lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
 &lt;p&gt;具体安装的话看&lt;a class=&#34;link&#34; href=&#34;https://www.haskell.org/downloads&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;这里&lt;/a&gt;就好，本人使用mac，经过后面的折腾，我建议直接安装&lt;code&gt;stack&lt;/code&gt;，这个一些特性可以看下面：&lt;/p&gt;
@@ -8547,7 +8884,7 @@ stack install stack-run
         
         <guid>https://www.howie6879.cn/p/centos7%E4%B8%8B%E4%BD%BF%E7%94%A8privoxy%E5%B0%86socket5%E8%BD%AChttp%E4%BB%A3%E7%90%86/</guid>
         <description>&lt;p&gt;&lt;code&gt;shadowsocks&lt;/code&gt;是一个&lt;code&gt;socket5&lt;/code&gt;的服务，对此，可以使用&lt;code&gt;Privoxy&lt;/code&gt;将其转化为&lt;code&gt;http&lt;/code&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more--&gt;
 &lt;h2 id=&#34;部署shadowsocks&#34;&gt;部署shadowsocks&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 安装&lt;/span&gt;
 pip install shadowsocks
@@ -8650,7 +8987,7 @@ forward-socks5 / 127.0.0.1:1080 .
 &lt;p&gt;2.要求：首先，希望你是处在&lt;code&gt;python3&lt;/code&gt;版本，然后拥有一个干净的虚拟环境更是必要。&lt;/p&gt;
 &lt;p&gt;3.virtualenv或者anaconda都是不错的选择&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more--&gt;
 &lt;h1 id=&#34;2pythonic-syntax-common-pitfalls-and-style-guide&#34;&gt;2.Pythonic Syntax, Common Pitfalls, and Style Guide&lt;/h1&gt;
 &lt;h2 id=&#34;21pythonic-code&#34;&gt;2.1.Pythonic code&lt;/h2&gt;
 &lt;p&gt;对于python开发者，无不希望写出pythonic风格的代码，请谨记以下几点：&lt;/p&gt;
@@ -8889,7 +9226,7 @@ for key in list(dict_):
 &lt;p&gt;很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。&lt;/p&gt;
 &lt;p&gt;下面展示下&lt;code&gt;0.1&lt;/code&gt;版本的成果，比如说检索&lt;code&gt;Mastering python&lt;/code&gt;，空格用&lt;code&gt;+&lt;/code&gt;代替。
 &lt;code&gt;python abook.py search Mastering+python Hattem&lt;/code&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h2 id=&#34;2说明&#34;&gt;2.说明&lt;/h2&gt;
 &lt;p&gt;项目名称叫做&lt;a class=&#34;link&#34; href=&#34;https://github.com/howie6879/ITBooks&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;ITBooks&lt;/a&gt;，当然不准备只做&lt;code&gt;IT&lt;/code&gt;方面书籍，文学名著也是可以的。&lt;/p&gt;
@@ -9166,7 +9503,7 @@ python abook.py search Mastering+Python Hattem
 2. pandas.Series：一维数据结构
 3. pandas.DataFrame：二维数据结构
 4. pandas.Panel：三维数据结构&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h3 id=&#34;21numpy-ndarray&#34;&gt;2.1.NumPy ndarray&lt;/h3&gt;
 &lt;p&gt;在数值计算中，&lt;code&gt;NumPy&lt;/code&gt;非常重要，其中最重要的数据结构便是ndarray多维数组对象，&lt;code&gt;NumPy&lt;/code&gt;提供了许多方法来创造数组。&lt;/p&gt;
 &lt;p&gt;首先导入numpy模块&lt;/p&gt;
@@ -9774,7 +10111,7 @@ Minor_axis axis: A to D
 &lt;/blockquote&gt;
 &lt;h5 id=&#34;搭建python3环境&#34;&gt;搭建python3环境：&lt;/h5&gt;
 &lt;p&gt;本人在尝试过后选择集成环境&lt;strong&gt;Anaconda&lt;/strong&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h6 id=&#34;编译&#34;&gt;编译&lt;/h6&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 下载依赖&lt;/span&gt;
 yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve
@@ -10206,7 +10543,7 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
 &lt;p&gt;生命不过百年，你我相识六年有余&lt;/p&gt;
 &lt;p&gt;记忆中我为你过了四次生日，高一、大一、大二、大三&lt;/p&gt;
 &lt;p&gt;第五次，祝你生日快乐&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;p&gt;这次却有些不同，因为我们相爱了，我可以加上一句，我爱你&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191229120620.png&#34; alt=&#34;&#34;  /&gt;&lt;/p&gt;
 &lt;p&gt;或许有些矫情，可在这夜晚中我毫不介意&lt;/p&gt;
@@ -10918,7 +11255,7 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;给你一个字符串 a， 输出字符奇数位置的字符串。如a=‘12345’，则输出135。&lt;/strong&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[::&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;输出100以内的所有素数，素数之间以一个空格区分&lt;/strong&gt;&lt;/p&gt;
@@ -11022,7 +11359,7 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
         
         <guid>https://www.howie6879.cn/p/cx_freeze%E6%89%93%E5%8C%85py%E6%96%87%E4%BB%B6/</guid>
         <description>&lt;p&gt;最近需要将python代码打包成exe，打包过程中出现了一些问题，特此记录，也顺便记录下cx_Freeze使用方法，留待日后查看。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;p&gt;首先进行&lt;a class=&#34;link&#34; href=&#34;https://sourceforge.net/projects/cx-freeze/files/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;下载&lt;/a&gt;，需要注意对应的版本号，比如本人使用python3.4，64位，故下载&lt;a class=&#34;link&#34; href=&#34;https://sourceforge.net/projects/cx-freeze/files/4.3.3/cx_Freeze-4.3.3.win-amd64-py3.4.msi/download&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;cx_Freeze-4.3.3.win-amd64-py3.4.msi&lt;/a&gt;这个版本，下载后在&lt;code&gt;python&lt;/code&gt;安装目录下就可以看到cxfreeze,然后配置好环境变量就可以使用了,如图：
@@ -11073,7 +11410,7 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
         <pubDate>Wed, 28 Sep 2016 20:27:02 +0000</pubDate>
         
         <guid>https://www.howie6879.cn/p/markdown%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</guid>
-        <description>&lt;h3 id=&#34;a-idoverview1概述a&#34;&gt;&lt;!-- raw HTML omitted --&gt;1.概述&lt;!-- raw HTML omitted --&gt;&lt;/h3&gt;
+        <description>&lt;h3 id=&#34;a-idoverview1概述a&#34;&gt;&lt;a id=&#34;overview&#34;&gt;1.概述&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;本教程的目的是让你读完本教程后，能够使用&lt;code&gt;Markdown&lt;/code&gt;来应付一些日常的书写；Markdown的目标是实现&lt;strong&gt;易读易写&lt;/strong&gt;，在这里我觉得还要加上一点，那就是易学，既然易学，那为什么还要写教程呢？因为我必须让我女朋友也学会Markdown啊，哈哈。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;参考： &lt;a class=&#34;link&#34; href=&#34;http://www.appinn.com/markdown/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -11086,9 +11423,9 @@ webui                            RUNNING   pid 2726, uptime 0:00:07
 &lt;p&gt;阅读：本篇教程一共九个 &lt;code&gt;Markdown&lt;/code&gt;的基本语法，看完后足够你应付日常书写，Markdown语法和显示效果一一对应，可以使用简书自带的编辑器进行练习。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;h3 id=&#34;a-idbasic2基本语法a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2.基本语法&lt;!-- raw HTML omitted --&gt;&lt;/h3&gt;
-&lt;h4 id=&#34;a-idtitle2-1分级标题a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-1.分级标题&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;!-- more --&gt;
+&lt;h3 id=&#34;a-idbasic2基本语法a&#34;&gt;&lt;a id=&#34;basic&#34;&gt;2.基本语法&lt;/a&gt;&lt;/h3&gt;
+&lt;h4 id=&#34;a-idtitle2-1分级标题a&#34;&gt;&lt;a id=&#34;title&#34;&gt;2-1.分级标题&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;为什么叫做分级标题呢？因为标题可以分为数个等级，一种是用&lt;code&gt;#... title&lt;/code&gt;表示，注意那个&lt;code&gt;#&lt;/code&gt;的省略号代表&lt;code&gt;#&lt;/code&gt;的个数可以为1~6个，如&lt;code&gt;# title&lt;/code&gt;表示一级标题， &lt;code&gt;## title&lt;/code&gt;表示二级标题，以此类推;还有一种是用任何数量的&lt;code&gt;=&lt;/code&gt;和&lt;code&gt;-&lt;/code&gt;具体效果如下所示：
 Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Markdown&#34; data-lang=&#34;Markdown&#34;&gt;&lt;span class=&#34;gh&#34;&gt;# 一级标题
@@ -11112,7 +11449,7 @@ Markdown语法：&lt;/p&gt;
 &lt;h1 id=&#34;这也是一级标题&#34;&gt;这也是一级标题&lt;/h1&gt;
 &lt;h2 id=&#34;这也是二级标题&#34;&gt;这也是二级标题&lt;/h2&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idfont2-2粗体和斜体a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-2.粗体和斜体&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idfont2-2粗体和斜体a&#34;&gt;&lt;a id=&#34;font&#34;&gt;2-2.粗体和斜体&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;使用&lt;code&gt;**&lt;/code&gt;和&lt;code&gt;*&lt;/code&gt;表示粗体和斜体,还可以用&lt;code&gt;__&lt;/code&gt;和&lt;code&gt;_&lt;/code&gt;表示，具体效果如下：&lt;/p&gt;
 &lt;p&gt;Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Markdown&#34; data-lang=&#34;Markdown&#34;&gt;**我是粗体**
@@ -11128,7 +11465,7 @@ Markdown语法：&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;我也是粗体&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;我也是斜体&lt;/em&gt;&lt;/p&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idlinkimage2-3链接和图像a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-3.链接和图像&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idlinkimage2-3链接和图像a&#34;&gt;&lt;a id=&#34;linkImage&#34;&gt;2-3.链接和图像&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;链接是你将要转向的链接，可以使用&lt;code&gt;\[描述](链接地址)&lt;/code&gt;来为文字增加外链接;
 图像是你要引用的图像，可以使用&lt;code&gt;\!\[描述](图片链接地址)&lt;/code&gt;来插入图像，当然也可以直接使用简书编辑器提供的功能，直接拖入图像即可上传图像;具体如下所示:&lt;/p&gt;
 &lt;p&gt;Markdown语法：&lt;/p&gt;
@@ -11141,7 +11478,7 @@ Markdown语法：&lt;/p&gt;
     &gt;简书&lt;/a&gt;网页地址,点击即可进入&lt;/p&gt;
 &lt;h2 id=&#34;httpsrawgithubusercontentcomhowie6879howie6879githubioimgpictures20191025170448png&#34;&gt;图片引入成功：
 &lt;img src=&#34;https://raw.githubusercontent.com/howie6879/howie6879.github.io/img/pictures/20191025170448.png&#34; alt=&#34;&#34;  /&gt;&lt;/h2&gt;
-&lt;h4 id=&#34;a-idlist2-4列表a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-4.列表&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idlist2-4列表a&#34;&gt;&lt;a id=&#34;list&#34;&gt;2-4.列表&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;列表可以分为无序列表和有序列表，可以使用&lt;code&gt;*  +  -&lt;/code&gt;的任何一个表示无序列表,有序列表则用数字和点表示（千万不要忘记空格），具体如下所示：&lt;/p&gt;
 &lt;p&gt;Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Markdown&#34; data-lang=&#34;Markdown&#34;&gt;&lt;span class=&#34;k&#34;&gt;*&lt;/span&gt; 无序列表1
@@ -11165,7 +11502,7 @@ Markdown语法：&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idquote2-5文字引用a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-5.文字引用&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idquote2-5文字引用a&#34;&gt;&lt;a id=&#34;quote&#34;&gt;2-5.文字引用&lt;/a&gt;&lt;/h4&gt;
 &lt;blockquote&gt;
 &lt;p&gt;当你想引用一段文字的时候，可以使用这个功能，用法相当简单,开头使用&lt;code&gt;&amp;gt;&lt;/code&gt;，然后就有目前这种效果了，如果下一行你不想引用，记得按一下&lt;code&gt;enter&lt;/code&gt;键。&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -11178,7 +11515,7 @@ Markdown语法：&lt;/p&gt;
 一日不见兮，思之如狂。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idcodeblock2-6代码块a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-6.代码块&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idcodeblock2-6代码块a&#34;&gt;&lt;a id=&#34;codeBlock&#34;&gt;2-6.代码块&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;代码块分为行内代码块和代码块，行内代码块可以使用`行内代码块`来表示；
 代码块可以分为一般的代码块和加强版代码块：
 一般的代码块只要简单地缩进 4 个空格或是 1 个制表符就可以创建；
@@ -11199,7 +11536,7 @@ Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;hello&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
     &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;hello &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;%s&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;%&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
-&lt;h4 id=&#34;a-idunderline2-7下划线a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-7.下划线&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idunderline2-7下划线a&#34;&gt;&lt;a id=&#34;underline&#34;&gt;2-7.下划线&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;下划线就是分割线，
 &lt;code&gt;* * *&lt;/code&gt;
 &lt;code&gt;********&lt;/code&gt;
@@ -11215,7 +11552,7 @@ Markdown语法：&lt;/p&gt;
 &lt;hr&gt;
 &lt;hr&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idtable2-8表格a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-8.表格&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idtable2-8表格a&#34;&gt;&lt;a id=&#34;table&#34;&gt;2-8.表格&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Markdown的表格不怎么好用，这里也介绍下：
 Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Markdown&#34; data-lang=&#34;Markdown&#34;&gt;| 标题一        |标题二          | 标题三   | 标题四|
@@ -11245,7 +11582,7 @@ Markdown语法：&lt;/p&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;hr&gt;
-&lt;h4 id=&#34;a-idbacklash2-9反斜杠a&#34;&gt;&lt;!-- raw HTML omitted --&gt;2-9.反斜杠&lt;!-- raw HTML omitted --&gt;&lt;/h4&gt;
+&lt;h4 id=&#34;a-idbacklash2-9反斜杠a&#34;&gt;&lt;a id=&#34;backlash&#34;&gt;2-9.反斜杠&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;反斜杠没什么好说的,可以理解为当你想在页面输出`我爱你`时，由于启用了Markdown，可能会输出&lt;code&gt;我爱你&lt;/code&gt;这样Markdown对应的行内代码块效果，反斜杠就是解决这样的问题，如下：
 Markdown语法：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Markdown&#34; data-lang=&#34;Markdown&#34;&gt;\`我爱你\`
@@ -11257,7 +11594,7 @@ Markdown语法：&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;我想你肯定学会了^_^&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;h3 id=&#34;a-idexplain3说明a&#34;&gt;&lt;!-- raw HTML omitted --&gt;3.说明&lt;!-- raw HTML omitted --&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;a-idexplain3说明a&#34;&gt;&lt;a id=&#34;explain&#34;&gt;3.说明&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;感觉锚点有点问题，简书总是有target跳新窗口
 **本教程献给我亲爱的女票，希望她能学会，另外错误之处敬请指出，转载请标明出处 **&lt;/p&gt;
 </description>
@@ -11289,7 +11626,7 @@ Markdown语法：&lt;/p&gt;
 hello was called
 Hello howie!
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这段代码，初看之下，确实不是很理解，接下来一步一步分析，看看装饰器到底是怎么工作的。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h2 id=&#34;装饰器原理&#34;&gt;装饰器原理&lt;/h2&gt;
 &lt;p&gt;在python中，方法允许作为参数传递，想在某个函数执行前后加点料，也可以这样简单实现。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;ch&#34;&gt;#!/usr/bin/env&lt;/span&gt;
@@ -11457,7 +11794,7 @@ hello
 &lt;span class=&#34;o&#34;&gt;//&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;综上，可以直接创建数据库且设置编码方式&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;CREATE&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;DATABASE&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;h_test&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;DEFAULT&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;CHARACTER&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;SET&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;utf8&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;COLLATE&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;utf8_general_ci&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
-&lt;!-- raw HTML omitted --&gt;
+&lt;!-- more --&gt;
 &lt;h3 id=&#34;1-2关于数据表&#34;&gt;1-2.关于数据表&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-mysql&#34; data-lang=&#34;mysql&#34;&gt;&lt;span class=&#34;o&#34;&gt;//&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;首先选定操作的数据库&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;h_test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
