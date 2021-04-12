@@ -145,9 +145,32 @@ MONGODB_CONFIG = {
 # 分发配置，目标支持：ding[钉钉]、wecom[企业微信]、tg[Telegram] 等等
 # 目前仅支持钉钉
 SENDER_LIST = ["ding"]
-# 钉钉 URL，如果 SENDER_LIST 包含 ding ，CC_D_TOKEN 配置就必须填写
 # 申请钉钉TOKEN时候，关键字必须带有 [2c]
-DD_URL = f"https://oapi.dingtalk.com/robot/send?access_token={os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41fb9722597d48655f4365')}"
+DD_TOKEN = os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41fb9722597d48655f4365')
+```
+
+##### 企业微信
+
+如果你热衷微信生态，`2C`同样对企业微信做了支持，请先随便用手机号注册一个[企业微信](https://work.weixin.qq.com/)。
+
+首先创造应用：
+
+![2Cfkbw](https://gitee.com/howie6879/oss/raw/master/uPic/2Cfkbw.png)
+
+获取相关ID：
+
+![zLGP5T](https://gitee.com/howie6879/oss/raw/master/uPic/zLGP5T.png)
+
+企业ID在`我的企业->企业信息->企业ID`
+
+现在你获取了以下三个参数，请填写到对应配置：
+
+```python
+WECOM_ID = os.getenv("CC_WECOM_ID", "wwee29721ad4f6e1c9")
+WECOM_AGENT_ID = os.getenv("CC_WECOM_AGENT_ID", "1000001")
+WECOM_SECRET = os.getenv(
+    "CC_WECOM_SECRET", "O4M9w38wuwAxCMr0O3lTqAgzLC7yxjsDGr6lgv12345"
+)
 ```
 
 ### 运行2C
@@ -181,6 +204,13 @@ Loading .env environment variables…
  23:10
 ```
 
-这样就成功启动了。
+这样就成功启动了，微信终端分发效果如下：
+
+<div align=center><img width="50%" src="https://gitee.com/howie6879/oss/raw/master/uPic/5j99F5.jpg" /></div>
+
+
+## 关于
+
+有任何安装使用问题，欢迎在下面留言一起交流哇~
 
 <div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
