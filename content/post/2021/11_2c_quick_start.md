@@ -161,7 +161,11 @@ DD_TOKEN = os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41
 
 ![zLGP5T](https://gitee.com/howie6879/oss/raw/master/uPic/zLGP5T.png)
 
-企业ID在`我的企业->企业信息->企业ID`
+企业ID在`我的企业->企业信息->企业ID`。
+
+为了方便可以在微信上接收消息，记得开启微信查件，进入下图所在位置，然扫码关注你的二维码即可：
+
+![zlfcd9](https://gitee.com/howie6879/oss/raw/master/uPic/zlfcd9.png)
 
 现在你获取了以下三个参数，请填写到对应配置：
 
