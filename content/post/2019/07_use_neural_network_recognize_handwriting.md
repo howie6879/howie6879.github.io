@@ -295,4 +295,4 @@ Epoch 9: 9447 / 10000
 
 搞定收工，有兴趣欢迎关注我的公众号：
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

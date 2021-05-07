@@ -159,7 +159,7 @@ DD_TOKEN = os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41
 
 获取相关ID：
 
-![zLGP5T](https://gitee.com/howie6879/oss/raw/master/uPic/zLGP5T.png)
+![zLGP5T](https://raw.githubusercontent.com/howie6879/oss/master/images/zLGP5T.png)
 
 企业ID在`我的企业->企业信息->企业ID`。
 
@@ -217,4 +217,4 @@ Loading .env environment variables…
 
 有任何安装使用问题，欢迎在下面留言一起交流哇~
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

@@ -403,4 +403,4 @@ kubectl get services
 - [深入剖析Kubernetes](https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D)：入门篇以及集群搭建部分
 - Kubernetes in Action中文版：第1、2章
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

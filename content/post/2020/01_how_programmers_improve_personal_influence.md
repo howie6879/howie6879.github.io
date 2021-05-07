@@ -103,4 +103,4 @@ toc: true
 
 这个主题其实可扩展的东西很多，大家可以私下好好研究一番。当然，我自身做的还远远不够，还有很大的进步空间，但是至少我自身是在往这个方向进步，这里我就先将自己的一些经验分享出来，算是抛砖引玉吧，诸位大佬多多包涵；谢谢，大家加油！
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

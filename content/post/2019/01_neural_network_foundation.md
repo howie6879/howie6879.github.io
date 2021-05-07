@@ -595,4 +595,4 @@ print('test_acc:', test_acc)
 - [hands_on_Ml_with_Sklearn_and_TF](https://github.com/apachecn/hands-on-ml-zh)
 - [hanbt零基础入门深度学习系列](https://www.zybuluo.com/hanbingtao/note/448086)
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)

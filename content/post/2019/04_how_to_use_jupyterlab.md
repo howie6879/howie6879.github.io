@@ -143,4 +143,4 @@ jupyter-lab --ip=0.0.0.0
 - 文档：https://jupyterlab.readthedocs.io/en/stable/
 - 插件：https://github.com/topics/jupyterlab-extension
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)

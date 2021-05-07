@@ -393,4 +393,4 @@ if __name__ == '__main__':
 
 如果觉得写得不错，点个好看来个`star`呗~
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

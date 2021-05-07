@@ -104,4 +104,4 @@ $$
 
 参数的更新方式就这样计算出来了，其实所谓的学习，就是确定一个目标函数用一定的计算方法让其算出最优的参数。
 
-<div align=center><img width="60%" src="https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png" /></div>
+<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>

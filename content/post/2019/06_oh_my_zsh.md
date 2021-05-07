@@ -190,4 +190,4 @@ source ~/.zshrc
 
 程序员在开发过程中，效率快慢是个不可忽略的因素，提高效率，能一定程度上节省开发时间，从而形成一系列的正向反馈，何乐而不为？
 
-![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/wechat_howie.png)
+![wechat_howie](https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg)
