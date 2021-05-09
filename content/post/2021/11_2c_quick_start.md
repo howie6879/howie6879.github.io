@@ -9,7 +9,12 @@ categories: [Python,Tool]
 author: "howie.hu"
 image: /images/thumbs/h_67.jpg
 ---
+
+![uuNLVj](https://raw.githubusercontent.com/howie6879/oss/master/images/uuNLVj.jpg)
+
 > [2C](https://github.com/howie6879/2c)项目还处于快速迭代的开发状态，此文档随时会变动，切记。
+>
+> 如果阅读体验不好，建议移步博客阅读[2C 使用教程](https://www.howie6879.cn/p/2c-使用教程/)。
 
 [2C](https://github.com/howie6879/2c)的目的是为了**构建一个多源（公众号、RSS）、干净、个性化的阅读环境**，如果你在公众号阅读体验下深切感受到对于广告的无奈，那么这个项目就是你需要的，一起看看怎么安装部署[2C](https://github.com/howie6879/2c)吧。
 
@@ -58,9 +63,9 @@ CONTAINER ID   IMAGE       COMMAND                  CREATED         STATUS      
 
 ```shell
 [~] python --version                                                                 
-Python 3.7.3
+Python 3.6.8 :: Anaconda, Inc.
 [~] pip --version
-pip 21.0.1 from ~/anaconda3/lib/python3.7/site-packages/pip (python 3.7)
+pip 21.1.1 from /Users/howie6879/.local/share/virtualenvs/2c-BCq66QuF/lib/python3.6/site-packages/pip (python 3.6)
 ```
 
 本项目使用 [pipenv](https://pipenv.pypa.io/en/latest/) 进行项目管理，安装使用过程如下：
@@ -133,11 +138,11 @@ MONGODB_CONFIG = {
 
 建立一个群聊用于接收文章消息，然后新增一个群机器人，如下图：
 
-![GctXXh](https://gitee.com/howie6879/oss/raw/master/uPic/GctXXh.jpg)
+![GctXXh](https://raw.githubusercontent.com/howie6879/oss/master/images/GctXXh.jpg)
 
 然后配置机器人：
 
-![7iWlhv](https://gitee.com/howie6879/oss/raw/master/uPic/7iWlhv.jpg)
+![7iWlhv](https://raw.githubusercontent.com/howie6879/oss/master/images/7iWlhv.jpg)
 
 最后记住机器人对应的`Token`，一般格式如下：`1dea61224e683d90c5d3694c89e30841681567747f41fb9722597d48655f4365`，那么此时分发器配置如下：
 
@@ -155,7 +160,7 @@ DD_TOKEN = os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41
 
 首先创造应用：
 
-![2Cfkbw](https://gitee.com/howie6879/oss/raw/master/uPic/2Cfkbw.png)
+![2Cfkbw](https://raw.githubusercontent.com/howie6879/oss/master/images/2Cfkbw.png)
 
 获取相关ID：
 
@@ -163,9 +168,9 @@ DD_TOKEN = os.getenv('CC_D_TOKEN', '1dea61224e683d90c5d3694c89e30841681567747f41
 
 企业ID在`我的企业->企业信息->企业ID`。
 
-为了方便可以在微信上接收消息，记得开启微信查件，进入下图所在位置，然扫码关注你的二维码即可：
+为了方便可以在微信上接收消息，记得开启微信插件，进入下图所在位置，然扫码关注你的二维码即可：
 
-![zlfcd9](https://gitee.com/howie6879/oss/raw/master/uPic/zlfcd9.png)
+![zlfcd9](https://raw.githubusercontent.com/howie6879/oss/master/images/zlfcd9.png)
 
 现在你获取了以下三个参数，请填写到对应配置：
 
@@ -177,12 +182,14 @@ WECOM_SECRET = os.getenv(
 )
 ```
 
+关于配置，除了可以直接在代码中的配置文件中进行，更建议直接在`.env`中进行配置，具体说明请参考[环境变量]([2c/00.2C环境变量.md at main · howie6879/2c (github.com)](https://github.com/howie6879/2c/blob/main/docs/00.2C环境变量.md))文件。
+
 ### 运行2C
 
 配置完成后，直接在终端运行即可：
 
 ```
-pipenv run python src/run.py
+pipenv run dev
 ```
 
 不出意外，会得到以下输出：
@@ -210,11 +217,4 @@ Loading .env environment variables…
 
 这样就成功启动了，微信终端分发效果如下：
 
-<div align=center><img width="50%" src="https://gitee.com/howie6879/oss/raw/master/uPic/5j99F5.jpg" /></div>
-
-
-## 关于
-
-有任何安装使用问题，欢迎在下面留言一起交流哇~
-
-<div align=center><img width="20%" src="https://gitee.com/howie6879/oss/raw/master/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>
+<div align=center><img width="40%" src="https://raw.githubusercontent.com/howie6879/oss/master/images/m3nJ61.png" /></div>
