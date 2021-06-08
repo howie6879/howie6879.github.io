@@ -10,8 +10,6 @@ author: "howie.hu"
 image: /images/thumbs/h_67.jpg
 ---
 
-![uuNLVj](https://raw.githubusercontent.com/howie6879/oss/master/images/uuNLVj.jpg)
-
 > [2C](https://github.com/howie6879/2c)项目还处于快速迭代的开发状态，此文档随时会变动，切记。
 >
 > 如果阅读体验不好，建议移步博客阅读[2C 使用教程](https://www.howie6879.cn/p/2c-使用教程/)。
