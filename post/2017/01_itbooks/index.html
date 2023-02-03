@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>ITBooks—简单的书籍下载小工具 | 老胡的储物柜</title>
+  <meta property="og:title" content="ITBooks—简单的书籍下载小工具 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2017-01-26T23:07:42&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2017-01-26T23:07:42&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="ITBooks—简单的书籍下载小工具"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2017/01_itbooks/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1前言">1.前言</a></li>
+    <li><a href="#2说明">2.说明</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">ITBooks—简单的书籍下载小工具</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2017年1月26日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE'>项目</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="1前言">1.前言</h2>
+<p>我有个习惯就是收藏一些书籍，比如说编程类的，总是会去某些网站刷刷，若有新书籍更新恰又是自己感兴趣的，自然会立马下载下来，写程序的都知道，编程书籍更新换代太快，国内的翻译的速度很难全面地跟上，对此，阅读国外的电子书籍是个途径。</p>
+<p>很早就想写个书籍集成的脚本，本周女朋友回学校改论文，鬼使神差地做起了这件事，白天上班，晚上撸，准备集成四个网站，目前实现了两个，可以进行搜索和下载。前后花了四个晚上，有点黑眼圈。</p>
+<p>下面展示下<code>0.1</code>版本的成果，比如说检索<code>Mastering python</code>，空格用<code>+</code>代替：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">python abook.py search Mastering+python Hattem
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="TF6CYl" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/TF6CYl.jpg" />   
+    </p>
+<h2 id="2说明">2.说明</h2>
+<p>项目名称叫做<a href="https://github.com/howie6879/ITBooks">ITBooks</a>，当然不准备只做<code>IT</code>方面书籍，文学名著也是可以的。</p>
+<p>
+        <img class="mx-auto" alt="9kBp2e" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/9kBp2e.jpg" />   
+    </p>
+<blockquote>
+<p><a href="https://github.com/howie6879/ITBooks">ITBooks</a>，是一个查询和下载书籍的<code>python</code>脚本。</p>
+</blockquote>
+<p>目前只存储了<code>allitebooks blah</code>网站的书籍信息，接下来会更多的集成各个网站，因为想写成个人服务脚本，故使用sqlite3数据库，使用  <code>scrapy</code>爬取信息，具体看<code>ITBooks/spider/allitebooks</code>，爬虫部分可直接运行从而进行书籍信息更新；你可以通过变写爬虫来添加自己喜欢的网站。
+添加爬虫只需要在<code>ITBooks/spider/allitebooks/spider</code>，下新建一个<code>scrapy</code>的爬虫脚本即可，对于数据的存储，具体在<code>ITBooks/database</code>，当然，你可以直接新建一个库。
+这里放个<code>allitebooks</code>的爬虫脚本，这里说明下，<strong>这个良心网站很不错，希望各位爬的时候慢点。不然崩了大家都玩完</strong>。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># -*- coding: utf-8 -*-</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">datetime</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">sys</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">scrapy</span>
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">scrapy.loader</span> <span style="color:#000;font-weight:bold">import</span> ItemLoader
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">scrapy.loader.processors</span> <span style="color:#000;font-weight:bold">import</span> MapCompose, TakeFirst, Join
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">scrapy.http</span> <span style="color:#000;font-weight:bold">import</span> Request
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">allitebooks.items</span> <span style="color:#000;font-weight:bold">import</span> AllitebooksItem
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">allitebooks.pipelines</span> <span style="color:#000;font-weight:bold">import</span> AllitebooksPipeline
+
+<span style="color:#000;font-weight:bold">if</span> sys<span style="color:#000;font-weight:bold">.</span>version_info[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">2</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib.parse</span> <span style="color:#000;font-weight:bold">import</span> urljoin
+<span style="color:#000;font-weight:bold">else</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urlparse</span> <span style="color:#000;font-weight:bold">import</span> urljoin
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AllitebooksSpider</span>(scrapy<span style="color:#000;font-weight:bold">.</span>Spider):
+    name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;allitebooks&#34;</span>
+    allowed_domains <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#34;allitebooks.com&#34;</span>]
+    start_urls <span style="color:#000;font-weight:bold">=</span> (<span style="color:#d14">&#39;http://www.allitebooks.com&#39;</span>, )
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse</span>(<span style="color:#999">self</span>, response):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        Get the next pages and yield requests
+</span><span style="color:#d14">        :param response:
+</span><span style="color:#d14">        :return: request url
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        pages <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>css(<span style="color:#d14">&#39;.pagination&gt;a::text&#39;</span>)<span style="color:#000;font-weight:bold">.</span>extract()[<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>]
+        <span style="color:#000;font-weight:bold">for</span> page <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#0086b3">int</span>(pages)):
+            <span style="color:#998;font-style:italic"># Generate a list of urls</span>
+            url <span style="color:#000;font-weight:bold">=</span> urljoin(response<span style="color:#000;font-weight:bold">.</span>url, <span style="color:#d14">&#39;/page/&#39;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#0086b3">str</span>(page <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>))
+            <span style="color:#000;font-weight:bold">yield</span> Request(url, callback<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>parse_detail)
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse_detail</span>(<span style="color:#999">self</span>, response):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        Get item URLs and yield Requests
+</span><span style="color:#d14">        :param response:
+</span><span style="color:#d14">        :return: request url
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        urls <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>css(
+            <span style="color:#d14">&#39;article&gt;div.entry-body&gt;header&gt;.entry-title&gt;a::attr(href)&#39;</span>
+        )<span style="color:#000;font-weight:bold">.</span>extract()
+        <span style="color:#000;font-weight:bold">for</span> url <span style="color:#000;font-weight:bold">in</span> urls:
+            <span style="color:#998;font-style:italic"># Remove duplicate links</span>
+            sqlDb <span style="color:#000;font-weight:bold">=</span> AllitebooksPipeline()
+            isExist <span style="color:#000;font-weight:bold">=</span> sqlDb<span style="color:#000;font-weight:bold">.</span>search_url(<span style="color:#d14">&#39;allitebooks&#39;</span>, url)
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> isExist:
+                <span style="color:#000;font-weight:bold">yield</span> Request(url, callback<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>parse_item)
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse_item</span>(<span style="color:#999">self</span>, response):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        This function parses a property page.
+</span><span style="color:#d14">        :param response:
+</span><span style="color:#d14">        :return: item
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#998;font-style:italic"># Create the loader using response</span>
+        l <span style="color:#000;font-weight:bold">=</span> ItemLoader(item<span style="color:#000;font-weight:bold">=</span>AllitebooksItem(), response<span style="color:#000;font-weight:bold">=</span>response)
+        <span style="color:#998;font-style:italic"># Load primary fields using css expressions</span>
+        l<span style="color:#000;font-weight:bold">.</span>add_css(<span style="color:#d14">&#39;title&#39;</span>, <span style="color:#d14">&#39;.single-title::text&#39;</span>, MapCompose(<span style="color:#0086b3">str</span><span style="color:#000;font-weight:bold">.</span>strip))
+        l<span style="color:#000;font-weight:bold">.</span>add_css(<span style="color:#d14">&#39;cover&#39;</span>, <span style="color:#d14">&#39;.entry-body-thumbnail&gt;a&gt;img::attr(src)&#39;</span>)
+        book_details <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>css(<span style="color:#d14">&#39;.book-detail&gt;dl&gt;dd::text&#39;</span>)<span style="color:#000;font-weight:bold">.</span>extract()
+        author_list <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>css(
+            <span style="color:#d14">&#39;.book-detail&gt;dl&gt;dd:nth-child(2)&gt;a::text&#39;</span>)<span style="color:#000;font-weight:bold">.</span>extract()
+        category_list <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>css(
+            <span style="color:#d14">&#39;.book-detail&gt;dl&gt;dd:nth-child(16)&gt;a::text&#39;</span>)<span style="color:#000;font-weight:bold">.</span>extract()
+        author <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;,&#39;</span><span style="color:#000;font-weight:bold">.</span>join(author_list)
+        category <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;,&#39;</span><span style="color:#000;font-weight:bold">.</span>join(category_list)
+        book_details <span style="color:#000;font-weight:bold">=</span> book_details[<span style="color:#0086b3">len</span>(author_list):(<span style="color:#000;font-weight:bold">-</span><span style="color:#0086b3">len</span>(category_list))]
+        l<span style="color:#000;font-weight:bold">.</span>add_value(<span style="color:#d14">&#39;author&#39;</span>, author, MapCompose(<span style="color:#0086b3">str</span><span style="color:#000;font-weight:bold">.</span>strip))
+        l<span style="color:#000;font-weight:bold">.</span>add_value(<span style="color:#d14">&#39;category&#39;</span>, category, MapCompose(<span style="color:#0086b3">str</span><span style="color:#000;font-weight:bold">.</span>strip))
+        item_name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;isbn year pages language file_size file_format&#34;</span><span style="color:#000;font-weight:bold">.</span>split()
+        <span style="color:#000;font-weight:bold">for</span> index, value <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(item_name):
+            l<span style="color:#000;font-weight:bold">.</span>add_value(value, book_details[index], MapCompose(<span style="color:#0086b3">str</span><span style="color:#000;font-weight:bold">.</span>strip))
+        l<span style="color:#000;font-weight:bold">.</span>add_css(<span style="color:#d14">&#39;description&#39;</span>, <span style="color:#d14">&#39;.entry-content&#39;</span>)
+        l<span style="color:#000;font-weight:bold">.</span>add_css(<span style="color:#d14">&#39;download&#39;</span>, <span style="color:#d14">&#39;span.download-links&gt;a::attr(href)&#39;</span>,
+                  MapCompose(<span style="color:#0086b3">str</span><span style="color:#000;font-weight:bold">.</span>strip), TakeFirst())
+        <span style="color:#998;font-style:italic"># Housekeeping fields</span>
+        l<span style="color:#000;font-weight:bold">.</span>add_value(<span style="color:#d14">&#39;url&#39;</span>, response<span style="color:#000;font-weight:bold">.</span>url)
+        l<span style="color:#000;font-weight:bold">.</span>add_value(<span style="color:#d14">&#39;spider&#39;</span>, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>name)
+        l<span style="color:#000;font-weight:bold">.</span>add_value(<span style="color:#d14">&#39;date&#39;</span>, datetime<span style="color:#000;font-weight:bold">.</span>datetime<span style="color:#000;font-weight:bold">.</span>now())
+        <span style="color:#000;font-weight:bold">yield</span> l<span style="color:#000;font-weight:bold">.</span>load_item()
+
+</code></pre></td></tr></table>
+</div>
+</div><p>现在就是由于想在本地运行，对于自动更新是个问题，本来想使用<code>celery</code>将<code>scrapy</code>爬虫弄成一个个任务，我是可以在机器上这样部署，可是这对于使用者不大现实，目前是手动更新（确实很挫）。</p>
+<p>接下来说说使用方法，如果你感兴趣，可以试试^_^
+脚本在<code>python2.7+和python3</code>下都可以运行，我测试过，但是爬虫却没在<code>python2</code>下测过，所以我建议还是用3吧。
+运行以下命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone https://github.com/howie6879/ITBooks
+<span style="color:#0086b3">cd</span> /ITBooks/ITBooks
+python abook.py search Mastering+Python Hattem
+</code></pre></td></tr></table>
+</div>
+</div><p>具体使用方法如下：</p>
+<pre tabindex="0"><code>  python abook.py search &lt;title&gt; &lt;author&gt;
+  python abook.py title &lt;title&gt;
+  python abook.py author &lt;author&gt;
+</code></pre><p>也在根目录下写了个<code>bash</code>，其实没什么差别：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">bash run.sh <span style="color:#000;font-weight:bold">[</span>search|title|author<span style="color:#000;font-weight:bold">]</span> &lt;value&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="7LicCz" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/7LicCz.jpg" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="daudEi" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/daudEi.jpg" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="ry3NLb" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/ry3NLb.jpg" />   
+    </p>
+<h2 id="总结">总结</h2>
+<p>写在最后，本人技术微末，如果错漏，欢迎指教，项目<code>github</code>地址在这里<a href="https://github.com/howie6879/ITBooks">ITBooks</a>，欢迎各位添砖加瓦。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2017/01_itbooks/">https://www.howie6879.cn/post/2017/01_itbooks/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/09_deploy-pyspider/">CentOS7分布式部署pyspider</a></li>
+        
+        <li><a href="/post/2016/10_mastering-pandas01/">Mastering Pandas 01</a></li>
+        
+        <li><a href="/post/2016/08_happy-birthday-to-my-girlfriend/">祝你生日快乐</a></li>
+        
+        <li><a href="/post/2016/07_company-name-to-website/">Python之由公司名推算出公司官网(余弦相似度)</a></li>
+        
+        <li><a href="/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">Python之朴素贝叶斯对展会数据分类</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/spider'>Spider</a></li>
+                
+                <li><a href='/tags/%E6%95%88%E7%8E%87'>效率</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

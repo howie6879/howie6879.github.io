@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>nndl_note: 深度神经⽹络为何很难训练 | 老胡的储物柜</title>
+  <meta property="og:title" content="nndl_note: 深度神经⽹络为何很难训练 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2020-12-18T21:13:58&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2020-12-18T21:13:58&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="nndl_note: 深度神经⽹络为何很难训练"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2020/02_why_are_deep_neural_networks_hard_to_train/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nndl_note: 深度神经⽹络为何很难训练</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月18日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+<ul>
+<li><a href="#消失的梯度问题">消失的梯度问题</a></li>
+<li><a href="#导致梯度消失的原因">导致梯度消失的原因</a></li>
+<li><a href="#在更加复杂网络中的不稳定梯度">在更加复杂⽹络中的不稳定梯度</a></li>
+<li><a href="#其它深度学习的障碍">其它深度学习的障碍</a></li>
+</ul>
+
+<!-- /code_chunk_output -->
+
+<p>上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。</p>
+
+<blockquote>
+<p>普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数</p>
+</blockquote>
+
+<p>而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214307565-20210201235205704.png" alt="shadow-image-20201119214307565"></figure></p>
+
+<p>这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214431316-20210201235159992.png" alt="shadow-image-20201119214431316"></figure></p>
+
+<p>随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？</p>
+
+<p>仔细研究会发现：</p>
+
+<ul>
+<li><p>如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前</p></li>
+
+<li><p>反之情况也会发生，前面层训练良好，后面停滞不前</p></li>
+</ul>
+
+<p>实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。</p>
+
+<h2 id="消失的梯度问题">消失的梯度问题</h2>
+
+<p>我们在第一章<a href="https://github.com/howie6879/ml_note/blob/main/nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97.md">识别手写字</a>曾经以<code>MNIST</code>数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。</p>
+
+<p>简单回顾一下，之前我们的训练样本路径为<code>/pylab/datasets/mnist.pkl.gz</code>，相关案例代码在<a href="[pylab](https://github.com/howie6879/pylab)">pylab</a>都可以找到（我稍做了改动以支持Python3）。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">mnist_loader</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">network2</span>
+
+training_data, validation_data, test_data <span style="color:#000;font-weight:bold">=</span> mnist_loader<span style="color:#000;font-weight:bold">.</span>load_data_wrapper()
+<span style="color:#998;font-style:italic"># 输入层 784</span>
+<span style="color:#998;font-style:italic"># 隐藏层 30</span>
+<span style="color:#998;font-style:italic"># 输出层 10</span>
+sizes <span style="color:#000;font-weight:bold">=</span> [<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>]
+net <span style="color:#000;font-weight:bold">=</span> network2<span style="color:#000;font-weight:bold">.</span>Network(sizes<span style="color:#000;font-weight:bold">=</span>sizes)
+
+<span style="color:#998;font-style:italic"># 随机梯度下降开始训练</span>
+net<span style="color:#000;font-weight:bold">.</span>SGD(
+    training_data,
+    <span style="color:#099">30</span>,
+    <span style="color:#099">10</span>,
+    <span style="color:#099">0.1</span>,
+    lmbda<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5.0</span>,
+    evaluation_data<span style="color:#000;font-weight:bold">=</span>validation_data,
+    monitor_evaluation_accuracy<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>,
+)
+
+<span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">Epoch 0 training complete
+</span><span style="color:#d14">Accuracy on evaluation data: 9280 / 10000
+</span><span style="color:#d14">Epoch 1 training complete
+</span><span style="color:#d14">Accuracy on evaluation data: 9391 / 10000
+</span><span style="color:#d14">......
+</span><span style="color:#d14">Epoch 28 training complete
+</span><span style="color:#d14">Accuracy on evaluation data: 9626 / 10000
+</span><span style="color:#d14">Epoch 29 training complete
+</span><span style="color:#d14">Accuracy on evaluation data: 9647 / 1000
+</span><span style="color:#d14">&#34;&#34;&#34;</span></code></pre></td></tr></table>
+</div>
+</div>
+<p>最终我们得到了分类的准确率为 96.47%，如果加深网络的层数会不会提升准确率呢？我们分别尝试一下几种情况：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 准确率 96.8%</span>
+net <span style="color:#000;font-weight:bold">=</span> network2<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])
+<span style="color:#998;font-style:italic"># 准确率 96.42%</span>
+net <span style="color:#000;font-weight:bold">=</span> network2<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])
+<span style="color:#998;font-style:italic"># 准确率 96.28%</span>
+net <span style="color:#000;font-weight:bold">=</span> network2<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])</code></pre></td></tr></table>
+</div>
+</div>
+<p>这说明一种情况，尽管我们加深神经网络的层数以让其学到更复杂的分类函数，但是并没有带来更好的分类表现（但也没有变得更差）。</p>
+
+<p>那么为什么会造成这种情况，这是我们接下来需要思考的问题。可以考虑先假设额外的隐藏层的确能够在原理上起到作⽤，问题是我们的学习算法没有发现正确地权值和偏置。</p>
+
+<p>下图（基于<code>[784, 30, 30, 10]</code>网络）表⽰了每个神经元权重和偏置在神经⽹络学习时的变化速率，图中的每个神经元有⼀个条形统计图，表⽰这个神经元在⽹络进⾏学习时改变的速度。更⼤的条意味着更快的速度，而小的条则表⽰变化缓慢。</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217162947909-20210201235152243.png" alt="shadow-20201217162947909"></figure></p>
+
+<p>可以发现，第⼆个隐藏层上的条基本上都要⽐第⼀个隐藏层上的条要⼤；所以，在第⼆个隐藏层的神经元将学习得更加快速。这并不是巧合，前⾯的层学习速度确实低于后⾯的层。</p>
+
+<p>我们可以继续观察学习速度的变化，下方分别是2~4个隐藏层的学习速度变化图：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163602988-20210201235216607.png" alt="shadow-image-20201217163602988"></figure></p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163721344-20210201235221602.png" alt="shadow-image-20201217163721344"></figure></p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163735287-20210201235232432.png" alt="shadow-image-20201217163735287"></figure></p>
+
+<p>同样的情况出现了，前⾯的隐藏层的学习速度要低于后⾯的隐藏层。这⾥，第⼀层的学习速度和最后⼀层要差了两个数量级，也就是⽐第四层慢了 100 倍。</p>
+
+<p>我们可以得出一个结果，在某些深度神经⽹络中，在我们隐藏层反向传播的时候梯度倾向于变小；这意味着在前⾯的隐藏层中的神经元学习速度要慢于后⾯的隐藏层，这个现象也被称作是<strong>消失的梯度问题</strong>。</p>
+
+<h2 id="导致梯度消失的原因">导致梯度消失的原因</h2>
+
+<blockquote>
+<p>核心原因在于深度神经网络中的梯度不稳定性，会造成前面层中梯度消失或者梯度爆炸</p>
+</blockquote>
+
+<p>看下面这个既简单的深度神经网络，每⼀层都只有⼀ 个单⼀的神经元：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217170827163-20210201235242656.png" alt="shadow-image-20201217170827163"></figure></p>
+
+<p>首先回顾几个计算公式：</p>
+
+<ul>
+<li>第$j$个神经元的输出：$a_j = \sigma(z_j)$ 其中$\sigma$就是<code>Sigmoid</code>函数</li>
+<li>$z_j = w<em>j*a</em>{j-1}+b_j$</li>
+</ul>
+
+<p>让我们通过公式追踪一下$b<em>1$的变化趋势：
+$$
+\begin{aligned}
+\frac{\partial C}{\partial b</em>{1}} = \frac{\partial C}{\partial a_{4}}  \times \frac{\partial a_{4}}{\partial z_{4}} \times \frac{\partial z_{4}}{\partial a_{3}}  \times \frac{\partial a_{3}}{\partial z_{3}}  \times \frac{\partial z_{3}}{\partial a_{2}}  \times \frac{\partial a_{2}}{\partial z_{2}}  \times \frac{\partial z_{2}}{\partial a_{1}}  \times \frac{\partial a_{1}}{\partial z_{1}} \times  \frac{\partial z_{1}}{\partial b_{1}}
+\end{aligned}
+$$
+以小见大一下，对于上述式子，可以做一下拆解：</p>
+
+<ul>
+<li>$a_4 = \sigma(z_4) = \sigma(w_4*a_3 + b_4)$</li>
+<li>$\frac{\partial a_4}{\partial z_4} = \frac{\partial \sigma(z_4)}{\partial z_4}=\sigma^{\prime}\left(z_4\right)$</li>
+
+<li><p>$\frac{\partial \sigma(z_4)}{\partial a_3} = \frac{\partial \sigma(w_4*a_3 + b_4)}{\partial a_3} = w_4$</p></li>
+
+<li><p>$\frac{\partial z_1}{\partial b_1} = \frac{\partial \sigma(w_1*a_0 + b_1)}{\partial b_1} = 1$</p></li>
+</ul>
+
+<p>故：
+<span  class="math">\(
+\begin{aligned}\frac{\partial C}{\partial b_{1}} = \frac{\partial C}{\partial a_{4}} \times \sigma^{\prime}(z_4) \times w_4 \times \sigma^{\prime}(z_3) \times w_3 \times \sigma^{\prime}(z_2) \times w_2 \times \sigma^{\prime}(z_1) \times 1
+\end{aligned}
+\)</span>
+其实可以直观地看出上述表达式是一系列如$w_j\sigma<sup>\prime(z_j)$的乘积，其中有<code>sigmoid</code>的导数，我们可以观察一下$\sigma</sup>\prime(x)$的函数图像（$\sigma^\prime(x) = \sigma(x)(1 - \sigma(x))$）:</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217223631570-20210201235252564.png" alt="shadow-image-20201217223631570"></figure></p>
+
+<p>绘图代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">matplotlib.pyplot</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">plt</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">sigmoid_d</span>(x):
+    y <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">1</span> <span style="color:#000;font-weight:bold">+</span> np<span style="color:#000;font-weight:bold">.</span>exp(<span style="color:#000;font-weight:bold">-</span>x))
+    <span style="color:#000;font-weight:bold">return</span> y <span style="color:#000;font-weight:bold">*</span> (<span style="color:#099">1</span> <span style="color:#000;font-weight:bold">-</span> y)
+
+x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>arange(<span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span>, <span style="color:#099">4</span>, <span style="color:#099">0.1</span>)
+y <span style="color:#000;font-weight:bold">=</span> sigmoid_d(x)
+plt<span style="color:#000;font-weight:bold">.</span>plot(x, y)
+plt<span style="color:#000;font-weight:bold">.</span>show()</code></pre></td></tr></table>
+</div>
+</div>
+<p>结合上述公式和函数图像，我们可以得出以下结论：</p>
+
+<ol>
+<li>由于权重一般是基于均值为0方差为1的高斯分布，所以任何权重总是处于$(0, 1)$</li>
+<li>$\sigma^\prime(x) \leq 0.25$</li>
+<li>$w_j\sigma^\prime(z_j)&lt;0.25$</li>
+</ol>
+
+<p>再结合上面的表达式，当层数越多，乘积项就会越多，就会导致$\frac{\partial C}{\partial b_{1}}$更小，于是就导致了梯度消失。</p>
+
+<blockquote>
+<p>Sigmoid作为激活函数情况下，由于梯度反向传播中的连乘效应，导致了梯度消失</p>
+</blockquote>
+
+<p>反之，梯度爆炸的问题就是神经网络前面层比后面层梯度变化快，从而引起了梯度爆炸的问题，比如$w$较大导致了$|w_j\sigma^\prime(z_j)|&gt;1$，再结合上面提到的连乘效应，就自然地梯度爆炸了。</p>
+
+<h2 id="在更加复杂络中的不稳定梯度">在更加复杂⽹络中的不稳定梯度</h2>
+
+<p>当我们从简单的神经网络上发现了随着网络层次的加深，会造成网络权值更新不稳定的情况后，也很明确地观察到了梯度消失问题。继续扩展一下，对于那些每层包含很多神经元的更加复杂的网络来说会是怎样的情况呢？</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214431316-20210201235258715.png" alt="shadow-image-20201119214431316"></figure></p>
+
+<p>对于第$l$层的梯度：
+<span  class="math">\(
+\delta^{l}=\Sigma^{\prime}\left(z^{l}\right)\left(w^{l+1}\right)^{T} \Sigma^{\prime}\left(z^{l+1}\right)\left(w^{l+2}\right)^{T} \ldots \Sigma^{\prime}\left(z^{L}\right) \nabla_{a} C
+\)</span>
+根据连乘效应，会导致出现不稳定的梯度，和前面例子一样，会导致前面层的梯度指数级地消失。</p>
+
+<h2 id="其它深度学习的障碍">其它深度学习的障碍</h2>
+
+<p>前面三节主要介绍了一大障碍：不稳定梯度（梯度消失或者梯度爆炸），实际上，不稳定梯度仅仅是深度学习的众多障碍之⼀。</p>
+
+<p>下面会据一些关于<strong>什么让训练深度⽹络⾮常困难</strong>相关主题的例子，这是个相当复杂的问题：</p>
+
+<ul>
+<li>在 2010 年<code>Glorot &amp;&amp; Bengio</code>发现证据表明 sigmoid 函数的选择会导致训练⽹络的 问题。特别地，他们发现<code>sigmoid</code>函数会导致最终层上的激活函数在训练中会聚集在 0，这也导 致了学习的缓慢。他们的⼯作中提出了⼀些取代<code>sigmoid</code>函数的激活函数选择，使得不会被这种聚集性影响性能。</li>
+<li>在 2013 年<code>Sutskever, Martens, Dahl 和 Hinton</code>研究了深度学习使⽤随机权重初始化和基于<code>momentum</code>的<code>SGD</code>⽅法。两种情形下，好的选择可以获得较⼤的差异的训练效果。</li>
+</ul>
+
+<p>论文地址：</p>
+
+<ul>
+<li><a href="chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fproceedings.mlr.press%2Fv9%2Fglorot10a%2Fglorot10a.pdf">Understanding the difficulty of training deep feedforward neural networks</a>
+
+<ul>
+<li>论文解读：</li>
+<li><a href="https://zhuanlan.zhihu.com/p/43840797">解读——01</a></li>
+<li><a href="https://www.cnblogs.com/yinheyi/p/6411713.html">解读——02</a></li>
+<li>论文翻译：<a href="https://blog.csdn.net/qq_34784753/article/details/78668884">这里</a></li>
+</ul></li>
+<li><a href="chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fwww.cs.toronto.edu%2F~hinton%2Fabsps%2Fmomentum.pdf">On the importance of initialization and momentum in deep learning</a></li>
+</ul>
+
+<div align=center><img width="20%" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2020/02_why_are_deep_neural_networks_hard_to_train/">https://www.howie6879.cn/post/2020/02_why_are_deep_neural_networks_hard_to_train/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/12_a_visual_proof_that_neural_nets_can_compute_any_function/">nndl_note: 神经⽹络可以计算任何函数的可视化证明</a></li>
+        
+        <li><a href="/post/2019/11_improving_the_way_neural_networks_learn/">nndl_note: 改进神经⽹络的学习⽅法</a></li>
+        
+        <li><a href="/post/2019/08_how_does_the_back_propagation_algorithm_work/">nndl_note: 反向传播算法如何工作</a></li>
+        
+        <li><a href="/post/2019/07_use_neural_network_recognize_handwriting/">nndl_note: 识别手写字</a></li>
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+                <li><a href='/tags/nndl-book'>nndl-book</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>神经网络基础 | 老胡的储物柜</title>
+  <meta property="og:title" content="神经网络基础 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-01-03T08:37:56&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-01-03T08:37:56&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="神经网络基础"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/01_neural_network_foundation/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#带着问题出发">带着问题出发</a></li>
+        <li><a href="#感知器">感知器</a></li>
+        <li><a href="#s型神经元">S型神经元</a></li>
+        <li><a href="#神经网络">神经网络</a></li>
+        <li><a href="#神经网络的数据表示">神经网络的数据表示</a></li>
+        <li><a href="#张量运算">张量运算</a></li>
+        <li><a href="#梯度优化">梯度优化</a></li>
+        <li><a href="#总结">总结</a></li>
+        <li><a href="#说明">说明</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">神经网络基础</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年1月3日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如，<a href="https://mp.weixin.qq.com/s/RdmMvuq8Vj33ggZALjfMLw">备份地址</a>：</p>
+<ul>
+<li>什么是感知器</li>
+<li>什么是神经网络</li>
+<li>张量以及运算</li>
+<li>微分</li>
+<li>梯度下降</li>
+</ul>
+<h3 id="带着问题出发">带着问题出发</h3>
+<p>在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对<code>MNIST数据集</code>进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念</p>
+<p><code>MNIST数据集</code>是一份手写字训练集，出自<code>MNIST</code>，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：</p>
+<ul>
+<li>拥有60,000个示例的训练集，以及10,000个示例的测试集</li>
+<li>图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示</li>
+<li>图片分为10类， 分别对应从0～9，共10个阿拉伯数字</li>
+</ul>
+<p>压缩包内容如下：</p>
+<ul>
+<li>train-images-idx3-ubyte.gz:  training set images (9912422 bytes)</li>
+<li>train-labels-idx1-ubyte.gz:  training set labels (28881 bytes)</li>
+<li>t10k-images-idx3-ubyte.gz:   test set images (1648877 bytes)</li>
+<li>t10k-labels-idx1-ubyte.gz:   test set labels (4542 bytes)</li>
+</ul>
+<p>上图：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/0A0F8531-ACD0-4843-8A4F-F16C82720088.png" />   
+    </p>
+<p>图片生成代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">%</span>matplotlib inline
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">matplotlib</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">matplotlib.pyplot</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">plt</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras.datasets</span> <span style="color:#000;font-weight:bold">import</span> mnist
+
+(train_images, train_labels), (test_images, test_labels) <span style="color:#000;font-weight:bold">=</span> mnist<span style="color:#000;font-weight:bold">.</span>load_data()
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">plot_digits</span>(instances, images_per_row<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, <span style="color:#000;font-weight:bold">**</span>options):
+    size <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">28</span>
+    images_per_row <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">min</span>(<span style="color:#0086b3">len</span>(instances), images_per_row)
+    images <span style="color:#000;font-weight:bold">=</span> instances
+    n_rows <span style="color:#000;font-weight:bold">=</span> (<span style="color:#0086b3">len</span>(instances) <span style="color:#000;font-weight:bold">-</span> <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">//</span> images_per_row <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>
+    row_images <span style="color:#000;font-weight:bold">=</span> []
+    n_empty <span style="color:#000;font-weight:bold">=</span> n_rows <span style="color:#000;font-weight:bold">*</span> images_per_row <span style="color:#000;font-weight:bold">-</span> <span style="color:#0086b3">len</span>(instances)
+    images<span style="color:#000;font-weight:bold">.</span>append(np<span style="color:#000;font-weight:bold">.</span>zeros((size, size <span style="color:#000;font-weight:bold">*</span> n_empty)))
+    <span style="color:#000;font-weight:bold">for</span> row <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(n_rows):
+        rimages <span style="color:#000;font-weight:bold">=</span> images[row <span style="color:#000;font-weight:bold">*</span> images_per_row : (row <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">*</span> images_per_row]
+        row_images<span style="color:#000;font-weight:bold">.</span>append(np<span style="color:#000;font-weight:bold">.</span>concatenate(rimages, axis<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>))
+    image <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>concatenate(row_images, axis<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>)
+    plt<span style="color:#000;font-weight:bold">.</span>imshow(image, cmap <span style="color:#000;font-weight:bold">=</span> matplotlib<span style="color:#000;font-weight:bold">.</span>cm<span style="color:#000;font-weight:bold">.</span>binary, <span style="color:#000;font-weight:bold">**</span>options)
+    plt<span style="color:#000;font-weight:bold">.</span>axis(<span style="color:#d14">&#34;off&#34;</span>)
+
+plt<span style="color:#000;font-weight:bold">.</span>figure(figsize<span style="color:#000;font-weight:bold">=</span>(<span style="color:#099">9</span>,<span style="color:#099">9</span>))
+plot_digits(train_images[:<span style="color:#099">100</span>], images_per_row<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>)
+plt<span style="color:#000;font-weight:bold">.</span>show()
+</code></pre></td></tr></table>
+</div>
+</div><p>不过你不用急着尝试，接下来我们可以一步一步慢慢来分析手写字训练集</p>
+<p>看这一行代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(train_images, train_labels), (test_images, test_labels) <span style="color:#000;font-weight:bold">=</span> mnist<span style="color:#000;font-weight:bold">.</span>load_data()
+</code></pre></td></tr></table>
+</div>
+</div><p><code>MNIST数据集</code>通过<code>keras.datasets</code>加载，其中<code>train_images</code>和<code>train_labels</code>构成了训练集，另外两个则是测试集：</p>
+<ul>
+<li>train_images.shape: (60000, 28, 28)</li>
+<li>train_labels.shape: (60000,)</li>
+</ul>
+<p>我们要做的事情很简单，将训练集丢到神经网络里面去，训练后生成了我们期望的神经网络模型，然后模型再对测试集进行预测，我们只需要判断预测的数字是不是正确的即可</p>
+<p>在用代码构建一个神经网络之前，我先简单介绍一下到底什么是神经网络，让我们从感知器开始</p>
+<h3 id="感知器">感知器</h3>
+<blockquote>
+<p>感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络</p>
+</blockquote>
+<p>感知器的工作方式如下所示：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/2977DAE0-ECE3-4BC5-AF1C-90D51DCBE9AB.png" />   
+    </p>
+<p>左侧三个变量分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5F74C39F-956D-4ABE-B12B-1F1CCABB9F63.png" />   
+    </p>
+<p>此时，output可以表示为：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/CD964C69-3677-4B34-8A98-1DAAF45BA6B3.png" />   
+    </p>
+<p>上面右侧的式子是一个阶跃函数，就是和Sigmoid、Relu一样作用的激活函数，然后我们就可以自己实现一个感知器：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    代码实现 Frank Rosenblatt 提出的感知器的与非门，加深对感知器的理解
+</span><span style="color:#d14">    blog: https://www.howie6879.cn/post/33/
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, act_func, input_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        实例化一些基本参数
+</span><span style="color:#d14">        :param act_func: 激活函数
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#998;font-style:italic"># 激活函数</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>act_func <span style="color:#000;font-weight:bold">=</span> act_func
+        <span style="color:#998;font-style:italic"># 权重 已经确定只会有两个二进制输入</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(input_nums)
+        <span style="color:#998;font-style:italic"># 偏置项</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, rate<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.1</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        训练出合适的 w 和 b
+</span><span style="color:#d14">        :param input_vectors: 样本训练数据集
+</span><span style="color:#d14">        :param labels: 标记值
+</span><span style="color:#d14">        :param learn_nums: 学习多少次
+</span><span style="color:#d14">        :param rate: 学习率
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
+            <span style="color:#000;font-weight:bold">for</span> index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
+                label <span style="color:#000;font-weight:bold">=</span> labels[index]
+                output <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>predict(input_vector)
+                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">-</span> output
+                <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">+=</span> input_vector <span style="color:#000;font-weight:bold">*</span> rate <span style="color:#000;font-weight:bold">*</span> delta
+                <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> rate <span style="color:#000;font-weight:bold">*</span> delta
+        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
+            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>act_func(<span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b)
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">f</span>(z):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    激活函数
+</span><span style="color:#d14">    :param z: (w1*x1+w2*x2+...+wj*xj) + b
+</span><span style="color:#d14">    :return: 1 or 0
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> z <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">0</span>
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_and_gate_training_data</span>():
+    <span style="color:#d14">&#39;&#39;&#39;
+</span><span style="color:#d14">    AND 训练数据集
+</span><span style="color:#d14">    &#39;&#39;&#39;</span>
+    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">1</span>, <span style="color:#099">1</span>], [<span style="color:#099">1</span>, <span style="color:#099">0</span>], [<span style="color:#099">0</span>, <span style="color:#099">1</span>], [<span style="color:#099">0</span>, <span style="color:#099">0</span>]])
+    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>])
+    <span style="color:#000;font-weight:bold">return</span> input_vectors, labels
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    输出如下：
+</span><span style="color:#d14">        此时感知器权重为[ 0.1  0.2]，偏置项为-0.2 与门
+</span><span style="color:#d14">        1 and 1 = 1
+</span><span style="color:#d14">        1 and 0 = 0
+</span><span style="color:#d14">        0 and 1 = 0
+</span><span style="color:#d14">        0 and 0 = 0
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    <span style="color:#998;font-style:italic"># 获取样本数据</span>
+    and_input_vectors, and_labels <span style="color:#000;font-weight:bold">=</span> get_and_gate_training_data()
+    <span style="color:#998;font-style:italic"># 实例化感知器模型</span>
+    p <span style="color:#000;font-weight:bold">=</span> Perceptron(f)
+    <span style="color:#998;font-style:italic"># 开始学习 AND</span>
+    p_and <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(and_input_vectors, and_labels)
+    <span style="color:#998;font-style:italic"># 开始预测 AND</span>
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;1 and 1 = </span><span style="color:#d14">%d</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">%</span> p_and<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;1 and 0 = </span><span style="color:#d14">%d</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">%</span> p_and<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">0</span>]))
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;0 and 1 = </span><span style="color:#d14">%d</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">%</span> p_and<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">0</span>, <span style="color:#099">1</span>]))
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;0 and 0 = </span><span style="color:#d14">%d</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">%</span> p_and<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">0</span>, <span style="color:#099">0</span>]))
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="s型神经元">S型神经元</h3>
+<p>神经元和感知器本质上是一样的，他们的区别在于激活函数不同，比如跃迁函数改为Sigmoid函数</p>
+<p>神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/19333562-3B02-4E17-96C2-5B7D44F99FA5.png" />   
+    </p>
+<p>以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案</p>
+<p>所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为σ(w⋅x+b)，而σ就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5E03C070-79F5-48F7-8EFB-A15171C3EF74-20220403123620786.png" />   
+    </p>
+<h3 id="神经网络">神经网络</h3>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/B1AA88E4-E903-40C6-A345-6A7908238FDD.png" />   
+    </p>
+<p>神经网络其实就是按照一定规则连接起来的多个神经元，一个神经网络由以下组件构成：</p>
+<ul>
+<li>输入层：接受传递数据，这里应该是 784 个神经元</li>
+<li>隐藏层：发掘出特征</li>
+<li>各层之间的权重：自动学习出来</li>
+<li>每个隐藏层都会有一个精心设计的激活函数，比如Sigmoid、Relu激活函数</li>
+<li>输出层，10个输出</li>
+<li>上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：前馈神经网络</li>
+<li>有回路，其中反馈环路是可⾏的：递归神经网络</li>
+</ul>
+<p>从输入层传入<code>手写字训练集</code>，然后通过隐藏层向前传递训练集数据，最后输出层会输出10个概率值，总和为1。现在，我们可以看看<code>Keras</code>代码:</p>
+<p>第一步，对数据进行预处理，我们知道，原本数据形状是<code>(60000, 28, 28)</code>，取值区间为<code>[0, 255]</code>，现在改为<code>[0, 1]</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>reshape((<span style="color:#099">60000</span>, <span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>)) 
+train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>astype(<span style="color:#d14">&#39;float32&#39;</span>) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>
+
+test_images <span style="color:#000;font-weight:bold">=</span> test_images<span style="color:#000;font-weight:bold">.</span>reshape((<span style="color:#099">10000</span>, <span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>)) 
+test_images <span style="color:#000;font-weight:bold">=</span> test_images<span style="color:#000;font-weight:bold">.</span>astype(<span style="color:#d14">&#39;float32&#39;</span>) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后对标签进行分类编码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras.utils</span> <span style="color:#000;font-weight:bold">import</span> to_categorical
+
+train_labels <span style="color:#000;font-weight:bold">=</span> to_categorical(train_labels) 
+test_labels <span style="color:#000;font-weight:bold">=</span> to_categorical(test_labels)
+</code></pre></td></tr></table>
+</div>
+</div><p>第二步，编写模型：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras</span> <span style="color:#000;font-weight:bold">import</span> models 
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras</span> <span style="color:#000;font-weight:bold">import</span> layers
+
+network <span style="color:#000;font-weight:bold">=</span> models<span style="color:#000;font-weight:bold">.</span>Sequential() 
+network<span style="color:#000;font-weight:bold">.</span>add(layers<span style="color:#000;font-weight:bold">.</span>Dense(<span style="color:#099">512</span>, activation<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;relu&#39;</span>, input_shape<span style="color:#000;font-weight:bold">=</span>(<span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>,))) 
+network<span style="color:#000;font-weight:bold">.</span>add(layers<span style="color:#000;font-weight:bold">.</span>Dense(<span style="color:#099">10</span>, activation<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;softmax&#39;</span>)
+            
+network<span style="color:#000;font-weight:bold">.</span>compile(optimizer<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;rmsprop&#39;</span>,loss<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;categorical_crossentropy&#39;</span>, metrics<span style="color:#000;font-weight:bold">=</span>[<span style="color:#d14">&#39;accuracy&#39;</span>])
+network<span style="color:#000;font-weight:bold">.</span>fit(train_images, train_labels, epochs<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span>, batch_size<span style="color:#000;font-weight:bold">=</span><span style="color:#099">128</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/8FC079F8-7379-479D-A478-6FED187D8A9C.png" />   
+    </p>
+<p>一个隐藏层，激活函数选用<code>relu</code>，输出层使用<code>softmax</code>返回一个由10个概率值（总和为 1）组成的数组</p>
+<p>训练过程中显示了两个数字：一个是网络在训练数据上的损失<code>loss</code>，另一个是网络在 训练数据上的精度<code>acc</code></p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/0EC7913A-205C-4BF2-BCB6-075411819AA3.png" />   
+    </p>
+<p>很简单，我们构建和训练一个神经网络，就这么几行代码，之所以写的这么剪短，是因为<code>keras</code>接接口封装地比较好用，但是里面的理论知识我们还是需要好好研究下</p>
+<h3 id="神经网络的数据表示">神经网络的数据表示</h3>
+<p><code>TensorFlow</code>里面的<code>Tensor</code>是张量的意思，上面例子里面存储在多维Numpy数组中的数据就是张量：张量是数据容器，矩阵就是二维张量，张量是矩阵向任意维度的推广，张量的维度称为轴</p>
+<h4 id="标量">标量</h4>
+<p>包含一个数字的张量叫做标量（0D张量），如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(<span style="color:#099">12</span>)
+<span style="color:#0086b3">print</span>(x, x<span style="color:#000;font-weight:bold">.</span>ndim)
+<span style="color:#998;font-style:italic"># 12, 0</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>张量轴的个数也叫做阶(rank)</p>
+<h4 id="向量">向量</h4>
+<p>数字组成的数组叫做向量（1D张量），如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">12</span>, <span style="color:#099">3</span>, <span style="color:#099">6</span>, <span style="color:#099">14</span>, <span style="color:#099">7</span>])
+<span style="color:#0086b3">print</span>(x, x<span style="color:#000;font-weight:bold">.</span>ndim)
+<span style="color:#998;font-style:italic"># [12  3  6 14  7] 1</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="矩阵">矩阵</h4>
+<p>向量组成的数组叫做矩阵（2D张量），如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">5</span>, <span style="color:#099">78</span>, <span style="color:#099">2</span>, <span style="color:#099">34</span>, <span style="color:#099">0</span>], [<span style="color:#099">6</span>, <span style="color:#099">79</span>, <span style="color:#099">3</span>, <span style="color:#099">35</span>, <span style="color:#099">1</span>], [<span style="color:#099">7</span>, <span style="color:#099">80</span>, <span style="color:#099">4</span>, <span style="color:#099">36</span>, <span style="color:#099">2</span>]])
+<span style="color:#0086b3">print</span>(x, x<span style="color:#000;font-weight:bold">.</span>ndim)
+<span style="color:#998;font-style:italic"># [[ 5 78  2 34  0]</span>
+<span style="color:#998;font-style:italic"># [ 6 79  3 35  1]</span>
+<span style="color:#998;font-style:italic"># [ 7 80  4 36  2]] 2</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="3d张量与更高维张量">3D张量与更高维张量</h4>
+<p>将多个矩阵组合成一个新的数组就是一个3D张量，如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[[<span style="color:#099">5</span>, <span style="color:#099">78</span>, <span style="color:#099">2</span>, <span style="color:#099">34</span>, <span style="color:#099">0</span>], [<span style="color:#099">6</span>, <span style="color:#099">79</span>, <span style="color:#099">3</span>, <span style="color:#099">35</span>, <span style="color:#099">1</span>]], [[<span style="color:#099">5</span>, <span style="color:#099">78</span>, <span style="color:#099">2</span>, <span style="color:#099">34</span>, <span style="color:#099">0</span>], [<span style="color:#099">6</span>, <span style="color:#099">79</span>, <span style="color:#099">3</span>, <span style="color:#099">35</span>, <span style="color:#099">1</span>]], [[<span style="color:#099">5</span>, <span style="color:#099">78</span>, <span style="color:#099">2</span>, <span style="color:#099">34</span>, <span style="color:#099">0</span>], [<span style="color:#099">6</span>, <span style="color:#099">79</span>, <span style="color:#099">3</span>, <span style="color:#099">35</span>, <span style="color:#099">1</span>]]])
+<span style="color:#0086b3">print</span>(x, x<span style="color:#000;font-weight:bold">.</span>ndim)
+<span style="color:#998;font-style:italic"># (array([[[ 5, 78,  2, 34,  0],</span>
+<span style="color:#998;font-style:italic">#          [ 6, 79,  3, 35,  1]],</span>
+<span style="color:#998;font-style:italic">#  </span>
+<span style="color:#998;font-style:italic">#         [[ 5, 78,  2, 34,  0],</span>
+<span style="color:#998;font-style:italic">#          [ 6, 79,  3, 35,  1]],</span>
+<span style="color:#998;font-style:italic">#  </span>
+<span style="color:#998;font-style:italic">#         [[ 5, 78,  2, 34,  0],</span>
+<span style="color:#998;font-style:italic">#          [ 6, 79,  3, 35,  1]]]), 3)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>将多个3D张量组合成一个数组，可以创建一个4D张量</p>
+<h4 id="关键属性">关键属性</h4>
+<p>张量是由以下三个关键属性来定义：</p>
+<ul>
+<li>轴的个数：3D张量三个轴，矩阵两个轴</li>
+<li>形状：是一个整数元祖，比如前面矩阵为(3, 5)，向量(5,)，3D张量为(3, 2, 5)</li>
+<li>数据类型</li>
+</ul>
+<h4 id="在numpy中操作张量">在Numpy中操作张量</h4>
+<p>以前面加载的<code>train_images</code>为：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(train_images, train_labels), (test_images, test_labels) <span style="color:#000;font-weight:bold">=</span> mnist<span style="color:#000;font-weight:bold">.</span>load_data()
+</code></pre></td></tr></table>
+</div>
+</div><p>比如进行切片选择<code>10~100</code>个数字：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images[<span style="color:#099">10</span>:<span style="color:#099">100</span>]<span style="color:#000;font-weight:bold">.</span>shape
+<span style="color:#998;font-style:italic"># (90, 28, 28)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="数据批量的概念">数据批量的概念</h4>
+<p>深度学习模型会将数据集随机分割成小批量进行处理，比如：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">batch <span style="color:#000;font-weight:bold">=</span> train_images[:<span style="color:#099">128</span>]
+batch<span style="color:#000;font-weight:bold">.</span>shape
+<span style="color:#998;font-style:italic"># (128, 28, 28)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="现实世界的数据张量">现实世界的数据张量</h4>
+<p>下面将介绍下现实世界中数据的形状：</p>
+<ul>
+<li>向量数据：2D张量，(samples, features)</li>
+<li>时间序列数据或者序列数据：3D张量，(samples, timesteps, features)</li>
+<li>图像：4D张量，(samples, height, width, channels) 或 (samples, channels, height, width)</li>
+<li>视频：5D张量，(samples, frames, height, width, channels) 或 (samples, frames, channels, height, width)</li>
+</ul>
+<h3 id="张量运算">张量运算</h3>
+<p>类似于计算机程序的计算可以转化为二进制计算，深度学习计算可以转化为数值数据张量上的一些<strong>张量运算</strong>(tensor operation)</p>
+<p>上面模型的隐藏层代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">keras<span style="color:#000;font-weight:bold">.</span>layers<span style="color:#000;font-weight:bold">.</span>Dense(<span style="color:#099">512</span>, activation<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;relu&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>这一层可以理解为一个函数，输入一个2D张量，输出一个2D张量，就如同上面感知机那一节最后输出的计算函数：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">output = relu(dot(W, input) + b)
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="逐元素计算">逐元素计算</h4>
+<p>Relu 和加法运算都是逐元素的运算，比如：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 输入示例</span>
+input_x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">2</span>], [<span style="color:#099">3</span>], [<span style="color:#099">1</span>]])
+<span style="color:#998;font-style:italic"># 权重</span>
+W <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">5</span>, <span style="color:#099">6</span>, <span style="color:#099">1</span>], [<span style="color:#099">7</span>, <span style="color:#099">8</span>, <span style="color:#099">1</span>]])
+<span style="color:#998;font-style:italic"># 计算输出 z</span>
+z <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>dot(W, input_x)
+
+<span style="color:#998;font-style:italic"># 实现激活函数</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">naive_relu</span>(x):
+    <span style="color:#000;font-weight:bold">assert</span> <span style="color:#0086b3">len</span>(x<span style="color:#000;font-weight:bold">.</span>shape) <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">2</span>
+    x <span style="color:#000;font-weight:bold">=</span> x<span style="color:#000;font-weight:bold">.</span>copy()
+    <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(x<span style="color:#000;font-weight:bold">.</span>shape[<span style="color:#099">0</span>]):
+        <span style="color:#000;font-weight:bold">for</span> j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(x<span style="color:#000;font-weight:bold">.</span>shape[<span style="color:#099">1</span>]):
+            x[i, j] <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">max</span>(x[i, j], <span style="color:#099">0</span>) 
+    <span style="color:#000;font-weight:bold">return</span> x
+
+<span style="color:#998;font-style:italic"># 激活函数对应的输出</span>
+output <span style="color:#000;font-weight:bold">=</span> naive_relu(z)
+output
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="广播">广播</h4>
+<p>张量运算那节中，有这样一段代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">output <span style="color:#000;font-weight:bold">=</span> relu(dot(W, <span style="color:#0086b3">input</span>) <span style="color:#000;font-weight:bold">+</span> b)
+</code></pre></td></tr></table>
+</div>
+</div><p><code>dot(W, input)</code>是2D张量，<code>b</code>是向量，两个形状不同的张量相加，会发生什么？</p>
+<p>如果没有歧义的话，较小的张量会被广播，用来匹配较大张量的形状：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">input_x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">1</span>], [<span style="color:#099">3</span>]])
+<span style="color:#998;font-style:italic"># 权重</span>
+W <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">5</span>, <span style="color:#099">6</span>], [<span style="color:#099">7</span>, <span style="color:#099">8</span>]])
+b <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>])
+<span style="color:#998;font-style:italic"># 计算输出 z</span>
+z <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>dot(W, input_x) <span style="color:#000;font-weight:bold">+</span> b
+<span style="color:#998;font-style:italic"># array([[24],</span>
+<span style="color:#998;font-style:italic">#        [32]])</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="张量点积">张量点积</h4>
+<p>点积运算，也叫张量积，如：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+<span style="color:#998;font-style:italic"># 输入示例</span>
+input_x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">2</span>], [<span style="color:#099">3</span>], [<span style="color:#099">1</span>]])
+<span style="color:#998;font-style:italic"># 权重</span>
+W <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">5</span>, <span style="color:#099">6</span>, <span style="color:#099">1</span>], [<span style="color:#099">7</span>, <span style="color:#099">8</span>, <span style="color:#099">1</span>]])
+np<span style="color:#000;font-weight:bold">.</span>dot(W, input_x)
+</code></pre></td></tr></table>
+</div>
+</div><p>两个向量之间的点积是一个标量：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">naive_vector_dot</span>(x, y):
+    <span style="color:#000;font-weight:bold">assert</span> <span style="color:#0086b3">len</span>(x<span style="color:#000;font-weight:bold">.</span>shape) <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">1</span>
+    <span style="color:#000;font-weight:bold">assert</span> <span style="color:#0086b3">len</span>(y<span style="color:#000;font-weight:bold">.</span>shape) <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">1</span> 
+    <span style="color:#000;font-weight:bold">assert</span> x<span style="color:#000;font-weight:bold">.</span>shape[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">==</span> y<span style="color:#000;font-weight:bold">.</span>shape[<span style="color:#099">0</span>]
+    z <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.</span>
+    <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(x<span style="color:#000;font-weight:bold">.</span>shape[<span style="color:#099">0</span>]):
+        z <span style="color:#000;font-weight:bold">+=</span> x[i] <span style="color:#000;font-weight:bold">*</span> y[i] 
+    <span style="color:#000;font-weight:bold">return</span> z
+
+x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>,<span style="color:#099">2</span>])
+y <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>,<span style="color:#099">2</span>])
+
+naive_vector_dot(x, y)
+
+<span style="color:#998;font-style:italic"># 5.0</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>矩阵和向量点积后是一个向量：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">np<span style="color:#000;font-weight:bold">.</span>dot(W, [<span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">3</span>])
+<span style="color:#998;font-style:italic"># array([20, 26])</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="张量变形">张量变形</h4>
+<p>前面对数据进行预处理的时候：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>reshape((<span style="color:#099">60000</span>, <span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>)) 
+train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>astype(<span style="color:#d14">&#39;float32&#39;</span>) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的例子将输入数据的shape变成了(60000, 784)，张量变形指的就是改变张量的行和列，得到想要的形状，前后数据集个数不变，经常遇到一个特殊的张量变形是转置(transposition)，如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros((<span style="color:#099">300</span>, <span style="color:#099">20</span>))
+x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>transpose(x)
+x<span style="color:#000;font-weight:bold">.</span>shape
+<span style="color:#998;font-style:italic"># (20, 300)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="梯度优化">梯度优化</h3>
+<p>针对每个输入，神经网络都会通过下面的函数对输入数据进行变换：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">output <span style="color:#000;font-weight:bold">=</span> relu(dot(W, input_x) <span style="color:#000;font-weight:bold">+</span> b)
+</code></pre></td></tr></table>
+</div>
+</div><p>其中：</p>
+<ul>
+<li>relu：激活函数</li>
+<li>W：是一个张量，表示权重，第一步可以取较小的随机值进行随机初始化</li>
+<li>b：是一个张量，表示偏置</li>
+</ul>
+<p>现在我们需要一个算法来让我们找到权重和偏置，从而使得y=y(x)可以拟合样本输入的x</p>
+<h4 id="再回到感知器">再回到感知器</h4>
+<p>感知器学习的过程就是其中权重和偏置不断调优更新的过程，其中的偏置可以理解成输入为1的权重值，那么权重是怎么更新的呢？</p>
+<p>首先，介绍一个概念，损失函数，引用李航老师统计学习方法书中的一个解释：</p>
+<blockquote>
+<p>监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))</p>
+</blockquote>
+<p>其中模型f(X)关于训练数据集的平均损失，我们称之为：经验风险（empirical risk），上述的权重调整，就是在不断地让经验风险最小，求出最好的模型f(X)，我们暂时不考虑正则化，此时我们经验风险的最优化的目标函数就是：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/142D8E83-65C1-4491-ADCC-EDE7280AD1C1.png" />   
+    </p>
+<p>求解出此目标函数最小时对应的权重值，就是我们感知器里面对应的权重值，在推导之前，我们还得明白两个概念：</p>
+<ul>
+<li>什么是导数</li>
+<li>什么是梯度</li>
+</ul>
+<h4 id="什么是导数">什么是导数</h4>
+<p>假设有一个连续的光滑函数<code>f(x) = y</code>，什么是函数连续性？指的是x的微小变化只能导致y的微小变化。</p>
+<p>假设f(x)上的两点<code>a,b</code>足够接近，那么<code>a,b</code>可以近似为一个线性函数，此时他们斜率为<code>k</code>，那么可以说斜率k是f在b点的<strong>导数</strong></p>
+<p>总之，导数描述了改变x后f(x)会如何变化，如果你希望减小f(x)的值，只需要将x沿着导数的反方向移动一小步即可，反之亦然</p>
+<h4 id="什么是梯度">什么是梯度</h4>
+<p>梯度是张量运算的导数，是导数这一概念向多元函数导数的推广，它指向函数值上升最快的方向，函数值下降最快的方向自然就是梯度的反方向</p>
+<h4 id="随机梯度下降">随机梯度下降</h4>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/sgd.jpg" />   
+    </p>
+<p>感知器代码里面的这段:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">+=</span> input_vector <span style="color:#000;font-weight:bold">*</span> rate <span style="color:#000;font-weight:bold">*</span> delta
+</code></pre></td></tr></table>
+</div>
+</div><p>就对应上面式子里面推导出来的规则</p>
+<h3 id="总结">总结</h3>
+<p>再来看看全部的手写字识别模型代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras</span> <span style="color:#000;font-weight:bold">import</span> models 
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras</span> <span style="color:#000;font-weight:bold">import</span> layers
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">keras.utils</span> <span style="color:#000;font-weight:bold">import</span> to_categorical
+
+(train_images, train_labels), (test_images, test_labels) <span style="color:#000;font-weight:bold">=</span> mnist<span style="color:#000;font-weight:bold">.</span>load_data()
+
+train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>reshape((<span style="color:#099">60000</span>, <span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>)) 
+train_images <span style="color:#000;font-weight:bold">=</span> train_images<span style="color:#000;font-weight:bold">.</span>astype(<span style="color:#d14">&#39;float32&#39;</span>) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>
+
+test_images <span style="color:#000;font-weight:bold">=</span> test_images<span style="color:#000;font-weight:bold">.</span>reshape((<span style="color:#099">10000</span>, <span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>)) 
+test_images <span style="color:#000;font-weight:bold">=</span> test_images<span style="color:#000;font-weight:bold">.</span>astype(<span style="color:#d14">&#39;float32&#39;</span>) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>
+
+train_labels <span style="color:#000;font-weight:bold">=</span> to_categorical(train_labels) 
+test_labels <span style="color:#000;font-weight:bold">=</span> to_categorical(test_labels)
+
+
+network <span style="color:#000;font-weight:bold">=</span> models<span style="color:#000;font-weight:bold">.</span>Sequential() 
+network<span style="color:#000;font-weight:bold">.</span>add(layers<span style="color:#000;font-weight:bold">.</span>Dense(<span style="color:#099">512</span>, activation<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;relu&#39;</span>, input_shape<span style="color:#000;font-weight:bold">=</span>(<span style="color:#099">28</span> <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">28</span>,))) 
+network<span style="color:#000;font-weight:bold">.</span>add(layers<span style="color:#000;font-weight:bold">.</span>Dense(<span style="color:#099">10</span>, activation<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;softmax&#39;</span>))
+
+network<span style="color:#000;font-weight:bold">.</span>compile(optimizer<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;rmsprop&#39;</span>,loss<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;categorical_crossentropy&#39;</span>, metrics<span style="color:#000;font-weight:bold">=</span>[<span style="color:#d14">&#39;accuracy&#39;</span>])
+network<span style="color:#000;font-weight:bold">.</span>fit(train_images, train_labels, epochs<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span>, batch_size<span style="color:#000;font-weight:bold">=</span><span style="color:#099">128</span>)
+
+test_loss, test_acc <span style="color:#000;font-weight:bold">=</span> network<span style="color:#000;font-weight:bold">.</span>evaluate(test_images, test_labels)
+<span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;test_acc:&#39;</span>, test_acc)
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>输入数据保存在<code>float32</code>格式的<code>Numpy</code>张量中，形状分别是(60000, 784)和(10000, 784)</li>
+<li>神经网络结构为：1个输入层、一个隐藏层、一个输出层</li>
+<li>categorical_crossentropy是针对分类模型的损失函数</li>
+<li>每批128个样本，共迭代5次，一共更新(469 * 5) = 2345次</li>
+</ul>
+<h3 id="说明">说明</h3>
+<p>对本文有影响的书籍文章如下，感谢他们的付出：</p>
+<ul>
+<li>[统计学习方法] 第一章</li>
+<li><a href="http://neuralnetworksanddeeplearning.com/chap1.html">Neural Networks and Deep Learning</a> 第一章</li>
+<li><a href="https://www.amazon.com/Deep-Learning-Python-Francois-Chollet/dp/1617294438">Deep Learning with Python</a> 第二章</li>
+<li><a href="https://github.com/apachecn/hands-on-ml-zh">hands_on_Ml_with_Sklearn_and_TF</a></li>
+<li><a href="https://www.zybuluo.com/hanbingtao/note/448086">hanbt零基础入门深度学习系列</a></li>
+</ul>
+<p>
+        <img class="mx-auto" alt="wechat_howie" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" />   
+    </p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/01_neural_network_foundation/">https://www.howie6879.cn/post/2019/01_neural_network_foundation/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+        <li><a href="/post/2019/00_character-level_cnn_for_text_classi%EF%AC%81cation/">读 Character-level CNN for Text Classiﬁcation</a></li>
+        
+        <li><a href="/post/2018/08_how-to-write-beautiful-python-code-with-pep-8/">如何用PEP 8编写优雅的Python代码</a></li>
+        
+        <li><a href="/post/2018/06_39/">统计学习方法笔记：3.k近邻法</a></li>
+        
+        <li><a href="/post/2018/05_38/">统计学习方法笔记：2.感知机</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

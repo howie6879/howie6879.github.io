@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>1.Docker - 初使用 | 老胡的储物柜</title>
+  <meta property="og:title" content="1.Docker - 初使用 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2017-08-15T20:13:30&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2017-08-15T20:13:30&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="1.Docker - 初使用"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2017/10_26/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">1.Docker - 初使用</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2017年8月15日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>自己很少使用<code>Docker</code>，也没有机会使用，毕业开始工作后，进的公司使用<code>Docker</code>进行部署，这是我的一些笔记，以便翻阅。</p>
+<h3 id="1准备">1.准备</h3>
+<blockquote>
+<p>系统：ubuntu16.04 or centos &hellip;</p>
+</blockquote>
+<h4 id="11安装">1.1.安装</h4>
+<h5 id="111ubuntu1604">1.1.1.ubuntu16.04</h5>
+<p>首先安装依赖包，在终端输入：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates
+</code></pre></td></tr></table>
+</div>
+</div><p>安装<code>Docker</code>，自动安装脚本提供了非常简洁的安装方式：</p>
+<!-- raw HTML omitted -->
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 官方下载方式</span>
+curl -sSL https://get.docker.com/ | sh
+
+<span style="color:#998;font-style:italic"># 镜像站会提升下载速度</span>
+<span style="color:#998;font-style:italic"># 阿里云的安装脚本</span>
+curl -sSL http://acs-public-mirror.oss-cn-hangzhou.aliyuncs.com/docker-engine/internet | sh -
+
+<span style="color:#998;font-style:italic"># DaoCloud 的安装脚本</span>
+curl -sSL https://get.daocloud.io/docker | sh
+</code></pre></td></tr></table>
+</div>
+</div><p>安装完成后，输入<code>sudo service docker status</code> 可见<code>Docker</code>已经启动:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">● docker.service - Docker Application Container Engine
+   Loaded: loaded <span style="color:#000;font-weight:bold">(</span>/lib/systemd/system/docker.service; enabled; vendor preset: enabled<span style="color:#000;font-weight:bold">)</span>
+   Active: active <span style="color:#000;font-weight:bold">(</span>running<span style="color:#000;font-weight:bold">)</span> since 二 2017-08-15 15:34:46 CST; 26min ago
+     Docs: https://docs.docker.com
+ Main PID: <span style="color:#099">16890</span> <span style="color:#000;font-weight:bold">(</span>dockerd<span style="color:#000;font-weight:bold">)</span>
+    Tasks: <span style="color:#099">25</span>
+   Memory: 60.1M
+      CPU: 1.980s
+   CGroup: /system.slice/docker.service
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="112centos7">1.1.2.centos7</h5>
+<p>完全可以参照上面的自动安装</p>
+<h4 id="12镜像加速器">1.2.镜像加速器</h4>
+<p>配置镜像加速器的目的是为了在使用<code>Docker</code>的过程中能提升速度，比如使用<a href="https://www.daocloud.io/mirror#accelerator-doc">DaoCloud 加速器</a>，输入网址，点击立即使用，按照官网的教程，一行命令搞定:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://<span style="color:#000;font-weight:bold">{</span>修改分配给你的id<span style="color:#000;font-weight:bold">}</span>.m.daocloud.io
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="2使用">2.使用</h3>
+<p>下面将简单的获取一个镜像并输出一个<code>Hello World</code>来简单演示下<code>Docker</code>的使用，首先介绍下<code>Docker</code>的三个基本概念，掌握了这三个基本概念，也就理解了<code>Docker</code>的生命周期</p>
+<p><strong>什么是镜像(Image)？</strong></p>
+<blockquote>
+<p>引用《第一本Docker书》</p>
+<p>镜像是构建<code>Docker</code>世界的基石，用户基于镜像来运行自己的容器，镜像是基于联合（Union）文件系统的一种层式，由一系列指令一步一步构建出来</p>
+</blockquote>
+<p><strong>什么是容器(Container)？</strong></p>
+<p><em>容器基于镜像启动，里面可以运行一个或者多个进程</em></p>
+<p><strong>什么是仓库(Repository)？</strong></p>
+<p><em>想象下<code>github</code>就很容易理解，托管你自己创建的镜像，默认使用<a href="https://hub.docker.com/">Docker Hub</a></em></p>
+<h4 id="21hello-world">2.1.Hello World</h4>
+<p>运行一条命令 <code>docker run hello-world</code>，会发现并没有运行成功，因为我是在非<code>root</code>的情况下运行的，会报如下错误：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker: Got permission denied <span style="color:#000;font-weight:bold">while</span> trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock/v1.30/containers/create: dial unix /var/run/docker.sock: connect: permission denied.
+</code></pre></td></tr></table>
+</div>
+</div><p>至于为什么有这个错误，具体可以看<a href="https://yeasy.gitbooks.io/docker_practice/content/install/ubuntu.html">这里</a>，介绍得非常清楚，下面说下解决办法：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 一定要重新登录才会生效</span>
+sudo usermod -aG docker <span style="color:#008080">$USER</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>用户重新登陆过后，就能成功运行了!</p>
+<h4 id="22简单例子">2.2.简单例子</h4>
+<p><strong>获取镜像</strong>:</p>
+<p><code>docker pull howie6879/cn_ubuntu</code>，这条命令就是从<code>Docker Hub</code>拉取一个镜像到本地，下面就可以使用这个镜像了,<strong>运行</strong>:</p>
+<p><code>docker run howie6879/cn_ubuntu:latest /bin/echo &quot;Hello World</code></p>
+<p>终端就会输出<code>Hello World</code></p>
+<h3 id="3最后">3.最后</h3>
+<blockquote>
+<p>参考1：<a href="https://yeasy.gitbooks.io/docker_practice/content/index.html">《Docker-从入门到实践》</a></p>
+<p>参考2：《第一本Docker书》</p>
+<p>gist看<a href="https://gist.github.com/83685e04e191079c56d36900e0839a3d">这里</a></p>
+<p>图片来自网络</p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2017/10_26/">https://www.howie6879.cn/post/2017/10_26/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2017/09_grpc-demo/">gRPC使用初试</a></li>
+        
+        <li><a href="/post/2017/08_talospider-intro/">talospider - 简单的爬虫框架</a></li>
+        
+        <li><a href="/post/2017/07_owllook-intro/">owllook -- 一个简洁的网络小说搜索引擎</a></li>
+        
+        <li><a href="/post/2017/06_sanic-usage-record/">sanic使用记录</a></li>
+        
+        <li><a href="/post/2017/05_build-vs-code-env-for-haskell/">vscode搭建haskell环境</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/docker'>Docker</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

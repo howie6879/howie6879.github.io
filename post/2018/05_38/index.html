@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>统计学习方法笔记：2.感知机 | 老胡的储物柜</title>
+  <meta property="og:title" content="统计学习方法笔记：2.感知机 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2018-09-18T17:54:42&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2018-09-18T17:54:42&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="统计学习方法笔记：2.感知机"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2018/05_38/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#感知机模型">感知机模型</a></li>
+    <li><a href="#感知机学习策略">感知机学习策略</a>
+      <ul>
+        <li><a href="#数据集的线性可分性">数据集的线性可分性</a></li>
+        <li><a href="#感知机学习策略-1">感知机学习策略</a></li>
+      </ul>
+    </li>
+    <li><a href="#感知机学习算法">感知机学习算法</a>
+      <ul>
+        <li><a href="#感知机学习算法的原始形式">感知机学习算法的原始形式</a></li>
+        <li><a href="#算法的收敛性">算法的收敛性</a></li>
+        <li><a href="#感知机学习算法的对偶形式">感知机学习算法的对偶形式</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">统计学习方法笔记：2.感知机</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年9月18日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
+<ul>
+<li>阅读章节：第二章：感知机</li>
+<li>开始时间：2018-09-18</li>
+<li>结束时间：2018-09-21</li>
+<li>目标：读完第二章，掌握基本概念，产出一篇笔记</li>
+<li><a href="https://www.howie6879.cn/post/38/">博客地址</a></li>
+</ul>
+<p>本章主要介绍了二类分类的线性分类模型：感知机：</p>
+<ul>
+<li>感知机模型</li>
+<li>感知机学习策略</li>
+<li>感知机学习算法</li>
+</ul>
+<p>说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见<a href="https://www.howie6879.cn/post/33/">这里</a></p>
+<h2 id="感知机模型">感知机模型</h2>
+<p>感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取<code>+1</code>和<code>–1</code>值，属于判别模型</p>
+<p>注：<code>+1 -1 分别代表正负类，有的可能用 1 0 表示</code></p>
+<p>在介绍感知机定义之前，下面几个概念需要说明一下：</p>
+<ul>
+<li>输入空间：输入所有可能取值的集合</li>
+<li>输出空间：输出所有可能取值的集合</li>
+<li>特征空间：每个具体的输入是一个实例，由特征向量表示</li>
+</ul>
+<p>所以对于一个感知机模型，可以这样表示：</p>
+<ul>
+<li>输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$</li>
+<li>输出空间：$\gamma = \{+1,-1 \}$</li>
+</ul>
+<p>那么感知机就是由输入空间到输出空间的函数：</p>
+<p>$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$</p>
+<p>其中：</p>
+<ul>
+<li>$sign$: 符号函数</li>
+<li>$w$: 权值（weight）或权值向量（weight vector）</li>
+<li>$b$: 偏置（bias）</li>
+</ul>
+<p>感知机的几何解释如下：线性方程</p>
+<p>$$w\cdot x + b =0$$</p>
+<p>如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：</p>
+<ul>
+<li>$w$: 超平面的法向量</li>
+<li>$b$: 超平面的截距</li>
+</ul>
+<h2 id="感知机学习策略">感知机学习策略</h2>
+<h3 id="数据集的线性可分性">数据集的线性可分性</h3>
+<p>什么是数据集的线性可分性，很简单，对于一个数据集：</p>
+<p>$$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$$</p>
+<p>如果存在上面一节说的超平面$S$：$w\cdot x + b =0$，能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，则称数据集T为线性可分数据集（linearly separable data set），否则，称数据集T线性不可分</p>
+<h3 id="感知机学习策略-1">感知机学习策略</h3>
+<p>找出超平面$S$，其实就是确定感知机模型参数：$w b$，根据统计学习方法三要素，此时我们需要确定一个学习策略，比如前面所说的损失函数（经验函数），并使其最小化（猜也猜得到策略讲完，后面就是说学习算法了哈哈）</p>
+<p>上一章以线性代数为例子，用损失函数来度量预测错误的程度，这里的损失函数可以用误分类点到超平面$S$的总距离，输入空间$\mathbb{R} ^n$中任一点$x_0$到超平面$S$的距离：</p>
+<p>$$\frac{1}{||w||}|w\cdot x_0+b|$$</p>
+<p>其中，$||w||$是$w$的$L_2$范数，假设超平面S的误分类点集合为$M$，那么所有误分类点到超平面$S$的总距离为：</p>
+<p>$$-\frac{1}{||w||}\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+<p>最终推导出感知机学习的损失函数：</p>
+<p>$$L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+<h2 id="感知机学习算法">感知机学习算法</h2>
+<p>上面一节已经确定了学习策略，按照统计学习方法三要素，目前需要一个算法来求解，目前最优化的方法是随机梯度下降法</p>
+<h3 id="感知机学习算法的原始形式">感知机学习算法的原始形式</h3>
+<p>现在感知机学习算法就是对下面最优化问题的算法：</p>
+<p>$$ \min_{w,b} L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b) $$</p>
+<p>现在的问题就转化成，求出参数$w$和$b$，使得上列损失函数达到极小化，这里我直接贴出书中的算法，后面的例子我会用<code>Python</code>代码实现：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/2A421204-2A48-44AA-B620-454085EA8691.png" />   
+    </p>
+<p>有了解题方法怎么能没有题目呢？李杭老师自然是考虑到了，请听题：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/07B0FED7-DE5B-4C6A-BAD5-37ABE4D6FCA2.png" />   
+    
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/88041E63-ADBF-4472-8031-C71436DCAA18.png" />   
+    </p>
+<p>借用<code>Linus Torvalds</code>大佬的一句话：<strong>Talk less, show me your code</strong>，所以直接看代码吧：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+<span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14"> Created by howie.hu at 2018/9/20.
+</span><span style="color:#d14">&#34;&#34;&#34;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.1代码实现
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, input_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>):
+        <span style="color:#998;font-style:italic"># 权重 已经确定只会有两个二进制输入</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(input_nums)
+        <span style="color:#998;font-style:italic"># 偏置项</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, rate<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        训练出合适的 w 和 b
+</span><span style="color:#d14">        :param input_vectors: 样本训练数据集
+</span><span style="color:#d14">        :param labels: 标记值
+</span><span style="color:#d14">        :param learn_nums: 学习多少次
+</span><span style="color:#d14">        :param rate: 学习率
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
+            <span style="color:#000;font-weight:bold">for</span> index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
+                label <span style="color:#000;font-weight:bold">=</span> labels[index]
+                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> (<span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b)
+                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
+                    <span style="color:#998;font-style:italic"># 计算方法由梯度下降算法推导出来</span>
+                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">+=</span> label <span style="color:#000;font-weight:bold">*</span> input_vector <span style="color:#000;font-weight:bold">*</span> rate
+                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> rate <span style="color:#000;font-weight:bold">*</span> label
+                    <span style="color:#000;font-weight:bold">break</span>
+        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        跃迁函数作为激活函数，感知器
+</span><span style="color:#d14">        :param input_vector:
+</span><span style="color:#d14">        :return:
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
+            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
+        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
+    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
+    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
+    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
+</code></pre></td></tr></table>
+</div>
+</div><p>输出如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
+<span style="color:#099">1</span>
+<span style="color:#099">1</span>
+-1
+</code></pre></td></tr></table>
+</div>
+</div><p>代码写完了，再看看推导过程：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190517173342.png" />   
+    </p>
+<h3 id="算法的收敛性">算法的收敛性</h3>
+<p>对于线性可分数据集感知机学习算法原始形式收敛，即经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型，定理<code>2.1</code>如下：</p>
+<p>假设训练数据集$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$是线性可分的，其中$x_i\in \chi  =\mathbb{R} ^n$，$y_i \in \gamma =\{-1, 1\}$，$i=1,2,&hellip;,N$，则有：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C3856950-3573-47A3-86A2-38F9A7B5F422.png" />   
+    </p>
+<h3 id="感知机学习算法的对偶形式">感知机学习算法的对偶形式</h3>
+<p>为什么要介绍感知机学习算法的对偶形式，主要目的就是减少运算量，这里一个<a href="https://www.zhihu.com/question/26526858">知乎回答</a>得挺好：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/CAB2C4A8-448A-4A23-9E26-4BEB6699BD3D.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/AC1F9A5E-B472-4E0C-8A15-680A8CAA1D65.png" />   
+    </p>
+<p>代码实现如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+<span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14"> Created by howie.hu at 2018/9/21.
+</span><span style="color:#d14">&#34;&#34;&#34;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, alpha_length<span style="color:#000;font-weight:bold">=</span><span style="color:#099">3</span>):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(alpha_length)
+        <span style="color:#998;font-style:italic"># 权重</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(<span style="color:#099">2</span>)
+        <span style="color:#998;font-style:italic"># 偏置项</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">7</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        训练出合适的 w 和 b
+</span><span style="color:#d14">        :param input_vectors: 样本训练数据集
+</span><span style="color:#d14">        :param labels: 标记值
+</span><span style="color:#d14">        :param learn_nums: 学习多少次
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        gram <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>matmul(input_vectors, input_vectors<span style="color:#000;font-weight:bold">.</span>T)
+
+        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
+
+            <span style="color:#000;font-weight:bold">for</span> input_vector_index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
+                label <span style="color:#000;font-weight:bold">=</span> labels[input_vector_index]
+                delta <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+                <span style="color:#000;font-weight:bold">for</span> alpha_index, a <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha):
+                    delta <span style="color:#000;font-weight:bold">+=</span> a <span style="color:#000;font-weight:bold">*</span> labels[alpha_index] <span style="color:#000;font-weight:bold">*</span> gram[input_vector_index][alpha_index]
+                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> delta <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
+                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha[input_vector_index] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
+                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> label
+                    <span style="color:#000;font-weight:bold">break</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>([j <span style="color:#000;font-weight:bold">*</span> input_vectors[i] <span style="color:#000;font-weight:bold">*</span> labels[i] <span style="color:#000;font-weight:bold">for</span> i, j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha)])
+        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
+            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
+        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
+    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
+    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
+    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
+    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
+<span style="color:#099">1</span>
+<span style="color:#099">1</span>
+-1
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="说明">说明</h2>
+<p>一些概念的详细解释：</p>
+<ul>
+<li><a href="https://blog.csdn.net/dengheCSDN/article/details/77313758">超平面是什么？</a></li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2018/05_38/">https://www.howie6879.cn/post/2018/05_38/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2018/04_37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+        
+        <li><a href="/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">Python之朴素贝叶斯对展会数据分类</a></li>
+        
+        <li><a href="/post/2018/03_update-https-for-blog/">博客升级HTTPS方案</a></li>
+        
+        <li><a href="/post/2018/02_sanic-for-pythoneer-06/">Sanic 使用教程 - 6.常用的技巧</a></li>
+        
+        <li><a href="/post/2018/01_sanic-for-pythoneer-05/">Sanic 使用教程 - 5.数据库使用</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95'>统计学习方法</a></li>
+                
+                <li><a href='/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0'>机器学习</a></li>
+                
+                <li><a href='/tags/mlhub123'>mlhub123</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

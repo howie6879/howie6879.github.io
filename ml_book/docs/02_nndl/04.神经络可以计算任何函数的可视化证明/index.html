@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="神经⽹络可以计算任何函数的可视化证明 #  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 &hellip;  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 #  在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&lt;\epsilon$，其中$\epsilon&gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 #  先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+$$ \sigma(z) \equiv 1 /\left(1&#43;e^{-z}\right) $$
+其中：$z=wx&#43;b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变   上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 &#43; np.exp(-(w * x &#43; b))) def plot_sigmoid(w, b): x = np.">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="神经⽹络可以计算任何函数的可视化证明 #  本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。
+主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：
+ 不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它
+ 试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：
+ 比如将中文翻译成英文 比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题 &hellip;  现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？
+前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。
+两个预先声明 #  在解释为何普遍性定理成⽴前，关于神经⽹络可以计算任何函数有两个预先声明需要注意一下：
+ 这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&lt;\epsilon$，其中$\epsilon&gt;0$ 按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数   普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数
+ 接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。
+一个输入和一个输出的普遍性 #  先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：
+第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数舞动起来，比如下面这个有一个隐藏层、两个隐藏神经元的网络：
+第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：
+$$ \sigma(z) \equiv 1 /\left(1&#43;e^{-z}\right) $$
+其中：$z=wx&#43;b$，参见右上角的图，让我们考虑一下几个情况：
+ 当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变   上述情况让$b$键减小，图像会右移，同样图像形状不变 当$b$不变，$w$减小，很显然，图像的陡峭程度会下降，反之亦然  下图是书中给出的图示：
+其实我们完全可以自己绘制这个过程，利用Python的matplotlib可以很好地完成这个事情：
+import matplotlib.pyplot as plt import numpy as np def sigmoid(w, b, x): return 1.0 / (1.0 &#43; np.exp(-(w * x &#43; b))) def plot_sigmoid(w, b): x = np." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" /><meta property="article:section" content="docs" />
+
+
+
+<title>04.神经 络可以计算任何函数的可视化证明 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class=" active">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>04.神经 络可以计算任何函数的可视化证明</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#两个预先声明">两个预先声明</a></li>
+    <li><a href="#一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</a></li>
+    <li><a href="#多个输入变量">多个输入变量</a></li>
+    <li><a href="#s型神经元的延伸">S型神经元的延伸</a></li>
+    <li><a href="#修补阶跃函数">修补阶跃函数</a></li>
+    <li><a href="#结论">结论</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="神经络可以计算任何函数的可视化证明">
+  神经⽹络可以计算任何函数的可视化证明
+  <a class="anchor" href="#%e7%a5%9e%e7%bb%8f%e7%bb%9c%e5%8f%af%e4%bb%a5%e8%ae%a1%e7%ae%97%e4%bb%bb%e4%bd%95%e5%87%bd%e6%95%b0%e7%9a%84%e5%8f%af%e8%a7%86%e5%8c%96%e8%af%81%e6%98%8e">#</a>
+</h1>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/4rG9L89HnDU.jpg" alt="4rG9L89HnDU" /></p>
+<p>本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。</p>
+<p>主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：</p>
+<blockquote>
+<p>不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它</p>
+</blockquote>
+<p>试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：</p>
+<ul>
+<li>比如将中文翻译成英文</li>
+<li>比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题</li>
+<li>&hellip;</li>
+</ul>
+<p>现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？</p>
+<p>前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。</p>
+<h2 id="两个预先声明">
+  两个预先声明
+  <a class="anchor" href="#%e4%b8%a4%e4%b8%aa%e9%a2%84%e5%85%88%e5%a3%b0%e6%98%8e">#</a>
+</h2>
+<p>在解释为何普遍性定理成⽴前，关于<strong>神经⽹络可以计算任何函数</strong>有两个预先声明需要注意一下：</p>
+<ul>
+<li>这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&lt;\epsilon$，其中$\epsilon&gt;0$</li>
+<li>按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数</li>
+</ul>
+<blockquote>
+<p>普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数</p>
+</blockquote>
+<p>接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。</p>
+<h2 id="一个输入和一个输出的普遍性">
+  一个输入和一个输出的普遍性
+  <a class="anchor" href="#%e4%b8%80%e4%b8%aa%e8%be%93%e5%85%a5%e5%92%8c%e4%b8%80%e4%b8%aa%e8%be%93%e5%87%ba%e7%9a%84%e6%99%ae%e9%81%8d%e6%80%a7">#</a>
+</h2>
+<p>先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093257.png" alt="" /></p>
+<p>第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数<strong>舞动起来</strong>，比如下面这个有一个隐藏层、两个隐藏神经元的网络：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093617.png" alt="" /></p>
+<p>第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：</p>
+<p>$$
+\sigma(z) \equiv 1 /\left(1+e^{-z}\right)
+$$</p>
+<p>其中：$z=wx+b$，参见右上角的图，让我们考虑一下几个情况：</p>
+<ol>
+<li>当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变</li>
+</ol>
+<ul>
+<li>上述情况让$b$键减小，图像会右移，同样图像形状不变</li>
+<li>当$b$不变，$w$减小，很显然，图像的<code>陡峭</code>程度会下降，反之亦然</li>
+</ul>
+<p>下图是书中给出的图示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191107172558.png" alt="" /></p>
+<p>其实我们完全可以自己绘制这个过程，利用<code>Python</code>的<code>matplotlib</code>可以很好地完成这个事情：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+<span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid</span>(w, b, x):
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1.0</span> <span style="color:#f92672">/</span> (<span style="color:#ae81ff">1.0</span> <span style="color:#f92672">+</span> np<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>(w <span style="color:#f92672">*</span> x <span style="color:#f92672">+</span> b)))
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">plot_sigmoid</span>(w, b):
+    x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">0.1</span>)
+    y <span style="color:#f92672">=</span> sigmoid(w, b, x)
+    plt<span style="color:#f92672">.</span>plot(x, y)
+</code></pre></div><p>先看下$b$增减下图像的移动情况：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(<span style="color:#ae81ff">12</span>)
+plt<span style="color:#f92672">.</span>subplots_adjust(wspace<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>, hspace<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">221</span>)
+<span style="color:#75715e"># 绘制原始图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 8 b = -4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">222</span>)
+<span style="color:#75715e"># b增加的图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">223</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">224</span>)
+<span style="color:#75715e"># b减小的图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 8 b = 1&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">1</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>show()
+</code></pre></div><p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108084652.png" alt="" /></p>
+<p>再看下$w$增减下图像的伸缩情况：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(<span style="color:#ae81ff">12</span>)
+plt<span style="color:#f92672">.</span>subplots_adjust(wspace<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>, hspace<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">221</span>)
+<span style="color:#75715e"># 绘制原始图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">222</span>)
+<span style="color:#75715e"># w减小的图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 3 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">223</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 3 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">224</span>)
+<span style="color:#75715e"># w增加的图像</span>
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;w = 105 b = 4&#34;</span>)
+w, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">105</span>, <span style="color:#ae81ff">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#f92672">.</span>show()
+</code></pre></div><p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108084950.png" alt="" /></p>
+<p>首先通过这两张图验证了上面的三点结论，最后可以看到我们得到的图像就像是一个阶跃函数</p>
+<p>为什么需要千方百计地引出阶跃函数出来，这是因为在输出层我们在将所有隐藏神经元的贡献值叠加在一起的时候，分析阶跃函数比<code>S</code>型函数容易。我们该怎么做？结合前面的经验，只要将$w$设置成一个比较大的值，然后通过修改$b$就可以左右移动来定义阶跃函数的位置</p>
+<p>思考下，阶跃发生的点在哪？让我们令$wx+b=0$，即可得出阶跃发生的点可以用$s=-b/w$进行表示，现在我们就可以使用$s$来极大简化我们描述神经元的方式</p>
+<p>目前为止我们专注于仅仅从顶部隐藏神经元输出，让我们看看整个网络的行为，尤其，我们假设隐藏神经元在计算以阶跃点$s_1$（顶部神经元）和$s_2$（底部神经元参数化的阶跃函数，它们各自有输出权重$w_1$和$w_2$：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108094016.png" alt="" /></p>
+<p>为何隐藏层的加权输出如上图，这理解一下，隐藏层的两个神经元的输出可以想象成阶跃函数，那么:</p>
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出就是<code>1.8</code></li>
+<li>x介于两者之间，输出就是<code>0.6</code></li>
+</ul>
+<p>接下来，我们进行这样一个设置：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108095019.png" alt="" /></p>
+<p>说明一下：</p>
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出还是<code>0</code></li>
+<li>x介于两者之间，输出就是<code>0.8</code></li>
+</ul>
+<p>这边主要得出的一个结论是，我们可以通过$w_1,w_2$来定义加权输出图像中凸起的位置和高度，为了减少混乱，用一个参数$h$表示高度：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191114091159.png" alt="" /></p>
+<blockquote>
+<p>现在我们脑中应该有个清晰的概念，那就是对于神经元的加权输出组合$\sum_{j} w_{j} a_{j}$，我们可以通过对$s$和$h$的调整来控制输出函数，从而让加权输出变成我们心目中的输出</p>
+</blockquote>
+<p>好了，说明结束，接下来看看最开始绘制出来而函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093257-20220403213542023.png" alt="" /></p>
+<p>这个函数的表达式为：</p>
+<p>$$
+f(x)=0.2+0.4 x^{2}+0.3 x \sin (15 x)+0.05 \cos (50 x)
+$$</p>
+<p>现在面临的问题是使用一个神经网络来计算它，前面我们着重分析了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是要注意，虽然我们经过参数的调整，得到了我们想要的目标函数，此时这个函数是隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是实际上网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$，也就是说：</p>
+<ul>
+<li>第一步：我们将隐藏神经元的加权组合$\sum_{j} w_{j} a_{j}$近似成了$f(x)$</li>
+<li>第二步：但是神经网络的输出却是$\sigma(f(x))$</li>
+</ul>
+<p>$\sigma(f(x))$的函数输出和$f(x)$的函数输出那可是大相径庭</p>
+<blockquote>
+<p>我们控制住了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是没有控制住网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+</blockquote>
+<p>那么此时我们面临的问题就是怎么让$\sigma(\sum_{j} w_{j} a_{j}+b)$近似于$f(x)$</p>
+<p>在上述情况下，可操作性的无非就是在加权输出上面做文章，所以我们可以设计一个神经网络，其隐藏层有个加权输出：</p>
+<p>$$
+\sigma^{-1} \circ f(x)
+$$</p>
+<p>其中$\sigma^{-1}$是$\sigma$的反函数</p>
+<p>很容易可以得出$\sigma^{-1} \circ f(x)$的结果输入到$\sigma$中输出还是$f(x)$，所以我们控制住了$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+<p>接下来就是调节参数直到拟合到我们满意的程度（⽬标函数和⽹络实际计算函数的平均偏差来衡量）</p>
+<h2 id="多个输入变量">
+  多个输入变量
+  <a class="anchor" href="#%e5%a4%9a%e4%b8%aa%e8%be%93%e5%85%a5%e5%8f%98%e9%87%8f">#</a>
+</h2>
+<p>上一节已经说明了一个输入和一个输出的普遍性，接下来可以尝试考虑多个输入变量的情况，假设有两个输入：$x,y$，分别对应权重$w_1,w_2$，以及一个神经元上的偏置$b$，看看他们如何影响神经元的输出：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122172304.png" alt="" /></p>
+<blockquote>
+<p>思考：将$w_2$设置为0，再不断调整$w1$，输出会怎样变化？</p>
+</blockquote>
+<p>首先，输出不受输入$y$影响，其次，按照上一节的惯性，图像应该是会变<code>陡峭</code>，会接近到类似阶跃函数，不同的是此时图像是三维的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122172954.png" alt="" /></p>
+<p>和上面一样，我们可以通过修改偏置的位置来设置移动阶跃点：</p>
+<p>$$
+s_{x} \equiv-b / w_{1}
+$$</p>
+<p>凸起的期望高度用相应的权重$h$表示，可以通过分别设置<code>x</code>或<code>y</code>输入神经元的权重为<code>0</code>来分别控制<code>y</code>或<code>x</code>方向的凹凸函数</p>
+<p>让我们考虑当我们叠加两个凹凸函数时会发⽣什么，⼀个沿$x$⽅向，另⼀个沿$y$⽅向，两者都有⾼度$h$：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122175706.png" alt="" /></p>
+<p>试着改变参数<code>h</code>，正如你能看到，这引起输出权重的变化，以及<code>x</code>和<code>y</code>上凹凸函数的⾼度：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122180038.png" alt="" /></p>
+<p>我们构建的有点像是<strong>塔形</strong>函数，如果我们能构建这样的塔型函数，那么我们能使⽤它们来近似任意的函数，仅仅通过在不同位置累加许多不同⾼度的塔</p>
+<p>以此类推，三个变量的四位函数也不在话下，在发散一下思维，$m$维也可以用完全相同的思想来实现。</p>
+<h2 id="s型神经元的延伸">
+  S型神经元的延伸
+  <a class="anchor" href="#s%e5%9e%8b%e7%a5%9e%e7%bb%8f%e5%85%83%e7%9a%84%e5%bb%b6%e4%bc%b8">#</a>
+</h2>
+<p>我们已经证明了由$S$型神经元构成的⽹络可以计算任何函数，若输入为: $x_1, x_2 &hellip;x_j$，输出为：</p>
+<p>$$
+\sigma\left(\sum_{j} w_{j} x_{j}+b\right)
+$$</p>
+<p>其中$\sigma$是$S$型函数，函数图像如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122221101.png" alt="" /></p>
+<p>如果我们考虑⼀个不同类型的神经元，它使⽤其它激活函数，⽐如如下的$s(z)$，会怎样？</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122221806.png" alt="" /></p>
+<p>此时神经元的输出为：</p>
+<p>$$
+s\left(\sum_{j} w_{j} x_{j}+b\right)
+$$</p>
+<p>同样的，我们依然可以利用这个函数来通过对权重和偏置的修改来得到一个阶跃函数的近似：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122222028.png" alt="" /></p>
+<p>这样我们可以和前面一样来推出任何目标函数，当然，这要求$s(z)$具有以下条件：</p>
+<ul>
+<li>$s(z)$ 在 $z \rightarrow-\infty$ 和 $z \rightarrow \infty$时是定义明确的</li>
+<li>这两个界限是在我们的阶跃函数上取的两个值，并且这两个界限彼此不同，否则就只能一马平川了哈哈</li>
+</ul>
+<h2 id="修补阶跃函数">
+  修补阶跃函数
+  <a class="anchor" href="#%e4%bf%ae%e8%a1%a5%e9%98%b6%e8%b7%83%e5%87%bd%e6%95%b0">#</a>
+</h2>
+<p>我们用神经元近似阶跃函数的时候，实际上有一个很窄的故障窗口，如下图说明，在这⾥函数会表现得和阶跃函数⾮常不同：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122223022.png" alt="" /></p>
+<p>其实理论上来说，只要权重够大，情况可以随着变好，刚刚是从函数本身出发，避免拟合的函数有问题，换个角度，我们可以从拟合的函数出发，我们利用$1/M$的神经元来模拟目标函数的$1/M$，其实也是变相地将目标函数的权重变大，从而达到效果</p>
+<h2 id="结论">
+  结论
+  <a class="anchor" href="#%e7%bb%93%e8%ae%ba">#</a>
+</h2>
+<blockquote>
+<p>普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数</p>
+</blockquote>
+<p>本章主要解答了是否使⽤⼀个神经⽹络可以计算任意特定函数的问题，这个自然是的。理论上我们只要两个隐藏层就可以计算任何函数，但深度学习又是什么情况呢？</p>
+<p>正如在第⼀章中表明过，深度⽹络有⼀个分级结构，使其尤其适⽤于学习分级的知识，这看上去可⽤于解决现实世界的问题，我个人觉得是单层虽然能拟合各种目标函数，这没错，但是一样的数据，单层网络并不能找到理想中的那个函数，虽然有可能对目前的数据拟合得很好，但是使用深度网络却可以更好地提升泛化能力。</p>
+<h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#两个预先声明">两个预先声明</a></li>
+    <li><a href="#一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</a></li>
+    <li><a href="#多个输入变量">多个输入变量</a></li>
+    <li><a href="#s型神经元的延伸">S型神经元的延伸</a></li>
+    <li><a href="#修补阶跃函数">修补阶跃函数</a></li>
+    <li><a href="#结论">结论</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

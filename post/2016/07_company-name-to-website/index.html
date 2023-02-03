@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>Python之由公司名推算出公司官网(余弦相似度) | 老胡的储物柜</title>
+  <meta property="og:title" content="Python之由公司名推算出公司官网(余弦相似度) - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2016-09-18T20:38:22&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2016-09-18T20:38:22&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="Python之由公司名推算出公司官网(余弦相似度)"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2016/07_company-name-to-website/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1问题">1.问题</a></li>
+    <li><a href="#2解决">2.解决</a>
+      <ul>
+        <li><a href="#21获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</a></li>
+        <li><a href="#22初步排除某些url">2.2.初步排除某些url</a></li>
+        <li><a href="#23余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</a></li>
+        <li><a href="#232构建单词向量">2.3.2：构建单词向量</a></li>
+        <li><a href="#233计算余弦相似度">2.3.3:计算余弦相似度</a></li>
+      </ul>
+    </li>
+    <li><a href="#3总结">3.总结</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Python之由公司名推算出公司官网(余弦相似度)</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2016年9月18日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="1问题">1.问题</h2>
+<p>对展会数据分类后，我的新任务是如何通过<code>公司名、公司地址、国家</code>等海关数据推断出该公司的官网网站（若官网不存在则不考虑）
+以下数据仅供参考：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">公司名</th>
+<th style="text-align:center">国家</th>
+<th style="text-align:center">地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">JPW INDUSTRIES INC</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">427 NEW SANFORD RD LAVERGNE TN 37086 US</td>
+</tr>
+<tr>
+<td style="text-align:center">Fujian Xishi Co., Ltd</td>
+<td style="text-align:center">CN, CHINA</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">BusinessPartner Co.,ltd</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">BENKAI Co.,Ltd</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">GOLD INC</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">18245 E 40TH AVE AURORA CO 80011 US</td>
+</tr>
+</tbody>
+</table>
+<p>需要得到结果：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">公司名</th>
+<th style="text-align:center">官方网站</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">JPW INDUSTRIES INC</td>
+<td style="text-align:center">http://http://www.jpwindustries.com/</td>
+</tr>
+<tr>
+<td style="text-align:center">Fujian Xishi Co., Ltd</td>
+<td style="text-align:center"><a href="http://www.xishigroup.com/">http://www.xishigroup.com/</a></td>
+</tr>
+<tr>
+<td style="text-align:center">BusinessPartner Co.,ltd</td>
+<td style="text-align:center"><a href="http://www.traderthailand.com/">http://www.traderthailand.com/</a></td>
+</tr>
+<tr>
+<td style="text-align:center">BENKAI Co.,Ltd</td>
+<td style="text-align:center"><a href="http://www.benkaico.com">http://www.benkaico.com</a></td>
+</tr>
+<tr>
+<td style="text-align:center">GOLD INC</td>
+<td style="text-align:center"><a href="https://goldbuginc.com/">https://goldbuginc.com/</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2解决">2.解决</h2>
+<p>由数据可看出，公司名是绝对存在的，故解决思路是从公司名出发，而不怎么全面的国家以及地址信息则用来提高准确度。</p>
+<p>大体思路是这样的，若公司官网存在，那么通过搜索引擎定会被检索到，搜索引擎自然首选<code>google</code>，所以可以先通过获取谷歌搜索的结果，然后分析获取的结果，从而得出最可能是该公司网站的<code>url</code>。
+初步搜索一下，看看各种情况：</p>
+<ul>
+<li>第一种情况，检索即可很直观地得出结果</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="hQ3pEk" src="https://images-1252557999.file.myqcloud.com/uPic/hQ3pEk.jpg" />   
+    </p>
+<ul>
+<li>第二种情况，检索不能直观地得出结果，但官网确实存在（<em>第二检索个结果</em>）</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="ymeqLN" src="https://images-1252557999.file.myqcloud.com/uPic/ymeqLN.jpg" />   
+    </p>
+<ul>
+<li>第三种情况，输入公司名+公司地址和只输入公司名得出的结果不一样</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="WuWvSw" src="https://images-1252557999.file.myqcloud.com/uPic/WuWvSw.jpg" />   
+    </p>
+<p>对于第三种情况，可以看出输入公司名+公司地址得出的结果是绝对正确的。</p>
+<p>观察第三种情况，当输入公司名+公司地址时，返回结果的右侧会出现公司的详细信息，经过验证，若出现这种情况，则其<code>website</code>对应的<code>url</code>绝对正确。</p>
+<p>故代码的第一步骤可以首先检索公司名+公司地址，观察<code>website</code>元素是否存在，若存在，返回公司官网，否则，对公司名进行检索，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">searchWeb</span>(query, tld<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;com&#39;</span>, lang<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;en&#39;</span>, tbs<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;0&#39;</span>, num<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, safe<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;off&#39;</span>, tpe<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;&#39;</span>, user_agent<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>):
+    query <span style="color:#000;font-weight:bold">=</span> quote_plus(query)
+    get_page(url_home <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">vars</span>())
+    url <span style="color:#000;font-weight:bold">=</span> url_search_num <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">vars</span>()
+    <span style="color:#998;font-style:italic"># Request the Google Search results page.</span>
+    html <span style="color:#000;font-weight:bold">=</span> get_page(url)
+    <span style="color:#000;font-weight:bold">try</span>:
+        href <span style="color:#000;font-weight:bold">=</span> re<span style="color:#000;font-weight:bold">.</span>findall(<span style="color:#d14">r</span><span style="color:#d14">&#39;Directions&lt;/a&gt;&lt;a\s*class=&#34;fl&#34;\s*href=&#34;(.*?)&#34;.*?&gt;Website&#39;</span>, <span style="color:#0086b3">str</span>(html))[<span style="color:#099">0</span>]
+        link <span style="color:#000;font-weight:bold">=</span> filter_result(href)
+        <span style="color:#000;font-weight:bold">return</span> link
+    <span style="color:#000;font-weight:bold">except</span>:
+        <span style="color:#000;font-weight:bold">pass</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="yy20Lf" src="https://images-1252557999.file.myqcloud.com/uPic/yy20Lf.jpg" />   
+    </p>
+<p>能直接获取公司官网毕竟是少数，大多数据还是要通过一步步计算得出，主要经过以下步骤：</p>
+<ul>
+<li>获取搜索引擎检索结果提取url</li>
+<li>初步排除某些url</li>
+<li>余弦相似度计算最可能的结果</li>
+</ul>
+<h3 id="21获取搜索引擎检索结果提取url">2.1.获取搜索引擎检索结果提取url</h3>
+<p>对于谷歌搜索，我使用了<code>MarioVilas</code>的项目<a href="https://github.com/MarioVilas/google">google</a>，毕竟在国内，为了以防万一我也写了<code>yahoo</code>搜索，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env</span>
+<span style="color:#998;font-style:italic"># -*-coding:utf-8-*-</span>
+<span style="color:#998;font-style:italic"># script: yahooSearch.py</span>
+__author__ <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;howie&#39;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">sys</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">time</span>
+
+<span style="color:#000;font-weight:bold">if</span> sys<span style="color:#000;font-weight:bold">.</span>version_info[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">2</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib.request</span> <span style="color:#000;font-weight:bold">import</span> Request, urlopen
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib.parse</span> <span style="color:#000;font-weight:bold">import</span> quote_plus, urlparse
+<span style="color:#000;font-weight:bold">else</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib</span> <span style="color:#000;font-weight:bold">import</span> quote_plus
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib2</span> <span style="color:#000;font-weight:bold">import</span> Request, urlopen
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urlparse</span> <span style="color:#000;font-weight:bold">import</span> urlparse, parse_qs
+
+<span style="color:#000;font-weight:bold">try</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">bs4</span> <span style="color:#000;font-weight:bold">import</span> BeautifulSoup
+
+    is_bs4 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">True</span>
+<span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">ImportError</span>:
+    <span style="color:#000;font-weight:bold">from</span> <span style="color:#555">BeautifulSoup</span> <span style="color:#000;font-weight:bold">import</span> BeautifulSoup
+
+    is_bs4 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>
+
+url_search <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;https://search.yahoo.com/search?p=</span><span style="color:#d14">%(query)s</span><span style="color:#d14">&amp;b=</span><span style="color:#d14">%(start)s</span><span style="color:#d14">&amp;pz=</span><span style="color:#d14">%(num)s</span><span style="color:#d14">&#34;</span>
+
+headers <span style="color:#000;font-weight:bold">=</span> {
+    <span style="color:#d14">&#39;accept-encoding&#39;</span>: <span style="color:#d14">&#39;gzip, deflate, sdch, br&#39;</span>,
+    <span style="color:#d14">&#39;accept-language&#39;</span>: <span style="color:#d14">&#39;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&#39;</span>,
+    <span style="color:#d14">&#39;upgrade-insecure-requests&#39;</span>: <span style="color:#d14">&#39;1&#39;</span>,
+    <span style="color:#d14">&#39;accept&#39;</span>: <span style="color:#d14">&#39;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#39;</span>,
+    <span style="color:#d14">&#39;cache-control&#39;</span>: <span style="color:#d14">&#39;max-age=0&#39;</span>,
+    <span style="color:#d14">&#39;authority&#39;</span>: <span style="color:#d14">&#39; search.yahoo.com&#39;</span>
+}
+<span style="color:#998;font-style:italic"># 默认user_agent</span>
+user_agent <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36&#39;</span>
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">filter_link</span>(link):
+    <span style="color:#000;font-weight:bold">try</span>:
+        linkData <span style="color:#000;font-weight:bold">=</span> urlparse(link)
+        <span style="color:#000;font-weight:bold">if</span> linkData<span style="color:#000;font-weight:bold">.</span>netloc <span style="color:#000;font-weight:bold">and</span> <span style="color:#d14">&#34;yahoo.com&#34;</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> linkData<span style="color:#000;font-weight:bold">.</span>netloc <span style="color:#000;font-weight:bold">and</span> <span style="color:#d14">&#34;/search/srpcache&#34;</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> linkData<span style="color:#000;font-weight:bold">.</span>path:
+            <span style="color:#000;font-weight:bold">return</span> link
+    <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">Exception</span>:
+        <span style="color:#000;font-weight:bold">pass</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">yahooSearch</span>(query, start<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>, num<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, page<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>, pause<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1.0</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    获取雅虎搜索url
+</span><span style="color:#d14">    :param query: 搜索关键词
+</span><span style="color:#d14">    :param start: 开始条目,最好为0
+</span><span style="color:#d14">    :param num: 搜索条目 建议10的倍数
+</span><span style="color:#d14">    :param page: 页数
+</span><span style="color:#d14">    :param pause: 停顿时间
+</span><span style="color:#d14">    :return: 返回url
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    query <span style="color:#000;font-weight:bold">=</span> quote_plus(query)
+    <span style="color:#000;font-weight:bold">while</span> page <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
+        url <span style="color:#000;font-weight:bold">=</span> url_search <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">vars</span>()
+        time<span style="color:#000;font-weight:bold">.</span>sleep(pause)
+        request <span style="color:#000;font-weight:bold">=</span> Request(url)
+        request<span style="color:#000;font-weight:bold">.</span>add_header(<span style="color:#d14">&#39;User-Agent&#39;</span>, user_agent)
+        response <span style="color:#000;font-weight:bold">=</span> urlopen(request)
+        html <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span>read()
+        <span style="color:#000;font-weight:bold">if</span> is_bs4:
+            soup <span style="color:#000;font-weight:bold">=</span> BeautifulSoup(html, <span style="color:#d14">&#39;html.parser&#39;</span>)
+        <span style="color:#000;font-weight:bold">else</span>:
+            soup <span style="color:#000;font-weight:bold">=</span> BeautifulSoup(html)
+        anchors <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find(<span style="color:#0086b3">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;web&#34;</span>)<span style="color:#000;font-weight:bold">.</span>find_all(<span style="color:#d14">&#39;a&#39;</span>)
+        <span style="color:#000;font-weight:bold">for</span> a <span style="color:#000;font-weight:bold">in</span> anchors:
+            <span style="color:#000;font-weight:bold">try</span>:
+                link <span style="color:#000;font-weight:bold">=</span> filter_link(a[<span style="color:#d14">&#34;href&#34;</span>])
+                <span style="color:#000;font-weight:bold">if</span> link:
+                    <span style="color:#000;font-weight:bold">yield</span> link
+            <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">KeyError</span>:
+                <span style="color:#000;font-weight:bold">continue</span>
+        start <span style="color:#000;font-weight:bold">+=</span> num <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>
+        page <span style="color:#000;font-weight:bold">-=</span> <span style="color:#099">1</span>
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    <span style="color:#998;font-style:italic"># GOLD INC 18245 E 40TH AVE AURORA CO 80011 US</span>
+    <span style="color:#000;font-weight:bold">for</span> url <span style="color:#000;font-weight:bold">in</span> yahooSearch(<span style="color:#d14">&#34;GOLD INC 18245 E 40TH AVE AURORA CO 80011 US&#34;</span>):
+        <span style="color:#0086b3">print</span>(url)
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="22初步排除某些url">2.2.初步排除某些url</h3>
+<p>这个可根据个人需求来配置，可添加<code>webConfig.py</code>脚本，排除某些<code>url</code>:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># -*-coding:utf-8-*-</span>
+__author__ <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;howie&#39;</span>
+
+config <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+    <span style="color:#998;font-style:italic"># www开头或分割后数组大于二的网站</span>
+    forbid_www<span style="color:#000;font-weight:bold">=</span>[<span style="color:#d14">&#34;www.linkedin.com&#34;</span>, <span style="color:#d14">&#34;www.alibaba.com&#34;</span>],
+    <span style="color:#998;font-style:italic"># 非www开头的网站</span>
+    forbid<span style="color:#000;font-weight:bold">=</span>[<span style="color:#d14">&#34;imexbb.com&#34;</span>, <span style="color:#d14">&#34;made-in-china.com&#34;</span>]
+)
+</code></pre></td></tr></table>
+</div>
+</div><p>以公司名<code>BENKAI Co.,Ltd</code>为例，初步获取url：
+<code>['http://www.benkaico.com', 'http://hisupplier.com', 'http://www.hktdc.com/en']</code></p>
+<h3 id="23余弦相似度计算最可能的结果">2.3.余弦相似度计算最可能的结果</h3>
+<p>对于公司<code>BENKAI Co.,Ltd</code>，我们获得了三个结果，现在又该如何从该列表中取得最可能的结果呢。</p>
+<p>这里可以采用余弦相似度，具体公式可google，稍稍解释下，对于这三个网站：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">[<span style="color:#d14">&#39;http://www.benkaico.com&#39;</span>, <span style="color:#d14">&#39;http://hisupplier.com&#39;</span>, <span style="color:#d14">&#39;http://www.hktdc.com/en&#39;</span>]<span style="color:#a61717;background-color:#e3d2d2">```</span>
+可以通过计算各个网站的<span style="color:#a61717;background-color:#e3d2d2">`</span>title<span style="color:#a61717;background-color:#e3d2d2">`</span>和<span style="color:#a61717;background-color:#e3d2d2">`</span>BENKAI Co<span style="color:#000;font-weight:bold">.</span>,Ltd<span style="color:#a61717;background-color:#e3d2d2">`</span>的相似程度来取得最可能的结果<span style="color:#a61717;background-color:#e3d2d2">。</span>
+<span style="color:#998;font-style:italic">#####2.3.1：对各网站title进行分词</span>
+<span style="color:#a61717;background-color:#e3d2d2">​```</span>python
+{<span style="color:#d14">&#39;http://www.benkaico.com&#39;</span>: [<span style="color:#d14">&#39;benkai&#39;</span>, <span style="color:#d14">&#39;co.&#39;</span>, <span style="color:#d14">&#39;,&#39;</span>, <span style="color:#d14">&#39;ltd&#39;</span>, <span style="color:#d14">&#39;.&#39;</span>], 
+<span style="color:#d14">&#39;http://www.hktdc.com/en&#39;</span>: [<span style="color:#d14">&#39;hktdc.com&#39;</span>, <span style="color:#d14">&#39;â</span><span style="color:#d14">\x80\x93</span><span style="color:#d14">&#39;</span>, <span style="color:#d14">&#39;page&#39;</span>, <span style="color:#d14">&#39;not&#39;</span>, <span style="color:#d14">&#39;found&#39;</span>], 
+<span style="color:#d14">&#39;http://hisupplier.com&#39;</span>: [<span style="color:#d14">&#39;china&#39;</span>, <span style="color:#d14">&#39;suppliers&#39;</span>, <span style="color:#d14">&#39;,&#39;</span>, <span style="color:#d14">&#39;suppliers&#39;</span>, <span style="color:#d14">&#39;directory&#39;</span>, <span style="color:#d14">&#39;,&#39;</span>, <span style="color:#d14">&#39;china&#39;</span>, <span style="color:#d14">&#39;manufacturers&#39;</span>, <span style="color:#d14">&#39;directory&#39;</span>, <span style="color:#d14">&#39;-&#39;</span>, <span style="color:#d14">&#39;hisupplier.com&#39;</span>]}
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="232构建单词向量">2.3.2：构建单词向量</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">{<span style="color:#d14">&#39;http://www.benkaico.com&#39;</span>: [[<span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>]], 
+<span style="color:#d14">&#39;http://www.hktdc.com/en&#39;</span>: [[<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>], [<span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>]],
+ <span style="color:#d14">&#39;http://hisupplier.com&#39;</span>: [[<span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">1</span>], [<span style="color:#099">2</span>, <span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#099">0</span>, <span style="color:#099">2</span>, <span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">0</span>, <span style="color:#099">2</span>, <span style="color:#099">0</span>]]}
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="233计算余弦相似度">2.3.3:计算余弦相似度</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">{<span style="color:#d14">&#39;http://www.benkaico.com&#39;</span>: <span style="color:#099">0.94427190999915878</span>, 
+<span style="color:#d14">&#39;http://www.hktdc.com/en&#39;</span>: <span style="color:#099">0.0</span>, 
+<span style="color:#d14">&#39;http://hisupplier.com&#39;</span>: <span style="color:#099">0.31451985913875646</span>}
+</code></pre></td></tr></table>
+</div>
+</div><p>通过比较，可以看到<code>http://www.benkaico.com</code>相似度最高的结果，跟真实结果一样。</p>
+<p>
+        <img class="mx-auto" alt="q8CYwk" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/q8CYwk.jpg" />   
+    </p>
+<p>全部步骤代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># -*-coding:utf-8-*-</span>
+__author__ <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;howie&#39;</span>
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">urllib</span> <span style="color:#000;font-weight:bold">import</span> parse
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">bs4</span> <span style="color:#000;font-weight:bold">import</span> BeautifulSoup
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">collections</span> <span style="color:#000;font-weight:bold">import</span> defaultdict
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">requests</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">re</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">nltk</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">time</span>
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">config.webConfig</span> <span style="color:#000;font-weight:bold">import</span> config
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">CosineSimilarity</span> <span style="color:#000;font-weight:bold">import</span> CosineSimilarity
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">search.yahooSearch</span> <span style="color:#000;font-weight:bold">import</span> yahooSearch
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">search.gooSearch</span> <span style="color:#000;font-weight:bold">import</span> search, searchWeb
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Website</span>(<span style="color:#0086b3">object</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    通过公司名等信息获取网站官网
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, engine<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;google&#39;</span>):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>forbid_www <span style="color:#000;font-weight:bold">=</span> config[<span style="color:#d14">&#34;forbid_www&#34;</span>]
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>forbid <span style="color:#000;font-weight:bold">=</span> config[<span style="color:#d14">&#34;forbid&#34;</span>]
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>engine <span style="color:#000;font-weight:bold">=</span> engine
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_web</span>(<span style="color:#999">self</span>, query, address<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        获取域名
+</span><span style="color:#d14">        :param query: 搜索词
+</span><span style="color:#d14">        :param address: 在此加上地址时，query最好是公司名
+</span><span style="color:#d14">        :return: 返回最可能是官网的网站
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>engine <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;google&#39;</span> <span style="color:#000;font-weight:bold">and</span> address:
+            allQuery <span style="color:#000;font-weight:bold">=</span> query <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34; &#34;</span> <span style="color:#000;font-weight:bold">+</span> address
+            result <span style="color:#000;font-weight:bold">=</span> searchWeb(query<span style="color:#000;font-weight:bold">=</span>allQuery, num<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span>)
+            <span style="color:#000;font-weight:bold">if</span> result:
+                <span style="color:#000;font-weight:bold">return</span> result
+        allDomain <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_domain(query)
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">len</span>(allDomain) <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;1&#34;</span>:
+            website <span style="color:#000;font-weight:bold">=</span> allDomain[<span style="color:#099">0</span>]
+        <span style="color:#000;font-weight:bold">else</span>:
+            <span style="color:#998;font-style:italic"># 初步判断网站域名</span>
+            counts <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_counts(allDomain)
+            largest <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">max</span>(<span style="color:#0086b3">zip</span>(counts<span style="color:#000;font-weight:bold">.</span>values(), counts<span style="color:#000;font-weight:bold">.</span>keys()))
+            <span style="color:#000;font-weight:bold">if</span> largest[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#0086b3">len</span>(allDomain) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>:
+                website <span style="color:#000;font-weight:bold">=</span> largest[<span style="color:#099">1</span>]
+            <span style="color:#000;font-weight:bold">else</span>:
+                <span style="color:#998;font-style:italic"># 获取对应域名标题</span>
+                domainData <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_title(<span style="color:#0086b3">set</span>(allDomain))
+                <span style="color:#998;font-style:italic"># 计算相似度</span>
+                initQuery <span style="color:#000;font-weight:bold">=</span> nltk<span style="color:#000;font-weight:bold">.</span>word_tokenize(query<span style="color:#000;font-weight:bold">.</span>lower(), language<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;english&#39;</span>)
+                <span style="color:#998;font-style:italic"># 余弦相似性计算相似度</span>
+                cos <span style="color:#000;font-weight:bold">=</span> CosineSimilarity(initQuery, domainData)
+                wordVector <span style="color:#000;font-weight:bold">=</span> cos<span style="color:#000;font-weight:bold">.</span>create_vector()
+                resultDic <span style="color:#000;font-weight:bold">=</span> cos<span style="color:#000;font-weight:bold">.</span>calculate(wordVector)
+                website <span style="color:#000;font-weight:bold">=</span> cos<span style="color:#000;font-weight:bold">.</span>get_website(resultDic)
+        <span style="color:#000;font-weight:bold">return</span> website
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_domain</span>(<span style="color:#999">self</span>, query):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">         获取谷歌搜索后的域名
+</span><span style="color:#d14">        :param query:搜索条件
+</span><span style="color:#d14">        :return:域名列表
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        allDomain <span style="color:#000;font-weight:bold">=</span> []
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>engine <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;google&#34;</span>:
+            <span style="color:#000;font-weight:bold">for</span> url <span style="color:#000;font-weight:bold">in</span> search(query, num<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span>, stop<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>):
+                allDomain <span style="color:#000;font-weight:bold">+=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>parse_url(url)
+        <span style="color:#000;font-weight:bold">elif</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>engine <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;yahoo&#34;</span>:
+            <span style="color:#000;font-weight:bold">for</span> url <span style="color:#000;font-weight:bold">in</span> yahooSearch(query):
+                allDomain <span style="color:#000;font-weight:bold">+=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>parse_url(url)
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> allDomain:
+            allDomain<span style="color:#000;font-weight:bold">.</span>append(<span style="color:#d14">&#39;&#39;</span>)
+        <span style="color:#000;font-weight:bold">return</span> allDomain
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse_url</span>(<span style="color:#999">self</span>, url):
+        allDomain <span style="color:#000;font-weight:bold">=</span> []
+        domainParse <span style="color:#000;font-weight:bold">=</span> parse<span style="color:#000;font-weight:bold">.</span>urlparse(url)
+        <span style="color:#998;font-style:italic"># 英文网站获取</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#d14">&#34;en&#34;</span> <span style="color:#000;font-weight:bold">in</span> domainParse[<span style="color:#099">2</span>]<span style="color:#000;font-weight:bold">.</span>lower()<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;/&#39;</span>):
+            domain <span style="color:#000;font-weight:bold">=</span> domainParse[<span style="color:#099">1</span>] <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;/en&#34;</span>
+        <span style="color:#000;font-weight:bold">else</span>:
+            domain <span style="color:#000;font-weight:bold">=</span> domainParse[<span style="color:#099">1</span>]
+        domainList <span style="color:#000;font-weight:bold">=</span> domain<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;.&#39;</span>)
+        <span style="color:#998;font-style:italic"># 排除干扰网站</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">len</span>(domainList) <span style="color:#000;font-weight:bold">&gt;=</span> <span style="color:#099">3</span> <span style="color:#000;font-weight:bold">and</span> domainList[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">!=</span> <span style="color:#d14">&#34;www&#34;</span>:
+            isUrl <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;.&#34;</span><span style="color:#000;font-weight:bold">.</span>join(domain<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;.&#39;</span>)[<span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span>:])
+            <span style="color:#000;font-weight:bold">if</span> isUrl <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>forbid:
+                allDomain<span style="color:#000;font-weight:bold">.</span>append(domainParse[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;://&#34;</span> <span style="color:#000;font-weight:bold">+</span> isUrl)
+        <span style="color:#000;font-weight:bold">elif</span> domain <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>forbid_www:
+            allDomain<span style="color:#000;font-weight:bold">.</span>append(domainParse[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;://&#34;</span> <span style="color:#000;font-weight:bold">+</span> domain)
+        <span style="color:#000;font-weight:bold">return</span> allDomain
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_title</span>(<span style="color:#999">self</span>, setDomain):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        获取对应网站title，并进行分词
+</span><span style="color:#d14">        :param allDomain: 网站集合
+</span><span style="color:#d14">        :return: 网站:title分词结果
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        domainData <span style="color:#000;font-weight:bold">=</span> {}
+        <span style="color:#000;font-weight:bold">for</span> domain <span style="color:#000;font-weight:bold">in</span> setDomain:
+            headers <span style="color:#000;font-weight:bold">=</span> {
+                <span style="color:#d14">&#34;Accept&#34;</span>: <span style="color:#d14">&#34;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#34;</span>,
+                <span style="color:#d14">&#34;Accept-Encoding&#34;</span>: <span style="color:#d14">&#34;gzip, deflate, sdch&#34;</span>,
+                <span style="color:#d14">&#34;Accept-Language&#34;</span>: <span style="color:#d14">&#34;zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4&#34;</span>,
+                <span style="color:#d14">&#34;Cache-Control&#34;</span>: <span style="color:#d14">&#34;max-age=0&#34;</span>,
+                <span style="color:#d14">&#34;Proxy-Connection&#34;</span>: <span style="color:#d14">&#34;keep-alive&#34;</span>,
+                <span style="color:#d14">&#34;Upgrade-Insecure-Requests&#34;</span>: <span style="color:#d14">&#34;1&#34;</span>,
+                <span style="color:#d14">&#34;User-Agent&#34;</span>: <span style="color:#d14">&#34;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.89 Safari/537.36&#34;</span>,
+            }
+            <span style="color:#000;font-weight:bold">try</span>:
+                data <span style="color:#000;font-weight:bold">=</span> requests<span style="color:#000;font-weight:bold">.</span>get(domain, headers<span style="color:#000;font-weight:bold">=</span>headers)<span style="color:#000;font-weight:bold">.</span>text
+                soup <span style="color:#000;font-weight:bold">=</span> BeautifulSoup(data, <span style="color:#d14">&#39;html.parser&#39;</span>)
+                title <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>title<span style="color:#000;font-weight:bold">.</span>get_text()
+                title <span style="color:#000;font-weight:bold">=</span> re<span style="color:#000;font-weight:bold">.</span>sub(<span style="color:#d14">r</span><span style="color:#d14">&#39;\r\n&#39;</span>, <span style="color:#d14">&#39;&#39;</span>, title<span style="color:#000;font-weight:bold">.</span>strip())
+                titleToken <span style="color:#000;font-weight:bold">=</span> nltk<span style="color:#000;font-weight:bold">.</span>word_tokenize(title<span style="color:#000;font-weight:bold">.</span>lower(), language<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;english&#39;</span>)
+                domainData[domain] <span style="color:#000;font-weight:bold">=</span> titleToken
+            <span style="color:#000;font-weight:bold">except</span>:
+                <span style="color:#000;font-weight:bold">pass</span>
+        <span style="color:#000;font-weight:bold">return</span> domainData
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_counts</span>(<span style="color:#999">self</span>, allDomain):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        返回网站列表各个域名数量
+</span><span style="color:#d14">        :param allDomain: 网站列表
+</span><span style="color:#d14">        :return: 网站:数量
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        counts <span style="color:#000;font-weight:bold">=</span> defaultdict(<span style="color:#0086b3">int</span>)
+        <span style="color:#000;font-weight:bold">for</span> eachDomain <span style="color:#000;font-weight:bold">in</span> allDomain:
+            counts[eachDomain] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
+        <span style="color:#000;font-weight:bold">return</span> counts
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    <span style="color:#998;font-style:italic"># allQuery = [&#34;National Sales Company, Inc.&#34;, &#34;Decor Music Inc.&#34;,&#34;Fujian Xishi Co., Ltd&#34;,&#34;Kiho USA Inc.&#34;,&#34;BusinessPartner Co.,ltd&#34;,&#34;BENKAI Co.,Ltd&#34;]</span>
+    <span style="color:#998;font-style:italic"># GOLD INC 18245 E 40TH AVE AURORA CO 80011 US</span>
+    allQuery <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#34;ALZARKI INTERNATIONAL&#34;</span>]
+    website <span style="color:#000;font-weight:bold">=</span> Website(engine<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;google&#39;</span>)
+    <span style="color:#000;font-weight:bold">for</span> query <span style="color:#000;font-weight:bold">in</span> allQuery:
+        time<span style="color:#000;font-weight:bold">.</span>sleep(<span style="color:#099">2</span>)
+        website <span style="color:#000;font-weight:bold">=</span> website<span style="color:#000;font-weight:bold">.</span>get_web(query<span style="color:#000;font-weight:bold">=</span>query)
+        <span style="color:#0086b3">print</span>(website)
+</code></pre></td></tr></table>
+</div>
+</div><p>计算余弦相似度代码</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># -*-coding:utf-8-*-</span>
+<span style="color:#998;font-style:italic"># script: CosineSimilarity.py</span>
+__author__ <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;howie&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> reduce
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">math</span> <span style="color:#000;font-weight:bold">import</span> sqrt
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CosineSimilarity</span>(<span style="color:#0086b3">object</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    余弦相似性计算相似度
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, initQuery, domainData):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>title <span style="color:#000;font-weight:bold">=</span> initQuery
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>data <span style="color:#000;font-weight:bold">=</span> domainData
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">create_vector</span>(<span style="color:#999">self</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        创建单词向量
+</span><span style="color:#d14">        :return: wordVector = </span><span style="color:#d14">{}</span><span style="color:#d14"> 目标标题以及各个网站标题对应的单词向量
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        wordVector <span style="color:#000;font-weight:bold">=</span> {}
+        <span style="color:#000;font-weight:bold">for</span> web, value <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>data<span style="color:#000;font-weight:bold">.</span>items():
+            wordVector[web] <span style="color:#000;font-weight:bold">=</span> []
+            titleVector, valueVector <span style="color:#000;font-weight:bold">=</span> [], []
+            allWord <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">set</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>title <span style="color:#000;font-weight:bold">+</span> value)
+            <span style="color:#000;font-weight:bold">for</span> eachWord <span style="color:#000;font-weight:bold">in</span> allWord:
+                titleNum <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>title<span style="color:#000;font-weight:bold">.</span>count(eachWord)
+                valueNum <span style="color:#000;font-weight:bold">=</span> value<span style="color:#000;font-weight:bold">.</span>count(eachWord)
+                titleVector<span style="color:#000;font-weight:bold">.</span>append(titleNum)
+                valueVector<span style="color:#000;font-weight:bold">.</span>append(valueNum)
+            wordVector[web]<span style="color:#000;font-weight:bold">.</span>append(titleVector)
+            wordVector[web]<span style="color:#000;font-weight:bold">.</span>append(valueVector)
+        <span style="color:#000;font-weight:bold">return</span> wordVector
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">calculate</span>(<span style="color:#999">self</span>, wordVector):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        计算余弦相似度
+</span><span style="color:#d14">        :param wordVector: wordVector = </span><span style="color:#d14">{}</span><span style="color:#d14"> 目标标题以及各个网站标题对应的单词向量
+</span><span style="color:#d14">        :return: 返回各个网站相似度值
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        resultDic <span style="color:#000;font-weight:bold">=</span> {}
+        <span style="color:#000;font-weight:bold">for</span> web, value <span style="color:#000;font-weight:bold">in</span> wordVector<span style="color:#000;font-weight:bold">.</span>items():
+            valueArr <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(value)
+            <span style="color:#998;font-style:italic"># 余弦相似性</span>
+            squares <span style="color:#000;font-weight:bold">=</span> []
+            numerator <span style="color:#000;font-weight:bold">=</span> reduce(<span style="color:#000;font-weight:bold">lambda</span> x, y: x <span style="color:#000;font-weight:bold">+</span> y, valueArr[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">*</span> valueArr[<span style="color:#099">1</span>])
+            square_title, square_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>, <span style="color:#099">0.0</span>
+            <span style="color:#000;font-weight:bold">for</span> num <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#0086b3">len</span>(valueArr[<span style="color:#099">0</span>])):
+                square_title <span style="color:#000;font-weight:bold">+=</span> <span style="color:#0086b3">pow</span>(valueArr[<span style="color:#099">0</span>][num], <span style="color:#099">2</span>)
+                square_data <span style="color:#000;font-weight:bold">+=</span> <span style="color:#0086b3">pow</span>(valueArr[<span style="color:#099">1</span>][num], <span style="color:#099">2</span>)
+            squares<span style="color:#000;font-weight:bold">.</span>append(sqrt(square_title))
+            squares<span style="color:#000;font-weight:bold">.</span>append(sqrt(square_data))
+            mul_of_squares <span style="color:#000;font-weight:bold">=</span> reduce(<span style="color:#000;font-weight:bold">lambda</span> x, y: x <span style="color:#000;font-weight:bold">*</span> y, squares)
+            resultDic[web] <span style="color:#000;font-weight:bold">=</span> numerator <span style="color:#000;font-weight:bold">/</span> sum_of_squares
+        <span style="color:#000;font-weight:bold">return</span> resultDic
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_website</span>(<span style="color:#999">self</span>, resultDic):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        获取最可能是官网的网站
+</span><span style="color:#d14">        :param resultDic: 各个网站相似度值
+</span><span style="color:#d14">        :return: 最可能的网站 也可能为空
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        website <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>
+        largest <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">max</span>(<span style="color:#0086b3">zip</span>(resultDic<span style="color:#000;font-weight:bold">.</span>values(), resultDic<span style="color:#000;font-weight:bold">.</span>keys()))
+        <span style="color:#000;font-weight:bold">if</span> largest[<span style="color:#099">0</span>]:
+            website <span style="color:#000;font-weight:bold">=</span> largest[<span style="color:#099">1</span>]
+        <span style="color:#998;font-style:italic"># 当相似度为0</span>
+        <span style="color:#000;font-weight:bold">else</span>:
+            websites <span style="color:#000;font-weight:bold">=</span> [key <span style="color:#000;font-weight:bold">for</span> key, values <span style="color:#000;font-weight:bold">in</span> resultDic<span style="color:#000;font-weight:bold">.</span>items() <span style="color:#000;font-weight:bold">if</span> values <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">0.0</span>]
+            <span style="color:#000;font-weight:bold">for</span> eachWebsite <span style="color:#000;font-weight:bold">in</span> websites:
+                keyword <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;,&#39;</span><span style="color:#000;font-weight:bold">.</span>join(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>data[eachWebsite])<span style="color:#000;font-weight:bold">.</span>lower()
+                <span style="color:#000;font-weight:bold">if</span> <span style="color:#d14">&#39;home&#39;</span> <span style="color:#000;font-weight:bold">in</span> keyword <span style="color:#000;font-weight:bold">or</span> <span style="color:#d14">&#34;welcome&#34;</span> <span style="color:#000;font-weight:bold">in</span> keyword:
+                    website <span style="color:#000;font-weight:bold">=</span> eachWebsite
+        <span style="color:#000;font-weight:bold">return</span> website
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="3总结">3.总结</h2>
+<p>至此，若有更好的解决方案，欢迎赐教，谢谢。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2016/07_company-name-to-website/">https://www.howie6879.cn/post/2016/07_company-name-to-website/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">Python之朴素贝叶斯对展会数据分类</a></li>
+        
+        <li><a href="/post/2016/05_about-python-decorator/">python之装饰器</a></li>
+        
+        <li><a href="/post/2016/04_package-py-lib-with-cx_freeze/">cx_Freeze打包py文件</a></li>
+        
+        <li><a href="/post/2016/03_mysql-tutorial/">MySQL基本操作命令汇总</a></li>
+        
+        <li><a href="/post/2016/02_markdown-tutorial/">Markdown简明教程</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

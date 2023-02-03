@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Request #  Request的主要作用是方便地处理网络请求，最终返回一个Response对象。
+主要提供的方法有：
+ Request().fetch：请求一个网页资源，可以单独使用 Request().fetch_callback：为Spider类提供的和核心方法  Core arguments #   url：请求的资源链接 method：请求的方法，GET或者POST callback：回调函数 headers：请求头 load_js：目标网页是否需要加载js metadata：跨请求传递的一些数据 request_config：请求配置 request_session：aiohttp的请求session aiohttp_kwargs：请求目标资源可定义的其他参数  Usage #  通过上面的参数介绍可以知道，Request除了需要结合Spider使用，也可以单独使用：
+import asyncio from ruia import Request request = Request(&#34;https://news.ycombinator.com/&#34;) response = asyncio.get_event_loop().run_until_complete(request.fetch()) # Output # [2018-07-25 11:23:42,620]-Request-INFO &lt;GET: https://news.ycombinator.com/&gt; # &lt;Response url[text]: https://news.ycombinator.com/ status:200 metadata:{}&gt; How It Works? #  Request通过对aiohttp和pyppeteer的封装来实现对网页资源的异步请求">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="Request #  Request的主要作用是方便地处理网络请求，最终返回一个Response对象。
+主要提供的方法有：
+ Request().fetch：请求一个网页资源，可以单独使用 Request().fetch_callback：为Spider类提供的和核心方法  Core arguments #   url：请求的资源链接 method：请求的方法，GET或者POST callback：回调函数 headers：请求头 load_js：目标网页是否需要加载js metadata：跨请求传递的一些数据 request_config：请求配置 request_session：aiohttp的请求session aiohttp_kwargs：请求目标资源可定义的其他参数  Usage #  通过上面的参数介绍可以知道，Request除了需要结合Spider使用，也可以单独使用：
+import asyncio from ruia import Request request = Request(&#34;https://news.ycombinator.com/&#34;) response = asyncio.get_event_loop().run_until_complete(request.fetch()) # Output # [2018-07-25 11:23:42,620]-Request-INFO &lt;GET: https://news.ycombinator.com/&gt; # &lt;Response url[text]: https://news.ycombinator.com/ status:200 metadata:{}&gt; How It Works? #  Request通过对aiohttp和pyppeteer的封装来实现对网页资源的异步请求" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" /><meta property="article:section" content="docs" />
+
+
+
+<title>1. Request | Ruia</title>
+<link rel="manifest" href="/ruia/manifest.json">
+<link rel="icon" href="/ruia/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ruia/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ruia/en.search.min.101897924ddfa2441ef62c0731fab334d40d8f0f26f09d00b54369ad9ee6a30d.js" integrity="sha256-EBiXkk3fokQe9iwHMfqzNNQNjw8m8J0AtUNprZ7mow0="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ruia"><span>Ruia</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/howie6879/ruia" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://docs.python-ruia.org/" target="_blank" rel="noopener">
+        English
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class="">❤️ 快速开始</a>
+  
+
+          
+  <ul>
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>入门指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>基础概念</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class=" active">1. Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class="">4. Field</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>开发指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>实践指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class="">1.谈谈对 Python 爬虫的理解</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ruia/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>1. Request</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ruia/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#core-arguments">Core arguments</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#how-it-works">How It Works?</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="request">
+  Request
+  <a class="anchor" href="#request">#</a>
+</h1>
+<p><code>Request</code>的主要作用是方便地处理网络请求，最终返回一个<a href="2.Response.md">Response</a>对象。</p>
+<p>主要提供的方法有：</p>
+<ul>
+<li><a href="https://github.com/howie6879/ruia/blob/master/ruia/request.py">Request().fetch</a>：请求一个网页资源，可以单独使用</li>
+<li><a href="https://github.com/howie6879/ruia/blob/master/ruia/request.py">Request().fetch_callback</a>：为<code>Spider</code>类提供的和核心方法</li>
+</ul>
+<h2 id="core-arguments">
+  Core arguments
+  <a class="anchor" href="#core-arguments">#</a>
+</h2>
+<ul>
+<li>url：请求的资源链接</li>
+<li>method：请求的方法，<code>GET</code>或者<code>POST</code></li>
+<li>callback：回调函数</li>
+<li>headers：请求头</li>
+<li>load_js：目标网页是否需要加载js</li>
+<li>metadata：跨请求传递的一些数据</li>
+<li>request_config：请求配置</li>
+<li>request_session：<code>aiohttp</code>的请求session</li>
+<li>aiohttp_kwargs：请求目标资源可定义的其他参数</li>
+</ul>
+<h2 id="usage">
+  Usage
+  <a class="anchor" href="#usage">#</a>
+</h2>
+<p>通过上面的参数介绍可以知道，<code>Request</code>除了需要结合<code>Spider</code>使用，也可以单独使用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> asyncio
+
+<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Request
+
+request <span style="color:#f92672">=</span> Request(<span style="color:#e6db74">&#34;https://news.ycombinator.com/&#34;</span>)
+response <span style="color:#f92672">=</span> asyncio<span style="color:#f92672">.</span>get_event_loop()<span style="color:#f92672">.</span>run_until_complete(request<span style="color:#f92672">.</span>fetch())
+
+<span style="color:#75715e"># Output</span>
+<span style="color:#75715e"># [2018-07-25 11:23:42,620]-Request-INFO  &lt;GET: https://news.ycombinator.com/&gt;</span>
+<span style="color:#75715e"># &lt;Response url[text]: https://news.ycombinator.com/ status:200 metadata:{}&gt;</span>
+</code></pre></div><h2 id="how-it-works">
+  How It Works?
+  <a class="anchor" href="#how-it-works">#</a>
+</h2>
+<p><code>Request</code>通过对<code>aiohttp</code>和<code>pyppeteer</code>的封装来实现对网页资源的异步请求</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#core-arguments">Core arguments</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#how-it-works">How It Works?</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

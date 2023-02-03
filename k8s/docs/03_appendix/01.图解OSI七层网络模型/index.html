@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="简单图解OSI七层网络模型 #   翻译自Bradley Mitchell的《The Layers of the OSI Model Illustrated》
+ Open Systems Interconnection(OSI)定义了一个网络框架，其以层为单位实现了各种协议，同时会将控制权逐层传递。目前OSI主要作为教学工具被使用，其在概念上将计算机网络结构按逻辑顺序划分为7层。
+较低层处理电信号、二进制数据块以及路由这些数据以便在网络中的穿梭；从用户的角度来看，更高的层次包括网络请求和响应、数据的表示和网络协议。
+OSI模型最初被认为是构建网络系统的标准体系结构，今天许多流行的网络技术都可以看出OSI的分层设计。
+物理层（Physical Layer） #  物理层是OSI模型的第一层，其职责在于通过网络通信媒介将比特流数据从发送（源）设备的物理层传输到接收（终）设备的物理层。
+第一层技术的例子包括以太网电缆和集线器。此外，集线器和其他中继器是在物理层起作用的标准网络设备，电缆连接器也是如此。
+在物理层，数据通过物理介质支持的以下信号类型进行传输:
+ 电压 无线电频率 红外脉冲 普通光  数据链路层（Data Link Layer） #  当从物理层获取数据时，数据链路层会检查物理传输错误，并将比特数据打包成数据帧。数据链路层还管理着物理寻址方案，例如以太网的MAC地址，用于控制网络设备对物理介质的访问。
+因为数据链路层是 OSI 模型中最复杂的一层，所以它通常被分成两部分: 媒体访问控制子层和逻辑链路控制子层。
+网络层（Network Layer） #  网络层在数据链路层之上增加了路由的概念。每当数据抵达网络层时，就会检查每个帧中包含的源地址和目标地址，以确定数据是否已到达其最终目的地。如果数据已经到达最终目的地，第3层就会将数据格式化并打包为数据包交付给运输层，否则网络层会更新目的地址并将帧推送到下层。
+为了支持路由，网络层需要一个维护逻辑地址，比如网络设备的IP地址。网络层还管理着这些逻辑地址和物理地址之间的映射，在IPv4网络中，这种映射通过地址解析协议(ARP)完成，IPv6使用邻居发现协议(NDP)。
+运输层（Transport Layer） #  传输层通过网络连接传输数据。TCP (传输控制协议)和 `UDP (用户数据报协议)是传输层比较常见且有代表性的协议。不同的传输协议可能支持一系列可选功能，包括错误恢复、流控制和支持重新传输。
+会话层（Session Layer） #  会话层位于第五层，其管理着网络连接事件顺序和流程的启动和关闭。它支持多种类型的连接，这些连接可以动态地创建并在单个网络上运行。
+表示层（Presentation Layer） #  表示层位于第六层，就功能相对来说是OSI模型各层中最简单的。其着力于消息数据的语法处理，如格式转换和支持其上一层（应用层）所需的加密/解密。
+应用层（Application Layer） #  应用层为终端用户使用的应用提供网络服务（处理用户数据的协议）。举个例子，在Web浏览器应用程序中，应用层协议HTTP打包发送和接收网页内容所需的数据。同时应用层也会向表示层提供或获取数据。">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="简单图解OSI七层网络模型 #   翻译自Bradley Mitchell的《The Layers of the OSI Model Illustrated》
+ Open Systems Interconnection(OSI)定义了一个网络框架，其以层为单位实现了各种协议，同时会将控制权逐层传递。目前OSI主要作为教学工具被使用，其在概念上将计算机网络结构按逻辑顺序划分为7层。
+较低层处理电信号、二进制数据块以及路由这些数据以便在网络中的穿梭；从用户的角度来看，更高的层次包括网络请求和响应、数据的表示和网络协议。
+OSI模型最初被认为是构建网络系统的标准体系结构，今天许多流行的网络技术都可以看出OSI的分层设计。
+物理层（Physical Layer） #  物理层是OSI模型的第一层，其职责在于通过网络通信媒介将比特流数据从发送（源）设备的物理层传输到接收（终）设备的物理层。
+第一层技术的例子包括以太网电缆和集线器。此外，集线器和其他中继器是在物理层起作用的标准网络设备，电缆连接器也是如此。
+在物理层，数据通过物理介质支持的以下信号类型进行传输:
+ 电压 无线电频率 红外脉冲 普通光  数据链路层（Data Link Layer） #  当从物理层获取数据时，数据链路层会检查物理传输错误，并将比特数据打包成数据帧。数据链路层还管理着物理寻址方案，例如以太网的MAC地址，用于控制网络设备对物理介质的访问。
+因为数据链路层是 OSI 模型中最复杂的一层，所以它通常被分成两部分: 媒体访问控制子层和逻辑链路控制子层。
+网络层（Network Layer） #  网络层在数据链路层之上增加了路由的概念。每当数据抵达网络层时，就会检查每个帧中包含的源地址和目标地址，以确定数据是否已到达其最终目的地。如果数据已经到达最终目的地，第3层就会将数据格式化并打包为数据包交付给运输层，否则网络层会更新目的地址并将帧推送到下层。
+为了支持路由，网络层需要一个维护逻辑地址，比如网络设备的IP地址。网络层还管理着这些逻辑地址和物理地址之间的映射，在IPv4网络中，这种映射通过地址解析协议(ARP)完成，IPv6使用邻居发现协议(NDP)。
+运输层（Transport Layer） #  传输层通过网络连接传输数据。TCP (传输控制协议)和 `UDP (用户数据报协议)是传输层比较常见且有代表性的协议。不同的传输协议可能支持一系列可选功能，包括错误恢复、流控制和支持重新传输。
+会话层（Session Layer） #  会话层位于第五层，其管理着网络连接事件顺序和流程的启动和关闭。它支持多种类型的连接，这些连接可以动态地创建并在单个网络上运行。
+表示层（Presentation Layer） #  表示层位于第六层，就功能相对来说是OSI模型各层中最简单的。其着力于消息数据的语法处理，如格式转换和支持其上一层（应用层）所需的加密/解密。
+应用层（Application Layer） #  应用层为终端用户使用的应用提供网络服务（处理用户数据的协议）。举个例子，在Web浏览器应用程序中，应用层协议HTTP打包发送和接收网页内容所需的数据。同时应用层也会向表示层提供或获取数据。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" /><meta property="article:section" content="docs" />
+
+
+
+<title>01.图解 Osi七层网络模型 | Kubernetes 学习之路</title>
+<link rel="manifest" href="/k8s/manifest.json">
+<link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/k8s/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/k8s/en.search.min.f5d2943d0cf1ecf8cf4d5d5306d7d831bf9bfb6f77da58303954836506c4f7a7.js" integrity="sha256-9dKUPQzx7PjPTV1TBtfYMb&#43;b&#43;2932lgwOVSDZQbE96c="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/k8s"><span>Kubernetes 学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://images-1252557999.file.myqcloud.com/uPic/wEYlMy.jpg" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基础</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" class="">01.走进 Kubernetes</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class="">03.容器持久化存储</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：进阶</span>
+  
+
+          
+  <ul>
+    
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" class=" active">01.图解 Osi七层网络模型</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/k8s/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01.图解 Osi七层网络模型</strong>
+
+  <label for="toc-control">
+    
+    <img src="/k8s/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#物理层physical-layer">物理层（Physical Layer）</a></li>
+    <li><a href="#数据链路层data-link-layer">数据链路层（Data Link Layer）</a></li>
+    <li><a href="#网络层network-layer">网络层（Network Layer）</a></li>
+    <li><a href="#运输层transport-layer">运输层（Transport Layer）</a></li>
+    <li><a href="#会话层session-layer">会话层（Session Layer）</a></li>
+    <li><a href="#表示层presentation-layer">表示层（Presentation Layer）</a></li>
+    <li><a href="#应用层application-layer">应用层（Application Layer）</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="简单图解osi七层网络模型">
+  简单图解OSI七层网络模型
+  <a class="anchor" href="#%e7%ae%80%e5%8d%95%e5%9b%be%e8%a7%a3osi%e4%b8%83%e5%b1%82%e7%bd%91%e7%bb%9c%e6%a8%a1%e5%9e%8b">#</a>
+</h1>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/osi_gif.gif" alt="osi_gif" /></p>
+<blockquote>
+<p>翻译自<a href="https://www.lifewire.com/bradley-mitchell-816228">Bradley Mitchell</a>的《<a href="https://www.lifewire.com/layers-of-the-osi-model-illustrated-818017">The Layers of the OSI Model Illustrated</a>》</p>
+</blockquote>
+<p>Open Systems Interconnection(OSI)定义了一个网络框架，其以层为单位实现了各种协议，同时会将控制权逐层传递。目前<code>OSI</code>主要作为教学工具被使用，其在概念上将计算机网络结构按逻辑顺序划分为7层。</p>
+<p>较低层处理电信号、二进制数据块以及路由这些数据以便在网络中的穿梭；从用户的角度来看，更高的层次包括网络请求和响应、数据的表示和网络协议。</p>
+<p><code>OSI</code>模型最初被认为是构建网络系统的标准体系结构，今天许多流行的网络技术都可以看出<code>OSI</code>的分层设计。</p>
+<h2 id="物理层physical-layer">
+  物理层（Physical Layer）
+  <a class="anchor" href="#%e7%89%a9%e7%90%86%e5%b1%82physical-layer">#</a>
+</h2>
+<p>物理层是<code>OSI</code>模型的第一层，其职责在于通过网络通信媒介将比特流数据从发送（源）设备的物理层传输到接收（终）设备的物理层。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/nTvz4K.jpg" alt="nTvz4K" /></p>
+<p>第一层技术的例子包括以太网电缆和集线器。此外，集线器和其他中继器是在物理层起作用的标准网络设备，电缆连接器也是如此。</p>
+<p>在物理层，数据通过物理介质支持的以下信号类型进行传输:</p>
+<ul>
+<li>电压</li>
+<li>无线电频率</li>
+<li>红外脉冲</li>
+<li>普通光</li>
+</ul>
+<h2 id="数据链路层data-link-layer">
+  数据链路层（Data Link Layer）
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e9%93%be%e8%b7%af%e5%b1%82data-link-layer">#</a>
+</h2>
+<p>当从物理层获取数据时，数据链路层会检查物理传输错误，并将比特数据打包成数据帧。数据链路层还管理着物理寻址方案，例如以太网的<code>MAC</code>地址，用于控制网络设备对物理介质的访问。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/fL4FRo.jpg" alt="fL4FRo" /></p>
+<p>因为数据链路层是 OSI 模型中最复杂的一层，所以它通常被分成两部分: 媒体访问控制子层和逻辑链路控制子层。</p>
+<h2 id="网络层network-layer">
+  网络层（Network Layer）
+  <a class="anchor" href="#%e7%bd%91%e7%bb%9c%e5%b1%82network-layer">#</a>
+</h2>
+<p>网络层在数据链路层之上增加了路由的概念。每当数据抵达网络层时，就会检查每个帧中包含的源地址和目标地址，以确定数据是否已到达其最终目的地。如果数据已经到达最终目的地，第3层就会将数据格式化并打包为数据包交付给运输层，否则网络层会更新目的地址并将帧推送到下层。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/fRiImm.jpg" alt="fRiImm" /></p>
+<p>为了支持路由，网络层需要一个维护逻辑地址，比如网络设备的<code>IP</code>地址。网络层还管理着这些逻辑地址和物理地址之间的映射，在<code>IPv4</code>网络中，这种映射通过地址解析协议(<code>ARP</code>)完成，<code>IPv6</code>使用邻居发现协议(<code>NDP</code>)。</p>
+<h2 id="运输层transport-layer">
+  运输层（Transport Layer）
+  <a class="anchor" href="#%e8%bf%90%e8%be%93%e5%b1%82transport-layer">#</a>
+</h2>
+<p>传输层通过网络连接传输数据。<code>TCP</code> (传输控制协议)和 `UDP (用户数据报协议)是传输层比较常见且有代表性的协议。不同的传输协议可能支持一系列可选功能，包括错误恢复、流控制和支持重新传输。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/0eKMWM.jpg" alt="0eKMWM" /></p>
+<h2 id="会话层session-layer">
+  会话层（Session Layer）
+  <a class="anchor" href="#%e4%bc%9a%e8%af%9d%e5%b1%82session-layer">#</a>
+</h2>
+<p>会话层位于第五层，其管理着网络连接事件顺序和流程的启动和关闭。它支持多种类型的连接，这些连接可以动态地创建并在单个网络上运行。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/kAKms4.jpg" alt="kAKms4" /></p>
+<h2 id="表示层presentation-layer">
+  表示层（Presentation Layer）
+  <a class="anchor" href="#%e8%a1%a8%e7%a4%ba%e5%b1%82presentation-layer">#</a>
+</h2>
+<p>表示层位于第六层，就功能相对来说是OSI模型各层中最简单的。其着力于消息数据的语法处理，如格式转换和支持其上一层（应用层）所需的加密/解密。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/6aIs7n.jpg" alt="6aIs7n" /></p>
+<h2 id="应用层application-layer">
+  应用层（Application Layer）
+  <a class="anchor" href="#%e5%ba%94%e7%94%a8%e5%b1%82application-layer">#</a>
+</h2>
+<p>应用层为终端用户使用的应用提供<strong>网络服务</strong>（处理用户数据的协议）。举个例子，在Web浏览器应用程序中，应用层协议HTTP打包发送和接收网页内容所需的数据。同时应用层也会向表示层提供或获取数据。</p>
+<p><img src="https://images-1252557999.file.myqcloud.com/uPic/N0qYsG.jpg" alt="N0qYsG" /></p>
+<h2 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h2>
+<p>本文主体内容来翻译自<a href="https://www.lifewire.com/bradley-mitchell-816228">Bradley Mitchell</a>的《<a href="https://www.lifewire.com/layers-of-the-osi-model-illustrated-818017">The Layers of the OSI Model Illustrated</a>》，衍生开的话还有以下不错的书籍资料：</p>
+<ul>
+<li><a href="https://book.douban.com/subject/26960678/">计算机网络-第7版-谢希仁</a></li>
+<li><a href="https://time.geekbang.org/column/intro/100007101?code=B0w8OmhZXXkMkJ5PSXpY9KNeN4%2FvjOXNDvtHpaRlbK8%3D">趣谈网络协议</a></li>
+<li><a href="https://book.douban.com/subject/24737674/">图解TCP/IP</a></li>
+</ul>
+<p>大家有兴趣的可以看一看。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#物理层physical-layer">物理层（Physical Layer）</a></li>
+    <li><a href="#数据链路层data-link-layer">数据链路层（Data Link Layer）</a></li>
+    <li><a href="#网络层network-layer">网络层（Network Layer）</a></li>
+    <li><a href="#运输层transport-layer">运输层（Transport Layer）</a></li>
+    <li><a href="#会话层session-layer">会话层（Session Layer）</a></li>
+    <li><a href="#表示层presentation-layer">表示层（Presentation Layer）</a></li>
+    <li><a href="#应用层application-layer">应用层（Application Layer）</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="深度神经⽹络为何很难训练 #  上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。
+ 普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数
+ 而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：
+这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？
+随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？
+仔细研究会发现：
+  如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前
+  反之情况也会发生，前面层训练良好，后面停滞不前
+  实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。
+消失的梯度问题 #  我们在第一章识别手写字曾经以MNIST数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。
+简单回顾一下，之前我们的训练样本路径为/pylab/datasets/mnist.pkl.gz ，相关案例代码在pylab都可以找到（我稍做了改动以支持Python3）。
+import mnist_loader import network2 training_data, validation_data, test_data = mnist_loader.load_data_wrapper() # 输入层 784 # 隐藏层 30 # 输出层 10 sizes = [784, 30, 10] net = network2.Network(sizes=sizes) # 随机梯度下降开始训练 net.SGD( training_data, 30, 10, 0.1, lmbda=5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, ) &#34;&#34;&#34; Epoch 0 training complete Accuracy on evaluation data: 9280 / 10000 Epoch 1 training complete Accuracy on evaluation data: 9391 / 10000 .">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="深度神经⽹络为何很难训练 #  上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。
+ 普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数
+ 而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：
+这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？
+随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？
+仔细研究会发现：
+  如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前
+  反之情况也会发生，前面层训练良好，后面停滞不前
+  实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。
+消失的梯度问题 #  我们在第一章识别手写字曾经以MNIST数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。
+简单回顾一下，之前我们的训练样本路径为/pylab/datasets/mnist.pkl.gz ，相关案例代码在pylab都可以找到（我稍做了改动以支持Python3）。
+import mnist_loader import network2 training_data, validation_data, test_data = mnist_loader.load_data_wrapper() # 输入层 784 # 隐藏层 30 # 输出层 10 sizes = [784, 30, 10] net = network2.Network(sizes=sizes) # 随机梯度下降开始训练 net.SGD( training_data, 30, 10, 0.1, lmbda=5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, ) &#34;&#34;&#34; Epoch 0 training complete Accuracy on evaluation data: 9280 / 10000 Epoch 1 training complete Accuracy on evaluation data: 9391 / 10000 ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" /><meta property="article:section" content="docs" />
+
+
+
+<title>05.深度神经 络为何很难训练 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class=" active">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>05.深度神经 络为何很难训练</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#消失的梯度问题">消失的梯度问题</a></li>
+    <li><a href="#导致梯度消失的原因">导致梯度消失的原因</a></li>
+    <li><a href="#在更加复杂络中的不稳定梯度">在更加复杂⽹络中的不稳定梯度</a></li>
+    <li><a href="#其它深度学习的障碍">其它深度学习的障碍</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="深度神经络为何很难训练">
+  深度神经⽹络为何很难训练
+  <a class="anchor" href="#%e6%b7%b1%e5%ba%a6%e7%a5%9e%e7%bb%8f%e7%bb%9c%e4%b8%ba%e4%bd%95%e5%be%88%e9%9a%be%e8%ae%ad%e7%bb%83">#</a>
+</h1>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/dinosaur-5995333_1280.png" alt="dinosaur-5995333_1280" /></p>
+<p>上一章提到了神经网络的一种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入得到一个近似的输出。</p>
+<blockquote>
+<p>普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数</p>
+</blockquote>
+<p>而且理论上我们只要一个隐藏层就可以计算任何函数，第一章我们就用如下的网络结构完成了一个手写字识别的模型：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214307565-20210201235205704.png" alt="shadow-image-20201119214307565" /></p>
+<p>这时候，大家心中可能都会有这样一个想法，如果加大网络的深度，模型的识别准确率是否会提高？</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214431316-20210201235159992.png" alt="shadow-image-20201119214431316" /></p>
+<p>随即我们会基于反向传播的随机梯度下降来训练神经网络，但实际上这会产生一些问题，因为我们的深度神经网络并没有比浅层网络好很多。那么此处就引出了一个问题，为什么深度神经网络相对训练困难？</p>
+<p>仔细研究会发现：</p>
+<ul>
+<li>
+<p>如果网络后面层学习状况好的时候，前面的层次经常会在训练时停滞不前</p>
+</li>
+<li>
+<p>反之情况也会发生，前面层训练良好，后面停滞不前</p>
+</li>
+</ul>
+<p>实际上，我们发现在深度神经⽹络中使⽤基于梯度下降的学习⽅法本⾝存在着内在不稳定性，这种不稳定性使得先前或者后⾯神经网络层的学习过程阻滞。</p>
+<h2 id="消失的梯度问题">
+  消失的梯度问题
+  <a class="anchor" href="#%e6%b6%88%e5%a4%b1%e7%9a%84%e6%a2%af%e5%ba%a6%e9%97%ae%e9%a2%98">#</a>
+</h2>
+<p>我们在第一章<a href="https://github.com/howie6879/ml_note/blob/main/nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97.md">识别手写字</a>曾经以<code>MNIST</code>数字分类问题做过示例，接下来我们同样通过这个样例来看看我们的神经网络在训练过程中究竟哪里出了问题。</p>
+<p>简单回顾一下，之前我们的训练样本路径为<code>/pylab/datasets/mnist.pkl.gz </code>，相关案例代码在<a href="[pylab]%28https://github.com/howie6879/pylab%29">pylab</a>都可以找到（我稍做了改动以支持Python3）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> mnist_loader
+<span style="color:#f92672">import</span> network2
+
+training_data, validation_data, test_data <span style="color:#f92672">=</span> mnist_loader<span style="color:#f92672">.</span>load_data_wrapper()
+<span style="color:#75715e"># 输入层 784</span>
+<span style="color:#75715e"># 隐藏层 30</span>
+<span style="color:#75715e"># 输出层 10</span>
+sizes <span style="color:#f92672">=</span> [<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>]
+net <span style="color:#f92672">=</span> network2<span style="color:#f92672">.</span>Network(sizes<span style="color:#f92672">=</span>sizes)
+
+<span style="color:#75715e"># 随机梯度下降开始训练</span>
+net<span style="color:#f92672">.</span>SGD(
+    training_data,
+    <span style="color:#ae81ff">30</span>,
+    <span style="color:#ae81ff">10</span>,
+    <span style="color:#ae81ff">0.1</span>,
+    lmbda<span style="color:#f92672">=</span><span style="color:#ae81ff">5.0</span>,
+    evaluation_data<span style="color:#f92672">=</span>validation_data,
+    monitor_evaluation_accuracy<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+)
+
+<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">Epoch 0 training complete
+</span><span style="color:#e6db74">Accuracy on evaluation data: 9280 / 10000
+</span><span style="color:#e6db74">Epoch 1 training complete
+</span><span style="color:#e6db74">Accuracy on evaluation data: 9391 / 10000
+</span><span style="color:#e6db74">......
+</span><span style="color:#e6db74">Epoch 28 training complete
+</span><span style="color:#e6db74">Accuracy on evaluation data: 9626 / 10000
+</span><span style="color:#e6db74">Epoch 29 training complete
+</span><span style="color:#e6db74">Accuracy on evaluation data: 9647 / 1000
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</code></pre></div><p>最终我们得到了分类的准确率为 96.47%，如果加深网络的层数会不会提升准确率呢？我们分别尝试一下几种情况：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 准确率 96.8%</span>
+net <span style="color:#f92672">=</span> network2<span style="color:#f92672">.</span>Network([<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>])
+<span style="color:#75715e"># 准确率 96.42%</span>
+net <span style="color:#f92672">=</span> network2<span style="color:#f92672">.</span>Network([<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>])
+<span style="color:#75715e"># 准确率 96.28%</span>
+net <span style="color:#f92672">=</span> network2<span style="color:#f92672">.</span>Network([<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>])
+</code></pre></div><p>这说明一种情况，尽管我们加深神经网络的层数以让其学到更复杂的分类函数，但是并没有带来更好的分类表现（但也没有变得更差）。</p>
+<p>那么为什么会造成这种情况，这是我们接下来需要思考的问题。可以考虑先假设额外的隐藏层的确能够在原理上起到作⽤，问题是我们的学习算法没有发现正确地权值和偏置。</p>
+<p>下图（基于<code>[784, 30, 30, 10]</code>网络）表⽰了每个神经元权重和偏置在神经⽹络学习时的变化速率，图中的每个神经元有⼀个条形统计图，表⽰这个神经元在⽹络进⾏学习时改变的速度。更⼤的条意味着更快的速度，而小的条则表⽰变化缓慢。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217162947909-20210201235152243.png" alt="shadow-20201217162947909" /></p>
+<p>可以发现，第⼆个隐藏层上的条基本上都要⽐第⼀个隐藏层上的条要⼤；所以，在第⼆个隐藏层的神经元将学习得更加快速。这并不是巧合，前⾯的层学习速度确实低于后⾯的层。</p>
+<p>我们可以继续观察学习速度的变化，下方分别是2~4个隐藏层的学习速度变化图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163602988-20210201235216607.png" alt="shadow-image-20201217163602988" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163721344-20210201235221602.png" alt="shadow-image-20201217163721344" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217163735287-20210201235232432.png" alt="shadow-image-20201217163735287" /></p>
+<p>同样的情况出现了，前⾯的隐藏层的学习速度要低于后⾯的隐藏层。这⾥，第⼀层的学习速度和最后⼀层要差了两个数量级，也就是⽐第四层慢了 100 倍。</p>
+<p>我们可以得出一个结果，在某些深度神经⽹络中，在我们隐藏层反向传播的时候梯度倾向于变小；这意味着在前⾯的隐藏层中的神经元学习速度要慢于后⾯的隐藏层，这个现象也被称作是<strong>消失的梯度问题</strong>。</p>
+<h2 id="导致梯度消失的原因">
+  导致梯度消失的原因
+  <a class="anchor" href="#%e5%af%bc%e8%87%b4%e6%a2%af%e5%ba%a6%e6%b6%88%e5%a4%b1%e7%9a%84%e5%8e%9f%e5%9b%a0">#</a>
+</h2>
+<blockquote>
+<p>核心原因在于深度神经网络中的梯度不稳定性，会造成前面层中梯度消失或者梯度爆炸</p>
+</blockquote>
+<p>看下面这个既简单的深度神经网络，每⼀层都只有⼀ 个单⼀的神经元：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217170827163-20210201235242656.png" alt="shadow-image-20201217170827163" /></p>
+<p>首先回顾几个计算公式：</p>
+<ul>
+<li>第$j$个神经元的输出：$a_j = \sigma(z_j)$ 其中$\sigma$就是<code>Sigmoid</code>函数</li>
+<li>$z_j = w_j*a_{j-1}+b_j$</li>
+</ul>
+<p>让我们通过公式追踪一下$b_1$的变化趋势：
+$$
+\begin{aligned}
+\frac{\partial C}{\partial b_{1}} = \frac{\partial C}{\partial a_{4}}  \times \frac{\partial a_{4}}{\partial z_{4}} \times \frac{\partial z_{4}}{\partial a_{3}}  \times \frac{\partial a_{3}}{\partial z_{3}}  \times \frac{\partial z_{3}}{\partial a_{2}}  \times \frac{\partial a_{2}}{\partial z_{2}}  \times \frac{\partial z_{2}}{\partial a_{1}}  \times \frac{\partial a_{1}}{\partial z_{1}} \times  \frac{\partial z_{1}}{\partial b_{1}}
+\end{aligned}
+$$
+以小见大一下，对于上述式子，可以做一下拆解：</p>
+<ul>
+<li>
+<p>$a_4 = \sigma(z_4) = \sigma(w_4*a_3 + b_4)$</p>
+</li>
+<li>
+<p>$\frac{\partial a_4}{\partial z_4} = \frac{\partial \sigma(z_4)}{\partial z_4}=\sigma^{\prime}\left(z_4\right)$</p>
+</li>
+<li>
+<p>$\frac{\partial \sigma(z_4)}{\partial a_3} = \frac{\partial \sigma(w_4*a_3 + b_4)}{\partial a_3} = w_4$</p>
+</li>
+<li>
+<p>$\frac{\partial z_1}{\partial b_1} = \frac{\partial \sigma(w_1*a_0 + b_1)}{\partial b_1} = 1$</p>
+</li>
+</ul>
+<p>故：
+$$
+\begin{aligned}\frac{\partial C}{\partial b_{1}} = \frac{\partial C}{\partial a_{4}} \times \sigma^{\prime}(z_4) \times w_4 \times \sigma^{\prime}(z_3) \times w_3 \times \sigma^{\prime}(z_2) \times w_2 \times \sigma^{\prime}(z_1) \times 1
+\end{aligned}
+$$
+其实可以直观地看出上述表达式是一系列如$w_j\sigma^\prime(z_j)$的乘积，其中有<code>sigmoid</code>的导数，我们可以观察一下$\sigma^\prime(x)$的函数图像（$\sigma^\prime(x) = \sigma(x)(1 - \sigma(x))$）:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201217223631570-20210201235252564.png" alt="shadow-image-20201217223631570" /></p>
+<p>绘图代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+<span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid_d</span>(x):
+    y <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">/</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> np<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>x))
+    <span style="color:#66d9ef">return</span> y <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> y)
+
+x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0.1</span>)
+y <span style="color:#f92672">=</span> sigmoid_d(x)
+plt<span style="color:#f92672">.</span>plot(x, y)
+plt<span style="color:#f92672">.</span>show()
+</code></pre></div><p>结合上述公式和函数图像，我们可以得出以下结论：</p>
+<ol>
+<li>由于权重一般是基于均值为0方差为1的高斯分布，所以任何权重总是处于$(0, 1)$</li>
+<li>$\sigma^\prime(x) \leq 0.25$</li>
+<li>$w_j\sigma^\prime(z_j)&lt;0.25$</li>
+</ol>
+<p>再结合上面的表达式，当层数越多，乘积项就会越多，就会导致$\frac{\partial C}{\partial b_{1}}$更小，于是就导致了梯度消失。</p>
+<blockquote>
+<p>Sigmoid作为激活函数情况下，由于梯度反向传播中的连乘效应，导致了梯度消失</p>
+</blockquote>
+<p>反之，梯度爆炸的问题就是神经网络前面层比后面层梯度变化快，从而引起了梯度爆炸的问题，比如$w$较大导致了$|w_j\sigma^\prime(z_j)|&gt;1$，再结合上面提到的连乘效应，就自然地梯度爆炸了。</p>
+<h2 id="在更加复杂络中的不稳定梯度">
+  在更加复杂⽹络中的不稳定梯度
+  <a class="anchor" href="#%e5%9c%a8%e6%9b%b4%e5%8a%a0%e5%a4%8d%e6%9d%82%e7%bb%9c%e4%b8%ad%e7%9a%84%e4%b8%8d%e7%a8%b3%e5%ae%9a%e6%a2%af%e5%ba%a6">#</a>
+</h2>
+<p>当我们从简单的神经网络上发现了随着网络层次的加深，会造成网络权值更新不稳定的情况后，也很明确地观察到了梯度消失问题。继续扩展一下，对于那些每层包含很多神经元的更加复杂的网络来说会是怎样的情况呢？</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20201119214431316-20210201235258715.png" alt="shadow-image-20201119214431316" /></p>
+<p>对于第$l$层的梯度：
+$$
+\delta^{l}=\Sigma^{\prime}\left(z^{l}\right)\left(w^{l+1}\right)^{T} \Sigma^{\prime}\left(z^{l+1}\right)\left(w^{l+2}\right)^{T} \ldots \Sigma^{\prime}\left(z^{L}\right) \nabla_{a} C
+$$
+根据连乘效应，会导致出现不稳定的梯度，和前面例子一样，会导致前面层的梯度指数级地消失。</p>
+<h2 id="其它深度学习的障碍">
+  其它深度学习的障碍
+  <a class="anchor" href="#%e5%85%b6%e5%ae%83%e6%b7%b1%e5%ba%a6%e5%ad%a6%e4%b9%a0%e7%9a%84%e9%9a%9c%e7%a2%8d">#</a>
+</h2>
+<p>前面三节主要介绍了一大障碍：不稳定梯度（梯度消失或者梯度爆炸），实际上，不稳定梯度仅仅是深度学习的众多障碍之⼀。</p>
+<p>下面会据一些关于<strong>什么让训练深度⽹络⾮常困难</strong>相关主题的例子，这是个相当复杂的问题：</p>
+<ul>
+<li>在 2010 年<code> Glorot &amp;&amp; Bengio</code>发现证据表明 sigmoid 函数的选择会导致训练⽹络的 问题。特别地，他们发现<code>sigmoid</code>函数会导致最终层上的激活函数在训练中会聚集在 0，这也导 致了学习的缓慢。他们的⼯作中提出了⼀些取代<code>sigmoid</code>函数的激活函数选择，使得不会被这种聚集性影响性能。</li>
+<li>在 2013 年<code>Sutskever, Martens, Dahl 和 Hinton</code>研究了深度学习使⽤随机权重初始化和基于<code>momentum</code>的<code>SGD</code>⽅法。两种情形下，好的选择可以获得较⼤的差异的训练效果。</li>
+</ul>
+<p>论文地址：</p>
+<ul>
+<li><a href="chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fproceedings.mlr.press%2Fv9%2Fglorot10a%2Fglorot10a.pdf">Understanding the difficulty of training deep feedforward neural networks</a>
+<ul>
+<li>论文解读：
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/43840797">解读——01</a></li>
+<li><a href="https://www.cnblogs.com/yinheyi/p/6411713.html">解读——02</a></li>
+</ul>
+</li>
+<li>论文翻译：<a href="https://blog.csdn.net/qq_34784753/article/details/78668884">这里</a></li>
+</ul>
+</li>
+<li><a href="chrome-extension://ikhdkkncnoglghljlkmcimlnlhkeamad/pdf-viewer/web/viewer.html?file=http%3A%2F%2Fwww.cs.toronto.edu%2F~hinton%2Fabsps%2Fmomentum.pdf">On the importance of initialization and momentum in deep learning</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#消失的梯度问题">消失的梯度问题</a></li>
+    <li><a href="#导致梯度消失的原因">导致梯度消失的原因</a></li>
+    <li><a href="#在更加复杂络中的不稳定梯度">在更加复杂⽹络中的不稳定梯度</a></li>
+    <li><a href="#其它深度学习的障碍">其它深度学习的障碍</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

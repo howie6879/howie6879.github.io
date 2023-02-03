@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>基础概念 on Ruia</title>
+    <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/</link>
+    <description>Recent content in 基础概念 on Ruia</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/</guid>
+      <description>Request #  Request的主要作用是方便地处理网络请求，最终返回一个Response对象。
+主要提供的方法有：
+ Request().fetch：请求一个网页资源，可以单独使用 Request().fetch_callback：为Spider类提供的和核心方法  Core arguments #   url：请求的资源链接 method：请求的方法，GET或者POST callback：回调函数 headers：请求头 load_js：目标网页是否需要加载js metadata：跨请求传递的一些数据 request_config：请求配置 request_session：aiohttp的请求session aiohttp_kwargs：请求目标资源可定义的其他参数  Usage #  通过上面的参数介绍可以知道，Request除了需要结合Spider使用，也可以单独使用：
+import asyncio from ruia import Request request = Request(&amp;#34;https://news.ycombinator.com/&amp;#34;) response = asyncio.get_event_loop().run_until_complete(request.fetch()) # Output # [2018-07-25 11:23:42,620]-Request-INFO &amp;lt;GET: https://news.ycombinator.com/&amp;gt; # &amp;lt;Response url[text]: https://news.ycombinator.com/ status:200 metadata:{}&amp;gt; How It Works? #  Request通过对aiohttp和pyppeteer的封装来实现对网页资源的异步请求</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/</guid>
+      <description>Response #  Response的目的是返回一个统一且友好的响应对象，主要属性如下：
+ url：请求的资源链接 metadata：跨请求传递的一些数据 html：源网站返回的资源数据 cookies：网站 cookies history：访问历史 headers：请求头 status：请求状态码  </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/</guid>
+      <description>Item #  Item的主要作用是定义以及通过一定的规则提取源网页中的目标数据，它主要提供一下两个方法：
+ get_item：针对页面单目标数据进行提取 get_items：针对页面多目标数据进行提取  Core arguments #  get_item和get_items方法接收的参数是一致的：
+ html：网页源码 url：网页链接 html_etree：etree._Element对象  Usage #  通过上面的参数介绍可以知道，不论是源网站链接或者网站HTML源码，甚至是经过lxml处理过的etree._Element对象，Item能接收这三种类型的输入并进行处理
+import asyncio from ruia import AttrField, TextField, Item class HackerNewsItem(Item): target_item = TextField(css_select=&amp;#39;tr.athing&amp;#39;) title = TextField(css_select=&amp;#39;a.storylink&amp;#39;) url = AttrField(css_select=&amp;#39;a.storylink&amp;#39;, attr=&amp;#39;href&amp;#39;) async def clean_title(self, value): return value async_func = HackerNewsItem.get_items(url=&amp;#34;https://news.ycombinator.com/&amp;#34;) items = asyncio.get_event_loop().run_until_complete(async_func) for item in items: print(item.title, item.url) 有时你会遇见这样一种情况，例如爬取Github的Issue时，你会发现一个Issue可能对应多个Tag。 这时，将Tag作为一个独立的Item来提取是不划算的， 我们可以使用Field字段的many=True参数，使这个字段返回一个列表。
+import asyncio from ruia import Item, TextField, AttrField class GithiubIssueItem(Item): title = TextField(css_select=&amp;#39;title&amp;#39;) tags = AttrField(css_select=&amp;#39;a.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/</guid>
+      <description>Selector #  Selector通过Field类实现，为开发者提供了CSS Selector和XPath两种方式提取目标数据，具体由下面两个类实现：
+ AttrField(BaseField)：提取网页标签的属性数据 TextField(BaseField)：提取网页标签的text数据  Core arguments #  所有的Field共有的参数：
+ default: str, 设置默认值，建议定义，否则找不到字段时会报错 many: bool, 返回值将是一个列表  AttrField、TextField、HtmlField共用参数：
+ css_select：str, 利用CSS Selector提取目标数据 xpath_select：str, 利用XPath提取目标数据  AttrField需要一个额外的参数：
+ attr：目标标签属性  RegexField需要一个额外的参数：
+ re_select: str, 正则表达式字符串  Usage #  from lxml import etree from ruia import AttrField, TextField, HtmlField, RegexField HTML = &amp;#34;&amp;#34;&amp;#34; &amp;lt;html&amp;gt; &amp;lt;head&amp;gt; &amp;lt;title&amp;gt;ruia&amp;lt;/title&amp;gt; &amp;lt;/head&amp;gt; &amp;lt;body&amp;gt;¬ &amp;lt;p&amp;gt; &amp;lt;a class=&amp;#34;test_link&amp;#34; href=&amp;#34;https://github.com/howie6879/ruia&amp;#34;&amp;gt;hello github.&amp;lt;/a&amp;gt; &amp;lt;/p&amp;gt; &amp;lt;/body&amp;gt; &amp;lt;/html&amp;gt; &amp;#34;&amp;#34;&amp;#34; html = etree.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/</guid>
+      <description>Spider #  Spider是爬虫程序的入口，它将Item、Middleware、Request、等模块组合在一起，从而为你构造一个稳健的爬虫程序。你只需要关注以下两个函数：
+ Spider.start：爬虫的启动函数 parse：爬虫的第一层解析函数，继承Spider的子类必须实现这个函数  Core arguments #  Spider.start的参数如下：
+ after_start：爬虫启动后的钩子函数 before_stop：爬虫启动前的钩子函数 middleware：中间件类，可以是一个中间件Middleware()实例，也可以是一组Middleware()实例组成的列表 loop：事件循环  Usage #  import aiofiles from ruia import AttrField, TextField, Item, Spider class HackerNewsItem(Item): target_item = TextField(css_select=&amp;#39;tr.athing&amp;#39;) title = TextField(css_select=&amp;#39;a.storylink&amp;#39;) url = AttrField(css_select=&amp;#39;a.storylink&amp;#39;, attr=&amp;#39;href&amp;#39;) async def clean_title(self, value): return value class HackerNewsSpider(Spider): start_urls = [&amp;#39;https://news.ycombinator.com/news?p=1&amp;#39;, &amp;#39;https://news.ycombinator.com/news?p=2&amp;#39;] async def parse(self, response): async for item in HackerNewsItem.get_items(html=await response.text()): yield item async def process_item(self, item: HackerNewsItem): &amp;#34;&amp;#34;&amp;#34;Ruia build-in method&amp;#34;&amp;#34;&amp;#34; async with aiofiles.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/</guid>
+      <description>Middleware #  Middleware的主要作用是在进行一个请求的前后进行一些处理，比如监听请求或者响应：
+ Middleware().request：在请求前处理一些事情 Middleware().response：在请求后处理一些事情  Usage #  使用中间件有两点需要注意，一个是处理函数需要带上特定的参数，第二个是不需要返回值，具体使用如下：
+from ruia import Middleware middleware = Middleware() @middleware.request async def print_on_request(spider_ins, request): &amp;#34;&amp;#34;&amp;#34; 每次请求前都会调用此函数 request: Request类的实例对象 &amp;#34;&amp;#34;&amp;#34; print(&amp;#34;request: print when a request is received&amp;#34;) @middleware.response async def print_on_response(spider_ins, request, response): &amp;#34;&amp;#34;&amp;#34; 每次请求后都会调用此函数 request: Request类的实例对象 response: Response类的实例对象 &amp;#34;&amp;#34;&amp;#34; print(&amp;#34;response: print when a response is received&amp;#34;) How It Works? #  Middleware通过装饰器来实现对函数的回调，从而让开发者可以优雅的实现中间件功能，Middleware类中的两个属性request_middleware和response_middleware分别维护着一个队列来处理开发者定义的处理函数</description>
+    </item>
+    
+  </channel>
+</rss>

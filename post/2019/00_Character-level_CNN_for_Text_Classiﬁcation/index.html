@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>读 Character-level CNN for Text Classiﬁcation | 老胡的储物柜</title>
+  <meta property="og:title" content="读 Character-level CNN for Text Classiﬁcation - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-01-03T08:37:56&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-01-03T08:37:56&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="读 Character-level CNN for Text Classiﬁcation"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/00_character-level_cnn_for_text_classi%EF%AC%81cation/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#character-level-convolutional-networks">Character-level Convolutional Networks</a></li>
+    <li><a href="#key-modules">Key Modules</a></li>
+    <li><a href="#character-quantization">Character quantization</a></li>
+    <li><a href="#模型设计">模型设计</a></li>
+    <li><a href="#data-augmentation-using-thesaurus">Data Augmentation using Thesaurus</a></li>
+    <li><a href="#comparison-models">Comparison Models</a></li>
+    <li><a href="#traditional-methods">Traditional Methods</a></li>
+    <li><a href="#deep-learning-methods">Deep Learning Methods</a></li>
+    <li><a href="#choice-of-alphabet">Choice of Alphabet</a></li>
+    <li><a href="#large-scale-datasets-and-results">Large-scale Datasets and Results</a></li>
+    <li><a href="#discussion">Discussion</a></li>
+    <li><a href="#conclusion-and-outlook">Conclusion and Outlook</a></li>
+    <li><a href="#resources">Resources</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">读 Character-level CNN for Text Classiﬁcation</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年1月3日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <blockquote>
+<p>这篇论文提供了一个关于字符级卷积网络(ConvNets)在文本分类中应用实证研究，我们构建了几个大型数据集，以表明字符级卷积网络可以实现最先进的或竞争性的结果，针对传统模型（如词袋，n-gram及其TFIDF变体）和深度学习模型（如基于单词的ConvNets和循环神经网络）进行比较</p>
+</blockquote>
+<h2 id="introduction">Introduction</h2>
+<p>文本分类是自然语言处理中的一个经典问题，需要给自由文本文档分配预定义的类别。文本分类的研究范围包括从设计最佳特征到选择最佳机器学习分类器。到目前为止，几乎所有的文本分类技术都是基于单词的，一些单词有序组合的简单统计，如 N-gram，通常表现最好</p>
+<p>另一方面，许多研究人员发现卷积网络（ConvNets）从计算机视觉应用到语音识别等，对于从原始信号中提取信息都有不错的效果，特别是，在深度学习研究的早期使用的延时网络本质上是对序列数据进行建模的卷积网络</p>
+<p>在这篇文章中，我们探讨在字符层面上把文本作为一种原始信号，并将其应用于一维随机网络中。对于本文我们只使用文本分类任务作为例证来说明ConvNets理解文本的能力，从历史上看，我们知道ConvNets通常需要大规模数据集才能工作，因此我们也构建了其中的几个，提供了一系列与传统模型和其他深度学习模型的比较</p>
+<p>将卷积网络应用于文本分类或自然语言处理是文献研究的热点，研究表明，ConvNets可以直接应用于分布式或离散的嵌入词，而不需要任何语言的句法或语义结构的知识，事实证明，这些方法与传统模型相比具有竞争力</p>
+<p>还有一些相关的工作使用字符级特性进行语言处理，这些包括使用<a href="http://www.icsd.aegean.gr/lecturers/stamatatos/papers/ijait-spam.pdf">带有线性分类器的字符级n-gram</a>，并将字符级特性合并到ConvNets，特别是，这些ConvNet方法以单词为基础，在单词或单词n-gram层提取字符级特征，形成分布式表示。对词性标注和信息检索的改进进行了观察</p>
+<p>本文是第一篇只将字符应用于ConvNets的文章，我们证明，在大规模数据集上训练时，深度ConvNets不需要词汇知识，此外以前的研究结论认为，ConvNets不需要语言的句法或语义结构知识，这种工程上的简化对于能够适用于不同语言的单一系统来说是至关重要的，因为字符总是构成一个必要的结构，无论能否做到分割成词，仅处理字符还有一个好处，那就是可以自然而然地学会拼写错误和表情符号等不正常的字符组合</p>
+<h2 id="character-level-convolutional-networks">Character-level Convolutional Networks</h2>
+<p>在这部分，我们介绍了用于文本分类的字符级ConvNets的设计，设计是模块化的，其中通过反向传播获得梯度以执行优化</p>
+<h2 id="key-modules">Key Modules</h2>
+<p>主要组件是简单卷积模块，它简单地计算一维卷积。假设我们有一个离散输入函数：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-fec93815dd949f9719c50c5ae0e614d3_b.jpg" />   
+    </p>
+<p>和一个离散核函数：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-6e742e33f4335485018cf0c99d3acab2_b.jpg" />   
+    </p>
+<p>具有步幅d的f(x)和g(y)之间的卷积:</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-8801d1cac164ea821b14632992943789_b.jpg" />   
+    </p>
+<p>被定义为：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-892c24913c5d7ddb36d3edcf52afd915_b.jpg" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-328bc86d8cfc28628fa3bc7a38c22408_b.jpg" />   
+    </p>
+<p>其中c = k - d + 1是偏移常数，这个非常合用的模块使我们能够对 convnet 进行比6层更深的训练，而其他所有层都失败了。 <a href="https://www.di.ens.fr/sierra/pdfs/icml2010b.pdf">A theoretical analysis of feature pooling in visual recognition.</a>的分析可能对这个问题有所帮助</p>
+<p>该模型使用的非线性函数是h(x) = max{0, x}，这使得我们的卷积层类似于校正的线性单位(ReLUs)，使用的算法是128个小批量的随机梯度下降（SGD），使用动量0.9和初始步长0.01，每3个时间段减半，持续10次。 每个时期采用固定数量的随机训练样本，这些样本在类之间均匀采样。稍后将详细说明每个数据集的此数字。 实现使用 Torch 7完成</p>
+<h2 id="character-quantization">Character quantization</h2>
+<p>我们的模型接受一系列编码字符作为输入，通过为输入语言规定大小为m的字母表来完成编码，然后使用1-m编码（或“one-hot”编码）量化每个字符。然后，将字符序列变换为具有固定长度l0的这种m大小的向量的序列。忽略超过长度l0的任何字符，并且包括空白字符的不在字母表中的任何字符被量化为全零向量。字符量化顺序是向后的，因此字符的最新读数总是放在输出开始的附近，使得完全连接的图层可以很容易地将权重与最新读数联系起来</p>
+<p>我们所有模型中使用的字母由70个字符组成，包括26个英文字母，10个数字，33个其他字符加一个全零向量:</p>
+<pre tabindex="0"><code>abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'\&quot;/\\|_@#$%^&amp;*~`+-=&lt;&gt;()[]{}
+</code></pre><p>稍后我们将会生成一个字母表加上大小写的模型并进行比较</p>
+<h2 id="模型设计">模型设计</h2>
+<p>论文中设计了large和small两种卷积网络，都由6个卷积层和3个全连接层共9层神经网络组成</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-1fd7677dfce291c8c147722fa192dcf4_b.png" />   
+    </p>
+<p>由于字母表长度为70，因此我们的输入特征为70，输入特征长度论文设定为1014，看起来1014个字符已经可以捕获大部分感兴趣的文本，我们还在三个全连接层之间插入两个dropout层以实现模型正则化，dropout概率为0.5，表1列出了卷积层的配置，表2列出了全连接层的配置：</p>
+<p>表1：实验中的卷积层，卷积层的步幅为1，并且池化层都是非重叠的，因此我们省略了他们的步幅描述</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-a85c26e795aa5014bdd27acad84ad4d2_b.jpg" />   
+    </p>
+<p>使用Gaussian distribution初始化权重，初始化模型的均值和标准差分别为：</p>
+<ul>
+<li>large model：(0, 0.02)</li>
+<li>small model：(0, 0.05)</li>
+</ul>
+<p>表2：实验中的全连接层，最后一层的输出单元数由问题决定，例如，对于10分类问题将是10</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-a85b8f75ad15b1b24175795c263d6b1e_b.jpg" />   
+    </p>
+<p>对于不同的问题，我们的输入长度可能也是不同的（比如此例子: l0=1014），特征长度也是如此，从我们的模型设计可以很容易地知道，给定输入长度 l0，在最后一个卷积层之后(任何一个完全连接层之前)的特征长度为 l6 = (l0-96) / 27，这个数字与第6层的特征大小相乘将给出第一个完全连接的层接受的输入维度</p>
+<h2 id="data-augmentation-using-thesaurus">Data Augmentation using Thesaurus</h2>
+<p>许多研究人员发现，适当的数据扩充技术有助于降低深度学习模型的泛化误差，当我们能够找到模型可能具有的合适的不变性属性时，这些技术通常能够很好地工作。就文本而言，不能像图像或语音识别那样进行数据转换来增加数据，因为字符的顺序具有严格的句法和语义意义，因此最好的数据扩充方式应该是使用人类的重述文本类，但是这样昂贵且不切实际的，因为数据集太庞大了，综上，比较常见的做法是使用词汇和词组的近义词进行替代扩充。</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-adb0ecb0ee8ee09a8a5603bcceb0df73_b.jpg" />   
+    </p>
+<h2 id="comparison-models">Comparison Models</h2>
+<p>为了与竞争模型进行公平的比较，我们用传统和深度学习方法进行了一系列的实验。我们尽最大努力来选择可以提供可比性和有竞争力的模型，并且在没有偏向某个模型的情况下忠实的汇报结果</p>
+<h2 id="traditional-methods">Traditional Methods</h2>
+<p>我们提到的传统方法都是使用手动提取特征并构建一个线性分类器， 在所有这些模型中，所使用的分类器都是一个多项式 Logit模型</p>
+<ul>
+<li>Bag-of-words &amp; TF-IDF</li>
+<li>Bag-of-ngrams &amp; TF-IDF</li>
+<li>Bag-of-means &amp; TF-IDF</li>
+</ul>
+<h2 id="deep-learning-methods">Deep Learning Methods</h2>
+<p>近来深度学习模型开始应用于文本分类，我们选用两个简单且经典的模型来进行对比：</p>
+<ul>
+<li>word-based ConvNet</li>
+<li>long-short term memory (LSTM)  recurrent neural network model</li>
+</ul>
+<h2 id="choice-of-alphabet">Choice of Alphabet</h2>
+<p>对于英语字母表，一个明显的选择就是是否要区分大写字母和小写字母，结论发现不区分时候结果比较好，一种可能的解释是语义不会随着不同的字母情况而改变，因此带来了正则化的好处</p>
+<h2 id="large-scale-datasets-and-results">Large-scale Datasets and Results</h2>
+<p>以前在不同的领域已经证明ConvNets通常能够很好地处理大规模的数据集，特别是在我们的例子中，当模型采用了低层次的原始特征(比如字符)时。然而，大多数用于文本分类的开放数据集都很小，大规模数据集被分割成一个比测试小得多的训练集，因此，我们不是通过使用它们来混淆我们的社区，而是为我们的实验构建了几个大型数据集，范围从数十万到数百万个样本，总结在表3</p>
+<p>表3：我们的大型数据集的统计数据，Epoch大小是每次迭代的minibatches数量大小：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-6ab88510cc5e785f4093d3172dd4079d_b.jpg" />   
+    </p>
+<p>表4：测试所有模型的错误，以百分比表示，Lg代表大，Sm代表小，w2v是word2vec的缩写形式，Lk表示lookup table，Th代表thesaurus，有Full标签的表示ConvNets区分大小写：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-60e117bc25477f5af532537d9c3fe2a3_b.jpg" />   
+    </p>
+<p>基于所有合适的模型对数据进行训练，表格4列出来了误差百分比，请注意，由于我们没有中文词库，Sogou News数据集使用词库扩充部分没有任何结果，我们标记蓝色为好的结果，红色为不好的：</p>
+<h2 id="discussion">Discussion</h2>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/v2-cb1f58cea2d4d6e93f0286e7ab5c6d3d_b.jpg" />   
+    </p>
+<p>为了进一步了解表4中的结果，我们在本节中提供了一些实证分析，为了便于我们的分析，我们在比较模型中给出了图3中的相对误差。每个图都计算自我们的比较的模型和字符级ConvNet模型之间的差异，然后除以比较的模型误差，图中的所有ConvNets分别是具有词库扩充的大型模型。</p>
+<ul>
+<li><strong>Character-level ConvNet is an effective method</strong>，我们实验结论最重要的一点就是character-level ConvNets可以在不需要单词的情况下对文本进行分类，这强烈表明语言也可以被认为是一种与任何其他类型无异的信号</li>
+<li><strong>Dataset size forms a dichotomy between traditional and ConvNets models</strong>，数据量越大，性能越好</li>
+<li><strong>ConvNets may work well for user-generated data</strong>，擅长识别拼写错误、表情符号等奇异的符号组合，在人为生成的数据上效果较好</li>
+<li><strong>Choice of alphabet makes a difference</strong>，比较大量的数据集可以不用考虑大小写</li>
+<li><strong>Semantics of tasks may not matter</strong>，字符级ConvNets分类时，与语义无关</li>
+<li><strong>Bag-of-means is a misuse of word2vec</strong>，Bag-of-means模型表现很差，这表明如此简单的使用分布式单词表示可能不会给我们带来文本分类的优势</li>
+<li><strong>There is no free lunch</strong>，每一种模型都是适合特定数据集的，做不到一种模型适用于所有数据集</li>
+</ul>
+<h2 id="conclusion-and-outlook">Conclusion and Outlook</h2>
+<p>本文提供了一个关于文本分类的字符级卷积网络的实证研究，我们使用几个大型数据集与大量传统和深度学习模型进行了比较，一方面，分析显示character-level ConvNet是一个有很高效率的方法，另一方面，我们的模型在比较中的表现取决于许多因素，例如数据集大小，文本是否被策划以及字母表的选择。</p>
+<h2 id="resources">Resources</h2>
+<p>参考文章：</p>
+<ul>
+<li><a href="https://blog.csdn.net/liuchonge/article/details/70947995">字符级卷积神经网络（Char-CNN）实现文本分类—模型介绍与TensorFlow实现 - 呜呜哈的博客 - CSDN博客</a></li>
+<li><a href="https://blog.csdn.net/gentelyang/article/details/80833942">Character-level Convolutional Networks for Text Classification之每日一篇 - gentelyang的博客 - CSDN博客</a></li>
+<li><a href="http://www.pianshen.com/article/5803133093/">《Character-level Convolutional NNetworks for Text Classification》论文学习 - 程序员大本营</a></li>
+</ul>
+<p>开源项目：</p>
+<ul>
+<li><a href="https://github.com/mhjabreel/CharCNN">GitHub - mhjabreel/CharCNN</a></li>
+<li><a href="https://github.com/mhjabreel/CharCnn_Keras">GitHub - mhjabreel/CharCnn_Keras: The implementation of text classification using character level convoultion neural networks using Keras</a></li>
+<li><a href="https://github.com/lc222/char-cnn-text-classification-tensorflow">GitHub - lc222/char-cnn-text-classification-tensorflow: Character-level Convolutional Networks for Text Classification论文仿真实现</a> - 这篇感觉代码有参考上述，看上面两个即可</li>
+<li>[GitHub - gaussic/text-classification-cnn-rnn: CNN-RNN中文文本分类，基于TensorFlow</li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/00_character-level_cnn_for_text_classi%EF%AC%81cation/">https://www.howie6879.cn/post/2019/00_character-level_cnn_for_text_classi%EF%AC%81cation/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+        <li><a href="/post/2018/08_how-to-write-beautiful-python-code-with-pep-8/">如何用PEP 8编写优雅的Python代码</a></li>
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+        <li><a href="/post/2018/06_39/">统计学习方法笔记：3.k近邻法</a></li>
+        
+        <li><a href="/post/2018/05_38/">统计学习方法笔记：2.感知机</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E8%AF%BB%E8%AE%BA%E6%96%87'>读论文</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

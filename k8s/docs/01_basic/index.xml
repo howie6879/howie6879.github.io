@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>第一部分：基础 on Kubernetes 学习之路</title>
+    <link>https://www.howie6879.cn/k8s/docs/01_basic/</link>
+    <description>Recent content in 第一部分：基础 on Kubernetes 学习之路</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://www.howie6879.cn/k8s/docs/01_basic/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/</guid>
+      <description>走进Kubernetes #  什么是Kubernetes #  随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下同时还做到以下几点：
+  让资源利用率更高
+  让硬件成本相对更低
+  于是就自然而然地就产生了基于容器自动化部署微服务的需求，在容器编排这块的纷争，各大巨头参与，战况惨烈，但最终胜出的是谷歌的Kubernetes1，其提供的特性有：
+ 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+ Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+ Kubernetes控制节点主要由以下几个核心组件组成：
+ etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
+ kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 #  单机安装 #  关于单机安装k8s，我使用的相关环境如下（于2022-08-13更新）：
+ macOS：Monterey 12.4 Docker Desktop Vesion：4.11.1 Kubernetes：v1.24.2  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+k8s.gcr.io/kube-proxy:v1.24.2=gotok8s/kube-proxy:v1.24.2 k8s.gcr.io/kube-controller-manager:v1.24.2=gotok8s/kube-controller-manager:v1.24.2 k8s.gcr.io/kube-scheduler:v1.24.2=gotok8s/kube-scheduler:v1.24.2 k8s.gcr.io/kube-apiserver:v1.24.2=gotok8s/kube-apiserver:v1.24.2 k8s.gcr.io/pause:3.7=gotok8s/pause:3.7 k8s.gcr.io/coredns/coredns:v1.8.6=gotok8s/coredns:v1.8.6 k8s.gcr.io/etcd:3.5.3-0=gotok8s/etcd:3.5.3-0 然后执行./load_images.sh 即可下载k8s依赖的镜像，随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</guid>
+      <description>基础概念介绍 #  俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。
+本文主要讲解以下四个概念：
+ Pod Deployment Service Namespace  引入 #  让我们使用Deployment运行一个无状态应用来开启此章节吧，比如运行一个nginx Deployment（创建文件：nginx-deployment.yaml）：
+apiVersion: apps/v1 kind: Deployment metadata: name: nginx-deployment labels: app: nginx spec: replicas: 1 selector: matchLabels: app: nginx template: metadata: labels: app: nginx spec: containers: - name: nginx image: nginx:latest ports: - containerPort: 80 配置文件第二行，有个kind字段，表示的是此时yaml配置的类型，即Deployment。什么是Deployment？这里我先不做解释，让我们先实践，看能不能在使用过程中体会出这个类型的概念意义。
+在终端执行：
+kubectl apply -f ./nginx-deployment.yaml # 输出 deployment.apps/nginx-deployment created 然后通过以下命令分别查看集群中创建的 Deployment 和 Pod 的状态：
+# 查看 Deployment kubectl get deployments # 输出 NAME READY UP-TO-DATE AVAILABLE AGE nginx-deployment 1/1 1 1 2m29s # 查看 Pod kubectl get pods # 输出 NAME READY STATUS RESTARTS AGE nginx-deployment-585449566-qslv5 1/1 Running 0 2m38s # 查看 Deployment 的信息 kubectl describe deployment nginx	# 删除 Deployment kubectl delete deployment nginx-deployment # 查看 Pod 的信息 # kubectl describe pod &amp;lt;pod-name&amp;gt; # 这里的 &amp;lt;pod-name&amp;gt; 是某一 Pod 的名称 kubectl describe pod nginx-deployment-585449566-qslv5 # 进入容器 kubectl exec -it nginx-deployment-585449566-qslv5 -- /bin/bash 此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词Pod，这又是什么？让我们带着疑问继续往下看吧。</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/</guid>
+      <description>容器持久化存储 #  容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
+有了Pod后，我们的应用程序需要被创建和管理，这就引出了ReplicaSet和Deployment；然后需要将部署好的应用暴露给外部进行访问，Service可以提供一个固定的ip和端口让外部访问。
+对于有状态的应用，可以使用StatefulSet来进行状态的恢复，在上一节概念介绍里面有提到，有状态的应用是离不开持久化存储的。
+引子 #  在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
+对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在k8s里面可以通过定义存储卷来满足这个需求，它们不像Pod这样的顶级资源，而是被定义为Pod的一部分，并和Pod共享相同的生命周期。因此在Pod里面容器重新启动期间，卷的内容是不变的，
+卷 #  emptyDir #  在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
+让我们实际操作一下，vim fortune-pod.yaml:
+apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 说明一下上述配置文件的含义：fortune镜像是k8s in action书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为html的容器挂载在var/htdocs中；而nginx也挂载了相同的html卷，不过位置在/usr/share/nginx/html，上面两个容器共用的卷就是emptyDir: {}。
+启动来感受一下：</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</guid>
+      <description>配置应用程序 #  使用Docker部署应用程序时，一般常用的配置方式有：
+ 配置内嵌 启动传参配置 环境变量  经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：
+ gitRepo hostPath NFS  再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于Kubernetes的顶级资源对象中，那就是ConfigMap。
+传递命令行参数 #  在上一节容器持久化存储的emptyDir概念介绍部分，我们引入了一个fortune-pod的例子，再回顾一下之前的配置文件吧，如下：
+apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 此应用程序设定了每隔10s就会自动生成输出到html，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。
+创建文件fortune-pod-args.yaml，输入以下内容：
+apiVersion: v1 kind: Pod metadata: name: fortune2s spec: containers: - image: luksa/fortune:args args: [&amp;#34;2&amp;#34;] name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 看到配置文件中的args字段了么？这个就是传给镜像luksa/fortune:args控制时间的参数，让我们启动看看吧。</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://www.howie6879.cn/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.howie6879.cn/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</guid>
+      <description>容器网络 #  </description>
+    </item>
+    
+  </channel>
+</rss>

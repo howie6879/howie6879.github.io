@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>设计模式——基于容器的分布式系统 | 老胡的储物柜</title>
+  <meta property="og:title" content="设计模式——基于容器的分布式系统 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2021-03-11T22:35:47&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2021-03-11T22:35:47&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="基于容器的分布式系统的常用设计模式"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.cn/post/2021/06_design_patterns_for_container-based_distributed_systems/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#模式的价值">模式的价值</a></li>
+    <li><a href="#单容器模式">单容器模式</a></li>
+    <li><a href="#单节点多容器模式">单节点（多容器）模式</a>
+      <ul>
+        <li><a href="#边车模式sidecar-pattern">边车模式（Sidecar pattern）</a></li>
+        <li><a href="#大使模式ambassadors-pattern">大使模式（Ambassadors pattern）</a></li>
+        <li><a href="#适配器模式adapter-pattern">适配器模式（Adapter pattern）</a></li>
+      </ul>
+    </li>
+    <li><a href="#多节点模式">多节点模式</a>
+      <ul>
+        <li><a href="#领导选举模式leader-election-pattern">领导选举模式（Leader election pattern）</a></li>
+        <li><a href="#工作队列模式work-queue-pattern">工作队列模式（Work queue pattern）</a></li>
+        <li><a href="#分散聚集模式scattergather-pattern">分散/聚集模式（Scatter/gather pattern）</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">设计模式——基于容器的分布式系统</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年3月11日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E4%BA%91%E5%8E%9F%E7%94%9F'>云原生</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>20世纪80年代末至90年代初，面向对象编程思想给软件开发带来了一轮技术革新，就像润物细无声的春雨那般，向全世界的程序员们快速普及了模块化构建应用程序的方法，一直流行至今。</p>
+<p>当下，我们可以看到类似的革新出现在了分布式系统开发，具体特点如下：</p>
+<ul>
+<li>基于容器的微服务架构体系日益流行</li>
+<li>容器天然隔离的属性非常适合作为分布式系统中的<strong>基本对象</strong></li>
+</ul>
+<p>基于面向对象，<strong>四人帮</strong>基于经验提出和总结了对于一些常见软件设计问题的标准解决方案，其描述了一系列基于接口的模式，可以在各种环境中重用，这被称之为软件设计模式。历史一定程度上来说是重复的，随着这种架构模式的成熟，基于容器的分布式系统的设计模式也就自然而然地浮现了。</p>
+<p>本篇主要阐述的是<code>Brendan Burns</code>在基于容器的分布式系统中发现的三种设计模式：</p>
+<ul>
+<li>single-container patterns for container management：容器管理之单容器模式</li>
+<li>single-node patterns of closely cooperating containers：容器协调之单节点（多容器）模式</li>
+<li>multi-node patterns for distributed algorithms：分布式算法之多节点模式</li>
+</ul>
+<p>基于容器分布式系统的设计模式会给分布式计算编码带来以下优势：</p>
+<ul>
+<li>最佳实践，给没有经验的程序员带来相对正确的使用方式</li>
+<li>简化开发</li>
+<li>提升系统可靠性</li>
+</ul>
+<h2 id="模式的价值">模式的价值</h2>
+<p>模式的目的是提供一般建议或结构来指导设计，这样做的好处有以下三点：</p>
+<ul>
+<li>站在巨人的肩膀上，对于经验不怎么丰富的开发者，可以通过模式来指引走在正确的道路上，从而少踩坑，提升项目质量</li>
+<li>提供通用的名称和定义，有共同的领域语言进行交流是一件很重要的事情</li>
+<li>方便识别并构建共享的通用组件</li>
+</ul>
+<h2 id="单容器模式">单容器模式</h2>
+<p>就像对象会定义边界一样，容器为定义接口提供了天然的边界；它不仅可以暴露特定应用的功能，还可以通过钩子函数来管理系统。传统的容器管理接口是极其有限的，如：</p>
+<ul>
+<li>run</li>
+<li>pause</li>
+<li>stop</li>
+</ul>
+<p>这些接口只能说满足基础的使用需求，但是就目前的现状来看，更丰富的接口可以为系统开发者与操作者提供更多的功能。鉴于<code>HTTP</code>和<code>JSON</code>的普及程度，可以考虑通过容器在特定的节点托管一个<code>Web</code>服务来实现。这样做的目的是什么，可以从下面两个角度来看待：</p>
+<ul>
+<li>upward：容器可以暴露丰富的应用信息，比如：
+<ul>
+<li>各类监控指标（QPS、应用健康等）</li>
+<li>一些开发人员感兴趣的信息如（线程、堆栈、锁、网络消息统计等）</li>
+<li>组件配置、日志等</li>
+</ul>
+</li>
+<li>downward：任何开发者在编写软件组件的时候，都可以使用容器原生支持的生命周期接口来进行管控。比如一个集群管理系统通常会给任务分配对应的<strong>优先级</strong>，高优先级的任务即使在集群被超额订阅的情况下也能保证运行，这种保证是通过逐出已经运行的低优先级任务来实现的，然后这些低优先级任务能否运行取决于后面是否还有资源分配过来；但是这样有个问题就是开发者需要承担一些没必要的复返，比如处理一些优先级比较低的任务被<em>抛弃</em>的情况。相反，如果在应用程序和管理系统之间定义了正式的生命周期，那么应用程序组件将变得更易于管理，比如<code>k8s</code>使用<code>Docker</code> 的<code>graceful deletion</code>功能，这就允许应用程序通过完成当前任务，把状态写入磁盘等等操作之后再终止，将这个功能扩展一下就可以使使有状态的分布式系统的状态管理更加容易。</li>
+</ul>
+<h2 id="单节点多容器模式">单节点（多容器）模式</h2>
+<p>上面提到了单容器的接口，我们稍稍延伸一下，对于一个多容器组成的应用，会有怎样的设计模式呢？当然，此时我们仍旧有些限制条件需要讲清楚：</p>
+<ul>
+<li>容器都处于<strong>单节点</strong>下</li>
+<li>容器管理系统需要支持将多容器作为原子单元协调编排，这也侧面印证为什么<code>k8s</code>需要有<code>Pod</code>这个逻辑概念</li>
+</ul>
+<h3 id="边车模式sidecar-pattern">边车模式（Sidecar pattern）</h3>
+<blockquote>
+<p>扩展和增强现有的应用容器</p>
+</blockquote>
+<p>目前最常见的多容器部署模式就是边车模式，边车模式就是由两个容器组成的单节点模式：</p>
+<ul>
+<li>核心是应用程序容器，这个就是应用程序的轴心</li>
+<li>其次就是边车容器，作用就是改进和增强应用程序容器</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="image-20210310145212203" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210310145212203.png" />   
+    </p>
+<p>边车模式的一般方式如上图所示，可以看到应用程序容器和边车容器共享了许多资源：</p>
+<ul>
+<li>部分文件系统</li>
+<li>主机名</li>
+<li>网络</li>
+<li>其他</li>
+</ul>
+<p>我们通过下面的例子来看一下边车容器存在的必要性以及好处，图示如下：</p>
+<p>
+        <img class="mx-auto" alt="image-20210310152144189" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210310152144189.png" />   
+    </p>
+<p>其中主容器是一个<code>web</code>服务，而<code>日志处理</code>边车容器的工作就是收集本地磁盘的服务器日志，并将其流式传输至存储集群，这样做的好处有：</p>
+<ul>
+<li>容器是资源计算和调度的基本单位，所以可以优先配置主<code>Web</code>服务器的<code>cgroup</code>使得其处理延时降低，而日志处理容器则在<code>web</code>服务器空闲时使用<code>cpu</code>时间片进行日志处理</li>
+<li>将模块化和可重用的组件封装成边车，可达到功能内聚，应用可被划分明确的边界进行解耦（方便接入、测试调试、状态处理等），最重要的是可以被不同主容器作为边车容器复用</li>
+</ul>
+<h3 id="大使模式ambassadors-pattern">大使模式（Ambassadors pattern）</h3>
+<blockquote>
+<p>改变和管理应用容器与外部世界的通信方式</p>
+</blockquote>
+<p>第一次看大使模式，很可能会想这不就是另一种形式的边车模式吗？其实不然，首先第一点，大使模式下所有的请求响应信息交换全部是大使容器来完成的，应用程序容器只能和大使容器进行<em>交流</em>。</p>
+<p>
+        <img class="mx-auto" alt="image-20210310213608329" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210310213608329.png" />   
+    </p>
+<p>这种模式主要利用的特性是<strong>同一<code>Pod</code>中的容器可以共享相同的<code>localhost</code>网络接口</strong>，而且可以从两个角度看大使容器：</p>
+<ul>
+<li>内到外：让我们以访问一个存储区域为例，假设该存储区域的大小不断增长，必须分成更多的子系统。在这种情况下，为了不干预主容器并且必须对所有受影响的服务实施相同的新访问逻辑，创建一个大使容器来调解对存储区域的访问是个不错的选择</li>
+<li>外到内：让我们设想一下，我们要测试微服务的新版本，可以通过大使容器控制请求量到相关部署</li>
+</ul>
+<p><!-- raw HTML omitted --></p>
+<h3 id="适配器模式adapter-pattern">适配器模式（Adapter pattern）</h3>
+<blockquote>
+<p>确保应用程序实现统一的监控接口</p>
+</blockquote>
+<p>真实世界的应用程序大概率会有出现下面列出的几种情况：</p>
+<ul>
+<li>一部分服务自行开发（可能有新老标准差异），一部分使用开源项目</li>
+<li>服务的编写语言多样，日志记录、监控也多样</li>
+</ul>
+<p>假设我们需要有效地监控和运维应用程序，这就要求应用程序可以提供统一的通用接口来进行指标收集。这就是适配器发挥作用的场景了，对于不同应用容器提供的不同接口，可以使用适配器适配这种异构性并转化为一致的接口且原有服务代码不需要做任何改动。</p>
+<p>
+        <img class="mx-auto" alt="image-20210310222109600" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210310222109600.png" />   
+    </p>
+<p>主应用程序通过<code>localhost</code>或者<code>volume</code>与适配器容器通信，适配器经过一层处理提供统一的输出给外部使用者，一些常用的使用场景如下：</p>
+<ul>
+<li>监控：适配器将应用程序容器公开的监控接口转换为通用监控系统所期望的接口</li>
+<li>日志：适配器提供统一的日志记录输出</li>
+</ul>
+<h2 id="多节点模式">多节点模式</h2>
+<p>不要将模块化容器局限于单机容器协调上，其实模块化容器还可以使构建协调的多节点分布式应用程序变得更加容易。接下来将描述其中的三种分布式系统模，与前一节中的模式一样，这些模式也需要对 <code>Pod</code> 这个逻辑概念的支持。</p>
+<h3 id="领导选举模式leader-election-pattern">领导选举模式（Leader election pattern）</h3>
+<p>分布式系统中最常见的问题就是领导选举问题，副本被普遍使用在一个组件的多个相同的实例之间共享负载，副本的另一个更加复杂的作用就是使得某一特定副本作为整个部署集的<strong>leader</strong>，其他副本作为热备（这个区分过程比较复杂），当原本Leader宕机时可以快速被选举为新的Leader，以恢复系统功能。系统甚至可以并行地进行领导者选举，例如多个分片均需要确定领导者。</p>
+<p>
+        <img class="mx-auto" alt="image-20210311093811840" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311093811840.png" />   
+    </p>
+<p>上图介绍了一个简单的分布式选举的例子：图中三个副本，任何一个副本都有可能成为主副本，首先第一个副本为主，若其不巧发生故障，第二阶段就会通过选举将第三个副本变成主副本，最后，第一个副本回复，重新加入集群，第三副本依旧作为主节点运行调度。</p>
+<p>现在确实有许多类库可以进行领导者选举，但它们通常比较复杂并且难以被正确理解和使用，此外，它们还受到特定编程语言实现的限制。</p>
+<p>所以本部分探讨的就是将领导者选举机制从应用程序中剥离至领导者选举专属容器中，我们可以考虑提供一组领导者选举容器，每个容器都与需要进行领导者选举的应用程序共同调度，这样就可以在这些领导者选举容器之间执行选举。</p>
+<p>同时，它们可以在<code>localhost </code>上为需要进行领导者选举的应用程序容器提供一个简化的<code>HTTP API</code> (例如<code>becomeLeader</code>、<code>renewLeadership</code> 等)。</p>
+<p>这些领导者选举容器只需要由这个复杂领域的专家进行一次性构建即可，然后不管应用程序开发人员选择何种编程语言，都可以复用其简化的接口。这种方式代表了软件工程中最好的抽象和封装过程。</p>
+<h3 id="工作队列模式work-queue-pattern">工作队列模式（Work queue pattern）</h3>
+<p>一个简单通用的容器化工作队列图示如下：</p>
+<p>
+        <img class="mx-auto" alt="image-20210311213759374" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311213759374.png" />   
+    </p>
+<p>最左侧提供了一组需要被执行的工作项，然后工作队列管理容器接受输入工作项，将其分发给多个执行器进行消费，并且多个执行器中间没有任何交互，这样的好处是可以根据实际运行情况增加执行器数量来赢取时间。</p>
+<p>虽然工作队列和领导者选举一样，是一个研究得很透彻的课题并且有很多框架对它们进行了很好的实现，但这些分布式系统设计模式仍然是可以在面向容器的架构中获益。在以前的系统中，框架将程序限制在单一的语言环境中（如<code>Python</code>中的<code>Celery</code>）。</p>
+<p>对于一个容器，由于<code>run()&amp;mount()</code>接口的实现，使得实现一个通用的工作队列框架变得简单直接，可以将任意的处理代码打包成一个容器，再结合任意数据就构建成了一个完整的工作队列系统。开发完整工作队列所涉及的所有其他工作都可以由通用工作队列框架处理，并且可以被任何有相同需求的系统复用，用户代码集成等细节让我们看看下面的图示：</p>
+<p>
+        <img class="mx-auto" alt="image-20210311214352035" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311214352035.png" />   
+    </p>
+<blockquote>
+<p>通用工作队列的图示，可重用框架容器以深灰色显示，而开发人员容器以浅灰色显示。</p>
+</blockquote>
+<p>让我们结合上面的两张图一起看看，在我看来这就是一个从第一张图抽象出用户自定义代码从而形成第二张图的过程，且看我详细列出关键点。</p>
+<h4 id="源容器接口">源容器接口</h4>
+<p>用户定义的工作项由工作队列管理容器接收，此时涉及到一个论文中没有描述的点就是队列管理容器对于接收的工作项是默认进行了标准定义的，也就是说工作项都是定义好的标准输入。但实际情况并不可能让所有的输入项都有相同的输入标准，必须由一段用户自定义的处理代码来将输入标准化，不知机智的你是否想到了<strong>大使模式</strong>：</p>
+<p>
+        <img class="mx-auto" alt="image-20210311220535339" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311220535339.png" />   
+    </p>
+<h4 id="执行器容器接口">执行器容器接口</h4>
+<p>当工作队列管理容器获取了对应的工作项，接下来的工作就是下发给执行器进行处理，具体做法是调用一次性<code>API</code>触发工作流，并且在工作容器的整个生命周期是不会有其他调用产生的。</p>
+<p>
+        <img class="mx-auto" alt="image-20210311221333727" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311221333727.png" />   
+    </p>
+<h3 id="分散聚集模式scattergather-pattern">分散/聚集模式（Scatter/gather pattern）</h3>
+<p>最后一个我们要着重介绍的设计模式是<strong>分散/收集模式</strong>（终于是最后一个:face_with_thermometer:），首先简单介绍一下这个模式：</p>
+<blockquote>
+<p>分散/收集模式是一个树形模式，当外部客户端向根节点发送一个初始请求，根节点会将这个请求分发给大量服务器，每个服务器分片均返回部分数据，然后跟节点将这些部分结果组合起来形成一个针对原始请求的完整响应。</p>
+</blockquote>
+<p>对于上面这样一个流程，实际上可以抽象出以下几个标准出来：</p>
+<ul>
+<li>分散请求（fanning out the requests）</li>
+<li>收集响应（gathering the responses）</li>
+<li>与客户端交互（interacting with the client）</li>
+<li>&hellip;</li>
+</ul>
+<p>上述流程的大部分代码都是通用的，就像面向对象编程中一样，我们可以将这个一个个拆分实现并进行容器化。</p>
+<p>
+        <img class="mx-auto" alt="image-20210311222807445" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210311222807445.png" />   
+    </p>
+<p>值得一提的是要实现一个分散/收集系统，需要一个用户提供两个容器：</p>
+<ul>
+<li>第一种容器实现叶子节点计算，该容器执行部分计算并返回相应的结果</li>
+<li>第二种容器是合并容器，该容器需要汇总所有叶子容器的计算结果，并组织成一个单一的响应后输出给用户</li>
+</ul>
+<h2 id="说明">说明</h2>
+<p>主体内容来自：</p>
+<ul>
+<li>论文《<a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45406.pdf">Design patterns for container-based distributed systems</a>》</li>
+<li>书籍《<a href="https://book.douban.com/subject/34844678/">Designing Distributed Systems</a>》</li>
+</ul>
+<p>不错的资料：</p>
+<ul>
+<li><a href="https://www.cnblogs.com/gaochundong/p/design-patterns-for-container-based-distributed-systems.html">[译] 基于容器的分布式系统设计模式</a></li>
+</ul>
+<p>最近一直在了解低代码开发平台相关知识，就是前面提到的<a href="https://www.howie6879.cn/p/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E5%BC%80%E5%8F%91%E5%B9%B3%E5%8F%B0/">一站式机器学习云研发平台</a>，其中关于资源管理这块离不开<code>k8s</code>的使用，因此花了不少精力在这上面，不出意外会出一个系列的学习笔记，而且在学习分布式设计模式的同时也对分布式系统产生了一些兴趣，这一块后续会一起好好研究研究。</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2021/06_design_patterns_for_container-based_distributed_systems/">https://www.howie6879.cn/post/2021/06_design_patterns_for_container-based_distributed_systems/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2021/05_k8s_note_03_container_persistence/">k8s学习之路.基础.[03.容器持久化存储]</a></li>
+        
+        <li><a href="/post/2021/04_ml_cloud_dev_platform/">一站式机器学习云开发平台</a></li>
+        
+        <li><a href="/post/2021/02_k8s_note_02_basic_concept/">k8s学习之路.基础.[02.概念介绍]</a></li>
+        
+        <li><a href="/post/2021/01_k8s_note_01_installation/">k8s学习之路.基础.[01.走进Kubernetes]</a></li>
+        
+        <li><a href="/post/2019/00_character-level_cnn_for_text_classi%EF%AC%81cation/">读 Character-level CNN for Text Classiﬁcation</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF'>k8s学习之路</a></li>
+                
+                <li><a href='/tags/%E8%AF%BB%E8%AE%BA%E6%96%87'>读论文</a></li>
+                
+                <li><a href='/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F'>设计模式</a></li>
+                
+                <li><a href='/tags/%E6%9E%B6%E6%9E%84'>架构</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

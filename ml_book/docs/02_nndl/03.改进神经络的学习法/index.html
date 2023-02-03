@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="改进神经⽹络的学习⽅法 #   万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
+ 前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
+ 交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数  交叉熵代价函数 #  通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
+对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：
+假设有这样一个神经元，我们希望当输入为1的时候，输出为0，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为0.6 和 0.9，前面我们说过，S型神经元的输出计算方式为：
+输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：
+$$ \frac{1}{1&#43;\exp(-\sum_j w_j x_j-b)} $$
+将0.6 和 0.9带入，即可得到输出为：0.82，很显然和目标0相差甚远，那么就只能继续寻找最优解了，随着迭代期的增加，神经元的输出、权重、偏置和代价的变化如下⾯⼀系列图形所⽰：
+可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于0.5我们都可以归为0，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：
+这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。
+这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单
+ 权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
+ 让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
+ $x=1$ $y=0$  再结合前面第一章讲的代价函数的定义：
+$$ C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2 $$
+ w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output  类比一下，此时的代价函数为：
+$$ C=\frac{(y-a)^{2}}{2} $$
+接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="改进神经⽹络的学习⽅法 #   万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
+ 前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
+ 交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数  交叉熵代价函数 #  通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
+对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：
+假设有这样一个神经元，我们希望当输入为1的时候，输出为0，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为0.6 和 0.9，前面我们说过，S型神经元的输出计算方式为：
+输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：
+$$ \frac{1}{1&#43;\exp(-\sum_j w_j x_j-b)} $$
+将0.6 和 0.9带入，即可得到输出为：0.82，很显然和目标0相差甚远，那么就只能继续寻找最优解了，随着迭代期的增加，神经元的输出、权重、偏置和代价的变化如下⾯⼀系列图形所⽰：
+可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于0.5我们都可以归为0，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：
+这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。
+这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单
+ 权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
+ 让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
+ $x=1$ $y=0$  再结合前面第一章讲的代价函数的定义：
+$$ C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2 $$
+ w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output  类比一下，此时的代价函数为：
+$$ C=\frac{(y-a)^{2}}{2} $$
+接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" /><meta property="article:section" content="docs" />
+
+
+
+<title>03.改进神经 络的学习 法 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class=" active">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>03.改进神经 络的学习 法</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#交叉熵代价函数">交叉熵代价函数</a>
+      <ul>
+        <li><a href="#引交叉熵代价函数">引⼊交叉熵代价函数</a></li>
+        <li><a href="#交叉熵的含义源哪">交叉熵的含义？源⾃哪⾥？</a></li>
+      </ul>
+    </li>
+    <li><a href="#过度拟合和规范化">过度拟合和规范化</a>
+      <ul>
+        <li><a href="#规范化">规范化</a></li>
+        <li><a href="#为何规范化可以帮助减轻过度拟合">为何规范化可以帮助减轻过度拟合</a></li>
+        <li><a href="#规范化的其他技术">规范化的其他技术</a></li>
+      </ul>
+    </li>
+    <li><a href="#权重初始化">权重初始化</a></li>
+    <li><a href="#如何选择神经络的超参数">如何选择神经⽹络的超参数</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="改进神经络的学习法">
+  改进神经⽹络的学习⽅法
+  <a class="anchor" href="#%e6%94%b9%e8%bf%9b%e7%a5%9e%e7%bb%8f%e7%bb%9c%e7%9a%84%e5%ad%a6%e4%b9%a0%e6%b3%95">#</a>
+</h1>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/ztgUEyfdz00.jpg" alt="ztgUEyfdz00" /></p>
+<blockquote>
+<p>万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的</p>
+</blockquote>
+<p>前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：</p>
+<ul>
+<li>交叉熵代价函数</li>
+<li>四种称为<code>规范化</code>的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展）</li>
+<li>更好的权重初始化⽅法</li>
+<li>如何选择神经网络的超参数</li>
+</ul>
+<h2 id="交叉熵代价函数">
+  交叉熵代价函数
+  <a class="anchor" href="#%e4%ba%a4%e5%8f%89%e7%86%b5%e4%bb%a3%e4%bb%b7%e5%87%bd%e6%95%b0">#</a>
+</h2>
+<p>通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？</p>
+<p>对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030214416.png" alt="" /></p>
+<p>假设有这样一个神经元，我们希望当输入为<code>1</code>的时候，输出为<code>0</code>，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为<code>0.6 和 0.9</code>，前面我们说过，<code>S型神经元</code>的输出计算方式为：</p>
+<p>输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：</p>
+<p>$$
+\frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+$$</p>
+<p>将<code>0.6 和 0.9</code>带入，即可得到输出为：<code>0.82</code>，很显然和目标<code>0</code>相差甚远，那么就只能继续寻找最优解了，随着迭代期的增加，神经元的输出、权重、偏置和代价的变化如下⾯⼀系列图形所⽰：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030215427.png" alt="" /></p>
+<p>可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于<code>0.5</code>我们都可以归为<code>0</code>，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030215956.png" alt="" />
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030220023.png" alt="" /></p>
+<p>这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。</p>
+<p>这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单</p>
+<blockquote>
+<p>权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小</p>
+</blockquote>
+<p>让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：</p>
+<ul>
+<li>$x=1$</li>
+<li>$y=0$</li>
+</ul>
+<p>再结合前面第一章讲的代价函数的定义：</p>
+<p>$$
+C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+$$</p>
+<ul>
+<li>w 表⽰所有的⽹络中权重的集合</li>
+<li>b 是所有的偏置</li>
+<li>n 是训练输⼊数据的个数</li>
+<li>a 是表⽰当输⼊为x时输出的向量，可以理解为output</li>
+</ul>
+<p>类比一下，此时的代价函数为：</p>
+<p>$$
+C=\frac{(y-a)^{2}}{2}
+$$</p>
+<p>接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：</p>
+<ul>
+<li>$x=1$</li>
+<li>$y=0$</li>
+<li>$a=\sigma(z)$</li>
+<li>$z=wx+b$</li>
+</ul>
+<p>推导过程如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031094031.png" alt="" /></p>
+<p>从推导结果可以看到偏导数的值和$\sigma^{\prime}\left(z\right)$成正比，回顾下前面讲的S型神经元中激活函数的图像：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/A7595F2F-C760-4FCC-8653-62D3EC408632-20220403213246938.png" alt="" /></p>
+<p>我们可以从这幅图看出，当神经元的输出接近<code>1</code>的时候，曲线变得相当平，所以$\sigma^{\prime}\left(z\right)$就很小，同时也可以得出代价函数<code>C</code>权重和偏置的偏导数也很小，这就是训练速度缓慢的原因</p>
+<p>再看上面代价函数值和迭代次数的图，中间部分非常<code>陡峭</code>，前后非常<code>平缓</code>，是不是非常契合$\sigma^{\prime}\left(z\right)$的变化的？类似其他的神经网络，也是这样的原因造成训练缓慢，使用均方误差作为代价函数还有个缺点就是容易陷入局部最优解的沼泽中</p>
+<h3 id="引交叉熵代价函数">
+  引⼊交叉熵代价函数
+  <a class="anchor" href="#%e5%bc%95%e4%ba%a4%e5%8f%89%e7%86%b5%e4%bb%a3%e4%bb%b7%e5%87%bd%e6%95%b0">#</a>
+</h3>
+<p>我们已经抛出了神经网络训练缓慢的原因，接下来就是考虑如何解决这个问题</p>
+<blockquote>
+<p>研究表明，我们可以通过使⽤交叉熵代价函数来替换⼆次代价函数</p>
+</blockquote>
+<p>为了理解什么是交叉熵，我们稍微改变⼀下之前的简单例⼦；假设，我们现在要训练⼀个包含若⼲输⼊变量的的神经元，输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031100956.png" alt="" /></p>
+<p>相关说明：</p>
+<ul>
+<li>$a=\sigma(z)$</li>
+<li>$z=\sum_{j} w_{j} x_{j}+b$</li>
+</ul>
+<p>我们如下定义这个神经元的交叉熵代价函数：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x}[y \ln a+(1-y) \ln (1-a)]
+$$</p>
+<p>其中对数图像如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031110403.png" alt="" /></p>
+<p>从上面这个公式以及图像可以看出，交叉熵是有<code>资格</code>作为代价函数的：</p>
+<ul>
+<li>总是非负的</li>
+<li>实际输出值和目标输出值之间的差距越小，最终的交叉熵的值接越低</li>
+</ul>
+<p>交叉熵作为代价函数更好的地方在于避免了学习速度下降的问题，那么到底是怎么解决的呢？很显然，解决问题的关键点在于$\sigma^{\prime}\left(z\right)$，话不多说，先求出代价函数针对$w$和$b$的偏导数再说：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031143107.png" alt="" /></p>
+<p>可以看到，$\sigma^{\prime}\left(z\right)$对权重学习的速度直接被消掉了，只和$\sigma(z)-y$成正相关，也就是说输出和实际值的误差越大，学习的速率也就越快</p>
+<p>回过头来用交叉熵作为代价函数，看看此时的损失函数值和迭代次数的关系：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031115805.png" alt="" />
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031115826.png" alt="" /></p>
+<p>通过对比可以看到此时的变化曲线有以下特点：</p>
+<ul>
+<li>误差越大，学习速度越快</li>
+<li>迭代周期明显变小</li>
+</ul>
+<p>其推⼴到有很多神经元的多层神经⽹络上的交叉熵公式为：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x} \sum_{j}\left[y_{j} \ln a_{j}^{L}+\left(1-y_{j}\right) \ln \left(1-a_{j}^{L}\right)\right]
+$$</p>
+<h3 id="交叉熵的含义源哪">
+  交叉熵的含义？源⾃哪⾥？
+  <a class="anchor" href="#%e4%ba%a4%e5%8f%89%e7%86%b5%e7%9a%84%e5%90%ab%e4%b9%89%e6%ba%90%e5%93%aa">#</a>
+</h3>
+<blockquote>
+<p>交叉熵可以帮我们完善二次代价函数的缺点，但交叉熵到底是怎么来的呢？</p>
+</blockquote>
+<p>在上一小节，我们有推导二次代价函数对于权重和偏置的偏导数，我们知道造成训练缓慢的原因在于$\sigma^{\prime}\left(z\right)$：</p>
+<p>$$
+\begin{aligned} \frac{\partial C}{\partial w} &amp;=(a-y) \sigma^{\prime}(z) x=a \sigma^{\prime}(z) \ \frac{\partial C}{\partial b} &amp;=(a-y) \sigma^{\prime}(z)=a \sigma^{\prime}(z) \end{aligned}
+$$</p>
+<p>如果将偏导数里面的$\sigma^{\prime}\left(z\right)$去掉，这样做会产生一个怎样的结果呢？</p>
+<p>$$
+\begin{aligned} \frac{\partial C}{\partial w_{j}} &amp;=x_{j}(a-y) \ \frac{\partial C}{\partial b} &amp;=(a-y) \end{aligned}
+$$</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031142042.png" alt="" /></p>
+<p>对此⽅程关于a进⾏积分，得到：</p>
+<p>$$
+C=-[y \ln a+(1-y) \ln (1-a)]+\mathrm{constant}
+$$</p>
+<p>这是⼀个单独的训练样本$x$对代价函数的贡献，为了得到整个的代价函数，我们需要对所有的训练样本进⾏平均，
+得到了：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x}[y \ln a+(1-y) \ln (1-a)]+\mathrm{constant}
+$$</p>
+<h2 id="过度拟合和规范化">
+  过度拟合和规范化
+  <a class="anchor" href="#%e8%bf%87%e5%ba%a6%e6%8b%9f%e5%90%88%e5%92%8c%e8%a7%84%e8%8c%83%e5%8c%96">#</a>
+</h2>
+<blockquote>
+<p>如何解决模型在训练过程中出现的过拟合问题</p>
+</blockquote>
+<h3 id="规范化">
+  规范化
+  <a class="anchor" href="#%e8%a7%84%e8%8c%83%e5%8c%96">#</a>
+</h3>
+<p>增加训练样本的数量是⼀种减轻过度拟合的⽅法，但是样本本身就是比较稀缺的资源</p>
+<p>还有其他的⼀下⽅法能够减轻过度拟合的程度吗？⼀种可⾏的⽅式就是降低⽹络的规模，然⽽，⼤的⽹络拥有⼀种⽐⼩⽹络更强的潜⼒，能使用大的网络更好</p>
+<p>我们可以使用<strong>规范化</strong>的技术来缓解过拟合问题，常见的手段是<em>权重衰减（weight decay）<em>或者</em>L2 规范化</em>，<em>L2规范化</em>的想法是增加⼀个额外的项到代价函数上，这个项叫做规范化项（统计学习方法中引入的结构风险），下⾯是规范化的交叉熵：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x j}\left[y_{j} \ln a_{j}^{L}+\left(1-y_{j}\right) \ln \left(1-a_{j}^{L}\right)\right]+\frac{\lambda}{2 n} \sum_{w} w^{2}
+$$</p>
+<p>公式前面一项是交叉熵的表达式，第二项表示的是所有权重平方的和（使用一个因子$\lambda / 2 n$进行量化调整），其中$\lambda&gt;0$称为规范化参数。</p>
+<p>直觉地看，规范化的效果是让⽹络倾向于学习⼩⼀点的权重，其他的东西都⼀样的。⼤的权重只有能够给出代价函数第⼀项⾜够的提升时才被允许。换⾔之，规范化可以当做⼀种寻找⼩的权重和最⼩化原始的代价函数之间的折中。</p>
+<p>这两部分之前相对的重要性就由λ的值来控制了： λ越⼩，就偏向于最⼩化原始代价函数，反之，倾向于⼩的权重。</p>
+<h3 id="为何规范化可以帮助减轻过度拟合">
+  为何规范化可以帮助减轻过度拟合
+  <a class="anchor" href="#%e4%b8%ba%e4%bd%95%e8%a7%84%e8%8c%83%e5%8c%96%e5%8f%af%e4%bb%a5%e5%b8%ae%e5%8a%a9%e5%87%8f%e8%bd%bb%e8%bf%87%e5%ba%a6%e6%8b%9f%e5%90%88">#</a>
+</h3>
+<p>我们已经看到了规范化在实践中能够减少过度拟合了，这是令⼈振奋的，不过这背后的原因还不得⽽知！通常的说法是：</p>
+<blockquote>
+<p>⼩的权重在某种程度上，意味着更低的复杂性，也就对数据给出了⼀种更简单却更强⼤解释，因此应该优先选择。</p>
+</blockquote>
+<p>接下来我们利用一个简单的回归任务对上述解释进行研究，如下一个简单的数据集，我们为其建立模型：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191101095821.png" alt="" /></p>
+<p>我们先考虑使用多项式来拟合数据：</p>
+<p>$$
+y=a_{0} x^{9}+a_{1} x^{8}+\ldots+a_{9}
+$$</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191101095932.png" alt="" /></p>
+<p>根据奥姆剃刀原则以及我们各自的经验，显然会选择下面的模型。以此类推，丛神经网络的角度，规范化得到的较小的权重应该会更好，实验也证明了这一点。</p>
+<blockquote>
+<p>我们应当时时记住这⼀点，规范化的神经⽹络常常能够⽐⾮规范化的泛化能⼒更强，这只是⼀种实验事实（empirical fact）</p>
+</blockquote>
+<h3 id="规范化的其他技术">
+  规范化的其他技术
+  <a class="anchor" href="#%e8%a7%84%e8%8c%83%e5%8c%96%e7%9a%84%e5%85%b6%e4%bb%96%e6%8a%80%e6%9c%af">#</a>
+</h3>
+<p>除了<strong>L2</strong>外还有很多规范化技术：</p>
+<ul>
+<li>L1规范化</li>
+<li>弃权（Dropout）</li>
+<li>人为增加训练样本</li>
+</ul>
+<p><strong>L1</strong>规范化：这个⽅法是在未规范化的代价函数上加上⼀个权重绝对值的和：</p>
+<p>$$
+C=C_{0}+\frac{\lambda}{n} \sum_{w}|w|
+$$</p>
+<blockquote>
+<p>L1规范化倾向于聚集⽹络的权重在 相对少量的⾼重要度连接上，⽽其他权重就会被驱使向0接近</p>
+</blockquote>
+<p><strong>弃权（Dropout）</strong>：弃权（Dropout）是⼀种相当激进的技术。和<strong>L1、L2</strong>规范化不同，弃权技术并不依赖对代价函数的修改。</p>
+<p>假设我们有⼀个训练数据<code>x</code>和对应的⽬标输出<code>y</code>。通常我们会通过在⽹络中前向传播<code>x</code>，然后进⾏反向传播来确定对梯度的贡献。使⽤弃权技术，这个过程就改了,我们会从随机（临时）地删除⽹络中的⼀半的隐藏神经元开始，同时让输⼊层和输出层的神经元保持不变</p>
+<p><strong>⼈为扩展训练数据</strong>：数据量大到一定程度可以弥补算法的差距，没啥好说的。</p>
+<h2 id="权重初始化">
+  权重初始化
+  <a class="anchor" href="#%e6%9d%83%e9%87%8d%e5%88%9d%e5%a7%8b%e5%8c%96">#</a>
+</h2>
+<p>创建了神经⽹络后，我们需要进⾏权重和偏置的初始化：之前的⽅式就是根据独⽴⾼斯随机变量来选择权重和偏置，其被归⼀化为均值为0，标准差1</p>
+<blockquote>
+<p>采用均值为0标准差为的⾼斯随机分布初始化这些权重$1 / \sqrt{n_{\mathrm{in}}}$</p>
+</blockquote>
+<h2 id="如何选择神经络的超参数">
+  如何选择神经⽹络的超参数
+  <a class="anchor" href="#%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e7%a5%9e%e7%bb%8f%e7%bb%9c%e7%9a%84%e8%b6%85%e5%8f%82%e6%95%b0">#</a>
+</h2>
+<p>直到现在，我们还没有解释对诸如学习速率<code>η</code>，正则化参数<code>λ</code>等等超参数选择的⽅法，目前只是给出那些效果很好的值而已。实践中，当你使⽤神经⽹络解决问题时，寻找好的超参数其实是比较困难的一件事情。</p>
+<p>本节会给出⼀些⽤于设定超参数的启发式想法，⽬的是帮你发展出⼀套⼯作流来确保 很好地设置超参数：</p>
+<ul>
+<li>宽泛策略：
+<ul>
+<li>将复杂的问题简单化，比如先减少目标类别，简化网络结构</li>
+<li>在问题简化后可以方便地进行对超参数进行调节，快速调试是哪个超参数有问题</li>
+</ul>
+</li>
+<li>学习速率：可以观察在某些学习速率下，迭代周期和训练代价的折线图变化情况，主要观察训练代价开始下降的学习率，学习速率可以变成可变的，在不同的迭代次数用不同的学习率</li>
+<li>早停法：这是我个人用得比较多的方法，判断验证集的准确率以及训练代价，比如效果不再提升，就可以考虑停止迭代，输出对应模型</li>
+<li>正则化参数：开始时不包含正则化（λ = 0.0），确定 η 的值，使⽤确定出来的 η，我们可以使⽤验证数据来选择好的 λ。从尝试 λ = 1.0 开始，然后根据验证集上的性能按照因⼦ 10 增加或减少其值。⼀旦我已经找到⼀个好的量级，你可以改进 λ 的值。这⾥搞定后，你就可以返回再重新优化 η。</li>
+<li>自动技术：网格搜索</li>
+</ul>
+<h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#交叉熵代价函数">交叉熵代价函数</a>
+      <ul>
+        <li><a href="#引交叉熵代价函数">引⼊交叉熵代价函数</a></li>
+        <li><a href="#交叉熵的含义源哪">交叉熵的含义？源⾃哪⾥？</a></li>
+      </ul>
+    </li>
+    <li><a href="#过度拟合和规范化">过度拟合和规范化</a>
+      <ul>
+        <li><a href="#规范化">规范化</a></li>
+        <li><a href="#为何规范化可以帮助减轻过度拟合">为何规范化可以帮助减轻过度拟合</a></li>
+        <li><a href="#规范化的其他技术">规范化的其他技术</a></li>
+      </ul>
+    </li>
+    <li><a href="#权重初始化">权重初始化</a></li>
+    <li><a href="#如何选择神经络的超参数">如何选择神经⽹络的超参数</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

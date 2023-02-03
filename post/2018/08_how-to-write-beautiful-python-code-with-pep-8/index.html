@@ -1,0 +1,1858 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>如何用PEP 8编写优雅的Python代码 | 老胡的储物柜</title>
+  <meta property="og:title" content="如何用PEP 8编写优雅的Python代码 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2018-12-26T09:07:56&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2018-12-26T09:07:56&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="如何用PEP 8编写优雅的Python代码"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2018/08_how-to-write-beautiful-python-code-with-pep-8/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#why-we-need-pep-8">Why We Need PEP 8</a></li>
+    <li><a href="#naming-conventions">Naming Conventions</a>
+      <ul>
+        <li><a href="#naming-styles">Naming Styles</a></li>
+        <li><a href="#how-to-choose-names">How to Choose Names</a></li>
+      </ul>
+    </li>
+    <li><a href="#code-layout">Code Layout</a>
+      <ul>
+        <li><a href="#blank-lines">Blank Lines</a></li>
+        <li><a href="#maximum-line-length-and-line-breaking">Maximum Line Length and Line Breaking</a></li>
+      </ul>
+    </li>
+    <li><a href="#indentation">Indentation</a>
+      <ul>
+        <li><a href="#tabs-vs-spaces">Tabs vs. Spaces</a></li>
+        <li><a href="#indentation-following-line-breaks">Indentation Following Line Breaks</a></li>
+        <li><a href="#where-to-put-the-closing-brace">Where to Put the Closing Brace</a></li>
+      </ul>
+    </li>
+    <li><a href="#comments">Comments</a>
+      <ul>
+        <li><a href="#block-comments">Block Comments</a></li>
+        <li><a href="#inline-comments">Inline Comments</a></li>
+        <li><a href="#documentation-strings">Documentation Strings</a></li>
+      </ul>
+    </li>
+    <li><a href="#whitespace-in-expressions-and-statements">Whitespace in Expressions and Statements</a>
+      <ul>
+        <li><a href="#whitespace-around-binary-operators">Whitespace Around Binary Operators</a></li>
+        <li><a href="#when-to-avoid-adding-whitespace">When to Avoid Adding Whitespace</a></li>
+      </ul>
+    </li>
+    <li><a href="#programming-recommendations">Programming Recommendations</a></li>
+    <li><a href="#when-to-ignore-pep-8">When to Ignore PEP 8</a></li>
+    <li><a href="#tips-and-tricks-to-help-ensure-your-code-follows-pep-8">Tips and Tricks to Help Ensure Your Code Follows PEP 8</a>
+      <ul>
+        <li><a href="#linters">Linters</a></li>
+        <li><a href="#autoformatters">Autoformatters</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">如何用PEP 8编写优雅的Python代码</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年12月26日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <blockquote>
+<p>原文地址：<a href="https://realpython.com/python-pep8/">How to Write Beautiful Python Code With PEP 8</a></p>
+<p>作者：<a href="https://realpython.com/team/jfiner/">Jasmine Finer </a></p>
+<p>翻译：<a href="https://github.com/howie6879">howie6879</a></p>
+</blockquote>
+<p><code>PEP 8</code>有时候读作<code>PEP8 </code>或者<code>PEP-8</code>，是一份提供如何编写Python代码指南和最佳实践的文档，由<code>Guido van Rossum, Barry Warsaw, Nick Coghlan</code>在2001年完成。<code>PEP 8</code>主要注重于提高 Python 代码的可读性和一致性。</p>
+<p><code>PEP</code>全称为：<code>Python Enhancement Proposal</code>，一个PEP是一份文档，它描述了为Python提出的新特性以及为社区编写的Python方面的文档，比如设计和风格。</p>
+<p>本教程概述了<code>PEP 8</code>中列出的关键指南，它的目标读者是初级到中级程序员，因此我没有涉及一些最高级的主题。不过你可以通过阅读完整的<a href="https://www.python.org/dev/peps/pep-0008/">PEP 8 — Style Guide for Python Code | Python.org</a>文档来学习高级主题。</p>
+<p>在本教程结束时，你将能够：</p>
+<ul>
+<li>编写遵从<code>PEP 8</code>规范的代码</li>
+<li>理解<code>PEP 8</code>中列出的指导原则背后的原因</li>
+<li>设置你的开发环境，以便开始编写符合<code>PEP 8</code>标准的Python代码</li>
+</ul>
+<h2 id="why-we-need-pep-8">Why We Need PEP 8</h2>
+<blockquote>
+<p>可读性很重要</p>
+</blockquote>
+<p><code>PEP 8</code>规范存在的目的在于提高Python代码的可读性，但为什么可读性如此重要？为什么编写具有可读性的代码是Python语言的指导原则之一？</p>
+<p>正如<code>Guido van Rossum</code>所说：”代码阅读的频率远远高于编写的频率“。你可能花费几分钟或一整天时间编写一段代码来处理用户身份验证，一旦你写完它，你就再也不会重写一次，但是你肯定会再读一次，这段代码可能仍然是你正在进行的项目的一部分。每次你回到那个代码文件，你必须要记住那部分代码是做什么的以及你为什么要写它，所以可读性很重要。</p>
+<p>如果你是Python新手，在你编写代码之后的几天或几周内还要你记住代码片段的含义可能有点困难。如果你遵循<code>PEP 8</code>标准，你可以很确定你对你的变量命名得很好，你会知道你添加了足够的空格，因此更容易遵循代码中的逻辑步骤，你还可以对你的代码进行很好的注释，所有的这些都意味着你的代码具有更高的可读性，也更容易再次阅读。作为初学者，遵循<code>PEP 8</code>的规则可以使学习Python成为更愉快的任务。</p>
+<p>如果你正在找工作，那么遵循<code>PEP 8</code>标准尤为重要，编写清晰可读性高的代码更会突出你的专业性，这将会侧面告诉你的老板，你了解怎么很好地构建你的代码。</p>
+<p>如果你拥有很多编写Python代码的经验，然后你可能需要和其他人协作开发，编写可读性高的代码在这里至关重要，其他人可能此前从未看过你这样风格的代码，他必须重新阅读且理解你的代码风格，如果拥有你遵循和认可的指南将使其他人更容易阅读你的代码。</p>
+<h2 id="naming-conventions">Naming Conventions</h2>
+<blockquote>
+<p>明了胜于晦涩</p>
+</blockquote>
+<p>当你编写Python代码的时候，你必须对很多东西命名：变量、函数、类、包等等，选择合理的名字将为你节省时间和精力。你将能够从名称中找出某个变量，函数或类所代表的含义。你还要避免使用不恰当的名称，因为这样可能会导致难以调试的错误。</p>
+<p>::Note: 永远不要使用 i，o，或 I 单字母名称，因为这些名称可能会被误认为1和0，具体取决于字体:::</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 这可能看起来像你试图将2重新分配给零</span>
+<span style="color:#099">0</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">2</span> 
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="naming-styles">Naming Styles</h3>
+<p>下表概述了Python代码中的一些常见命名风格以及何时应该使用它们：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/EA017D35-813C-4339-BC62-0DF6D2B7E5E6.png" />   
+    </p>
+<p>这些是一些常见的命名约定以及如何使用它们的示例，但是为了编写高可读性代码，你仍然需要谨慎选择字母和单词。除了在代码中选择正确的命名风格外，还必须仔细选择名称，以下是有关如何尽可能有效地执行此操作的一些指示。</p>
+<h3 id="how-to-choose-names">How to Choose Names</h3>
+<p>为变量、函数、类等选择名称是一项挑战，在编写代码时，你应该在命名选择中加入相当多的思考，因为这样可以使代码更具可读性。在Python中为对象命名的最佳方法是使用描述性名称来清楚表明对象所代表的内容。</p>
+<p>对变量进行命名时，你可能会选择简单的单字母小写名称，例如x。但是，除非你使用x作为数学函数的参数，否则并不清楚x代表什么。想象下你正在将一个人的名字保存为字符串，并且你希望使用字符串切片来格式化其名称。你最终会得到这样的东西：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+x <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;John Smith&#39;</span>
+y, z <span style="color:#000;font-weight:bold">=</span> x<span style="color:#000;font-weight:bold">.</span>split()
+<span style="color:#0086b3">print</span>(z, y, sep<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;, &#39;</span>)
+<span style="color:#998;font-style:italic"># &#39;Smith, John&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面代码可以很好的运行，但是你必须追踪<code>x,y,z</code>表示的含义，这样也会让你的代码协作者产生困扰，更明确的名称选择将是这样的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;John Smith&#39;</span>
+first_name, last_name <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">.</span>split()
+<span style="color:#0086b3">print</span>(last_name, first_name, sep<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;, &#39;</span>)
+<span style="color:#998;font-style:italic"># &#39;Smith, John&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>同样，为了减少输入的数量，在选择名称时使用单词缩写也是很有诱惑力的，在下面的例子中，我定义了一个函数<code>db()</code>，它接受一个参数x并将其加倍返回：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">db</span>(x):
+    <span style="color:#000;font-weight:bold">return</span> x <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">2</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>乍一看，这似乎是一个明智的选择。 <code>db()</code>很容易看成是<code>double</code>的缩写，但想象一下，几天后再看这段代码，你可能已经忘记了你试图通过这个函数实现的目标是什么，这将使猜测它原本的含义变得困难。</p>
+<p>下面的例子就比较清晰，如果你几天后再看这段代码，你仍然可以阅读并理解此函数的目标：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">multiply_by_two</span>(x):
+    <span style="color:#000;font-weight:bold">return</span> x <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">2</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>同样的理念适用于Python中的所有其他数据类型和对象，尽量一直使用最简洁且最具描述性的名称。</p>
+<h2 id="code-layout">Code Layout</h2>
+<blockquote>
+<p>优美胜于丑陋</p>
+</blockquote>
+<p>如何对代码布局对于提升它的可读性有很大的作用。在本节中，你将学习如何添加垂直空格以提高代码的可读性。你还将学习如何处理<code>PEP 8</code>中建议的79字符行限制。</p>
+<h3 id="blank-lines">Blank Lines</h3>
+<p>垂直空格或空行可以极大地提高代码的可读性，聚集在一起的代码可能是压倒性的且难以阅读，同样，代码中的空行太多会使其看起来非常稀疏，读者可能需要进行没必要的滚动，以下是关于如何使用垂直空白的三个关键指南。</p>
+<p><strong>用两个空行包围顶级函数和类</strong>，顶级函数和类应该是完全自包含的，并处理单独的功能，在它们周围放置额外的垂直空间是有意义的，因此很明显它们是分开的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyFirstClass</span>:
+    <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MySecondClass</span>:
+    <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">top_level_function</span>():
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>用一个空行包围类中的方法定义</strong>，在一个类中，函数都彼此有联系，最好只在它们之间留一行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyClass</span>:
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">first_method</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">second_method</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>在函数内部谨慎地使用空行，以显示清晰的步骤</strong>，有时候一个复杂的函数必须在return语句之前完成好几个步骤，为了帮助阅读者理解函数里面的逻辑，在每个步骤之间留一个空行会很有帮助。</p>
+<p>在下面的示例中，有一个计算列表方差的函数，这个问题可以分为两个步骤，所以我在每个步骤之间留下了一个空行，在return语句之前还有一个空行。这有助于读者清楚地看到返回的内容：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">calculate_variance</span>(number_list):
+    sum_list <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>
+    <span style="color:#000;font-weight:bold">for</span> number <span style="color:#000;font-weight:bold">in</span> number_list:
+        sum_list <span style="color:#000;font-weight:bold">=</span> sum_list <span style="color:#000;font-weight:bold">+</span> number
+    mean <span style="color:#000;font-weight:bold">=</span> sum_list <span style="color:#000;font-weight:bold">/</span> <span style="color:#0086b3">len</span>(number_list)
+
+    sum_squares <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>
+    <span style="color:#000;font-weight:bold">for</span> number <span style="color:#000;font-weight:bold">in</span> number_list:
+        sum_squares <span style="color:#000;font-weight:bold">=</span> sum_squares <span style="color:#000;font-weight:bold">+</span> number<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span>
+    mean_squares <span style="color:#000;font-weight:bold">=</span> sum_squares <span style="color:#000;font-weight:bold">/</span> <span style="color:#0086b3">len</span>(number_list)
+
+    <span style="color:#000;font-weight:bold">return</span> mean_squares <span style="color:#000;font-weight:bold">-</span> mean<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>如果仔细地使用垂直空格，可以大大提高代码的可读性，它有助于读者直观地理解你的代码如何分成几个部分，以及这些部分如何相互关联。</p>
+<h3 id="maximum-line-length-and-line-breaking">Maximum Line Length and Line Breaking</h3>
+<p><code>PEP 8</code>建议每行代码限制在79个字符以内，这是因为它允许多个文件并排打开，同时也避免了换行，当然，将语句保持在79个字符以内并不总是可行的。<code>PEP 8</code>概述了允许语句在多行上运行的方法。</p>
+<p>如果代码包含在括号、方括号或大括号中，Python将会认为代码是一行的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(arg_one, arg_two,
+             arg_three, arg_four):
+    <span style="color:#000;font-weight:bold">return</span> arg_one
+</code></pre></td></tr></table>
+</div>
+</div><p>如果不能用上述的方式进行每行代码延续，那么可以使用反斜杠代替换行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">mypkg</span> <span style="color:#000;font-weight:bold">import</span> example1, \
+    example2, example3
+</code></pre></td></tr></table>
+</div>
+</div><p>但是，如果可以使用第一个方案，那么就应该尽量这样做。</p>
+<p>如果需要在二元运算符周围做换行操作，例如<code>+</code>和<code>*</code>，那么需要将换行操作放在前面，这条规则源于数学，数学家同意在二元运算符之前换行以可提高可读性，比较以下两个例子。</p>
+<p>下面是在二元运算符之前换行的示例：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+total <span style="color:#000;font-weight:bold">=</span> (first_variable
+         <span style="color:#000;font-weight:bold">+</span> second_variable
+         <span style="color:#000;font-weight:bold">-</span> third_variable)
+</code></pre></td></tr></table>
+</div>
+</div><p>你可以马上反应过来哪些变量正在相加后者相减，因为操作符紧邻着变量。</p>
+<p>现在，让我们看一个在二元运算符之后换行的示例：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not Recommended</span>
+total <span style="color:#000;font-weight:bold">=</span> (first_variable <span style="color:#000;font-weight:bold">+</span>
+         second_variable <span style="color:#000;font-weight:bold">-</span>
+         third_variable)
+</code></pre></td></tr></table>
+</div>
+</div><p>在这里，很难看出哪个变量被加，哪个变量被减。</p>
+<p>在二元运算符之前换行可以让代码更加具有可读性，所<code>PEP 8</code>鼓励这种方式。在二元运算符之后换行的代码仍然符合<code>PEP 8</code>，但是，我们鼓励你在二元运算符之前换行。</p>
+<h2 id="indentation">Indentation</h2>
+<blockquote>
+<p>当存在多种可能，不要尝试去猜测<br>
+而是尽量找一种，最好是唯一一种明显的解决方案（如果不确定，就用穷举法）</p>
+</blockquote>
+<p>缩进，即前导空格，在Python中非常重要。Python中代码行的缩进级别决定了语句如何组合在一起。</p>
+<p>思考下面的例子：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">3</span>
+<span style="color:#000;font-weight:bold">if</span> x <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">5</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;x is larger than 5&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>缩进的print语句使得Python明白只有if语句返回True才能继续执行它，同样的缩进适用于告诉 Python 在调用函数时要执行哪些代码，或者哪些代码属于给定的类。</p>
+<p><code>PEP 8</code>制定的关键缩进规则如下：</p>
+<ul>
+<li>使用4个连续的空格来表示缩进。</li>
+<li>选择空格而不是制表符(Tab)。</li>
+</ul>
+<h3 id="tabs-vs-spaces">Tabs vs. Spaces</h3>
+<p>如同上述所说，当你进行缩进的时候，你最好用空格代替制表符，你可以直接对文本编辑器的设置进行调整，当你按<code>Tab</code>的时候转换为4个空格的输出</p>
+<p>如果你使用的是Python 2并且混合使用了制表符和空格来缩进代码，当你运行的时候可能不会看见错误。为了帮助你检查一致性，可以在从命令行运行Python 2代码时添加<code>-t</code>标志。当你不一致地使用制表符和空格时，解释器将会发出警告：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">python2 -t code.py
+code.py: inconsistent use of tabs and spaces in indentation
+</code></pre></td></tr></table>
+</div>
+</div><p>相反，如果你使用<code>-tt</code>标志，解释器将发出错误而不是警告，使用此方法的好处是解释器会告诉你缩进不一致的位置在哪里：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">python2 -tt code.py
+File <span style="color:#d14">&#34;code.py&#34;</span>, line <span style="color:#099">3</span>
+    print<span style="color:#000;font-weight:bold">(</span>i, j<span style="color:#000;font-weight:bold">)</span>
+             ^
+TabError: inconsistent use of tabs and spaces in indentation
+</code></pre></td></tr></table>
+</div>
+</div><p>Python 3不允许制表符和空格混合使用，因此，如果你使用的是Python3，解释器将会自动报错：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">python3 code<span style="color:#000;font-weight:bold">.</span>py
+File <span style="color:#d14">&#34;code.py&#34;</span>, line <span style="color:#099">3</span>
+    <span style="color:#0086b3">print</span>(i, j)
+              <span style="color:#000;font-weight:bold">^</span>
+<span style="color:#900;font-weight:bold">TabError</span>: inconsistent use of tabs <span style="color:#000;font-weight:bold">and</span> spaces <span style="color:#000;font-weight:bold">in</span> indentation
+</code></pre></td></tr></table>
+</div>
+</div><p>你可以在编写Python代码中使用制表符或空格来表示缩进，但是，如果你使用的是Python 3，则必须与你的选择保持一致，否则你的代码将不能运行。<code>PEP 8</code>推荐你总是使用4个连续的空格来表示缩进。</p>
+<h3 id="indentation-following-line-breaks">Indentation Following Line Breaks</h3>
+<p>当你为了保证每行在79个字符以下而进行换行时，使用缩进来提高代码可读性是很有用的，它允许读者区分两行代码和跨越两行的单行代码，这里有两种缩进风格供你选择。</p>
+<p>第一个是将缩进块与开始的分隔符对齐:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(arg_one, arg_two,
+             arg_three, arg_four):
+    <span style="color:#000;font-weight:bold">return</span> arg_one
+</code></pre></td></tr></table>
+</div>
+</div><p>有时你会发现只需要4个空格就可以与开口分隔符对齐，这种情况经常发生在 if 语句中，如果跨多行的<code>if+ +(</code>构成4个字符，那么就会发生这种情况，在这种情况下，很难确定 if 语句中嵌套的代码块从哪里开始:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+<span style="color:#000;font-weight:bold">if</span> (x <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">3</span> <span style="color:#000;font-weight:bold">and</span>
+    x <span style="color:#000;font-weight:bold">&lt;</span> <span style="color:#099">10</span>):
+    <span style="color:#0086b3">print</span>(x)
+</code></pre></td></tr></table>
+</div>
+</div><p>在这种情况下，<code>PEP 8</code>提供了两种替代方案来帮助你提高代码可读性：</p>
+<ul>
+<li>在最后的条件后添加注释，由于大多数编辑器中有语法高亮显示，这可以将条件与嵌套代码分开：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+<span style="color:#000;font-weight:bold">if</span> (x <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">3</span> <span style="color:#000;font-weight:bold">and</span>
+    x <span style="color:#000;font-weight:bold">&lt;</span> <span style="color:#099">10</span>):
+    <span style="color:#998;font-style:italic"># Both conditions satisfied</span>
+    <span style="color:#0086b3">print</span>(x)
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在换行中添加额外的缩进：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+<span style="color:#000;font-weight:bold">if</span> (x <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">3</span> <span style="color:#000;font-weight:bold">and</span>
+        x <span style="color:#000;font-weight:bold">&lt;</span> <span style="color:#099">10</span>):
+    <span style="color:#0086b3">print</span>(x)
+</code></pre></td></tr></table>
+</div>
+</div><p>换行符后的另一种缩进方式是<strong>悬挂缩进(hanging indent)</strong>，这是一个印刷术语，意思是段落或语句中除第一行以外的每一行都缩进，可以使用悬挂缩进直观地表示一行代码的延续。下面是一个例子:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">var <span style="color:#000;font-weight:bold">=</span> function(
+    arg_one, arg_two,
+    arg_three, arg_four)
+</code></pre></td></tr></table>
+</div>
+</div><p>::Note：当你正在使用hanging indent时，第一行不得有任何参数。以下示例不符合PEP 8::</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not Recommended</span>
+var <span style="color:#000;font-weight:bold">=</span> function(arg_one, arg_two,
+    arg_three, arg_four)
+</code></pre></td></tr></table>
+</div>
+</div><p>使用<strong>hanging indent</strong>时，可以添加额外的缩进以区分连续行与函数内包含的代码。下面是一个难以阅读的例子，因为函数里面的代码和连续行的缩进等级是相同的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not Recommended</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(
+    arg_one, arg_two,
+    arg_three, arg_four):
+    <span style="color:#000;font-weight:bold">return</span> arg_one
+</code></pre></td></tr></table>
+</div>
+</div><p>相反，最好在一行代码换行后使用双缩进，这有助于你区分函数参数和函数内部构造，从而提高可读性：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(
+        arg_one, arg_two,
+        arg_three, arg_four):
+    <span style="color:#000;font-weight:bold">return</span> arg_one
+</code></pre></td></tr></table>
+</div>
+</div><p>当你编写遵循<code>PEP 8</code>规范代码的时候，每行字符在79之内的规则使你必须强制换行，为了提高可读性，你应该缩进一行，以表明它是一个连续的行。做到这一点有两种方法，第一种是将缩进的块与开始的分隔符对齐，第二种是使用悬挂缩进，在换行之后，你可以自由选择使用哪种方法进行缩进。</p>
+<h3 id="where-to-put-the-closing-brace">Where to Put the Closing Brace</h3>
+<p>一行代码的换行操作允许你在括号、方括号或大括号后面断开一行，这会造成一个问题，就是很容易忘记关闭括号，但重要的是要把它放在合理的地方，否则，它会使读者感到困惑，<code>Pep 8</code>为隐含的行延续中的结束括号的位置提供了两个选项:</p>
+<ul>
+<li>使用前一行的第一个非空白字符排列右括号：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">list_of_numbers <span style="color:#000;font-weight:bold">=</span> [
+    <span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">3</span>,
+    <span style="color:#099">4</span>, <span style="color:#099">5</span>, <span style="color:#099">6</span>,
+    <span style="color:#099">7</span>, <span style="color:#099">8</span>, <span style="color:#099">9</span>
+    ]
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>将结束括号与声明行的第一个字符对齐:</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">list_of_numbers <span style="color:#000;font-weight:bold">=</span> [
+    <span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">3</span>,
+    <span style="color:#099">4</span>, <span style="color:#099">5</span>, <span style="color:#099">6</span>,
+    <span style="color:#099">7</span>, <span style="color:#099">8</span>, <span style="color:#099">9</span>
+]
+</code></pre></td></tr></table>
+</div>
+</div><p>你可以自由地选择任何一种方式，但是，和之前说的一样，一致性是关键，所以之后的代码就要坚持使用你选择的某一个方案以保持代码一致性。</p>
+<h2 id="comments">Comments</h2>
+<blockquote>
+<p>如果你无法向人描述你的方案，那肯定不是一个好方案；反之亦然</p>
+</blockquote>
+<p>你应该使用注释来说明编写的代码，这对记录你的代码非常重要，这样你的任何协作者都可以理解它。当你或者其他人阅读代码注释，他们应该能够很容易地理解注释所应用的代码，以及它如何与代码的其余部分相匹配。</p>
+<p>下面是一些你为你代码作注释时候需要注意的关键点：</p>
+<ul>
+<li>将注释和文档字符串的行长限制为72个字符</li>
+<li>使用完整的句子，以大写字母开头</li>
+<li>注释随着代码的更新而更新</li>
+</ul>
+<h3 id="block-comments">Block Comments</h3>
+<p>使用块注释来记录一小部分代码，当你必须编写几行代码来执行单个操作时，它们非常有用，例如从文件导入数据或更新数据库记录。其重要性在于它们可以帮助其他人理解给定代码块的用途和功能。</p>
+<p><code>PEP 8</code>提供以下规则来编写注释：</p>
+<ul>
+<li>将块注释缩进到其描述代码的相同级别</li>
+<li>用#加上一个空格开始每一行的注释</li>
+<li>用包含单个＃的行分隔段落</li>
+</ul>
+<p>这是一个解释for循环功能的块注释，请注意，句子为了每行保留79个字符行限制进行了换行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>, <span style="color:#099">10</span>):
+    <span style="color:#998;font-style:italic"># Loop over i ten times and print out the value of i, followed by a</span>
+    <span style="color:#998;font-style:italic"># new line character</span>
+    <span style="color:#0086b3">print</span>(i, <span style="color:#d14">&#39;</span><span style="color:#d14">\n</span><span style="color:#d14">&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>有时，如果代码技术性较强，那么有必要在块注释中使用多个段落：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">quadratic</span>(a, b, c, x):
+    <span style="color:#998;font-style:italic"># Calculate the solution to a quadratic equation using the quadratic</span>
+    <span style="color:#998;font-style:italic"># formula.</span>
+    <span style="color:#998;font-style:italic">#</span>
+    <span style="color:#998;font-style:italic"># There are always two solutions to a quadratic equation, x_1 and x_2.</span>
+    x_1 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">+</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+    x_2 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">-</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+    <span style="color:#000;font-weight:bold">return</span> x_1, x_2
+</code></pre></td></tr></table>
+</div>
+</div><p>如果你不确定什么样的注释类型是合适的，那么块注释通常是正确的选择。请尽量在你的代码中添加注释，一旦你对代码进行了更新也请务必对注释进行更新！</p>
+<h3 id="inline-comments">Inline Comments</h3>
+<p>行内注释对单个语句中的一段代码进行了解释，这有助于提醒你或者其他人为什么某行代码是必须的，以下是 <code>PEP 8</code>对他们的评价:</p>
+<ul>
+<li>谨慎使用行内注释</li>
+<li>在与它们引用的语句相同的行上写入行内注释</li>
+<li>从语句中用两个或多个空格分隔行内注释</li>
+<li>像块注释那样，用#加上一个空格开始每一行的注释</li>
+<li>不要用它们来解释明显的问题</li>
+</ul>
+<p>下面是一个行内注释的例子：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>  <span style="color:#998;font-style:italic"># This is an inline comment</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>有时，行内注释似乎是必要的，但是你可以使用更好的命名约定，下面是一个例子:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;John Smith&#39;</span>  <span style="color:#998;font-style:italic"># Student Name</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里，行内注释为变量提供了额外的说明信息，然而用<code>x</code>作为一个人名的变量名不是很好的做法，如果你对变量重命名，是可以不用使用行内注释的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">student_name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;John Smith&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最后，像这样的行内注释是不好的做法，因为它们陈述了显而易见且杂乱的代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">empty_list <span style="color:#000;font-weight:bold">=</span> []  <span style="color:#998;font-style:italic"># Initialize empty list</span>
+
+x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+x <span style="color:#000;font-weight:bold">=</span> x <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">5</span>  <span style="color:#998;font-style:italic"># Multiply x by 5</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>行内注释比块注释更具体，并且容易在非必要时候添加它们，这会导致代码混乱。除非你确定需要行内注释，不然使用块注释避免代码混乱的问题比较好，坚持使用块注释，可以让你的代码更加符合<code>PEP8</code>的标准。</p>
+<h3 id="documentation-strings">Documentation Strings</h3>
+<p><code>Documentation strings</code> 或者说<code>docstrings</code>， 是用双引号（”””）或单引号（’’’）括起来的字符串，它们出现在任何函数，类，方法或模块的第一行，你可以使用它们来解释和记录特定的代码块。这里有一个对应的<code>PEP</code>，见<a href="https://www.python.org/dev/peps/pep-0257/">PEP 257</a>，但你可以从本节阅读总结的经验：</p>
+<p>使用文档字符串的重要规则如下：</p>
+<ul>
+<li>文档字符串两边都有三个双引号环绕，比如：<code>&quot;&quot;&quot;This is a docstring&quot;&quot;&quot;</code></li>
+<li>为所有公共模块，函数，类和方法编写<code>docstrings</code></li>
+<li>使用单行<code>&quot;&quot;&quot;</code>结束多行<code>docstring</code></li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">quadratic</span>(a, b, c, x):
+    <span style="color:#d14">&#34;&#34;&#34;Solve quadratic equation via the quadratic formula.
+</span><span style="color:#d14">
+</span><span style="color:#d14">    A quadratic equation has the following form:
+</span><span style="color:#d14">    ax**2 + bx + c = 0
+</span><span style="color:#d14">
+</span><span style="color:#d14">    There always two solutions to a quadratic equation: x_1 &amp; x_2.
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    x_1 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">+</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+    x_2 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">-</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+
+    <span style="color:#000;font-weight:bold">return</span> x_1, x_2
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>对于单行<code>docstrings</code>，保持<code>&quot;&quot;&quot;</code>在同一行：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">quadratic</span>(a, b, c, x):
+    <span style="color:#d14">&#34;&#34;&#34;Use the quadratic formula&#34;&#34;&#34;</span>
+    x_1 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">+</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+    x_2 <span style="color:#000;font-weight:bold">=</span> (<span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">-</span>(b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">*</span>c)<span style="color:#000;font-weight:bold">**</span>(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">2</span>)) <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>a)
+
+    <span style="color:#000;font-weight:bold">return</span> x_1, x_2
+</code></pre></td></tr></table>
+</div>
+</div><p>想要了解更多，请阅读<a href="https://realpython.com/documenting-python-code/#docstrings-background">Documenting Python Code: A Complete Guide – Real Python</a></p>
+<h2 id="whitespace-in-expressions-and-statements">Whitespace in Expressions and Statements</h2>
+<blockquote>
+<p>间隔胜于紧凑</p>
+</blockquote>
+<p>正确使用空格在表达式和语句中非常有用，如果代码中没有足够的空格，那么代码应该很难阅读，因为他们都凑在一起，如果空格太多，又会难以在视觉上将完整的语句联系出来。</p>
+<h3 id="whitespace-around-binary-operators">Whitespace Around Binary Operators</h3>
+<p>在进行以下二元操作的时候，应该在其两边加上空格：</p>
+<ul>
+<li>分配操作（=, +=, -=, 等等）</li>
+<li>比较（==, !=, &gt;, &lt;. &gt;=, &lt;=）和 （is, is not, in, not in）</li>
+<li>布尔（and, not, or）</li>
+</ul>
+<p>::Note：当<code>=</code>是为一个函数的参数赋值时候就不用在两边加空格::</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(default_parameter<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span>):
+    <span style="color:#998;font-style:italic"># ...</span>
+
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">function</span>(default_parameter <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>):
+    <span style="color:#998;font-style:italic"># ...</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>如果语句中有多个运算符，则在每个运算符前后添加单个空格可能会让人感到困惑，相反，最好只在优先级最低的运算符周围添加空格，尤其是在执行数学运算时。以下是几个例子：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+y <span style="color:#000;font-weight:bold">=</span> x<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">5</span>
+z <span style="color:#000;font-weight:bold">=</span> (x<span style="color:#000;font-weight:bold">+</span>y) <span style="color:#000;font-weight:bold">*</span> (x<span style="color:#000;font-weight:bold">-</span>y)
+
+<span style="color:#998;font-style:italic"># Not Recommended</span>
+y <span style="color:#000;font-weight:bold">=</span> x <span style="color:#000;font-weight:bold">**</span> <span style="color:#099">2</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">5</span>
+z <span style="color:#000;font-weight:bold">=</span> (x <span style="color:#000;font-weight:bold">+</span> y) <span style="color:#000;font-weight:bold">*</span> (x <span style="color:#000;font-weight:bold">-</span> y)
+</code></pre></td></tr></table>
+</div>
+</div><p>还可以将此应用于有多个条件的if语句：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">if</span> x <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">5</span> <span style="color:#000;font-weight:bold">and</span> x <span style="color:#000;font-weight:bold">%</span> <span style="color:#099">2</span> <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">0</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;x is larger than 5 and divisible by 2!&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>在上面的示例中，<code>and</code>操作具有最低优先级，因此，可以下面这样更清楚地表达if语句：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> x<span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">5</span> <span style="color:#000;font-weight:bold">and</span> x<span style="color:#000;font-weight:bold">%</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">==</span><span style="color:#099">0</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;x is larger than 5 and divisible by 2!&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>你可以自由选择哪个方式更清晰，但需要注意的是你必须在运算符的任何一侧使用相同数量的空格。</p>
+<p>下面的例子是不被允许的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Definitely do not do this!</span>
+<span style="color:#000;font-weight:bold">if</span> x <span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">5</span> <span style="color:#000;font-weight:bold">and</span> x<span style="color:#000;font-weight:bold">%</span> <span style="color:#099">2</span><span style="color:#000;font-weight:bold">==</span> <span style="color:#099">0</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;x is larger than 5 and divisible by 2!&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>在切片中，冒号作为二元运算符。因此，上一节中概述的规则也适用于此，并且其任何一方都应该有相同数量的空白，以下列表切片示例是合法的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#0086b3">list</span>[<span style="color:#099">3</span>:<span style="color:#099">4</span>]
+
+<span style="color:#998;font-style:italic"># Treat the colon as the operator with lowest priority</span>
+<span style="color:#0086b3">list</span>[x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">1</span> : x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">2</span>]
+
+<span style="color:#998;font-style:italic"># In an extended slice, both colons must be</span>
+<span style="color:#998;font-style:italic"># surrounded by the same amount of whitespace</span>
+<span style="color:#0086b3">list</span>[<span style="color:#099">3</span>:<span style="color:#099">4</span>:<span style="color:#099">5</span>]
+<span style="color:#0086b3">list</span>[x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">1</span> : x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">2</span> : x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">3</span>]
+
+<span style="color:#998;font-style:italic"># The space is omitted if a slice parameter is omitted</span>
+<span style="color:#0086b3">list</span>[x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">1</span> : x<span style="color:#000;font-weight:bold">+</span><span style="color:#099">2</span> :]
+</code></pre></td></tr></table>
+</div>
+</div><p>总之，你应该使用空格包围大多数运算符，但是，此规则有一些注意事项，例如在函数参数中或在一个语句中组合多个运算符时。</p>
+<h3 id="when-to-avoid-adding-whitespace">When to Avoid Adding Whitespace</h3>
+<p>在某些情况下，添加空格可能会使代码难以阅读，太多的空格会使代码过于稀疏而难以理解。 <code>PEP 8</code>概述了一些非常明显的例子应当不使用空格</p>
+<p>在一行的末尾避免添加空格是最重要的地方，这称为<code>trailing whitespace</code>，它是不可见的，可能产生难以追踪的错误。</p>
+<p>以下列表概述了一些应避免添加空格的情况：</p>
+<ul>
+<li>直接放在括号、方括号或大括号内:</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+my_list <span style="color:#000;font-weight:bold">=</span> [<span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">3</span>]
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+my_list <span style="color:#000;font-weight:bold">=</span> [ <span style="color:#099">1</span>, <span style="color:#099">2</span>, <span style="color:#099">3</span>, ]
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在逗号，分号或冒号之前：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+y <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">6</span>
+
+<span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#0086b3">print</span>(x, y)
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#0086b3">print</span>(x , y)
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在打开函数调用的参数列表的开括号之前：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">double</span>(x):
+    <span style="color:#000;font-weight:bold">return</span> x <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">2</span>
+
+<span style="color:#998;font-style:italic"># Recommended</span>
+double(<span style="color:#099">3</span>)
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+double (<span style="color:#099">3</span>)
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在开始索引或切片的开括号之前:</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#0086b3">list</span>[<span style="color:#099">3</span>]
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#0086b3">list</span> [<span style="color:#099">3</span>]
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在尾随逗号和右括号之间：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#0086b3">tuple</span> <span style="color:#000;font-weight:bold">=</span> (<span style="color:#099">1</span>,)
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#0086b3">tuple</span> <span style="color:#000;font-weight:bold">=</span> (<span style="color:#099">1</span>, )
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>对齐赋值运算符：</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+var1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+var2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">6</span>
+some_long_var <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">7</span>
+
+<span style="color:#998;font-style:italic"># Not recommended</span>
+var1          <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">5</span>
+var2          <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">6</span>
+some_long_var <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">7</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>确保你的代码中没有尾随空格。 在其他情况下，<code>PEP 8</code>不鼓励添加额外的空格，例如立直接放在括号、方括号或大括号内，以及逗号和冒号之前。 为了对齐操作符，也不应该添加额外的空格。</p>
+<h2 id="programming-recommendations">Programming Recommendations</h2>
+<blockquote>
+<p>简洁胜于复杂</p>
+</blockquote>
+<p>你经常会发现有几种方法可以在 Python (以及任何其他编程语言)中执行类似的操作。在本节中，你将看到<code>PEP 8</code>提供的一些建议用来消除这种歧义并且保持一致性。</p>
+<p><strong>不要使用等价运算符将布尔值与True或False进行比较</strong>，你经常需要检查布尔值是True还是False，当这样操作时，请使用如下所示的语句直观地执行此操作：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+my_bool <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">6</span> <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">5</span>
+<span style="color:#000;font-weight:bold">if</span> my_bool <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">True</span>:
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#39;6 is bigger than 5&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里不需要使用等价运算符<code>==</code>， bool只能取值True或False，按照下面这样写就行了：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> my_bool:
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#39;6 is bigger than 5&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这种在if语句中使用bool的方式可以写更少的代码并且更加简单，因此<code>PEP 8</code>鼓励使用这种方式。</p>
+<p><strong>在if语句中判断列表是否为空</strong>，当你希望确定列表是否为空时，你通常会判断列表的长度，如果列表为空，那么长度为0，在if语句中使用时等于False，这里有一个例子：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+my_list <span style="color:#000;font-weight:bold">=</span> []
+<span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#0086b3">len</span>(my_list):
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;List is empty!&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>但是，在Python中，任何空列表，字符串或元组都可以当为False的。因此，我们可以提出一个更简单的替代方案：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+my_list <span style="color:#000;font-weight:bold">=</span> []
+<span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> my_list:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;List is empty!&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>两种方法都可以判断列表是否为空，但是第二种方式更加简洁，因此<code>PEP 8</code>鼓励使用这种方式。</p>
+<p><strong>在if语句中，使用 is not 比 no &hellip; is in 好</strong>，当你需要确定一个变量是否被赋值，这里有两种方法，第一种是评估if语句中的x是不是为非<code>None</code>，如下所示：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> x <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">None</span>:
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#39;x exists!&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>第二种方案是现在if语句中判断x是不是<code>None</code>，再进行<code>not</code>操作：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> x <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#39;x exists!&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>两种方法都可以判断x是否为<code>None</code>，但是第一种方式更加简单，因此<code>PEP 8</code>鼓励使用这种方式。</p>
+<p><strong>当你想表达if x is not None时，不要使用if x</strong>，有时候，你可能拥有一个函数带有默认值为<code>None</code>的参数，当对参数<code>arg</code>检查是否带有不同的值的时候经常会犯下面这样的错误：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> arg:
+    <span style="color:#998;font-style:italic"># Do something with arg...</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>此代码检查的是<code>arg</code>是否为真，但相对的你要的是检查是否为<code>None</code>，所以下面这样写比较好：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> arg <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">None</span>:
+    <span style="color:#998;font-style:italic"># Do something with arg...</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的错误会使得判断是否为真和<code>not None</code>相等，你可以设置<code>arg = []</code>，如上所述，空列表在Python中被认为是<code>False</code>，因此，尽管参数被声明为<code>[]</code>，但条件并没有满足，因此函数里面的代码<code>if</code>声明并不能被执行。</p>
+<p><strong>用.startswith() 和.endswith()代替切片</strong>，如果你想检查一段字符串的前缀或者后缀是否带有字符串<code>cat</code>，这看起来使用列表切片似乎比较明智，但是，列表切片容易出错，您必须对前缀或后缀中的字符数进行硬编码，对于那些不太熟悉Python列表切片的人来说很难看清楚你想要实现的目的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">if</span> word[:<span style="color:#099">3</span>] <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;cat&#39;</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;The word starts with &#34;cat&#34;&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>然而，还是使用<code>.startswith():</code>可读性比较高：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> word<span style="color:#000;font-weight:bold">.</span>startswith(<span style="color:#d14">&#39;cat&#39;</span>):
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;The word starts with &#34;cat&#34;&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>同样的，当你想检查字符串后缀也是同样的原理，下面的示例概述了如何检查字符串是否以jpg结尾：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Not recommended</span>
+<span style="color:#000;font-weight:bold">if</span> file_name[<span style="color:#000;font-weight:bold">-</span><span style="color:#099">3</span>:] <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;jpg&#39;</span>:
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;The file is a JPEG&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>虽然结果是正确的，但是符号有点复杂且难以阅读，与之相对的，你可以用<code>.endswith()</code>实现，看下面例子：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># Recommended</span>
+<span style="color:#000;font-weight:bold">if</span> file_name<span style="color:#000;font-weight:bold">.</span>endswith(<span style="color:#d14">&#39;jpg&#39;</span>):
+    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#39;The file is a JPEG&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>就像上面的列出的编程建议，我们目标是编写清晰以及可读性较高的代码，在Python中，有许多不同的方法可以实现相同的结果，因此有关选择哪种方法的指南很有帮助。</p>
+<h2 id="when-to-ignore-pep-8">When to Ignore PEP 8</h2>
+<blockquote>
+<p>什么时候忽略PEP 8？对于这个问题有个简短的答案，那就是永远不会</p>
+</blockquote>
+<p>如果你严格遵循 PEP 8，就可以保证您拥有干净、专业和可读的代码。 这对你以及合作者和潜在雇主都有好处。</p>
+<p>但是，PEP 8中的一些指导方针在以下实例中不适用：</p>
+<ul>
+<li>如果遵守PEP 8将破坏与现有软件的兼容性</li>
+<li>如果你正在从事的工作的代码与 PEP 8不一致</li>
+<li>如果代码需要与旧版本的Python版本保持兼容</li>
+</ul>
+<h2 id="tips-and-tricks-to-help-ensure-your-code-follows-pep-8">Tips and Tricks to Help Ensure Your Code Follows PEP 8</h2>
+<p>想要你的代码兼容<code>PEP 8</code>，那你得记住不少规范，在开发代码时，记住所有这些规则可能是一项艰巨的任务。特别是对老项目进行更新以兼容<code>PEP 8</code>时，幸运的是，有些工具可以帮助你加快这一过程，这里有两个工具可以帮你强制兼容<code>PEP 8</code>规范：<code>linters</code>和<code>autoformatters</code>。</p>
+<h3 id="linters">Linters</h3>
+<p>Linters是分析代码和标记错误的程序，他们可以为你如何修复错误提供建议，在作为文本编辑器的扩展安装时，Linters特别有用，因为它们标记了你编程时的错误和格式问题。在本节中，您将看到Linters程序是如何工作的大纲，最后还有文本编辑器扩展的链接。</p>
+<p>对于Python代码，最好的linters如下：</p>
+<ul>
+<li>[pycodestyle](<a href="https://pypi.org/project/pycodestyle/">pycodestyle · PyPI</a>)是一个根据<code>PEP 8</code>中的某些风格约定来检查Python代码的工具</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 使用pip安装pycodestyle</span>
+pip install pycodestyle
+</code></pre></td></tr></table>
+</div>
+</div><p>使用以下命令在终端中使用<code>pycodestyle</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pycodestyle code.py
+code.py:1:17: E231 missing whitespace after <span style="color:#d14">&#39;,&#39;</span>
+code.py:2:21: E231 missing whitespace after <span style="color:#d14">&#39;,&#39;</span>
+code.py:6:19: E711 comparison to None should be <span style="color:#d14">&#39;if cond is None:&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><a href="flake8">flake8</a>是一个结合了调试器，<code>pyflakes</code>和<code>pycodestyle</code>的工具</li>
+</ul>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 使用pip安装flake8</span>
+pip install flake8
+</code></pre></td></tr></table>
+</div>
+</div><p>使用以下命令在终端中使用<code>pycodestyle</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">flake8 code.py
+code.py:1:17: E231 missing whitespace after <span style="color:#d14">&#39;,&#39;</span>
+code.py:2:21: E231 missing whitespace after <span style="color:#d14">&#39;,&#39;</span>
+code.py:3:17: E999 SyntaxError: invalid syntax
+code.py:6:19: E711 comparison to None should be <span style="color:#d14">&#39;if cond is None:&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>还显示了输出的示例。</p>
+<p>::Note：额外输出的一行表示语法错误。::</p>
+<p>这些也可用作Atom，Sublime Text，Visual Studio Code和VIM的扩展。您还可以找到有关为Python开发设置Sublime Text和VIM的指南，以及Real Python中一些流行的文本编辑器的概述。</p>
+<h3 id="autoformatters">Autoformatters</h3>
+<p><code>Autoformatters</code>可以重构你的代码以使其符合<code>PEP 8</code>规范，像<a href="black">black</a>程序就可以根据<code>PEP 8</code>规范重新格式化你的代码，一个很大的区别是它将行长度限制为88个字符，而不是79个字符。但是，您可以通过添加命令行标志来覆盖它，如下面的示例所示。</p>
+<p>可以使用pip安装black，它需要<code>Python 3.6+</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">pip install black
+</code></pre></td></tr></table>
+</div>
+</div><p>它可以通过命令行运行，就像Linters一样。假设你从名为code.py里面不符合PEP 8规范的代码开始：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>,<span style="color:#099">3</span>):
+    <span style="color:#000;font-weight:bold">for</span> j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>,<span style="color:#099">3</span>):
+        <span style="color:#000;font-weight:bold">if</span> (i<span style="color:#000;font-weight:bold">==</span><span style="color:#099">2</span>):
+            <span style="color:#0086b3">print</span>(i,j)
+</code></pre></td></tr></table>
+</div>
+</div><p>你可以在命令行中运行如下代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">black code.py
+reformatted code.py
+All <span style="color:#000;font-weight:bold">done</span>!
+</code></pre></td></tr></table>
+</div>
+</div><p><code>code.py</code>将会被重新格式化为如下所示：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>, <span style="color:#099">3</span>):
+    <span style="color:#000;font-weight:bold">for</span> j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>, <span style="color:#099">3</span>):
+        <span style="color:#000;font-weight:bold">if</span> i <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">2</span>:
+            <span style="color:#0086b3">print</span>(i, j)
+</code></pre></td></tr></table>
+</div>
+</div><p>如果你想要更改行长度限制，则可以使用<code>—line-length</code>标志：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">black --line-length<span style="color:#000;font-weight:bold">=</span><span style="color:#099">79</span> code.py
+reformatted code.py
+All <span style="color:#000;font-weight:bold">done</span>!
+</code></pre></td></tr></table>
+</div>
+</div><p>另外两个<code>autoformatters </code>分别为<code>autopep8</code>和<code>yapf</code>，它们和<code>black</code>操作类似。</p>
+<p>另一个<code>Real Python</code>教程，由<code> Alexander van Tol</code>编写的<a href="https://realpython.com/python-code-quality/">Python Code Quality: Tools &amp; Best Practices</a>详细解释了如何使用这些工具。</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>你现在已经知道如何使用<code>PEP 8</code>中的指南编写高质量，可读高的Python代码，虽然指南看起来很迂腐，但遵循它们可以真正改善你的代码，特别是在与潜在雇主或合作者共享代码时。</p>
+<p>在本教程中你了解到：</p>
+<ul>
+<li>什么是<code> PEP 8</code>以及其存在的原因</li>
+<li>为什么你应该编写符合<code>PEP 8</code>标准的代码</li>
+<li>如何编写符合<code>PEP 8</code>的代码</li>
+</ul>
+<p>除此之外，您还了解了如何使用linters和autoformatters根据<code>PEP 8</code>指南检查代码。</p>
+<p>如果你想了解更多，可以阅读[full documentation](<a href="https://www.python.org/dev/peps/pep-0008/">PEP 8 — Style Guide for Python Code | Python.org</a>)或者浏览<a href="https://pep8.org/">pep8.org</a>，这些教程不仅提供了类似的信息同时也提供了很好的格式让你阅读，在这些文档中，您将找到本教程未涉及的其余<code>PEP 8</code>指南。</p>
+<p>
+        <img class="mx-auto" alt="wechat_howie" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" />   
+    </p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2018/08_how-to-write-beautiful-python-code-with-pep-8/">https://www.howie6879.cn/post/2018/08_how-to-write-beautiful-python-code-with-pep-8/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+        <li><a href="/post/2018/06_39/">统计学习方法笔记：3.k近邻法</a></li>
+        
+        <li><a href="/post/2018/05_38/">统计学习方法笔记：2.感知机</a></li>
+        
+        <li><a href="/post/2018/04_37/">统计学习方法笔记：1.统计学习方法概论</a></li>
+        
+        <li><a href="/post/2018/03_update-https-for-blog/">博客升级HTTPS方案</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

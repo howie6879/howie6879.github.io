@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="感知机 #  本章主要介绍了二类分类的线性分类模型：感知机：
+ 感知机模型 感知机学习策略 感知机学习算法  说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见这里
+感知机模型 #  感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取&#43;1和–1值，属于判别模型
+注：&#43;1 -1 分别代表正负类，有的可能用 1 0 表示
+在介绍感知机定义之前，下面几个概念需要说明一下：
+ 输入空间：输入所有可能取值的集合 输出空间：输出所有可能取值的集合 特征空间：每个具体的输入是一个实例，由特征向量表示  所以对于一个感知机模型，可以这样表示：
+ 输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$ 输出空间：$\gamma = \{&#43;1,-1 \}$  那么感知机就是由输入空间到输出空间的函数：
+$$\displaystyle f( x) \ =\ sign( w\cdot x&#43;b)$$
+其中：
+ $sign$: 符号函数 $w$: 权值（weight）或权值向量（weight vector） $b$: 偏置（bias）  感知机的几何解释如下：线性方程
+$$w\cdot x &#43; b =0$$
+如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：
+ $w$: 超平面的法向量 $b$: 超平面的截距  感知机学习策略 #  数据集的线性可分性 #  什么是数据集的线性可分性，很简单，对于一个数据集：">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="感知机 #  本章主要介绍了二类分类的线性分类模型：感知机：
+ 感知机模型 感知机学习策略 感知机学习算法  说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见这里
+感知机模型 #  感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取&#43;1和–1值，属于判别模型
+注：&#43;1 -1 分别代表正负类，有的可能用 1 0 表示
+在介绍感知机定义之前，下面几个概念需要说明一下：
+ 输入空间：输入所有可能取值的集合 输出空间：输出所有可能取值的集合 特征空间：每个具体的输入是一个实例，由特征向量表示  所以对于一个感知机模型，可以这样表示：
+ 输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$ 输出空间：$\gamma = \{&#43;1,-1 \}$  那么感知机就是由输入空间到输出空间的函数：
+$$\displaystyle f( x) \ =\ sign( w\cdot x&#43;b)$$
+其中：
+ $sign$: 符号函数 $w$: 权值（weight）或权值向量（weight vector） $b$: 偏置（bias）  感知机的几何解释如下：线性方程
+$$w\cdot x &#43; b =0$$
+如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：
+ $w$: 超平面的法向量 $b$: 超平面的截距  感知机学习策略 #  数据集的线性可分性 #  什么是数据集的线性可分性，很简单，对于一个数据集：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" /><meta property="article:section" content="docs" />
+
+
+
+<title>02.感知机 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class=" active">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>02.感知机</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#感知机模型">感知机模型</a></li>
+    <li><a href="#感知机学习策略">感知机学习策略</a>
+      <ul>
+        <li><a href="#数据集的线性可分性">数据集的线性可分性</a></li>
+        <li><a href="#感知机学习策略-1">感知机学习策略</a></li>
+      </ul>
+    </li>
+    <li><a href="#感知机学习算法">感知机学习算法</a>
+      <ul>
+        <li><a href="#感知机学习算法的原始形式">感知机学习算法的原始形式</a></li>
+        <li><a href="#算法的收敛性">算法的收敛性</a></li>
+        <li><a href="#感知机学习算法的对偶形式">感知机学习算法的对偶形式</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="感知机">
+  感知机
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba">#</a>
+</h1>
+<p>本章主要介绍了二类分类的线性分类模型：感知机：</p>
+<ul>
+<li>感知机模型</li>
+<li>感知机学习策略</li>
+<li>感知机学习算法</li>
+</ul>
+<p>说明：个人感觉这本书偏理论化，讲究的是一招定天下，好处是内功深厚自然无敌，一通百通，但难处是语言有点晦涩，这章可以考虑结合我之前的一篇关于感知器的笔记，或许能加深理解，见<a href="https://www.howie6879.cn/post/33/">这里</a></p>
+<h2 id="感知机模型">
+  感知机模型
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e6%a8%a1%e5%9e%8b">#</a>
+</h2>
+<p>感知机（perceptron）：是一个二类分类的线性判断模型，其输入为实例的特征向量，输出为实例的类别，取<code>+1</code>和<code>–1</code>值，属于判别模型</p>
+<p>注：<code>+1 -1 分别代表正负类，有的可能用 1 0 表示</code></p>
+<p>在介绍感知机定义之前，下面几个概念需要说明一下：</p>
+<ul>
+<li>输入空间：输入所有可能取值的集合</li>
+<li>输出空间：输出所有可能取值的集合</li>
+<li>特征空间：每个具体的输入是一个实例，由特征向量表示</li>
+</ul>
+<p>所以对于一个感知机模型，可以这样表示：</p>
+<ul>
+<li>输入空间（特征空间）：$\chi \subseteq \mathbb{R} ^n$</li>
+<li>输出空间：$\gamma = \{+1,-1 \}$</li>
+</ul>
+<p>那么感知机就是由输入空间到输出空间的函数：</p>
+<p>$$\displaystyle f( x) \ =\ sign( w\cdot x+b)$$</p>
+<p>其中：</p>
+<ul>
+<li>$sign$: 符号函数</li>
+<li>$w$: 权值（weight）或权值向量（weight vector）</li>
+<li>$b$: 偏置（bias）</li>
+</ul>
+<p>感知机的几何解释如下：线性方程</p>
+<p>$$w\cdot x + b =0$$</p>
+<p>如果是二维空间，感知机就是一个线性函数，将正负样本一分为二，如何是三维空间，那么感知机就是一个平面将类别一切为二，上升到n维空间的话，其对应的是特征空间$\mathbb{R} ^n$的一个超平面$S$：</p>
+<ul>
+<li>$w$: 超平面的法向量</li>
+<li>$b$: 超平面的截距</li>
+</ul>
+<h2 id="感知机学习策略">
+  感知机学习策略
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e5%ad%a6%e4%b9%a0%e7%ad%96%e7%95%a5">#</a>
+</h2>
+<h3 id="数据集的线性可分性">
+  数据集的线性可分性
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e9%9b%86%e7%9a%84%e7%ba%bf%e6%80%a7%e5%8f%af%e5%88%86%e6%80%a7">#</a>
+</h3>
+<p>什么是数据集的线性可分性，很简单，对于一个数据集：</p>
+<p>$$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$$</p>
+<p>如果存在上面一节说的超平面$S$：$w\cdot x + b =0$，能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，则称数据集T为线性可分数据集（linearly separable data set），否则，称数据集T线性不可分</p>
+<h3 id="感知机学习策略-1">
+  感知机学习策略
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e5%ad%a6%e4%b9%a0%e7%ad%96%e7%95%a5-1">#</a>
+</h3>
+<p>找出超平面$S$，其实就是确定感知机模型参数：$w b$，根据统计学习方法三要素，此时我们需要确定一个学习策略，比如前面所说的损失函数（经验函数），并使其最小化（猜也猜得到策略讲完，后面就是说学习算法了哈哈）</p>
+<p>上一章以线性代数为例子，用损失函数来度量预测错误的程度，这里的损失函数可以用误分类点到超平面$S$的总距离，输入空间$\mathbb{R} ^n$中任一点$x_0$到超平面$S$的距离：</p>
+<p>$$\frac{1}{||w||}|w\cdot x_0+b|$$</p>
+<p>其中，$||w||$是$w$的$L_2$范数，假设超平面S的误分类点集合为$M$，那么所有误分类点到超平面$S$的总距离为：</p>
+<p>$$-\frac{1}{||w||}\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+<p>最终推导出感知机学习的损失函数：</p>
+<p>$$L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b)$$</p>
+<h2 id="感知机学习算法">
+  感知机学习算法
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e5%ad%a6%e4%b9%a0%e7%ae%97%e6%b3%95">#</a>
+</h2>
+<p>上面一节已经确定了学习策略，按照统计学习方法三要素，目前需要一个算法来求解，目前最优化的方法是随机梯度下降法</p>
+<h3 id="感知机学习算法的原始形式">
+  感知机学习算法的原始形式
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e5%ad%a6%e4%b9%a0%e7%ae%97%e6%b3%95%e7%9a%84%e5%8e%9f%e5%a7%8b%e5%bd%a2%e5%bc%8f">#</a>
+</h3>
+<p>现在感知机学习算法就是对下面最优化问题的算法：</p>
+<p>$$ \min_{w,b} L(w,b) =-\sum_{x_i\in M} y_i(w\cdot x_i + b) $$</p>
+<p>现在的问题就转化成，求出参数$w$和$b$，使得上列损失函数达到极小化，这里我直接贴出书中的算法，后面的例子我会用<code>Python</code>代码实现：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/2A421204-2A48-44AA-B620-454085EA8691.png" alt="" /></p>
+<p>有了解题方法怎么能没有题目呢？李杭老师自然是考虑到了，请听题：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/07B0FED7-DE5B-4C6A-BAD5-37ABE4D6FCA2.png" alt="" />
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/88041E63-ADBF-4472-8031-C71436DCAA18.png" alt="" /></p>
+<p>借用<code>Linus Torvalds</code>大佬的一句话：<strong>Talk less, show me your code</strong>，所以直接看代码吧：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74"> Created by howie.hu at 2018/9/20.
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+<span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Perceptron</span>:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    李航老师统计学习方法第二章感知机例2.1代码实现
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self, input_nums<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>):
+        <span style="color:#75715e"># 权重 已经确定只会有两个二进制输入</span>
+        self<span style="color:#f92672">.</span>w <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros(input_nums)
+        <span style="color:#75715e"># 偏置项</span>
+        self<span style="color:#f92672">.</span>b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fit</span>(self, input_vectors, labels, learn_nums<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>, rate<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>):
+        <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        训练出合适的 w 和 b
+</span><span style="color:#e6db74">        :param input_vectors: 样本训练数据集
+</span><span style="color:#e6db74">        :param labels: 标记值
+</span><span style="color:#e6db74">        :param learn_nums: 学习多少次
+</span><span style="color:#e6db74">        :param rate: 学习率
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(learn_nums):
+            <span style="color:#66d9ef">for</span> index, input_vector <span style="color:#f92672">in</span> enumerate(input_vectors):
+                label <span style="color:#f92672">=</span> labels[index]
+                delta <span style="color:#f92672">=</span> label <span style="color:#f92672">*</span> (sum(self<span style="color:#f92672">.</span>w <span style="color:#f92672">*</span> input_vector) <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>b)
+                <span style="color:#66d9ef">if</span> delta <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0</span>:
+                    <span style="color:#75715e"># 计算方法由梯度下降算法推导出来</span>
+                    self<span style="color:#f92672">.</span>w <span style="color:#f92672">+=</span> label <span style="color:#f92672">*</span> input_vector <span style="color:#f92672">*</span> rate
+                    self<span style="color:#f92672">.</span>b <span style="color:#f92672">+=</span> rate <span style="color:#f92672">*</span> label
+                    <span style="color:#66d9ef">break</span>
+        print(<span style="color:#e6db74">&#34;最终结果：此时感知器权重为</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">，偏置项为</span><span style="color:#e6db74">{1}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(self<span style="color:#f92672">.</span>w, self<span style="color:#f92672">.</span>b))
+        <span style="color:#66d9ef">return</span> self
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict</span>(self, input_vector):
+        <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        跃迁函数作为激活函数，感知器
+</span><span style="color:#e6db74">        :param input_vector:
+</span><span style="color:#e6db74">        :return:
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">if</span> isinstance(input_vector, list):
+            input_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(input_vector)
+        y <span style="color:#f92672">=</span> sum(self<span style="color:#f92672">.</span>w <span style="color:#f92672">*</span> input_vector) <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>b
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">if</span> y <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    input_vectors <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]])
+    labels <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+    p <span style="color:#f92672">=</span> Perceptron()
+    model <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>fit(input_vectors, labels)
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>]))
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">3</span>]))
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]))
+</code></pre></div><p>输出如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#f92672">[</span> 1.  1.<span style="color:#f92672">]</span>，偏置项为-3.0
+<span style="color:#ae81ff">1</span>
+<span style="color:#ae81ff">1</span>
+-1
+</code></pre></div><p>代码写完了，再看看推导过程：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190517173342.png" alt="" /></p>
+<h3 id="算法的收敛性">
+  算法的收敛性
+  <a class="anchor" href="#%e7%ae%97%e6%b3%95%e7%9a%84%e6%94%b6%e6%95%9b%e6%80%a7">#</a>
+</h3>
+<p>对于线性可分数据集感知机学习算法原始形式收敛，即经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型，定理<code>2.1</code>如下：</p>
+<p>假设训练数据集$T = {(x_1,y_1),(x_2,y_2),&hellip;,(x_n,y_n)}$是线性可分的，其中$x_i\in \chi  =\mathbb{R} ^n$，$y_i \in \gamma =\{-1, 1\}$，$i=1,2,&hellip;,N$，则有：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C3856950-3573-47A3-86A2-38F9A7B5F422.png" alt="" /></p>
+<h3 id="感知机学习算法的对偶形式">
+  感知机学习算法的对偶形式
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e6%9c%ba%e5%ad%a6%e4%b9%a0%e7%ae%97%e6%b3%95%e7%9a%84%e5%af%b9%e5%81%b6%e5%bd%a2%e5%bc%8f">#</a>
+</h3>
+<p>为什么要介绍感知机学习算法的对偶形式，主要目的就是减少运算量，这里一个<a href="https://www.zhihu.com/question/26526858">知乎回答</a>得挺好：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/CAB2C4A8-448A-4A23-9E26-4BEB6699BD3D.png" alt="" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/AC1F9A5E-B472-4E0C-8A15-680A8CAA1D65.png" alt="" /></p>
+<p>代码实现如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74"> Created by howie.hu at 2018/9/21.
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+
+<span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Perceptron</span>:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self, alpha_length<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>):
+        self<span style="color:#f92672">.</span>alpha <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros(alpha_length)
+        <span style="color:#75715e"># 权重</span>
+        self<span style="color:#f92672">.</span>w <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros(<span style="color:#ae81ff">2</span>)
+        <span style="color:#75715e"># 偏置项</span>
+        self<span style="color:#f92672">.</span>b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fit</span>(self, input_vectors, labels, learn_nums<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>):
+        <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        训练出合适的 w 和 b
+</span><span style="color:#e6db74">        :param input_vectors: 样本训练数据集
+</span><span style="color:#e6db74">        :param labels: 标记值
+</span><span style="color:#e6db74">        :param learn_nums: 学习多少次
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+        gram <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>matmul(input_vectors, input_vectors<span style="color:#f92672">.</span>T)
+
+        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(learn_nums):
+
+            <span style="color:#66d9ef">for</span> input_vector_index, input_vector <span style="color:#f92672">in</span> enumerate(input_vectors):
+                label <span style="color:#f92672">=</span> labels[input_vector_index]
+                delta <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span>
+                <span style="color:#66d9ef">for</span> alpha_index, a <span style="color:#f92672">in</span> enumerate(self<span style="color:#f92672">.</span>alpha):
+                    delta <span style="color:#f92672">+=</span> a <span style="color:#f92672">*</span> labels[alpha_index] <span style="color:#f92672">*</span> gram[input_vector_index][alpha_index]
+                delta <span style="color:#f92672">=</span> label <span style="color:#f92672">*</span> delta <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>b
+                <span style="color:#66d9ef">if</span> delta <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0</span>:
+                    self<span style="color:#f92672">.</span>alpha[input_vector_index] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+                    self<span style="color:#f92672">.</span>b <span style="color:#f92672">+=</span> label
+                    <span style="color:#66d9ef">break</span>
+        self<span style="color:#f92672">.</span>w <span style="color:#f92672">=</span> sum([j <span style="color:#f92672">*</span> input_vectors[i] <span style="color:#f92672">*</span> labels[i] <span style="color:#66d9ef">for</span> i, j <span style="color:#f92672">in</span> enumerate(self<span style="color:#f92672">.</span>alpha)])
+        print(<span style="color:#e6db74">&#34;最终结果：此时感知器权重为</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">，偏置项为</span><span style="color:#e6db74">{1}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(self<span style="color:#f92672">.</span>w, self<span style="color:#f92672">.</span>b))
+        <span style="color:#66d9ef">return</span> self
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict</span>(self, input_vector):
+        <span style="color:#66d9ef">if</span> isinstance(input_vector, list):
+            input_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(input_vector)
+        y <span style="color:#f92672">=</span> sum(self<span style="color:#f92672">.</span>w <span style="color:#f92672">*</span> input_vector) <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>b
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">if</span> y <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    input_vectors <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]])
+    labels <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+    p <span style="color:#f92672">=</span> Perceptron()
+    model <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>fit(input_vectors, labels)
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>]))
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">3</span>]))
+    print(model<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]))
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#f92672">[</span> 1.  1.<span style="color:#f92672">]</span>，偏置项为-3.0
+<span style="color:#ae81ff">1</span>
+<span style="color:#ae81ff">1</span>
+-1
+</code></pre></div><h2 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h2>
+<p>一些概念的详细解释：</p>
+<ul>
+<li><a href="https://blog.csdn.net/dengheCSDN/article/details/77313758">超平面是什么？</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#感知机模型">感知机模型</a></li>
+    <li><a href="#感知机学习策略">感知机学习策略</a>
+      <ul>
+        <li><a href="#数据集的线性可分性">数据集的线性可分性</a></li>
+        <li><a href="#感知机学习策略-1">感知机学习策略</a></li>
+      </ul>
+    </li>
+    <li><a href="#感知机学习算法">感知机学习算法</a>
+      <ul>
+        <li><a href="#感知机学习算法的原始形式">感知机学习算法的原始形式</a></li>
+        <li><a href="#算法的收敛性">算法的收敛性</a></li>
+        <li><a href="#感知机学习算法的对偶形式">感知机学习算法的对偶形式</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

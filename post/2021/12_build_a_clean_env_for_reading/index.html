@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>打造一个干净且个性化的公众号阅读环境 | 老胡的储物柜</title>
+  <meta property="og:title" content="打造一个干净且个性化的公众号阅读环境 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2021-05-09T20:35:47&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2021-05-09T20:35:47&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="构建一个多源（公众号、RSS）、干净、个性化的阅读环境"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.cn/post/2021/12_build_a_clean_env_for_reading/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#思路">思路</a></li>
+    <li><a href="#开发">开发</a></li>
+    <li><a href="#使用">使用</a>
+      <ul>
+        <li><a href="#mongodb">MongoDB</a></li>
+        <li><a href="#下载2c">下载2C</a></li>
+        <li><a href="#配置2c">配置2C</a></li>
+        <li><a href="#运行2c">运行2C</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">打造一个干净且个性化的公众号阅读环境</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年5月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E5%B7%A5%E5%85%B7'>工具</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE'>项目</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="背景">背景</h2>
+<p>一个月前的下班时间，当时我正在看公众号，准备感受下今天的技术文章，不愉快的事情发生了，竟然一连好几篇文档点进去都是<strong>广告</strong>，至今想起，那种心情仍旧挥散不去。</p>
+<p>于是我产生了一个想法，为什么不构建一个干净且个性化的个人阅读环境呢？作为一名微信公众号的重度用户，公众号一直被我设为汲取知识的地方。随着使用程度的增加，现在公众号里面的<strong>广告问题</strong>非常影响我的阅读体验。</p>
+<p>假设你关注的公众号有十来个，若一个公众号两周接一次广告，理论上你会面临二十多次广告，实际上会更多，运气不好的话一天刷下来都是广告也不一定。若你关注了二三十个公众号，那很难避免现阶段公众号环境的广告轰炸。</p>
+<p>更可恶的是，大部分的广告，无不是<strong>贩卖焦虑，营造消极气氛</strong>，实在无法忍受且严重影响我的心情。但有些公众号写的文章又确实不错，那怎么做可以不看广告只看文章呢？如果你在公众号阅读体验下深切感受到对于广告的无奈，那么这个项目就是你需要的。</p>
+<p>我收集了一百多篇（个人力量有限，样本需要更多有志之士一起收集）微信广告文章，大家可以看看里面的关键字感受一下：</p>
+<p>
+        <img class="mx-auto" alt="2c_ads_word_cloud" src="https://images-1252557999.file.myqcloud.com/uPic/2c_ads_word_cloud.jpg" />   
+    </p>
+<p>所以我需要<strong>构建一个多源（公众号、RSS）、干净、个性化的阅读环境</strong>，这个环境满足以下三个核心要求：</p>
+<ul>
+<li><strong>去广告！</strong></li>
+<li>考虑到以公众号为主，阅读环境还是在微信生态里面，可以基于<strong>企业微信号</strong>做文章分发</li>
+<li>多源，除了微信公众号，还可以定订阅其他市面上优质内容源</li>
+</ul>
+<p>最终效果大家可以先感受一下：</p>
+<p><!-- raw HTML omitted --></p>
+<p>如果诸位觉得有用，请继续阅读。</p>
+<h2 id="思路">思路</h2>
+<p>至此，已经可以大概看到这个项目的面貌了，接下来要做的就是怎么实现一个满足上述要求的项目。</p>
+<p>我的思路很简单，大概流程如下：</p>
+<p>
+        <img class="mx-auto" alt="2c_process" src="https://images-1252557999.file.myqcloud.com/uPic/2c_process.svg" />   
+    </p>
+<p>简单解释一下：</p>
+<ul>
+<li><strong>采集器</strong>：监控各自关注的公众号或者博客源，最终构建<code>Feed</code>流作为输入源；</li>
+<li><strong>分类器</strong>（广告）：基于历史广告数据，利用机器学习实现一个广告分类器（可自定义规则），然后给每篇文章自动打上标签再持久化到<code>MongoDB</code>；</li>
+<li><strong>分发器</strong>：依靠接口层进行数据请求&amp;响应，为使用者提供个性化配置，然后根据配置自动进行分发，将干净的文章流向微信、钉钉、TG甚至自建网站都行。</li>
+</ul>
+<p>这样做就实现了干净阅读环境的构建，衍生一下，还可以实现个人知识库的构建，可以做诸如标签管理、图谱构建等，这些都可以在接口层进行实现。</p>
+<h2 id="开发">开发</h2>
+<p>其实有了思路，只要有一定的编程基础，接下来的事情就很清晰了，我在这里不详细说开发过程以及代码怎么写，因为我都开源出来了哈。</p>
+<p>
+        <img class="mx-auto" alt="2C" src="https://images-1252557999.file.myqcloud.com/uPic/image-20210509155537337.png" />   
+    </p>
+<p>项目我取名为<a href="https://github.com/howie6879/2c">2C</a>，含义是<code>Claen &amp; Customize Content</code>，真正的开发时间前后大概花了我两周的业余时间，所以还是付出了我的一些心血，如果大家觉得不错，来个Star呗❤️。</p>
+<p>这个项目最大的阻力就是广告样本的收集，这也决定<code>2C</code>项目的效果，所以我非常欢迎且期待大家参与进来，提交广告样本，具体请看<a href="https://github.com/howie6879/2c/issues/4">Issue_更多的广告样本</a>。</p>
+<h2 id="使用">使用</h2>
+<p>接下来重点说说怎么使用<code>2C</code>，此项目对于一些基础环境是有一点要求的，为了尽可能减少开发者部署使用的复杂度（特别是非Python开发者），因此我计划使用<code>Docker</code>进行调度运行，这样对用户的使用来说是比较方便的，请按照顺序执行以下<code>TODO</code>：</p>
+<ul>
+<li><input disabled="" type="checkbox"> 安装<code>Docker</code>：推荐直接使用<a href="https://get.daocloud.io/">Docker 极速下载</a></li>
+<li><input disabled="" type="checkbox"> 安装<code>MongoDB</code>：用于持久化，可手动或使用镜像安装</li>
+<li><input disabled="" type="checkbox"> 下载<code>2C</code></li>
+<li><input disabled="" type="checkbox"> 配置<code>2C</code></li>
+<li><input disabled="" type="checkbox"> 运行<code>2C</code></li>
+</ul>
+<h3 id="mongodb">MongoDB</h3>
+<p><code>2C</code>的存储部分依赖<code>MongoDB</code>，如果你已经部署好了<code>MongoDB</code>，直接在<strong>配置</strong>里面进行数据库配置即可。</p>
+<p>如果你没有准备好的<code>MongoDB</code>，可以使用<code>Docker</code>一键执行：</p>
+<pre tabindex="0"><code class="language-shelll" data-lang="shelll"># 数据库路径，开发者可自由设置
+mkdir -p /data/db
+docker run --name mongodb  --restart=always -p 27017:27017 -e /data/db:/data/db -d mongo:3.6
+</code></pre><p>可在<code>Docker</code>查询是否成功启动：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>root@centos ~<span style="color:#000;font-weight:bold">]</span><span style="color:#998;font-style:italic"># docker ps -a</span>
+CONTAINER ID   IMAGE       COMMAND                  CREATED         STATUS         PORTS                      NAMES
+758617a57827   mongo:3.6   <span style="color:#d14">&#34;docker-entrypoint.s…&#34;</span>   <span style="color:#099">3</span> seconds ago   Up <span style="color:#099">2</span> seconds   0.0.0.0:27017-&gt;27017/tcp   mongodb
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="下载2c">下载2C</h3>
+<p>安装<code>2C</code>前，需要你的系统环境安装有<a href="https://www.python.org/">Python3.6+</a>环境。如果确认准备好环境，请进入终端，做环境检查，如下命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>~<span style="color:#000;font-weight:bold">]</span> python --version                                                                 
+Python 3.6.8 :: Anaconda, Inc.
+<span style="color:#000;font-weight:bold">[</span>~<span style="color:#000;font-weight:bold">]</span> pip --version
+pip 21.1.1 from /Users/howie6879/.local/share/virtualenvs/2c-BCq66QuF/lib/python3.6/site-packages/pip <span style="color:#000;font-weight:bold">(</span>python 3.6<span style="color:#000;font-weight:bold">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>本项目使用 <a href="https://pipenv.pypa.io/en/latest/">pipenv</a> 进行项目管理，安装使用过程如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 确保有Python3.6+环境</span>
+git clone https://github.com/howie6879/2c.git
+<span style="color:#0086b3">cd</span> 2c
+
+<span style="color:#998;font-style:italic"># 创建基础环境</span>
+pipenv install --python<span style="color:#000;font-weight:bold">={</span>your_python3.6+_path<span style="color:#000;font-weight:bold">}</span>  --skip-lock --dev
+</code></pre></td></tr></table>
+</div>
+</div><p>搭建好基础环境后，就需要对项目进行配置，具体参考如下<strong>2C配置</strong>部分。</p>
+<h3 id="配置2c">配置2C</h3>
+<p>项目的配置文件位于路径<code>src/config/config.py</code>下，使用者可以进行以下配置：</p>
+<ul>
+<li>配置需要订阅的公众号</li>
+<li>数据库</li>
+<li>分发器类型配置：支持企业微信和钉钉</li>
+</ul>
+<h4 id="公众号配置">公众号配置</h4>
+<p>输入你订阅的公众号名称即可：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">WECHAT_LIST <span style="color:#000;font-weight:bold">=</span> [
+    <span style="color:#d14">&#34;老胡的储物柜&#34;</span>,
+]
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="数据库配置">数据库配置</h4>
+<p>如果是本机开发，使用上述方法搭建的<code>MongoDB</code>，保持不变即可：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 数据库配置</span>
+MONGODB_CONFIG <span style="color:#000;font-weight:bold">=</span> {
+    <span style="color:#998;font-style:italic"># &#34;mongodb://0.0.0.0:27017&#34;</span>
+    <span style="color:#d14">&#34;username&#34;</span>: os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_M_USER&#34;</span>, <span style="color:#d14">&#34;&#34;</span>),
+    <span style="color:#d14">&#34;password&#34;</span>: os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_M_PASS&#34;</span>, <span style="color:#d14">&#34;&#34;</span>),
+    <span style="color:#d14">&#34;host&#34;</span>: os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_M_HOST&#34;</span>, <span style="color:#d14">&#34;0.0.0.0&#34;</span>),
+    <span style="color:#d14">&#34;port&#34;</span>: <span style="color:#0086b3">int</span>(os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_M_PORT&#34;</span>, <span style="color:#d14">&#34;27017&#34;</span>)),
+    <span style="color:#d14">&#34;db&#34;</span>: os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_M_DB&#34;</span>, <span style="color:#d14">&#34;2c&#34;</span>),
+}
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="分发器配置">分发器配置</h4>
+<p>目前分发器支持类型如下：</p>
+<ul>
+<li>ding：钉钉</li>
+<li>wecom：企业微信</li>
+</ul>
+<h5 id="钉钉">钉钉</h5>
+<p>建立一个群聊用于接收文章消息，然后新增一个群机器人，如下图：</p>
+<p>
+        <img class="mx-auto" alt="GctXXh" src="https://images-1252557999.file.myqcloud.com/uPic/R318WKfH4QaCk5o.jpg" />   
+    </p>
+<p>然后配置机器人：</p>
+<p>
+        <img class="mx-auto" alt="7iWlhv" src="https://images-1252557999.file.myqcloud.com/uPic/L6Mp9Gh5dunYeUk.jpg" />   
+    </p>
+<p>最后记住机器人对应的<code>Token</code>，一般格式如下：<code>1dea61224e683d90c5d3694c89e30841681567747f41fb9722597d48655f4365</code>，那么此时分发器配置如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 分发配置，目标支持：ding[钉钉]、wecom[企业微信]、tg[Telegram] 等等</span>
+<span style="color:#998;font-style:italic"># 目前仅支持钉钉</span>
+SENDER_LIST <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#34;ding&#34;</span>]
+<span style="color:#998;font-style:italic"># 申请钉钉TOKEN时候，关键字必须带有 [2c]</span>
+DD_TOKEN <span style="color:#000;font-weight:bold">=</span> os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;CC_D_TOKEN&#39;</span>, <span style="color:#d14">&#39;1dea61224e683d90c5d3694c89e30841681567747f41fb9722597d48655f4365&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="企业微信">企业微信</h5>
+<p>如果你热衷微信生态，<code>2C</code>同样对企业微信做了支持，请先随便用手机号注册一个<a href="https://work.weixin.qq.com/">企业微信</a>。</p>
+<p>首先创造应用：</p>
+<p>
+        <img class="mx-auto" alt="2Cfkbw" src="https://images-1252557999.file.myqcloud.com/uPic/9brGzsDd2oMQ5CK.png" />   
+    </p>
+<p>获取相关ID：</p>
+<p>
+        <img class="mx-auto" alt="zLGP5T" src="https://images-1252557999.file.myqcloud.com/uPic/36icNFMDLKeqhCa.png" />   
+    </p>
+<p>企业ID在<code>我的企业-&gt;企业信息-&gt;企业ID</code>。</p>
+<p>为了方便可以在微信上接收消息，记得开启微信插件，进入下图所在位置，然扫码关注你的二维码即可：</p>
+<p>
+        <img class="mx-auto" alt="zlfcd9" src="https://images-1252557999.file.myqcloud.com/uPic/Ei65BKLWyR2aCku.png" />   
+    </p>
+<p>现在你获取了以下三个参数，请填写到对应配置：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">WECOM_ID <span style="color:#000;font-weight:bold">=</span> os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_WECOM_ID&#34;</span>, <span style="color:#d14">&#34;wwee29721ad4f6e1c9&#34;</span>)
+WECOM_AGENT_ID <span style="color:#000;font-weight:bold">=</span> os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#34;CC_WECOM_AGENT_ID&#34;</span>, <span style="color:#d14">&#34;1000001&#34;</span>)
+WECOM_SECRET <span style="color:#000;font-weight:bold">=</span> os<span style="color:#000;font-weight:bold">.</span>getenv(
+    <span style="color:#d14">&#34;CC_WECOM_SECRET&#34;</span>, <span style="color:#d14">&#34;O4M9w38wuwAxCMr0O3lTqAgzLC7yxjsDGr6lgv12345&#34;</span>
+)
+</code></pre></td></tr></table>
+</div>
+</div><p>关于配置，除了可以直接在代码中的配置文件中进行，更建议直接在<code>.env</code>中进行配置，具体说明请参考<a href="https://github.com/howie6879/2c/blob/main/docs/00.2C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F.md">环境变量</a>文件。</p>
+<h3 id="运行2c">运行2C</h3>
+<p>配置完成后，直接在终端运行即可：</p>
+<pre tabindex="0"><code>pipenv run dev
+</code></pre><p>不出意外，会得到以下输出：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>2c<span style="color:#000;font-weight:bold">]</span> pipenv run python src/run.py      
+Loading .env environment variables…
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:08:50<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://wechat.privacyhide.com/VERSION?&gt;
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:08:52<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Spider started!
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:08:52<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Worker started: <span style="color:#099">140195525068320</span>
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:08:52<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Worker started: <span style="color:#099">140195525068728</span>
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:08:52<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://cdn.jsdelivr.net/gh/hellodword/wechat-feeds@4153bf9/details.json&gt;
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Stopping spider: Ruia
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Total requests: <span style="color:#099">1</span>
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Time usage: 0:03:53.628657
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  Ruia Spider finished!
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  2c Schedule started successfully :<span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">[</span>2021:04:11 22:12:45<span style="color:#000;font-weight:bold">]</span> INFO  2c Schedule time:
+ 07:10
+ 11:10
+ 16:10
+ 20:10
+ 23:10
+</code></pre></td></tr></table>
+</div>
+</div><p>这样就成功启动了，钉钉分发效果如下（微信分发效果在文首）：</p>
+<p>
+        <img class="mx-auto" alt="image-20210509160826972" src="https://images-1252557999.file.myqcloud.com/uPic/WrhHX9L6m5wFsdx.png" />   
+    </p>
+<h2 id="说明">说明</h2>
+<blockquote>
+<p>这里声明一点，看广告是对作者的支持，这样一定程度上可以促进作者更好地产出。但我看到喜欢的会直接<strong>打赏支持</strong>，所以<strong>搭便车</strong>的言论在我这里站不住脚，谢谢。</p>
+</blockquote>
+<p>看到这里，说明这篇文章以及<code>2C</code>项目你是感兴趣的，非常期待你使用<code>2C</code>，让你有更好的阅读体验，如果能参与进来，一起收集样本，贡献项目，那更是欢迎至极。</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2021/12_build_a_clean_env_for_reading/">https://www.howie6879.cn/post/2021/12_build_a_clean_env_for_reading/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2021/11_2c_quick_start/">Liuli 使用教程</a></li>
+        
+        <li><a href="/post/2021/10_ruia_quick_start/">Ruia异步爬虫框架——快速开始</a></li>
+        
+        <li><a href="/post/2021/08_build_online_ebook/">三分钟将文集转成在线电子书</a></li>
+        
+        <li><a href="/post/2019/10_monitor_os_notifications/">不论微信钉钉，我写了个通用消息监控处理机器人</a></li>
+        
+        <li><a href="/post/2019/09_save_wechat_article_to_bear/">利用微信同步文章到Bear</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%95%88%E7%8E%87'>效率</a></li>
+                
+                <li><a href='/tags/ruia'>Ruia</a></li>
+                
+                <li><a href='/tags/liuli'>Liuli</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

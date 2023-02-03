@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>nndl_note: 反向传播算法如何工作 | 老胡的储物柜</title>
+  <meta property="og:title" content="nndl_note: 反向传播算法如何工作 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-05-10T16:36:44&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-05-10T16:36:44&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="nndl_note: 反向传播算法如何工作"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#热神经络中使矩阵快速计算输出的法">热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法</a></li>
+    <li><a href="#关于代价函数的两个假设">关于代价函数的两个假设</a></li>
+    <li><a href="#反向传播的四个基本方程">反向传播的四个基本方程</a>
+      <ul>
+        <li><a href="#输出层误差的程">输出层误差的⽅程</a></li>
+        <li><a href="#使用下一层的误差表示当前层的误差">使用下一层的误差表示当前层的误差</a></li>
+        <li><a href="#代价函数关于络中任意偏置的改变率">代价函数关于⽹络中任意偏置的改变率</a></li>
+        <li><a href="#代价函数关于任何个权重的改变率">代价函数关于任何⼀个权重的改变率</a></li>
+      </ul>
+    </li>
+    <li><a href="#反向传播算法">反向传播算法</a></li>
+    <li><a href="#反向传播全局观">反向传播：全局观</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nndl_note: 反向传播算法如何工作</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年5月10日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<ul>
+<li><a href="#%E7%83%AD%E8%BA%AB%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E8%AE%A1%E7%AE%97%E8%BE%93%E5%87%BA%E7%9A%84%E6%96%B9%E6%B3%95">热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法</a></li>
+<li><a href="#%E5%85%B3%E4%BA%8E%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0%E7%9A%84%E4%B8%A4%E4%B8%AA%E5%81%87%E8%AE%BE">关于代价函数的两个假设</a></li>
+<li><a href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%9A%84%E5%9B%9B%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%96%B9%E7%A8%8B">反向传播的四个基本方程</a>
+<ul>
+<li><a href="#%E8%BE%93%E5%87%BA%E5%B1%82%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%96%B9%E7%A8%8B">输出层误差的⽅程</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E4%B8%8B%E4%B8%80%E5%B1%82%E7%9A%84%E8%AF%AF%E5%B7%AE%E8%A1%A8%E7%A4%BA%E5%BD%93%E5%89%8D%E5%B1%82%E7%9A%84%E8%AF%AF%E5%B7%AE">使用下一层的误差表示当前层的误差</a></li>
+<li><a href="#%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0%E5%85%B3%E4%BA%8E%E7%BD%91%E7%BB%9C%E4%B8%AD%E4%BB%BB%E6%84%8F%E5%81%8F%E7%BD%AE%E7%9A%84%E6%94%B9%E5%8F%98%E7%8E%87">代价函数关于⽹络中任意偏置的改变率</a></li>
+<li><a href="#%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0%E5%85%B3%E4%BA%8E%E4%BB%BB%E4%BD%95%E4%B8%80%E4%B8%AA%E6%9D%83%E9%87%8D%E7%9A%84%E6%94%B9%E5%8F%98%E7%8E%87">代价函数关于任何⼀个权重的改变率</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95">反向传播算法</a></li>
+<li><a href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%85%A8%E5%B1%80%E8%A7%82">反向传播：全局观</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+<!-- raw HTML omitted -->
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190524092154.png" />   
+    </p>
+<p>前面一章，我们通过了梯度下降算法实现目标函数的最小化，从而学习了该神经网络的权重和偏置，但是有一个问题并没有考虑到，那就是如何计算代价函数的梯度，本章的重点就是介绍计算这些梯度的快速算法——反向传播算法，首先先介绍一下上图中以及下面文章中会出现的一些数学符号：</p>
+<ul>
+<li>$L$ : 表示网络层数</li>
+<li>$b_j^l$ : 表示第$l$层的第$j$个神经元的偏置</li>
+<li>$a_j^l$ : 表示第$l$层的第$j$个神经元的激活值</li>
+<li>$w_{j k}^{l}$ : 表示从$l-1$层的第$k$个神经元到第$l$层的第$j$个神经元的连接上的权重</li>
+<li>$w^l$ : 权重矩阵，其中元素表示$l-1$层连接到$l$层神经元的权重</li>
+<li>$b^l$ : 第$l$层神经元的偏置向量</li>
+<li>$z^l$ : 第$l$层神经元的带权输入向量</li>
+<li>$a^l$ : 第$l$层每个神经元激活值构成的向量</li>
+<li>$\delta_{j}^{l}$ : 第$l$层第$j$个神经元的**误差**</li>
+</ul>
+<p>本篇文章是公式重灾区，但是涉及的知识并不高级，这也说明一个道理：</p>
+<blockquote>
+<p>很多看似显而易见的想法只有在事后才变得显而易见。</p>
+</blockquote>
+<h2 id="热神经络中使矩阵快速计算输出的法">热⾝：神经⽹络中使⽤矩阵快速计算输出的⽅法</h2>
+<p>通过第一章，我们已经知道每个神经元的激活值的计算方法，根据上面的公式，我们可以得出$a_j^l$的表达方式：</p>
+<p>$$
+a_{j}^{l}=\sigma\left(\sum_{k} w_{j k}^{l} a_{k}^{l-1}+b_{j}^{l}\right)
+$$</p>
+<p>举个例子：$a_3^2$表示第二层的第三个神经元的激活值，那么该输出值怎么同上一层的输出值以及权重关联起来的呢，根据激活值的计算公式，我们可以得出：</p>
+<p>$$
+\begin{aligned}
+a_3^2 &amp;= \sigma(w_{3 1}^{2} a_1^1 + w_{3 2}^{2} a_2^1+ w_{3 3}^{2} a_3^1 + b_3^2 )
+\ &amp;= \sigma\left(\sum_{k=1}^3 w_{3 k}^2 a_{k}^1 + b_3^2  \right)
+\end{aligned}
+$$</p>
+<p>可以看到例子中的结果满足表达式，接下来，让我们将表达式改成向量形式：</p>
+<p>$$
+\begin{aligned}
+a^{l} &amp;= \sigma\left(w^{l} a^{l-1}+b^{l}\right)
+\ &amp;= \sigma\left(z^l \right)
+\end{aligned}
+$$</p>
+<p>这个式子是正确的么，我们实际根据第一层到第二层的计算来看看：</p>
+<p>首先定义第一层的激活函数输出值向量$a^1$:</p>
+<p>$$
+{a^1} = \left[ \begin{array}{c}{a_1^1} \ {a_2^1} \ {a_3^1} \end{array}\right]
+$$</p>
+<p>然后是第一层神经元连接到第二层神经元的权重矩阵：</p>
+<p>$$
+{w^2} = \left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right]
+$$</p>
+<p>同理，第二层神经元的偏置向量：</p>
+<p>$$
+{b^2} = \left[ \begin{array}{c}{b_1^2} \ {b_2^2} \ {b_3^2} \ {b_4^2} \end{array}\right]
+$$</p>
+<p>我们的目标是求得第二层神经元激活值构成的向量$a^2$:</p>
+<p>$$
+{a^2} = \left[ \begin{array}{c}{a_1^2} \ {a_2^2} \ {a_3^2} \ {a_4^2} \end{array}\right]
+$$</p>
+<p>激活值计算如下：</p>
+<p>$$
+\begin{aligned}
+a^2 &amp;= \sigma(w^2a^1 + b^2)
+\&amp;= \sigma\left(\left[ \begin{array}{c}{w_{1 1}^2,w_{1 2}^2,w_{1 3}^2} \ {w_{2 1}^2,w_{2 2}^2,w_{2 3}^2} \ {w_{3 1}^2,w_{3 2}^2,w_{3 3}^2} \ {w_{4 1}^2,w_{4 2}^2,w_{4 3}^2} \end{array}\right] \left[ \begin{array}{c}{a_1^1} \ {a_2^1} \ {a_3^1} \end{array}\right] + \left[ \begin{array}{c}{b_1^2} \ {b_2^2} \ {b_3^2} \ {b_4^2} \end{array}\right]\right)
+\end{aligned}
+$$</p>
+<p>$$
+{a^2} = \left[ \begin{array}{c}{a_1^2} \ {a_2^2} \ {a_3^2} \ {a_4^2} \end{array}\right]=\sigma\left(\left[ \begin{array}{c}{w_{1 1}^2 a_1^1+w_{1 2}^2 a_2^1+w_{1 3}^2 a_3^1}+b_1^2 \ {w_{2 1}^2 a_1^1+w_{2 2}^2 a_2^1+w_{2 3}^2 a_3^1}+b_2^2 \ {w_{3 1}^2 a_1^1+w_{3 2}^2 a_2^1+w_{3 3}^2 a_3^1}+b_3^2 \ {w_{4 1}^2 a_1^1+w_{4 2}^2 a_2^1+w_{4 3}^2 a_3^1}+b_4^2 \end{array}\right]\right)
+$$</p>
+<p>可以看到$a_3^2$的值和前面第一次举例子算出来的值一致。</p>
+<h2 id="关于代价函数的两个假设">关于代价函数的两个假设</h2>
+<p>我们以均方误差得出的代价函数如下：</p>
+<p>$$
+C=\frac{1}{2 n} \sum_{x}\left|y(x)-a^{L}(x)\right|^{2}
+$$</p>
+<p>公式说明：</p>
+<ul>
+<li>$y(x)$是目标输出</li>
+<li>$a^{L}(x)$是当输入是$x$时候网络输出的激活值向量</li>
+</ul>
+<p>好了，为了应⽤反向传播，我们需要对代价函数 $C$ 做出什么样的前提假设呢？</p>
+<p>第一：代价函数可以被写成⼀个在每个训练样本 $x$ 上的代价函数 $C_x$ 的均值:</p>
+<p>$$
+C=\frac{1}{n} \sum_{x} C_{x}
+$$</p>
+<p>第⼆：代价可以写成神经⽹络输出的函数：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190524120302.png" />   
+    </p>
+<p>为对于⼀个单独的训练样本 $x$ 其⼆次代价函数可以写作：</p>
+<p>$$
+C=\frac{1}{2}\left|y-a^{L}\right|^{2}=\frac{1}{2} \sum_{j}\left(y_{j}-a_{j}^{L}\right)^{2}
+$$</p>
+<h2 id="反向传播的四个基本方程">反向传播的四个基本方程</h2>
+<p>反向传播其实是对权重和偏置变化影响代价函数过程的理解，最终极的含义其实就是计算偏导数 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$。</p>
+<p>为了计算这些值，我们引入一个中间量$\delta_{j}^{l}$ ，其表示的是第$l$层第$j$个神经元的**误差**，其中$\delta^l$表示第$l$层的误差向量，对于这个误差，我们应该怎样表示呢：</p>
+<p>$$
+\delta_{j}^{l} \equiv \frac{\partial C}{\partial z_{j}^{l}}
+$$</p>
+<p>接下来要做的就是将这些误差和 $\partial C / \partial w_{j k}^{l}$ 和 $\partial C / \partial b_{j}^{l}$ 联系起来，解决方案就是反向传播基于四个基本⽅程：</p>
+<h3 id="输出层误差的程">输出层误差的⽅程</h3>
+<p><strong>输出层误差的⽅程</strong>，$\delta^L$ ： 每个元素定义如下：</p>
+<p>$$
+\delta_{j}^{L}=\frac{\partial C}{\partial a_{j}^{L}} \sigma^{\prime}\left(z_{j}^{L}\right)
+$$</p>
+<p>矩阵形式重写⽅程：</p>
+<p>$$
+\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)
+$$</p>
+<p>其中$\nabla_{a}$就是梯度向量，其元素就是偏导数$\partial C / \partial a_{j}^{L}$的所有元素，以上述二次代价函数为例：</p>
+<p>$$
+C_{x}=\frac{1}{2}\left|y-a^{L}\right|^{2}
+$$</p>
+<p>可以得出：</p>
+<p>$$
+\nabla_{a} C=\left(a^{L}-y\right)
+$$</p>
+<p>因此方程的矩阵形式可以改成：</p>
+<p>$$
+\delta^{L}=\left(a^{L}-y\right) \odot \sigma^{\prime}\left(z^{L}\right)
+$$</p>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528115627.png" />   
+    </p>
+<h3 id="使用下一层的误差表示当前层的误差">使用下一层的误差表示当前层的误差</h3>
+<p>$$
+\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)
+$$</p>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528120156.png" />   
+    </p>
+<h3 id="代价函数关于络中任意偏置的改变率">代价函数关于⽹络中任意偏置的改变率</h3>
+<p>$$
+\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}
+$$</p>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528140657.png" />   
+    </p>
+<h3 id="代价函数关于任何个权重的改变率">代价函数关于任何⼀个权重的改变率</h3>
+<p>$$
+\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}
+$$</p>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528142309.png" />   
+    </p>
+<p>反向传播的四个基本公式，靠着一个链式法则，就全都推下来了，没有什么难度</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190524150849.png" />   
+    </p>
+<h2 id="反向传播算法">反向传播算法</h2>
+<p>反向传播算法给出了一种计算代价函数梯度的方法，算法描述如下：</p>
+<ul>
+<li>输入特征x：为输⼊层设置对应的激活值$a^1$</li>
+<li>前向传播：对每个$$l=2,3,&hellip;,L$$计算相应的$$z^l$$和$$a^l$$
+<ul>
+<li>$$z^l=w^{l} a^{l-1}+b^{l}$$</li>
+<li>$$a^l=\sigma(z^l)$$</li>
+</ul>
+</li>
+<li>输出层误差：$$\delta^{L}=\nabla_{a} C \odot \sigma^{\prime}\left(z^{L}\right)$$</li>
+<li>反向误差传播：对每个$$l=L-1,L-2,&hellip;,2$$，计算$$\delta^{l}=\left(\left(w^{l+1}\right)^{T} \delta^{l+1}\right) \odot \sigma^{\prime}\left(z^{l}\right)$$</li>
+<li>输出：代价函数的梯度由$$\frac{\partial C}{\partial w_{j k}^{l}}=a_{k}^{l-1} \delta_{j}^{l}$$和$$\frac{\partial C}{\partial b_{j}^{l}}=\delta_{j}^{l}$$得出</li>
+</ul>
+<h2 id="反向传播全局观">反向传播：全局观</h2>
+<p>假设我们已经对⼀些⽹络中的 $w_{j k}^l$ 做⼀点⼩⼩的变动 $$\Delta w_{j k}^{l}$$</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528150559.png" />   
+    </p>
+<p>显然，这样会造成输出激活值的改变：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528150804.png" />   
+    </p>
+<p>然后，会让下一层所有的激活值产生改变：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528150841.png" />   
+    </p>
+<p>接着，这些改变都将影响到⼀个个下⼀层，到达输出层，最终影响代价函数：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528150904.png" />   
+    </p>
+<p>根据求导的思想，我们可以得出下面公式：</p>
+<p>$$
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>我们知道，$$\Delta w_{j k}^{l}$$造成了第$$l$$层的第$$j$$神经元的激活值的变化$$\Delta a_{j}^{l}$$，这个变化由下⾯的公式给出：</p>
+<p>$$
+\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>$$\Delta a_{j}^{l}$$的变化会造成下一层所有神经元激活值的变化，我们聚焦到其中⼀个激活值上看看影响的情况，不防设$$a_q^{l+1}$$：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190528151606.png" />   
+    </p>
+<p>实际上，这会导致下⾯的变化：</p>
+<p>$$
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \Delta a_{j}^{l}
+$$</p>
+<p>我们已经知道$$\Delta a_{j}^{l} \approx \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}$$，我们可以得到：</p>
+<p>$$
+\Delta a_{q}^{l+1} \approx \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>就这样一直传播下去，最终将所有的影响汇聚到输出层代价的变化，假设$$a_{j}^{l}, a_{q}^{l+1}, \ldots, a_{n}^{L-1}, a_{m}^{L}$$，那么结果的表达式就是：</p>
+<p>$$
+\Delta C \approx \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>影响输出层代价的权重值有很多，所以我们需要进行求和：</p>
+<p>$$
+\Delta C \approx \sum_{m n p_{\ldots q}} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \ldots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>因为：</p>
+<p>$$
+\Delta C \approx \frac{\partial C}{\partial w_{j k}^{l}} \Delta w_{j k}^{l}
+$$</p>
+<p>带入上面式子，得出：</p>
+<p>$$
+\begin{aligned}
+\frac{\partial C}{\partial w_{j k}^{l}}&amp;=\sum_{m n p \ldots q} \frac{\partial C}{\partial a_{m}^{L}} \frac{\partial a_{m}^{L}}{\partial a_{n}^{L-1}} \frac{\partial a_{n}^{L-1}}{\partial a_{p}^{L-2}} \cdots \frac{\partial a_{q}^{l+1}}{\partial a_{j}^{l}} \frac{\partial a_{j}^{l}}{\partial w_{j k}^{l}}
+\&amp;=a_{k}^{l-1} \delta_{j}^{l}
+\end{aligned}
+$$</p>
+<p>想起一句歌词，又回到最初的起点，我们竟然就是在做反向传播，神奇。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/26765585">知乎上另外一篇笔记</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/">https://www.howie6879.cn/post/2019/08_how_does_the_back_propagation_algorithm_work/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/07_use_neural_network_recognize_handwriting/">nndl_note: 识别手写字</a></li>
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+        <li><a href="/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
+        
+        <li><a href="/post/2019/04_how_to_use_jupyterlab/">JupyterLab使用教程：程序员的笔记本神器v1.0</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+                <li><a href='/tags/nndl-book'>nndl-book</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

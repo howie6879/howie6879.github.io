@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>nndl_note: 识别手写字 | 老胡的储物柜</title>
+  <meta property="og:title" content="nndl_note: 识别手写字 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-05-08T16:36:44&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-05-08T16:36:44&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="nndl_note: 识别手写字"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#感知器">感知器</a></li>
+    <li><a href="#s型神经元">S型神经元</a></li>
+    <li><a href="#神经络的架构">神经⽹络的架构</a></li>
+    <li><a href="#个简单的分类写数字的络">⼀个简单的分类⼿写数字的⽹络</a></li>
+    <li><a href="#随机梯度下降算法">随机梯度下降算法</a></li>
+    <li><a href="#实现数字分类模型">实现数字分类模型</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nndl_note: 识别手写字</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年5月8日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<ul>
+<li><a href="#%E6%84%9F%E7%9F%A5%E5%99%A8">感知器</a></li>
+<li><a href="#s%E5%9E%8B%E7%A5%9E%E7%BB%8F%E5%85%83">S型神经元</a></li>
+<li><a href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%9E%B6%E6%9E%84">神经⽹络的架构</a></li>
+<li><a href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%88%86%E7%B1%BB%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E7%9A%84%E7%BD%91%E7%BB%9C">⼀个简单的分类⼿写数字的⽹络</a></li>
+<li><a href="#%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95">随机梯度下降算法</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0%E6%95%B0%E5%AD%97%E5%88%86%E7%B1%BB%E6%A8%A1%E5%9E%8B">实现数字分类模型</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+<!-- raw HTML omitted -->
+<p>
+        <img class="mx-auto" alt="unE6VJ" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/unE6VJ.jpg" />   
+    </p>
+<p><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a> 是由 <a href="http://michaelnielsen.org/">Michael Nielsen</a> 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。</p>
+<p>神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？</p>
+<ul>
+<li>人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别</li>
+<li>神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准</li>
+</ul>
+<p>本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：</p>
+<ul>
+<li>两个重要的人工神经元：感知器和S型神经元</li>
+<li>神经⽹络的架构</li>
+<li>⼀个简单的分类⼿写数字的⽹络</li>
+<li>标准的神经网络学习算法：随机梯度下降算法</li>
+</ul>
+<h2 id="感知器">感知器</h2>
+<p>1943年，心理学家McCulloch和数学家Pitts发表了《<a href="http://cns-pc62.bu.edu/cn550/Readings/mcculloch-pitts-43.pdf">A logical calculus of the ideas immanent in nervous activity</a>》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：</p>
+<blockquote>
+<p>感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络</p>
+</blockquote>
+<p>感知器的工作方式如下所示：</p>
+<p>
+        <img class="mx-auto" alt="jRC6Tq" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/jRC6Tq.jpg" />   
+    </p>
+<p>$x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。</p>
+<p>对于$x_{1},x_{2},&hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：</p>
+<p>
+        <img class="mx-auto" alt="from nndl" src="https://www.howie6879.cn/images/post/33/03.jpg" />   
+    </p>
+<p>假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：</p>
+<ul>
+<li>$x=(x_{1},x_{2},&hellip;,x_{j})$</li>
+<li>$w=(w_{1},w_{2},&hellip;,w_{j})$</li>
+</ul>
+<p>那么感知器的规则可以重写为:</p>
+<p>
+        <img class="mx-auto" alt="8rTNoj" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/8rTNoj.jpg" />   
+    </p>
+<p>这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。</p>
+<p>它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用<code>python</code>写的一个感知器自动学习实现与非门，代码在<a href="https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb">nndl_chapter01</a>。</p>
+<p>说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：</p>
+<table>
+<thead>
+<tr>
+<th>$x$</th>
+<th>$y$</th>
+<th>$output$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。</p>
+<p>可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。</p>
+<p>遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。</p>
+<p>感知器，终于可以多层了。</p>
+<h2 id="s型神经元">S型神经元</h2>
+<p>前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？</p>
+<p>
+        <img class="mx-auto" alt="5X7Or7" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5X7Or7.jpg" />   
+    </p>
+<p>以数字识别为例，假设⽹络错误地把⼀个<code>9</code>的图像分类为<code>8</code>，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果<code>9</code>，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把<code>9</code>的图像分类为<code>8</code>调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。</p>
+<p>所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为$\sigma(w \cdot x+b)$，而$\sigma$就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：</p>
+<p>$$
+\sigma(z) \equiv \frac{1}{1+e^{-z}}
+$$</p>
+<p>其中$z$表达式为：</p>
+<p>$$z=\sum_{j} w{_j}x{_j}+b$$</p>
+<p>那么⼀个具有输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：</p>
+<p>$$
+\frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+$$</p>
+<p>上面说过，感知器的激活函数只会输出两个值，分别是<code>0</code>或<code>1</code>，让我们把目光投向S型神经元，假设此时$z$是一个很大的正数，那么此时output将无限接近于1，反之，若$z$是一个很大的负数，那么此时output将无限接近于0，从极端情况来看，是不是很像S型神经元呢？</p>
+<p>S型神经元的输出是[0,1]之间的任何实数，那么这个分类模型该如何判断分类结果呢？其实很简单，我们可以定义一个数值，比如：</p>
+<ul>
+<li>$\sigma(z) \leq 0.5$ 输出0</li>
+<li>$\sigma(z)&gt;0.5$  输出1</li>
+</ul>
+<h2 id="神经络的架构">神经⽹络的架构</h2>
+<p>看下面一个四层神经网络，这种类型的多层⽹络有时被称为<strong>多层感知器</strong>或者<strong>MLP</strong>，如下图：</p>
+<p>
+        <img class="mx-auto" alt="ftLVog" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/ftLVog.jpg" />   
+    </p>
+<p>需要记住以下几个概念：</p>
+<ul>
+<li>⽹络中最左边的称为<strong>输⼊层</strong>，其中的神经元称为<strong>输⼊神经元</strong></li>
+<li>中间得称之为<strong>隐藏层</strong>，图中有两个隐藏层</li>
+<li>最右边称之为<strong>输出层</strong></li>
+<li>上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：<strong>前馈神经网络</strong></li>
+<li>有回路，其中反馈环路是可⾏的：<strong>递归神经网络</strong></li>
+</ul>
+<h2 id="个简单的分类写数字的络">⼀个简单的分类⼿写数字的⽹络</h2>
+<p>对于这六个数字<code>504192</code>，我们该如何实现一个分类⼿写数字的⽹络呢，可以将其分解为两个小问题：</p>
+<ul>
+<li>
+<p>504192是连续在一起的图像，首先可以将其分割成6个小图像，比如<code>5</code> <code>0</code> &hellip;等</p>
+</li>
+<li>
+<p>再对分割开的小图像进行分类，比如识别<code>5</code>我们将使⽤⼀个三层神经⽹络来识别单个数字：
+
+        <img class="mx-auto" alt="xCZuay" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/xCZuay.jpg" />   
+    
+由于训练数据由$28*28$的⼿写数字的图像组成，所以:</p>
+</li>
+<li>
+<p>输入层有784个神经元，因为$784 = 28 \times 28$，输⼊像素是灰度级的，值为0:0表⽰⽩⾊，值为1:0表⽰⿊⾊，中间数值表⽰逐渐暗淡的灰⾊</p>
+</li>
+<li>
+<p>隐藏层⽤n来表⽰神经元的数量，我们将给n实验不同的数值。⽰例中⽤⼀个⼩的隐藏层来说明，仅仅包含$n = 15$个神经元</p>
+</li>
+<li>
+<p>⽹络的输出层包含有10个神经元，如果第一个输出神经元被激活，那么数字就是0，以此类推，从0到9</p>
+</li>
+</ul>
+<p>一个分类⼿写数字的⽹络，大概就可以这样实现。</p>
+<h2 id="随机梯度下降算法">随机梯度下降算法</h2>
+<p>分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤<a href="http://yann.lecun.com/exdb/mnist/">MNIST</a>数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用<code>jupyter notebook</code>开始吧，如果没有，请自行检索教程安装，代码目录如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pylab
+└── datasets
+    └── MNIST_data
+        ├── t10k-images-idx3-ubyte.gz
+        ├── t10k-labels-idx1-ubyte.gz
+        ├── train-images-idx3-ubyte.gz
+        └── train-labels-idx1-ubyte.gz
+</code></pre></td></tr></table>
+</div>
+</div><p>然后使用<code> TensorFlow</code>来读取数据，看看下载的数据集到底是什么样子，可以在<code>mnist_data.ipynb</code>中添加如下代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">matplotlib</span> <span style="color:#000;font-weight:bold">import</span> pyplot <span style="color:#000;font-weight:bold">as</span> plt
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">tensorflow.examples.tutorials.mnist.input_data</span> <span style="color:#000;font-weight:bold">import</span> read_data_sets
+
+mnist <span style="color:#000;font-weight:bold">=</span> read_data_sets(<span style="color:#d14">&#34;../datasets/MNIST_data/&#34;</span>, one_hot<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+
+</code></pre></td></tr></table>
+</div>
+</div><p>查看一些基本信息：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Training data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>num_examples)
+<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Validating data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>validation<span style="color:#000;font-weight:bold">.</span>num_examples)
+<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Testing data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>test<span style="color:#000;font-weight:bold">.</span>num_examples)
+
+<span style="color:#998;font-style:italic"># 每张图片是长度为784的一维数组</span>
+<span style="color:#0086b3">print</span>(<span style="color:#0086b3">len</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">0</span>]))
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">display_digit</span>(image):
+    image <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">.</span>reshape([<span style="color:#099">28</span>,<span style="color:#099">28</span>])
+    plt<span style="color:#000;font-weight:bold">.</span>imshow(image, cmap<span style="color:#000;font-weight:bold">=</span>plt<span style="color:#000;font-weight:bold">.</span>get_cmap(<span style="color:#d14">&#39;gray_r&#39;</span>))
+    plt<span style="color:#000;font-weight:bold">.</span>show()
+
+<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;样本真实数字为：</span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">list</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>labels[<span style="color:#099">1</span>])<span style="color:#000;font-weight:bold">.</span>index(<span style="color:#099">1</span>))
+<span style="color:#998;font-style:italic"># 显示图像</span>
+display_digit(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">1</span>])
+
+<span style="color:#998;font-style:italic"># Output</span>
+<span style="color:#998;font-style:italic"># Training data size: 55000</span>
+<span style="color:#998;font-style:italic"># Validating data size: 5000</span>
+<span style="color:#998;font-style:italic"># Testing data size: 10000</span>
+<span style="color:#998;font-style:italic"># 784</span>
+<span style="color:#998;font-style:italic"># 样本真实数字为：3</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到显示如下图像：</p>
+<p>
+        <img class="mx-auto" alt="Crfu35" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/Crfu35.jpg" />   
+    </p>
+<p>通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。</p>
+<p>感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个<strong>代价函数</strong>（有时被称为损失或⽬标函数）：</p>
+<p>$$
+C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+$$</p>
+<ul>
+<li>w 表⽰所有的⽹络中权重的集合</li>
+<li>b 是所有的偏置</li>
+<li>n 是训练输⼊数据的个数</li>
+<li>a 是表⽰当输⼊为x时输出的向量，可以理解为output</li>
+</ul>
+<p>训练模型的过程就是优化代价函数的过程，<em>Cost Function(代价函数)</em> 越小，就代表模型拟合的越好，所以我们的目的是找出最⼩化权重和偏置的代价函数$C(w,b)$，其实这个就是我们平常用来评价回归算法的均方误差，也就是<strong>MSE</strong>。</p>
+<p>现在我们的目标很清晰，为了找出合适的权重和偏置值，我们需要让代价函数的值接近于0，在这个条件下我们就可以找出合适的权重和偏置值，我们将采⽤称为<strong>梯度下降</strong>的算法来达到这个⽬的。</p>
+<p>下面是我的推导过程：</p>
+<p>
+        <img class="mx-auto" alt="RwxP6N" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/RwxP6N.jpg" />   
+    </p>
+<h2 id="实现数字分类模型">实现数字分类模型</h2>
+<p>终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。</p>
+<p>书籍作者很贴心地实现了模型代码，仓库见<a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a>，接下来我们一起来看看具体的实现代码吧。</p>
+<p>首先是实现一个<code>Network</code>类，</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">random</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Network</span>(<span style="color:#0086b3">object</span>):
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, sizes):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        初始化
+</span><span style="color:#d14">        :param sizes:
+</span><span style="color:#d14">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>num_layers <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">len</span>(sizes)
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>sizes <span style="color:#000;font-weight:bold">=</span> sizes
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>biases <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">for</span> y <span style="color:#000;font-weight:bold">in</span> sizes[<span style="color:#099">1</span>:]]
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>weights <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, x)
+                        <span style="color:#000;font-weight:bold">for</span> x, y <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">zip</span>(sizes[:<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>], sizes[<span style="color:#099">1</span>:])]
+
+</code></pre></td></tr></table>
+</div>
+</div><p>前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考<a href="https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py">network.py</a>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">sigmoid</span>(z):
+    <span style="color:#d14">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">/</span>(<span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">+</span>np<span style="color:#000;font-weight:bold">.</span>exp(<span style="color:#000;font-weight:bold">-</span>z))
+</code></pre></td></tr></table>
+</div>
+</div><p>代码已经准备就绪，下面可以开始进行模型训练：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">mnist_loader</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">network</span>
+
+training_data, validation_data, test_data <span style="color:#000;font-weight:bold">=</span> mnist_loader<span style="color:#000;font-weight:bold">.</span>load_data_wrapper()
+
+net <span style="color:#000;font-weight:bold">=</span> network<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])
+net<span style="color:#000;font-weight:bold">.</span>SGD(<span style="color:#0086b3">list</span>(training_data), <span style="color:#099">30</span>, <span style="color:#099">10</span>, <span style="color:#099">3.0</span>, test_data<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">list</span>(test_data))
+
+<span style="color:#998;font-style:italic"># Output</span>
+Epoch <span style="color:#099">0</span>: <span style="color:#099">9023</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">1</span>: <span style="color:#099">9222</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">2</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">3</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">4</span>: <span style="color:#099">9383</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">5</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">6</span>: <span style="color:#099">9432</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">7</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">8</span>: <span style="color:#099">9454</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>看结果，十次迭代后，轻轻松松突破94%</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><a href="https://github.com/howie6879/pylab/blob/master/pylab/books/nndl/chapter01/chapter01.ipynb">文中涉及代码</a></li>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+<li><a href="http://www.cnblogs.com/subconscious/p/5058741.html">神经网络浅讲：从神经元到深度学习</a></li>
+<li><a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/">https://www.howie6879.cn/post/2019/07_use_neural_network_recognize_handwriting/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+        <li><a href="/post/2019/06_oh_my_zsh/">oh-my-zsh：让终端飞</a></li>
+        
+        <li><a href="/post/2019/04_how_to_use_jupyterlab/">JupyterLab使用教程：程序员的笔记本神器v1.0</a></li>
+        
+        <li><a href="/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">以Ruia为例：如何实现一个Python爬虫框架</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+                <li><a href='/tags/nndl-book'>nndl-book</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

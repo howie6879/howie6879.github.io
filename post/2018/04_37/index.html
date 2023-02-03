@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>统计学习方法笔记：1.统计学习方法概论 | 老胡的储物柜</title>
+  <meta property="og:title" content="统计学习方法笔记：1.统计学习方法概论 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2018-09-16T17:54:42&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2018-09-16T17:54:42&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="统计学习方法笔记：1.统计学习方法概论"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2018/04_37/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#统计学习">统计学习</a></li>
+    <li><a href="#监督学习">监督学习</a>
+      <ul>
+        <li><a href="#基本概念">基本概念</a></li>
+        <li><a href="#问题的形式化">问题的形式化</a></li>
+      </ul>
+    </li>
+    <li><a href="#统计学习三要素">统计学习三要素</a>
+      <ul>
+        <li><a href="#模型">模型</a></li>
+        <li><a href="#策略">策略</a></li>
+        <li><a href="#算法">算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#模型评估与模型选择">模型评估与模型选择</a>
+      <ul>
+        <li><a href="#训练误差与测试误差">训练误差与测试误差</a></li>
+        <li><a href="#过拟合与模型选择">过拟合与模型选择</a></li>
+      </ul>
+    </li>
+    <li><a href="#正则化与交叉验证">正则化与交叉验证</a>
+      <ul>
+        <li><a href="#正则化">正则化</a></li>
+        <li><a href="#交叉验证">交叉验证</a></li>
+      </ul>
+    </li>
+    <li><a href="#泛化能力">泛化能力</a>
+      <ul>
+        <li><a href="#泛化误差">泛化误差</a></li>
+        <li><a href="#泛化误差上界">泛化误差上界</a></li>
+      </ul>
+    </li>
+    <li><a href="#生成模型与判别模型">生成模型与判别模型</a></li>
+    <li><a href="#分类问题">分类问题</a></li>
+    <li><a href="#标注问题">标注问题</a></li>
+    <li><a href="#回归问题">回归问题</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">统计学习方法笔记：1.统计学习方法概论</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年9月16日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
+<ul>
+<li>阅读章节：第一章：统计学习方法概论</li>
+<li>开始时间：2018-09-14</li>
+<li>结束时间：2018-09-16</li>
+<li>目标：读完第一章，掌握基本概念，产出一篇笔记</li>
+<li><a href="https://www.howie6879.cn/post/37/">博客地址</a></li>
+</ul>
+<p>第一章主要对全书内容做了一个内容的概括：</p>
+<ul>
+<li>统计学习：定义、研究对象和方法</li>
+<li>监督学习</li>
+<li>统计学习三要素：模型、策略、算法</li>
+<li>模型评估与选择：包括正则化、交叉验证与学习的泛化能力</li>
+<li>生成模型与判别模型</li>
+<li>分类问题、标注问题与回归问题</li>
+</ul>
+<h2 id="统计学习">统计学习</h2>
+<p><strong>什么是统计学习</strong></p>
+<p>统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习</p>
+<p><strong>统计学习的特点</strong></p>
+<ul>
+<li>统计学习以计算机及网络为平台，是建立在计算机及 网络之上的</li>
+<li>统计学习以数据为研究对象，是数据驱动的学科</li>
+<li>统计学习的目的是对数据进行预测与分析</li>
+<li>统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析</li>
+<li>统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论</li>
+</ul>
+<p><strong>什么是机器学习</strong></p>
+<p>如果<code>一个程序</code>可以在<code>任务T</code>上，随着<code>经验E</code>的增加，<code>效果P</code>也可以随之增加，则称这个程序可以从经验中学习。 &mdash; 卡内基美隆大学的Tom Michael Mitchell教授</p>
+<blockquote>
+<p>如果以垃圾邮件为例，<code>一个程序</code>指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；<code>任务T</code>指的是区分垃圾邮件的任务；<code>经验E</code>为已经区分过是否为垃圾邮件的历史邮件；<code>效果P</code>为机器学习算法在区分是否为垃圾邮件任务上的准确率</p>
+</blockquote>
+<p><strong>统计学习的目的</strong></p>
+<p>统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析</p>
+<p><strong>统计学习的方法</strong></p>
+<ul>
+<li>监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归</li>
+<li>非监督学习（unsupervised learning）：聚类、降维</li>
+<li>半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM）</li>
+<li>强化学习（reinforcement learning）：蒙特卡洛方法</li>
+</ul>
+<h2 id="监督学习">监督学习</h2>
+<h3 id="基本概念">基本概念</h3>
+<ul>
+<li>输入空间（input space）：输入所有可能取值的集合</li>
+<li>输出空间（output space）：输出所有可能取值的集合</li>
+<li>特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间</li>
+<li>联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - <a href="https://blog.csdn.net/tiankong_/article/details/78332666">机器学习-联合概率分布笔记</a></li>
+<li>假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）</li>
+</ul>
+<p>人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：</p>
+<ul>
+<li>分类问题：输出变量为有限个离散变量的预测问题</li>
+<li>回归问题：输入变量与输出变量均为连续变量的预测问题</li>
+<li>标注问题：输入变量与输出变量均为变量序列的预测问题</li>
+</ul>
+<h3 id="问题的形式化">问题的形式化</h3>
+<p>监督学习利用训练数据集学习一个模型，再用模型对测试样本集进行预测 （prediction）：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/72A50DED-998C-4C8F-B20D-3FC2257CE2B4.png" />   
+    </p>
+<p>输入训练集 -&gt; 生成模型 -&gt; 预测，由于训练集是人工给出的，所以称之为监督学习</p>
+<h2 id="统计学习三要素">统计学习三要素</h2>
+<p>统计学习方法由三要素构成，可以简单地表示为：<strong>方法 = 模型 + 策略 + 算法</strong></p>
+<h3 id="模型">模型</h3>
+<p>在监督学习过程中，模型就是所要学习的条件概率分布或决策函数。模型的假设空间（hypothesis space）包含所有可能的条件概率分布或决策函数</p>
+<p>例如，假设决策函数是输入变量的线性函数，那么模型的假设空间就是所有这些线性函数构成的函数集合，假设空间中的模型一般有无穷多个</p>
+<h3 id="策略">策略</h3>
+<p>知道模型的交涉空间后，现在的目的就是选择出最优的一个模型出来，而这就是统计学习的目标，这里引入两个概念：</p>
+<ul>
+<li>损失函数（loss function）：用于度量模型一次预测的好坏</li>
+<li>风险函数（risk function）：度量平均意义下模型预测的好坏</li>
+</ul>
+<p><strong>损失函数和风险函数</strong></p>
+<p>监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))</p>
+<p>统计学习中常用的损失函数有如下几种：</p>
+<ul>
+<li>0-1损失函数（0-1 loss function）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/42CD0528-7011-4AA9-A79C-514587FA8DD7.png" />   
+    </li>
+<li>平方损失函数（quadratic loss function）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5B51ED16-2F58-4CED-B7EA-03CE52ABC835.png" />   
+    </li>
+<li>绝对损失函数（absolute loss function）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/329F0C27-AE06-4580-BB67-9BA522AA9D33.png" />   
+    </li>
+<li>对数损失函数（logarithmic loss function）或对数似然损失函数（loglikelihood loss function）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/502CA9B6-2E10-46C6-9F8D-BF8CAA4140C0.png" />   
+    </li>
+</ul>
+<p>有了上面概念的铺垫，又可以引入下面两个概念：</p>
+<ul>
+<li>模型f(X)关于联合分布P(X,Y)的平均意义下的损失：风险函数（risk function）或期望损失（expected loss）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C419536B-5085-4FAD-A822-D9EE9F9C4733.png" />   
+    </li>
+<li>模型f(X)关于训练数据集的平均损失：经验风险（empirical risk）或经验损失（empirical loss）：
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/B39854FF-891B-44A5-9D55-564E049EA825.png" />   
+    </li>
+</ul>
+<p>当样本数量足够的情况下，经验风险是趋近于期望风险的，但是现实中样本数量是有限的，，所以用经验风险估计期望风险常常并不理想，要对经验风险进行一定的矫正</p>
+<p>这就关系到监督学习的两个基本策略：<strong>经验风险最小化和结构风险最小化</strong></p>
+<p><strong>经验风险最小化与结构风险最小化</strong></p>
+<p>在假设空间、损失函数以及训练数据集确定的情况下，经验风险函数式（1.10）就可以确定，经验风险最小化（empirical risk minimization，ERM）的策略认为，经验风险最小的模型是最优的模型</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/7196AB5B-A29F-4F0B-A92E-1E038E9DA6AF.png" />   
+    </p>
+<p>当样本数量过小，可能会出现<strong>过拟合</strong>问题，结构风险最小化（structural risk minimization，SRM）是为了防止过拟合而提出来的策略</p>
+<p>结构风险最小化等价于正则化（regularization）：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5882A701-300C-4107-8CBC-99658B6D7BEA.png" />   
+    </p>
+<p>加上结构风险最小化的策略，此时的最优模型就是下面的最优化问题求解：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/85C6CF7E-ABA1-4DA9-A9D6-8A6F2990355C.png" />   
+    </p>
+<p>这样，监督学习问题就变成了经验风险或结构风险函数的最优化问题（1.11）和（1.13），这时经验或结构风险函数是最优化的目标函数</p>
+<h3 id="算法">算法</h3>
+<p>统计学习基于训练数据集，根据学习策略，从假设空间中选择最优模型，最后需要考虑用什么样的计算方法求解最优模型，这时，统计学习问题归结为最优化问题，统计学习的算法成为求解最优化问题的算法：</p>
+<h2 id="模型评估与模型选择">模型评估与模型选择</h2>
+<h3 id="训练误差与测试误差">训练误差与测试误差</h3>
+<p>对于我们利用学习方法通过训练给出的模型，我们希望这个模型能较好的具有以下两点能力：</p>
+<ul>
+<li>拟合能力：已知数据的预测比较合理</li>
+<li>泛化能力：未知数据的预测比较合理</li>
+</ul>
+<p>前面说过，损失函数能够度量模型预测的好坏，所以基于损失函数的模型的训练误差（training error）和模型的测试误差（test error）就自然成为学习方法评估的标准：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/D2733ADB-7BDB-4A8D-8F2B-E38E51ABC182.png" />   
+    </p>
+<h3 id="过拟合与模型选择">过拟合与模型选择</h3>
+<p>我们认为在假设空间存在一个真的模型，那么我们选择的模型的目标就是尽量接近这个真模型，假设空间很可能含有不同复杂度的模型，所以此时我们的目标就变成了寻找一个复杂度合适的模型，这里引出一个概念，过拟合（over fitting） - 所选模型的复杂度则比真模型更高</p>
+<p>接下来我们的问题就转接成了需找一个模型复杂度适当的模型，前面一节我们介绍了训练误差与测试误差，那么训练误差与测试误差和模型的复杂度有没有什么关系呢，看下图：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/57BE978D-6617-4A80-9D2A-937508E6366A.png" />   
+    </p>
+<p>可以看到，训练误差和模型复杂度的关系是：随着模型复杂度的增加，训练误差逐渐递减，趋向于0（此时可能过拟合），但是测试误差会有个最小值（此时才是最合适的复杂度）</p>
+<p>那么我们的学习目的就出来了：选择复杂度适当的模型，以达到使测试误差最小</p>
+<p>现在目的就很明确了，就是需要一个途径比较测试误差，选出最值小的，从而选出我们的模型：</p>
+<ul>
+<li>正则化</li>
+<li>交叉验证</li>
+</ul>
+<h2 id="正则化与交叉验证">正则化与交叉验证</h2>
+<h3 id="正则化">正则化</h3>
+<p>在统计学习三要素那一节讲过结构风险最小化策略，此策略的目的就是防止过拟合，正则化是结构风险最小化策略的实现，是在经验风险上加一个正则化项（regularizer）或罚项(penalty term)：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/94BCF3C8-4EF6-4FE3-8E0B-C404E93B55BF.png" />   
+    </p>
+<p>正则化的作用是选择经验风险与模型复杂度同时较小的模型</p>
+<h3 id="交叉验证">交叉验证</h3>
+<p>交叉验证的基本想法是重复地使用数据，把给定的数据进行切分，将切分的数据集组合为训练集与测试集，在此基础上反复地进行训练、测试以及模型选择，交叉验证有如下三种方式：</p>
+<ul>
+<li>简单交叉验证</li>
+<li>S折交叉验证</li>
+<li>留一交叉验证</li>
+</ul>
+<h2 id="泛化能力">泛化能力</h2>
+<p>学习方法的泛化能力（generalization  ability）是指由该方法学习到的模型对未知数据的预测能力，是学习方法本质上重要的性质</p>
+<h3 id="泛化误差">泛化误差</h3>
+<p><strong>泛化误差的定义</strong></p>
+<p>对于一个学到的模型，其对未知数的预测就是泛化误差（generalization error），其实就是策略那节讲的风险函数：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C0F55EFF-18AE-41DE-A8EE-91112A9047DF.png" />   
+    </p>
+<p>泛化误差反映了学习方法的泛化能力，如果一种方法学习的模型比另一种方法学习的模型具有更小的泛化误差，那么这种方法就更有效</p>
+<h3 id="泛化误差上界">泛化误差上界</h3>
+<p>学习方法的泛化能力分析往往是通过研究泛化误差的概率上界进行的，简称为泛化误 差上界（generalization error bound）</p>
+<p>泛化误差上界性质如下：</p>
+<ul>
+<li>它是样本容量的函数，当样本容量增加时，泛化上界趋于0</li>
+<li>它是假设空间容量（capacity）的函数，假设空间容量越大，模型就越难学，泛化误差上界就越大</li>
+</ul>
+<h2 id="生成模型与判别模型">生成模型与判别模型</h2>
+<p>监督学习方法可以分为：</p>
+<ul>
+<li>生成方法（generative approach）：生成方法可以还原出联合概率分布<code>P(X,Y)</code>，而判别方法则不能；生成方法的学习收敛速度更快，即当样本容量增加的时候，学到的模型可以更快地收敛于真实模型；当存在隐变量时，仍可以用生成方法学习，此时判别方法就不能用</li>
+<li>判别方法（discriminative approach）：判别方法直接学习的是条件概率<code>P(Y|X)</code>或决策函数<code>f(X)</code>，直接面对预测，往往学习的准确率更高；由于直接学习<code>P(Y|X)</code>或<code>f(X)</code>，可以对数据进行各种程度上 的抽象、定义特征并使用特征，因此可以简化学习问题</li>
+</ul>
+<p>所学到的模型分别称为：</p>
+<ul>
+<li>生成模型（generative model）：
+<ul>
+<li>朴素贝叶斯法</li>
+<li>隐马尔可夫模型</li>
+</ul>
+</li>
+<li>判别模型（discriminative model）：
+<ul>
+<li>k近邻法</li>
+<li>感知机</li>
+<li>决策树</li>
+<li>逻辑斯谛回归模型</li>
+<li>最大熵模型</li>
+<li>支持向量机</li>
+<li>提升方法</li>
+<li>条件随机场</li>
+<li>&hellip;&hellip;</li>
+</ul>
+</li>
+</ul>
+<h2 id="分类问题">分类问题</h2>
+<blockquote>
+<p>在监督学习中，当输出变量Y取有限个离散值时，预测问题便成为分类问题，监督学习从数据中学习一个分类模型或分类决策函数，称为分类器（classifier）</p>
+</blockquote>
+<p>许多统计学习方法可以用于分类：</p>
+<ul>
+<li>k近邻法</li>
+<li>感知机</li>
+<li>朴素贝叶斯法</li>
+<li>决策树</li>
+<li>决策列表</li>
+<li>逻辑斯谛回归模型</li>
+<li>支持向量机</li>
+<li>提升方法</li>
+<li>贝叶斯网络</li>
+<li>神经网络</li>
+<li>Winnow</li>
+<li>&hellip;&hellip;</li>
+</ul>
+<p>评价分类器性能的指标一般是分类准确率（accuracy）：对于给定的测试数据集，分类器正确分类的样本数与总样本数之比，也就是损失函数是0-1损失时测试数据集上的准确率，见图<code>1.17</code></p>
+<p>对于二类分类问题常用的评价指标是精确率（precision）与召回率（recall），因为是二分类，所以一共有四中预测情况：</p>
+<ul>
+<li>TP——将正类预测为正类数</li>
+<li>FN——将正类预测为负类数</li>
+<li>FP——将负类预测为正类数</li>
+<li>TN——将负类预测为负类数</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/F10C9303-79C3-4134-8481-C895631C84CC.png" />   
+    </p>
+<h2 id="标注问题">标注问题</h2>
+<blockquote>
+<p>标注问题的目标在于学习一个模型， 使它能够对观测序列给出标记序列作为预测</p>
+</blockquote>
+<p>许多统计学习方法可以用于标注：</p>
+<ul>
+<li>隐马尔可夫模型</li>
+<li>条件随机场</li>
+</ul>
+<p>评价标注模型的指标与评价分类模型的指标一样，常用的有标注准确率、精确率和召回率，其定义与分类模型相同</p>
+<h2 id="回归问题">回归问题</h2>
+<p>回归用于预测输入变量（自变量）和输出变量（因变量）之间的关系，特别是当输入变量的值发生变化时，输出变量的值随之发生的变化，回归问题按照输入变量的个数，分为一元回归和多元回归；按照输入变量和输出变量之间关系的类型即模型的类型，分为线性回归和非线性回归</p>
+<h2 id="说明">说明</h2>
+<p>一些参考链接：</p>
+<ul>
+<li><a href="https://github.com/WenDesi/lihang_book_algorithm">致力于将李航博士《统计学习方法》一书中所有算法实现一遍</a></li>
+<li><a href="https://github.com/zzqboy/static_study">《统计学习方法》的读书笔记，重现了大部分的课后题，仅供参考</a></li>
+<li><a href="https://segmentfault.com/a/1190000015561652#articleHeader2">深度学习中的概率知识详解</a></li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2018/04_37/">https://www.howie6879.cn/post/2018/04_37/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">Python之朴素贝叶斯对展会数据分类</a></li>
+        
+        <li><a href="/post/2018/03_update-https-for-blog/">博客升级HTTPS方案</a></li>
+        
+        <li><a href="/post/2018/02_sanic-for-pythoneer-06/">Sanic 使用教程 - 6.常用的技巧</a></li>
+        
+        <li><a href="/post/2018/01_sanic-for-pythoneer-05/">Sanic 使用教程 - 5.数据库使用</a></li>
+        
+        <li><a href="/page/friends/">Friends</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95'>统计学习方法</a></li>
+                
+                <li><a href='/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0'>机器学习</a></li>
+                
+                <li><a href='/tags/mlhub123'>mlhub123</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>nndl_note: 改进神经⽹络的学习⽅法 | 老胡的储物柜</title>
+  <meta property="og:title" content="nndl_note: 改进神经⽹络的学习⽅法 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-10-30T19:40:02&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-10-30T19:40:02&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="本章我们主要讨论改进神经⽹络的学习⽅法"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/11_improving_the_way_neural_networks_learn/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#交叉熵代价函数">交叉熵代价函数</a>
+      <ul>
+        <li><a href="#引交叉熵代价函数">引⼊交叉熵代价函数</a></li>
+        <li><a href="#交叉熵的含义源哪">交叉熵的含义？源⾃哪⾥？</a></li>
+      </ul>
+    </li>
+    <li><a href="#过度拟合和规范化">过度拟合和规范化</a>
+      <ul>
+        <li><a href="#规范化">规范化</a></li>
+        <li><a href="#为何规范化可以帮助减轻过度拟合">为何规范化可以帮助减轻过度拟合</a></li>
+        <li><a href="#规范化的其他技术">规范化的其他技术</a></li>
+      </ul>
+    </li>
+    <li><a href="#权重初始化">权重初始化</a></li>
+    <li><a href="#如何选择神经络的超参数">如何选择神经⽹络的超参数</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nndl_note: 改进神经⽹络的学习⽅法</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年10月30日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<ul>
+<li><a href="#%E4%BA%A4%E5%8F%89%E7%86%B5%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0">交叉熵代价函数</a>
+<ul>
+<li><a href="#%E5%BC%95%E4%BA%A4%E5%8F%89%E7%86%B5%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0">引⼊交叉熵代价函数</a></li>
+<li><a href="#%E4%BA%A4%E5%8F%89%E7%86%B5%E7%9A%84%E5%90%AB%E4%B9%89%E6%BA%90%E5%93%AA">交叉熵的含义？源⾃哪⾥？</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%87%E5%BA%A6%E6%8B%9F%E5%90%88%E5%92%8C%E8%A7%84%E8%8C%83%E5%8C%96">过度拟合和规范化</a>
+<ul>
+<li><a href="#%E8%A7%84%E8%8C%83%E5%8C%96">规范化</a></li>
+<li><a href="#%E4%B8%BA%E4%BD%95%E8%A7%84%E8%8C%83%E5%8C%96%E5%8F%AF%E4%BB%A5%E5%B8%AE%E5%8A%A9%E5%87%8F%E8%BD%BB%E8%BF%87%E5%BA%A6%E6%8B%9F%E5%90%88">为何规范化可以帮助减轻过度拟合</a></li>
+<li><a href="#%E8%A7%84%E8%8C%83%E5%8C%96%E7%9A%84%E5%85%B6%E4%BB%96%E6%8A%80%E6%9C%AF">规范化的其他技术</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9D%83%E9%87%8D%E5%88%9D%E5%A7%8B%E5%8C%96">权重初始化</a></li>
+<li><a href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E8%B6%85%E5%8F%82%E6%95%B0">如何选择神经⽹络的超参数</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+<!-- raw HTML omitted -->
+<blockquote>
+<p>万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的</p>
+</blockquote>
+<p>前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：</p>
+<ul>
+<li>交叉熵代价函数</li>
+<li>四种称为<code>规范化</code>的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展）</li>
+<li>更好的权重初始化⽅法</li>
+<li>如何选择神经网络的超参数</li>
+</ul>
+<h2 id="交叉熵代价函数">交叉熵代价函数</h2>
+<p>通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？</p>
+<p>对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030214416.png" />   
+    </p>
+<p>假设有这样一个神经元，我们希望当输入为<code>1</code>的时候，输出为<code>0</code>，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为<code>0.6 和 0.9</code>，前面我们说过，<code>S型神经元</code>的输出计算方式为：</p>
+<p>输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：</p>
+<p>$$
+\frac{1}{1+\exp(-\sum_j w_j x_j-b)}
+$$</p>
+<p>将<code>0.6 和 0.9</code>带入，即可得到输出为：<code>0.82</code>，很显然和目标<code>0</code>相差甚远，那么就只能继续寻找最优解了，随着迭代期的增加，神经元的输出、权重、偏置和代价的变化如下⾯⼀系列图形所⽰：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030215427.png" />   
+    </p>
+<p>可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于<code>0.5</code>我们都可以归为<code>0</code>，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030215956.png" />   
+    
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191030220023.png" />   
+    </p>
+<p>这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。</p>
+<p>这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单</p>
+<blockquote>
+<p>权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小</p>
+</blockquote>
+<p>让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：</p>
+<ul>
+<li>$x=1$</li>
+<li>$y=0$</li>
+</ul>
+<p>再结合前面第一章讲的代价函数的定义：</p>
+<p>$$
+C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2
+$$</p>
+<ul>
+<li>w 表⽰所有的⽹络中权重的集合</li>
+<li>b 是所有的偏置</li>
+<li>n 是训练输⼊数据的个数</li>
+<li>a 是表⽰当输⼊为x时输出的向量，可以理解为output</li>
+</ul>
+<p>类比一下，此时的代价函数为：</p>
+<p>$$
+C=\frac{(y-a)^{2}}{2}
+$$</p>
+<p>接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：</p>
+<ul>
+<li>$x=1$</li>
+<li>$y=0$</li>
+<li>$a=\sigma(z)$</li>
+<li>$z=wx+b$</li>
+</ul>
+<p>推导过程如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031094031.png" />   
+    </p>
+<p>从推导结果可以看到偏导数的值和$\sigma^{\prime}\left(z\right)$成正比，回顾下前面讲的S型神经元中激活函数的图像：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/A7595F2F-C760-4FCC-8653-62D3EC408632-20220403213246938.png" />   
+    </p>
+<p>我们可以从这幅图看出，当神经元的输出接近<code>1</code>的时候，曲线变得相当平，所以$\sigma^{\prime}\left(z\right)$就很小，同时也可以得出代价函数<code>C</code>权重和偏置的偏导数也很小，这就是训练速度缓慢的原因</p>
+<p>再看上面代价函数值和迭代次数的图，中间部分非常<code>陡峭</code>，前后非常<code>平缓</code>，是不是非常契合$\sigma^{\prime}\left(z\right)$的变化的？类似其他的神经网络，也是这样的原因造成训练缓慢，使用均方误差作为代价函数还有个缺点就是容易陷入局部最优解的沼泽中</p>
+<h3 id="引交叉熵代价函数">引⼊交叉熵代价函数</h3>
+<p>我们已经抛出了神经网络训练缓慢的原因，接下来就是考虑如何解决这个问题</p>
+<blockquote>
+<p>研究表明，我们可以通过使⽤交叉熵代价函数来替换⼆次代价函数</p>
+</blockquote>
+<p>为了理解什么是交叉熵，我们稍微改变⼀下之前的简单例⼦；假设，我们现在要训练⼀个包含若⼲输⼊变量的的神经元，输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031100956.png" />   
+    </p>
+<p>相关说明：</p>
+<ul>
+<li>$a=\sigma(z)$</li>
+<li>$z=\sum_{j} w_{j} x_{j}+b$</li>
+</ul>
+<p>我们如下定义这个神经元的交叉熵代价函数：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x}[y \ln a+(1-y) \ln (1-a)]
+$$</p>
+<p>其中对数图像如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031110403.png" />   
+    </p>
+<p>从上面这个公式以及图像可以看出，交叉熵是有<code>资格</code>作为代价函数的：</p>
+<ul>
+<li>总是非负的</li>
+<li>实际输出值和目标输出值之间的差距越小，最终的交叉熵的值接越低</li>
+</ul>
+<p>交叉熵作为代价函数更好的地方在于避免了学习速度下降的问题，那么到底是怎么解决的呢？很显然，解决问题的关键点在于$\sigma^{\prime}\left(z\right)$，话不多说，先求出代价函数针对$w$和$b$的偏导数再说：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031143107.png" />   
+    </p>
+<p>可以看到，$\sigma^{\prime}\left(z\right)$对权重学习的速度直接被消掉了，只和$\sigma(z)-y$成正相关，也就是说输出和实际值的误差越大，学习的速率也就越快</p>
+<p>回过头来用交叉熵作为代价函数，看看此时的损失函数值和迭代次数的关系：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031115805.png" />   
+    
+
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031115826.png" />   
+    </p>
+<p>通过对比可以看到此时的变化曲线有以下特点：</p>
+<ul>
+<li>误差越大，学习速度越快</li>
+<li>迭代周期明显变小</li>
+</ul>
+<p>其推⼴到有很多神经元的多层神经⽹络上的交叉熵公式为：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x} \sum_{j}\left[y_{j} \ln a_{j}^{L}+\left(1-y_{j}\right) \ln \left(1-a_{j}^{L}\right)\right]
+$$</p>
+<h3 id="交叉熵的含义源哪">交叉熵的含义？源⾃哪⾥？</h3>
+<blockquote>
+<p>交叉熵可以帮我们完善二次代价函数的缺点，但交叉熵到底是怎么来的呢？</p>
+</blockquote>
+<p>在上一小节，我们有推导二次代价函数对于权重和偏置的偏导数，我们知道造成训练缓慢的原因在于$\sigma^{\prime}\left(z\right)$：</p>
+<p>$$
+\begin{aligned} \frac{\partial C}{\partial w} &amp;=(a-y) \sigma^{\prime}(z) x=a \sigma^{\prime}(z) \ \frac{\partial C}{\partial b} &amp;=(a-y) \sigma^{\prime}(z)=a \sigma^{\prime}(z) \end{aligned}
+$$</p>
+<p>如果将偏导数里面的$\sigma^{\prime}\left(z\right)$去掉，这样做会产生一个怎样的结果呢？</p>
+<p>$$
+\begin{aligned} \frac{\partial C}{\partial w_{j}} &amp;=x_{j}(a-y) \ \frac{\partial C}{\partial b} &amp;=(a-y) \end{aligned}
+$$</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191031142042.png" />   
+    </p>
+<p>对此⽅程关于a进⾏积分，得到：</p>
+<p>$$
+C=-[y \ln a+(1-y) \ln (1-a)]+\mathrm{constant}
+$$</p>
+<p>这是⼀个单独的训练样本$x$对代价函数的贡献，为了得到整个的代价函数，我们需要对所有的训练样本进⾏平均，
+得到了：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x}[y \ln a+(1-y) \ln (1-a)]+\mathrm{constant}
+$$</p>
+<h2 id="过度拟合和规范化">过度拟合和规范化</h2>
+<blockquote>
+<p>如何解决模型在训练过程中出现的过拟合问题</p>
+</blockquote>
+<h3 id="规范化">规范化</h3>
+<p>增加训练样本的数量是⼀种减轻过度拟合的⽅法，但是样本本身就是比较稀缺的资源</p>
+<p>还有其他的⼀下⽅法能够减轻过度拟合的程度吗？⼀种可⾏的⽅式就是降低⽹络的规模，然⽽，⼤的⽹络拥有⼀种⽐⼩⽹络更强的潜⼒，能使用大的网络更好</p>
+<p>我们可以使用<strong>规范化</strong>的技术来缓解过拟合问题，常见的手段是<em>权重衰减（weight decay）<em>或者</em>L2 规范化</em>，<em>L2规范化</em>的想法是增加⼀个额外的项到代价函数上，这个项叫做规范化项（统计学习方法中引入的结构风险），下⾯是规范化的交叉熵：</p>
+<p>$$
+C=-\frac{1}{n} \sum_{x j}\left[y_{j} \ln a_{j}^{L}+\left(1-y_{j}\right) \ln \left(1-a_{j}^{L}\right)\right]+\frac{\lambda}{2 n} \sum_{w} w^{2}
+$$</p>
+<p>公式前面一项是交叉熵的表达式，第二项表示的是所有权重平方的和（使用一个因子$\lambda / 2 n$进行量化调整），其中$\lambda&gt;0$称为规范化参数。</p>
+<p>直觉地看，规范化的效果是让⽹络倾向于学习⼩⼀点的权重，其他的东西都⼀样的。⼤的权重只有能够给出代价函数第⼀项⾜够的提升时才被允许。换⾔之，规范化可以当做⼀种寻找⼩的权重和最⼩化原始的代价函数之间的折中。</p>
+<p>这两部分之前相对的重要性就由λ的值来控制了： λ越⼩，就偏向于最⼩化原始代价函数，反之，倾向于⼩的权重。</p>
+<h3 id="为何规范化可以帮助减轻过度拟合">为何规范化可以帮助减轻过度拟合</h3>
+<p>我们已经看到了规范化在实践中能够减少过度拟合了，这是令⼈振奋的，不过这背后的原因还不得⽽知！通常的说法是：</p>
+<blockquote>
+<p>⼩的权重在某种程度上，意味着更低的复杂性，也就对数据给出了⼀种更简单却更强⼤解释，因此应该优先选择。</p>
+</blockquote>
+<p>接下来我们利用一个简单的回归任务对上述解释进行研究，如下一个简单的数据集，我们为其建立模型：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191101095821.png" />   
+    </p>
+<p>我们先考虑使用多项式来拟合数据：</p>
+<p>$$
+y=a_{0} x^{9}+a_{1} x^{8}+\ldots+a_{9}
+$$</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191101095932.png" />   
+    </p>
+<p>根据奥姆剃刀原则以及我们各自的经验，显然会选择下面的模型。以此类推，丛神经网络的角度，规范化得到的较小的权重应该会更好，实验也证明了这一点。</p>
+<blockquote>
+<p>我们应当时时记住这⼀点，规范化的神经⽹络常常能够⽐⾮规范化的泛化能⼒更强，这只是⼀种实验事实（empirical fact）</p>
+</blockquote>
+<h3 id="规范化的其他技术">规范化的其他技术</h3>
+<p>除了<strong>L2</strong>外还有很多规范化技术：</p>
+<ul>
+<li>L1规范化</li>
+<li>弃权（Dropout）</li>
+<li>人为增加训练样本</li>
+</ul>
+<p><strong>L1</strong>规范化：这个⽅法是在未规范化的代价函数上加上⼀个权重绝对值的和：</p>
+<p>$$
+C=C_{0}+\frac{\lambda}{n} \sum_{w}|w|
+$$</p>
+<blockquote>
+<p>L1规范化倾向于聚集⽹络的权重在 相对少量的⾼重要度连接上，⽽其他权重就会被驱使向0接近</p>
+</blockquote>
+<p><strong>弃权（Dropout）</strong>：弃权（Dropout）是⼀种相当激进的技术。和<strong>L1、L2</strong>规范化不同，弃权技术并不依赖对代价函数的修改。</p>
+<p>假设我们有⼀个训练数据<code>x</code>和对应的⽬标输出<code>y</code>。通常我们会通过在⽹络中前向传播<code>x</code>，然后进⾏反向传播来确定对梯度的贡献。使⽤弃权技术，这个过程就改了,我们会从随机（临时）地删除⽹络中的⼀半的隐藏神经元开始，同时让输⼊层和输出层的神经元保持不变</p>
+<p><strong>⼈为扩展训练数据</strong>：数据量大到一定程度可以弥补算法的差距，没啥好说的。</p>
+<h2 id="权重初始化">权重初始化</h2>
+<p>创建了神经⽹络后，我们需要进⾏权重和偏置的初始化：之前的⽅式就是根据独⽴⾼斯随机变量来选择权重和偏置，其被归⼀化为均值为0，标准差1</p>
+<blockquote>
+<p>采用均值为0标准差为的⾼斯随机分布初始化这些权重$1 / \sqrt{n_{\mathrm{in}}}$</p>
+</blockquote>
+<h2 id="如何选择神经络的超参数">如何选择神经⽹络的超参数</h2>
+<p>直到现在，我们还没有解释对诸如学习速率<code>η</code>，正则化参数<code>λ</code>等等超参数选择的⽅法，目前只是给出那些效果很好的值而已。实践中，当你使⽤神经⽹络解决问题时，寻找好的超参数其实是比较困难的一件事情。</p>
+<p>本节会给出⼀些⽤于设定超参数的启发式想法，⽬的是帮你发展出⼀套⼯作流来确保 很好地设置超参数：</p>
+<ul>
+<li>宽泛策略：
+<ul>
+<li>将复杂的问题简单化，比如先减少目标类别，简化网络结构</li>
+<li>在问题简化后可以方便地进行对超参数进行调节，快速调试是哪个超参数有问题</li>
+</ul>
+</li>
+<li>学习速率：可以观察在某些学习速率下，迭代周期和训练代价的折线图变化情况，主要观察训练代价开始下降的学习率，学习速率可以变成可变的，在不同的迭代次数用不同的学习率</li>
+<li>早停法：这是我个人用得比较多的方法，判断验证集的准确率以及训练代价，比如效果不再提升，就可以考虑停止迭代，输出对应模型</li>
+<li>正则化参数：开始时不包含正则化（λ = 0.0），确定 η 的值，使⽤确定出来的 η，我们可以使⽤验证数据来选择好的 λ。从尝试 λ = 1.0 开始，然后根据验证集上的性能按照因⼦ 10 增加或减少其值。⼀旦我已经找到⼀个好的量级，你可以改进 λ 的值。这⾥搞定后，你就可以返回再重新优化 η。</li>
+<li>自动技术：网格搜索</li>
+</ul>
+<h2 id="参考">参考</h2>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+</ul>
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/11_improving_the_way_neural_networks_learn/">https://www.howie6879.cn/post/2019/11_improving_the_way_neural_networks_learn/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/08_how_does_the_back_propagation_algorithm_work/">nndl_note: 反向传播算法如何工作</a></li>
+        
+        <li><a href="/post/2019/07_use_neural_network_recognize_handwriting/">nndl_note: 识别手写字</a></li>
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+                <li><a href='/tags/nndl-book'>nndl-book</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

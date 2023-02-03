@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>Liuli在树莓派上的部署教程 | 老胡的储物柜</title>
+  <meta property="og:title" content="Liuli在树莓派上的部署教程 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2022-05-05T20:35:47&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2022-05-05T20:35:47&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="[wechat rss liuli pi]"
+  />
+  <meta
+    name="description"
+    content="构建一个多源（公众号、RSS）、干净、个性化的阅读环境, 部署在树莓派（Pi）"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#安装-mongodb-重要">安装 MongoDB [重要]</a></li>
+    <li><a href="#docker-部署">Docker 部署</a>
+      <ul>
+        <li><a href="#安装-docker">安装 Docker</a></li>
+        <li><a href="#docker-部署-1">Docker 部署</a></li>
+        <li><a href="#源码部署">源码部署</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Liuli在树莓派上的部署教程</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年5月5日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E5%B7%A5%E5%85%B7'>工具</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE'>项目</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p><a href="https://github.com/liuli-io/liuli">Liuli</a>的目标是帮助你一站式构建多源、干净、个性化的阅读环境，目前还在缓慢开发迭代中，欢迎更多的朋友参与进来，其当前可应用的场景有：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s/rxoq97YodwtAdTqKntuwMA">基于Liuli构建纯净的RSS公众号信息流</a></li>
+<li><a href="https://mp.weixin.qq.com/s/RSVZFxiq8G7a51te4q93gQ">基于Liuli追更&amp;阅读小说</a></li>
+</ul>
+<p>建议使用前看一下上面的文章，有个大概印象，接下来将根据以下方式来介绍如何在树莓派上面安装<code>Liuli</code>:</p>
+<ul>
+<li>Docker部署</li>
+<li>源码部署</li>
+</ul>
+<h2 id="安装-mongodb-重要">安装 MongoDB [重要]</h2>
+<p>因为<code>Liuli</code>依赖<code>MongoDB</code>作为数据库，而在树莓派下<code>Docker</code>启用<code>MongoDB</code>有点混乱，所以这块咱就直接在系统上安装，再者因为有的朋友可能配置不是很高，都带不动<code>Docker</code>，到时直接源码部署的话更是要在系统上安装。</p>
+<p>安装<code>MongoDB</code>：</p>
+<pre tabindex="0"><code># 升级更新
+sudo apt update
+sudo apt upgrade
+
+# 在`/etc/apt/sources.list`添加软件源
+wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+echo &quot;deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse&quot; | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+
+# 安装MongoDB
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+# 启动
+sudo systemctl daemon-reload
+sudo systemctl enable mongod
+sudo systemctl start mongod
+# 查看状态
+sudo systemctl status mongod
+
+# 进入MongoDB
+mongo
+</code></pre><p>创建用户：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">use admin
+db.createUser<span style="color:#000;font-weight:bold">(</span>
+    <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#d14">&#34;user&#34;</span>: <span style="color:#d14">&#34;liuli&#34;</span>,
+        <span style="color:#d14">&#34;pwd&#34;</span>: <span style="color:#d14">&#34;liuli&#34;</span>,
+        <span style="color:#d14">&#34;roles&#34;</span>: <span style="color:#000;font-weight:bold">[</span>
+            <span style="color:#d14">&#34;userAdminAnyDatabase&#34;</span>,
+            <span style="color:#d14">&#34;dbAdminAnyDatabase&#34;</span>,
+            <span style="color:#d14">&#34;readWriteAnyDatabase&#34;</span>
+        <span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">)</span>
+<span style="color:#0086b3">exit</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>配置操作<code>sudo vim /etc/mongod.conf</code>，改动如下:</p>
+<pre tabindex="0"><code># 修改 bindIp 为 0.0.0.0，外部可访问
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+# 增加登录验证
+security:
+   authorization: enabled
+</code></pre><p>重启生效：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sudo systemctl restart mongod
+</code></pre></td></tr></table>
+</div>
+</div><p>此时登录：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 注意自己的 ip</span>
+sudo mongo --host <span style="color:#d14">&#34;192.168.0.2&#34;</span> -u <span style="color:#d14">&#34;liuli&#34;</span> -p <span style="color:#d14">&#34;liuli&#34;</span>
+
+<span style="color:#998;font-style:italic"># 查看数据库</span>
+&gt; db.adminCommand<span style="color:#000;font-weight:bold">({</span>listDatabases: 1<span style="color:#000;font-weight:bold">})</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="docker-部署">Docker 部署</h2>
+<p>总的来说，<code>Docker</code>部署还是比较方便的，特别针对不熟悉<code>Python</code>的朋友，所以把这个方式放在第一位。</p>
+<h3 id="安装-docker">安装 Docker</h3>
+<p>首先我们来安装<code>Docker</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sudo apt-get install apt-transport-https ca-certificates software-properties-common -y
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+<span style="color:#998;font-style:italic"># 如果网速慢，可以尝试：sudo sh get-docker.sh --mirror Aliyun</span>
+sudo sh get-docker.sh
+
+<span style="color:#998;font-style:italic"># 添加密钥</span>
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/raspbian/gpg | sudo apt-key add -
+
+<span style="color:#998;font-style:italic"># 在`/etc/apt/sources.list`添加软件源</span>
+sudo add-apt-repository <span style="color:#d14">\
+</span><span style="color:#d14"></span>    <span style="color:#d14">&#34;deb [arch=armhf] https://mirrors.aliyun.com/docker-ce/linux/raspbian \
+</span><span style="color:#d14">    </span><span style="color:#000;font-weight:bold">$(</span>lsb_release -cs<span style="color:#000;font-weight:bold">)</span><span style="color:#d14"> \
+</span><span style="color:#d14">    stable&#34;</span>
+
+sudo groupadd docker
+sudo usermod -aG docker <span style="color:#008080">$USER</span>
+
+<span style="color:#998;font-style:italic"># 更新</span>
+sudo apt-get update
+sudo apt-get upgrade
+
+<span style="color:#998;font-style:italic"># 刷新</span>
+newgrp docker
+
+<span style="color:#998;font-style:italic"># 启动</span>
+sudo systemctl <span style="color:#0086b3">enable</span> docker
+sudo systemctl start docker
+
+<span style="color:#998;font-style:italic"># 测试</span>
+sudo docker run hello-world
+</code></pre></td></tr></table>
+</div>
+</div><p>可以考虑引入<code>portainer</code>来管理：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sudo mkdir -p /data/docker_data/portainer_data
+sudo docker run -d -p 8001:8000 -p 9001:9000 --name<span style="color:#000;font-weight:bold">=</span>portainer --restart<span style="color:#000;font-weight:bold">=</span>always -v /var/run/docker.sock:/var/run/docker.sock -v /data/docker_data/portainer_data:/data portainer/portainer-ce
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="docker-部署-1">Docker 部署</h3>
+<p>接下来就是正式部署了：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 下载 api 和 schedule 镜像</span>
+sudo docker pull liuliio/api:v0.1.3
+sudo docker pull liuliio/schedule:v0.2.4
+
+<span style="color:#998;font-style:italic"># 建立配置目录</span>
+sudo mkdir -p liuli/liuli_config
+sudo touch liuli/pro.env
+sudo touch liuli/liuli_config/wechat.json
+</code></pre></td></tr></table>
+</div>
+</div><p>先来看看<code>pro.env</code>配置：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-env" data-lang="env"><span style="color:#008080">PYTHONPATH</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">${</span><span style="color:#008080">PYTHONPATH</span><span style="color:#d14">}</span>:<span style="color:#d14">${</span><span style="color:#008080">PWD</span><span style="color:#d14">}</span>
+<span style="color:#008080">LL_M_USER</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;liuli&#34;</span>
+<span style="color:#008080">LL_M_PASS</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;liuli&#34;</span>
+<span style="color:#998;font-style:italic"># 你的外部可访问ip</span>
+<span style="color:#008080">LL_M_HOST</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;192.168.0.2&#34;</span>
+<span style="color:#008080">LL_M_PORT</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;27017&#34;</span>
+<span style="color:#008080">LL_M_DB</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;admin&#34;</span>
+<span style="color:#008080">LL_M_OP_DB</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;liuli&#34;</span>
+<span style="color:#008080">LL_FLASK_DEBUG</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+<span style="color:#008080">LL_HOST</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>
+<span style="color:#008080">LL_HTTP_PORT</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">8765</span>
+<span style="color:#008080">LL_DOMAIN</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>
+<span style="color:#008080">LL_WORKERS</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>
+<span style="color:#998;font-style:italic"># 上面这么多配置不用改，下面的才需要各自配置</span>
+<span style="color:#998;font-style:italic"># 是否发送通知给钉钉</span>
+<span style="color:#008080">LL_D_TOKEN</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>
+<span style="color:#998;font-style:italic"># 是否发送通知给微信</span>
+<span style="color:#008080">LL_WECOM_ID</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>
+<span style="color:#008080">LL_WECOM_AGENT_ID</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;-1&#34;</span>
+<span style="color:#008080">LL_WECOM_SECRET</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>
+<span style="color:#998;font-style:italic"># 在你的github建立仓库 liuli_backup 即可</span>
+<span style="color:#998;font-style:italic"># 也可以不填，完全填空，也就是内容不备份到github</span>
+<span style="color:#008080">LL_GITHUB_TOKEN</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>
+<span style="color:#008080">LL_GITHUB_REPO</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;{your_github_name}/liuli_backup&#34;</span>
+<span style="color:#008080">LL_GITHUB_DOMAIN</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://{your_github_name}.github.io/liuli_backup/&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>请详细查看以下文档进行具体参数配置，按照流程操作，很简单：</p>
+<ul>
+<li><a href="https://github.com/liuli-io/liuli/blob/main/docs/03.%E5%88%86%E5%8F%91%E5%99%A8%E9%85%8D%E7%BD%AE.md">分发器配置</a>：钉钉微信配置获取教程</li>
+<li><a href="https://github.com/liuli-io/liuli/blob/main/docs/04.%E5%A4%87%E4%BB%BD%E5%99%A8%E9%85%8D%E7%BD%AE.md">备份器配置</a>：Github备份器配置获取教程</li>
+<li><a href="https://github.com/liuli-io/liuli/blob/main/docs/02.%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F.md">参数说明</a>：各个参数详细介绍</li>
+</ul>
+<p>配置好后，请将以上内容写到<code>sudo vim liuli/pro.env</code>文件。</p>
+<p>接下来直接配置公众号相关，直接使用<code>Liuli</code>官方的配置<code>sudo vim liuli/liuli_config/wechat.json</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000080">&#34;name&#34;</span>: <span style="color:#d14">&#34;wechat&#34;</span>,
+    <span style="color:#000080">&#34;author&#34;</span>: <span style="color:#d14">&#34;liuli_team&#34;</span>,
+    <span style="color:#000080">&#34;doc_source&#34;</span>: <span style="color:#d14">&#34;liuli_wechat&#34;</span>,
+    <span style="color:#000080">&#34;collector&#34;</span>: {
+        <span style="color:#000080">&#34;wechat&#34;</span>: {
+            <span style="color:#000080">&#34;wechat_list&#34;</span>: [
+                <span style="color:#d14">&#34;小众消息&#34;</span>
+            ],
+            <span style="color:#000080">&#34;delta_time&#34;</span>: <span style="color:#099">5</span>,
+            <span style="color:#000080">&#34;spider_type&#34;</span>: <span style="color:#d14">&#34;sg_ruia&#34;</span>,
+            <span style="color:#000080">&#34;spider_type_des&#34;</span>: <span style="color:#d14">&#34;当镜像是schedule:playwright_*时，spider_type可填写sg_playwright&#34;</span>
+        }
+    },
+    <span style="color:#000080">&#34;processor&#34;</span>: {
+        <span style="color:#000080">&#34;before_collect&#34;</span>: [],
+        <span style="color:#000080">&#34;after_collect&#34;</span>: [{
+            <span style="color:#000080">&#34;func&#34;</span>: <span style="color:#d14">&#34;ad_marker&#34;</span>,
+            <span style="color:#000080">&#34;cos_value&#34;</span>: <span style="color:#099">0.6</span>
+        }, {
+            <span style="color:#000080">&#34;func&#34;</span>: <span style="color:#d14">&#34;to_rss&#34;</span>,
+            <span style="color:#000080">&#34;doc_source_list&#34;</span>: [<span style="color:#d14">&#34;liuli_wechat&#34;</span>],
+            <span style="color:#000080">&#34;link_source&#34;</span>: <span style="color:#d14">&#34;github&#34;</span>
+
+        }]
+    },
+    <span style="color:#000080">&#34;sender&#34;</span>: {
+        <span style="color:#000080">&#34;sender_list&#34;</span>: [<span style="color:#d14">&#34;wecom&#34;</span>],
+        <span style="color:#000080">&#34;query_days&#34;</span>: <span style="color:#099">7</span>,
+        <span style="color:#000080">&#34;delta_time&#34;</span>: <span style="color:#099">3</span>
+    },
+    <span style="color:#000080">&#34;backup&#34;</span>: {
+        <span style="color:#000080">&#34;backup_list&#34;</span>: [<span style="color:#d14">&#34;mongodb&#34;</span>],
+        <span style="color:#000080">&#34;query_days&#34;</span>: <span style="color:#099">7</span>,
+        <span style="color:#000080">&#34;delta_time&#34;</span>: <span style="color:#099">3</span>,
+        <span style="color:#000080">&#34;init_config&#34;</span>: {},
+        <span style="color:#000080">&#34;after_get_content&#34;</span>: [{
+            <span style="color:#000080">&#34;func&#34;</span>: <span style="color:#d14">&#34;str_replace&#34;</span>,
+            <span style="color:#000080">&#34;before_str&#34;</span>: <span style="color:#d14">&#34;data-src=\&#34;&#34;</span>,
+            <span style="color:#000080">&#34;after_str&#34;</span>: <span style="color:#d14">&#34;src=\&#34;https://images.weserv.nl/?url=&#34;</span>
+        }]
+    },
+    <span style="color:#000080">&#34;schedule&#34;</span>: {
+        <span style="color:#000080">&#34;period_list&#34;</span>: [
+            <span style="color:#d14">&#34;00:10&#34;</span>,
+            <span style="color:#d14">&#34;12:10&#34;</span>,
+            <span style="color:#d14">&#34;21:10&#34;</span>
+        ]
+    }
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>此时文件夹目录如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">(</span>base<span style="color:#000;font-weight:bold">)</span> ➜  <span style="color:#0086b3">cd</span> liuli
+<span style="color:#000;font-weight:bold">(</span>base<span style="color:#000;font-weight:bold">)</span> ➜  liuli tree -L <span style="color:#099">2</span>
+.
+├── liuli_config
+│   └── wechat.json
+└── pro.env
+</code></pre></td></tr></table>
+</div>
+</div><p>配置完毕，接下来就可以启动了：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 启动 API</span>
+sudo docker run -d -it --restart<span style="color:#000;font-weight:bold">=</span>always -p 8765:8765 -v <span style="color:#008080">$PWD</span>/pro.env:/data/code/pro.env --name liuli_api liuliio/api:v0.1.3
+<span style="color:#998;font-style:italic"># 启动 schedule</span>
+sudo docker run -d -it --restart<span style="color:#000;font-weight:bold">=</span>always -v <span style="color:#008080">$PWD</span>/pro.env:/data/code/pro.env -v <span style="color:#008080">$PWD</span>/liuli_config:/data/code/liuli_config --name liuli_schedule liuliio/schedule:v0.2.4
+</code></pre></td></tr></table>
+</div>
+</div><p>成功日志如下：</p>
+<p>
+        <img class="mx-auto" alt="pi_liuli_logs" src="https://images-1252557999.file.myqcloud.com/uPic/pi_liuli_logs-20220520221540258.jpg" />   
+    </p>
+<p>此时访问以下接口可进行验证：</p>
+<ul>
+<li>获取公众号rss地址: http://0.0.0.0:8765/rss/liuli_wechat/小众消息/</li>
+<li>查看目标公众号备份的文章：http://0.0.0.0:8765/backup/liuli_wechat/公众号名称/文章名称</li>
+</ul>
+<p>至此，你可以订阅和查看目标公众号的文章了。</p>
+<blockquote>
+<p>注意⚠️：IP根据自身部署服务的IP填写</p>
+</blockquote>
+<p>公众号rss地址效果：</p>
+<p>
+        <img class="mx-auto" alt="pi_wechat" src="https://images-1252557999.file.myqcloud.com/uPic/202204300055506.png" />   
+    </p>
+<p>目标公众号备份文章：</p>
+<p>
+        <img class="mx-auto" alt="pi-wechat-html" src="https://images-1252557999.file.myqcloud.com/uPic/202204300059906.png" />   
+    </p>
+<p>如果需要微信消息提示，请移步：<a href="https://github.com/liuli-io/liuli/blob/main/docs/03.%E5%88%86%E5%8F%91%E5%99%A8%E9%85%8D%E7%BD%AE.md">分发器配置｜钉钉微信配置教程</a></p>
+<p><!-- raw HTML omitted --></p>
+<h3 id="源码部署">源码部署</h3>
+<p>如果你是直接看的源码部署，请先阅读<code>Docker部署</code>部分，拷贝好以下文件：</p>
+<ul>
+<li>wechat.json</li>
+<li>pro.env</li>
+</ul>
+<p>首先，下载源码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone https://github.com/liuli-io/liuli.git
+
+<span style="color:#998;font-style:italic"># 删除掉 Pipfile 里面以下行</span>
+<span style="color:#998;font-style:italic"># black = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># isort = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># pylint = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># pytest = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># pandas = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># numpy = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># pypinyin = &#34;*&#34;</span>
+<span style="color:#998;font-style:italic"># playwright = &#34;*&#34;</span>
+
+<span style="color:#998;font-style:italic"># 保证有 python3.7+ 环境</span>
+pip install pipenv
+pipenv install --python <span style="color:#000;font-weight:bold">{</span>your_python3.7_path<span style="color:#000;font-weight:bold">}</span> --skip-lock --dev
+
+<span style="color:#998;font-style:italic"># 配置</span>
+<span style="color:#998;font-style:italic"># 将上面的 pro.env 内容拷贝</span>
+vim pro.env
+<span style="color:#998;font-style:italic"># 删除 liuli_config 文件夹所有内容</span>
+<span style="color:#998;font-style:italic"># 将 wechat.json 复制到 liuli_config/wechat.json</span>
+
+<span style="color:#998;font-style:italic"># 启动 API</span>
+bash ./start.sh api pro
+<span style="color:#998;font-style:italic"># 启动 schedule</span>
+bash ./start.sh schedule pro
+</code></pre></td></tr></table>
+</div>
+</div><p>查看日志：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">((</span>liuli<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span>base<span style="color:#000;font-weight:bold">)</span> ➜  liuli git:<span style="color:#000;font-weight:bold">(</span>main<span style="color:#000;font-weight:bold">)</span> ✗ bash ./start.sh api pro
+Start api<span style="color:#000;font-weight:bold">(</span>pro<span style="color:#000;font-weight:bold">)</span> serve: <span style="color:#008080">PIPENV_DOTENV_LOCATION</span><span style="color:#000;font-weight:bold">=</span>./pro.env pipenv run gunicorn -c src/config/gunicorn.py src.api.http_app:app
+Loading .env environment variables...
+<span style="color:#000;font-weight:bold">[</span>2022-04-28 15:00:50 +0800<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>29074<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>INFO<span style="color:#000;font-weight:bold">]</span> Starting gunicorn 20.1.0
+<span style="color:#000;font-weight:bold">[</span>2022-04-28 15:00:50 +0800<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>29074<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>INFO<span style="color:#000;font-weight:bold">]</span> Listening at: http://0.0.0.0:8765 <span style="color:#000;font-weight:bold">(</span>29074<span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">[</span>2022-04-28 15:00:50 +0800<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>29074<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>INFO<span style="color:#000;font-weight:bold">]</span> Using worker: gevent
+<span style="color:#000;font-weight:bold">[</span>2022-04-28 15:00:50 +0800<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>29079<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">[</span>INFO<span style="color:#000;font-weight:bold">]</span> Booting worker with pid: <span style="color:#099">29079</span>
+<span style="color:#000;font-weight:bold">[</span>2022:04:28 15:00:54<span style="color:#000;font-weight:bold">]</span> INFO  Liuli API server<span style="color:#000;font-weight:bold">(</span>v0.1.3<span style="color:#000;font-weight:bold">)</span> started successfully :<span style="color:#000;font-weight:bold">)</span>
+...
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="说明">说明</h2>
+<p>上述过程参考资料如下：</p>
+<ul>
+<li><a href="https://www.mongodb.com/developer/how-to/mongodb-on-raspberry-pi/">Install &amp; Configure MongoDB on the Raspberry Pi</a></li>
+<li><a href="https://www.anegron.site/2020/06/18/how-to-install-conda-and-docker-on-your-raspberry-pi/">How to install Conda and Docker on your Raspberry Pi</a></li>
+<li><a href="https://yeasy.gitbook.io/docker_practice/install/raspberry-pi">Docker 入门到实践-raspberry-pi</a></li>
+<li><a href="https://docs.docker.com/engine/install/">Docker官方文档 Install Docker Engine</a></li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/">https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2022/04_build_novel_info_flow_based_on_liuli/">基于Liuli追更&amp;阅读小说</a></li>
+        
+        <li><a href="/post/2022/02_build_a_clean_wechat_rss_based_liuli/">基于Liuli构建纯净的RSS公众号信息流</a></li>
+        
+        <li><a href="/post/2021/12_build_a_clean_env_for_reading/">打造一个干净且个性化的公众号阅读环境</a></li>
+        
+        <li><a href="/post/2021/11_2c_quick_start/">Liuli 使用教程</a></li>
+        
+        <li><a href="/post/2022/05_pic-url-solution/">我的图床解决方案，超详细！</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%95%88%E7%8E%87'>效率</a></li>
+                
+                <li><a href='/tags/liuli'>Liuli</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

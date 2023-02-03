@@ -1,0 +1,1618 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>MySQL基本操作命令汇总 | 老胡的储物柜</title>
+  <meta property="og:title" content="MySQL基本操作命令汇总 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2016-03-27T20:21:49&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2016-03-27T20:21:49&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="MySQL基本操作命令汇总"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2016/03_mysql-tutorial/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一基本操作">一、基本操作</a>
+      <ul>
+        <li><a href="#1-1关于数据库">1-1.关于数据库</a></li>
+        <li><a href="#1-2关于数据表">1-2.关于数据表</a></li>
+        <li><a href="#1-3表的约束">1-3表的约束</a></li>
+        <li><a href="#1-4索引">1-4索引</a></li>
+        <li><a href="#1-5添加数据">1-5.添加数据</a></li>
+        <li><a href="#1-6更新数据">1-6.更新数据</a></li>
+        <li><a href="#1-7删除数据">1-7.删除数据</a></li>
+      </ul>
+    </li>
+    <li><a href="#二-单表查询和多表操作">二 、单表查询和多表操作</a>
+      <ul>
+        <li><a href="#2-1-1单表查询">2-1-1.单表查询</a></li>
+        <li><a href="#2-1-2高级查询">2-1-2.高级查询</a></li>
+        <li><a href="#2-2多表操作">2-2.多表操作</a></li>
+      </ul>
+    </li>
+    <li><a href="#三-事务与存储过程">三 、事务与存储过程</a>
+      <ul>
+        <li><a href="#3-1-事务管理">3-1 事务管理</a></li>
+        <li><a href="#3-2-存储过程">3-2 存储过程</a></li>
+        <li><a href="#3-3-调用存储过程">3-3 调用存储过程</a></li>
+      </ul>
+    </li>
+    <li><a href="#四视图">四、视图</a>
+      <ul>
+        <li><a href="#4-1视图的基本操作">4-1、视图的基本操作</a></li>
+      </ul>
+    </li>
+    <li><a href="#五总结">五、总结</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">MySQL基本操作命令汇总</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2016年3月27日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="一基本操作">一、基本操作</h2>
+<blockquote>
+<p>对数据库以及表的一些基本操作</p>
+</blockquote>
+<hr>
+<h3 id="1-1关于数据库">1-1.关于数据库</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建数据库</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>h_test;<span style="color:#bbb">        
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看数据库</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">databases</span>;<span style="color:#bbb">  
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看数据库信息</span><span style="color:#bbb">    
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>h_test;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改数据库的编码，可使用上一条语句查看是否修改成功</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>h_test<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">default</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">character</span><span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>gbk<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">collate</span><span style="color:#bbb"> </span>gbk_bin;<span style="color:#bbb">      
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除数据库</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>h_test;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">综上，可以直接创建数据库且设置编码方式</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">DATABASE</span><span style="color:#bbb"> </span>h_test<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">DEFAULT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">CHARACTER</span><span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">SET</span><span style="color:#bbb"> </span>utf8<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">COLLATE</span><span style="color:#bbb"> </span>utf8_general_ci;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<!-- raw HTML omitted -->
+<h3 id="1-2关于数据表">1-2.关于数据表</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">首先选定操作的数据库</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">use</span><span style="color:#bbb"> </span>h_test;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建表</span>student<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">11</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">11</span>)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看数据表</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">tables</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看数据表信息，后面加上参数</span><span style="color:#000;font-weight:bold">/</span>G可使结果更加美观<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看表的的字段信息</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">desc</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改表名</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">rename</span><span style="color:#bbb"> </span>[<span style="color:#000;font-weight:bold">to</span>]<span style="color:#bbb"> </span>h_student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改字段名</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">change</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span>stu_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改字段的数据类型</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span>modify<span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">20</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">添加字段</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span>grade<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除字段</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span>grade;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改字段的位置</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span>modify<span style="color:#bbb"> </span>stu_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>)<span style="color:#bbb"> </span>first;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student<span style="color:#bbb"> </span>modify<span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">11</span>)<span style="color:#bbb"> </span>after<span style="color:#bbb"> </span>age;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除数据表</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>h_student;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1-3表的约束">1-3表的约束</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">约束条件</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">PRIMARY KEY</td>
+<td style="text-align:center">主键约束，用于唯一标识对应的记录</td>
+</tr>
+<tr>
+<td style="text-align:left">FOREIGN KEY</td>
+<td style="text-align:center">外键约束</td>
+</tr>
+<tr>
+<td style="text-align:left">NOT NULL</td>
+<td style="text-align:center">非空约束</td>
+</tr>
+<tr>
+<td style="text-align:left">UNIQUE</td>
+<td style="text-align:center">唯一性约束</td>
+</tr>
+<tr>
+<td style="text-align:left">DEFAULT</td>
+<td style="text-align:center">默认值约束，用于设置字段的默认值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-4索引">1-4索引</h3>
+<blockquote>
+<p>作用：提高表中数据的查询速度
+1.普通索引
+2.唯一性索引
+3.全文索引
+4.单列索引
+5.多列索引
+6.空间索引</p>
+</blockquote>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">一</span>.<span style="color:#a61717;background-color:#e3d2d2">创建表的时候创建索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">表名</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#a61717;background-color:#e3d2d2">字段名</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">数据类型</span>[<span style="color:#a61717;background-color:#e3d2d2">完整性约束条件</span>],<span style="color:#bbb">
+</span><span style="color:#bbb">        </span>...<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#a61717;background-color:#e3d2d2">字段名</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">数据类型</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">        </span>[<span style="color:#000;font-weight:bold">UNIQUE</span><span style="color:#000;font-weight:bold">|</span><span style="color:#000;font-weight:bold">FULLTEXT</span><span style="color:#000;font-weight:bold">|</span><span style="color:#000;font-weight:bold">SPATIAL</span>]<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#000;font-weight:bold">|</span><span style="color:#000;font-weight:bold">KEY</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">创建普通索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test1</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span>(id)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">可以插入一条数据</span>,<span style="color:#a61717;background-color:#e3d2d2">查看索引是否被使用</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">explain</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>test1<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">\</span>G;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span>.<span style="color:#a61717;background-color:#e3d2d2">创建唯一性索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test2</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">UNIQUE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">unique_id</span>(id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">asc</span>)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">3</span>.<span style="color:#a61717;background-color:#e3d2d2">创建全文索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test3</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">FULLTEXT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">fulltext_name</span>(name)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>MyISAM;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span>.<span style="color:#a61717;background-color:#e3d2d2">创建单列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test4</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">single_name</span>(<span style="color:#900;font-weight:bold">name</span>(<span style="color:#099">20</span>))<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">5</span>.<span style="color:#a61717;background-color:#e3d2d2">创建多列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test5</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">multi</span>(id,<span style="color:#900;font-weight:bold">name</span>(<span style="color:#099">20</span>))<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">6</span>.<span style="color:#a61717;background-color:#e3d2d2">创建空间索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">test6</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">INT</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>space<span style="color:#bbb"> </span>GEOMETRY<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">SPATIAL</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">INDEX</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">sp</span>(space)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>MyISAM;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">-------------------------------------------------</span><span style="color:#998;font-style:italic">--
+</span><span style="color:#998;font-style:italic">//二.使用create index语句在已经存在的表上创建索引
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">首先新建一个表</span>,<span style="color:#a61717;background-color:#e3d2d2">这个表没有索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>intro<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">40</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>g<span style="color:#bbb"> </span>GEOMETRY<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>MyISAM;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">创建普通索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>index_id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span>.<span style="color:#a61717;background-color:#e3d2d2">创建唯一性索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">unique</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>uniqueidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">3</span>.<span style="color:#a61717;background-color:#e3d2d2">创建单列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>singleidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(age);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span>.<span style="color:#a61717;background-color:#e3d2d2">创建多列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>mulitidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#900;font-weight:bold">name</span>(<span style="color:#099">20</span>),<span style="color:#900;font-weight:bold">intro</span>(<span style="color:#099">40</span>));<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">5</span>.<span style="color:#a61717;background-color:#e3d2d2">创建全文索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">fulltext</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>fulltextidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(name);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">6</span>.<span style="color:#a61717;background-color:#e3d2d2">创建空间索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">spatial</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>spatidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(g);<span style="color:#bbb"> 
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">下图是第二种方法创建索引演示后的所有索引</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-8d7b377d65f2ef07.png" />   
+    </p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">三</span>.<span style="color:#a61717;background-color:#e3d2d2">使用</span>alter<span style="color:#bbb"> </span>table语句在已经存在的表上创建索引<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除</span>student表<span style="color:#a61717;background-color:#e3d2d2">，重新创建</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>age<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>intro<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">40</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>space<span style="color:#bbb"> </span>GEOMETRY<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>MyISAM;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">创建普通索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">index_id</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span>.<span style="color:#a61717;background-color:#e3d2d2">创建唯一性索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">unique</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">uniqueidx</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">3</span>.<span style="color:#a61717;background-color:#e3d2d2">创建单列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">singleidx</span><span style="color:#bbb"> </span>(age);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span>.<span style="color:#a61717;background-color:#e3d2d2">创建多列索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">multidx</span>(<span style="color:#900;font-weight:bold">name</span>(<span style="color:#099">20</span>),<span style="color:#900;font-weight:bold">intro</span>(<span style="color:#099">40</span>));<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">5</span>.<span style="color:#a61717;background-color:#e3d2d2">创建全文索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">fulltext</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">fulltextidx</span>(name);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span><span style="color:#000;font-weight:bold">-</span><span style="color:#099">6</span>.<span style="color:#a61717;background-color:#e3d2d2">创建空间索引</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">spatial</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">spatidx</span>(space);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">下图演示结果</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-259ee7d12bc238d6.png" />   
+    </p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除索引，有下面两种方式</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">使用</span>alter<span style="color:#bbb"> </span>table删除索引fulltextidx<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>fulltextidx;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span>.<span style="color:#a61717;background-color:#e3d2d2">使用</span>drop<span style="color:#bbb"> </span>index删除索引spatidx<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">index</span><span style="color:#bbb"> </span>spatidx<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">下图可看到删除成功</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-e752d5df3325619b.png" />   
+    </p>
+<h3 id="1-5添加数据">1-5.添加数据</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">重新建立表</span>student<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>grade<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">插入一条数据，也可以少某个字段的同时也少对应的数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(id,name,grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#099">1</span>,<span style="color:#d14">&#39;howie&#39;</span>,<span style="color:#099">70</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">也可以不指定字段名，但要注意顺序</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#099">2</span>,<span style="color:#d14">&#39;howie&#39;</span>,<span style="color:#099">80</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">也可以这样添加数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">3</span>,name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;howie&#34;</span>,grade<span style="color:#000;font-weight:bold">=</span><span style="color:#099">90</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">同时添加多条数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#099">4</span>,<span style="color:#d14">&#39;howie&#39;</span>,<span style="color:#099">80</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#099">5</span>,<span style="color:#d14">&#39;howie&#39;</span>,<span style="color:#099">80</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#099">6</span>,<span style="color:#d14">&#39;howie&#39;</span>,<span style="color:#099">80</span>);<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1-6更新数据">1-6.更新数据</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">更新</span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span><span style="color:#a61717;background-color:#e3d2d2">的数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;howie1&#34;</span>,grade<span style="color:#000;font-weight:bold">=</span><span style="color:#099">60</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">批量更新</span>,<span style="color:#a61717;background-color:#e3d2d2">如果没有</span>where子句<span style="color:#a61717;background-color:#e3d2d2">，会更新表中所有对应数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>grade<span style="color:#000;font-weight:bold">=</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#099">4</span>;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1-7删除数据">1-7.删除数据</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除</span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">6</span><span style="color:#a61717;background-color:#e3d2d2">的数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">delete</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">6</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">批量删除数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">delete</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">3</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除所有数据</span>,<span style="color:#900;font-weight:bold">DDL</span>(<span style="color:#a61717;background-color:#e3d2d2">数据定义语言</span>)<span style="color:#a61717;background-color:#e3d2d2">语句</span><span style="color:#bbb"> </span>truncate<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student也可以删除表内所有数据<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">delete</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="二-单表查询和多表操作">二 、单表查询和多表操作</h2>
+<blockquote>
+<p>单表查询：如何从数据库中获取你需要的数据
+多表查询：实际开发中，需要进行2张表以上进行操作</p>
+</blockquote>
+<h3 id="2-1-1单表查询">2-1-1.单表查询</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">建立表</span>student<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">auto_increment</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>grade<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>(id)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">插入数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span><span style="color:#bbb"> </span>(name,grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie1&#34;</span>,<span style="color:#099">40</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie1&#34;</span>,<span style="color:#099">50</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie2&#34;</span>,<span style="color:#099">50</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie3&#34;</span>,<span style="color:#099">60</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie4&#34;</span>,<span style="color:#099">70</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie5&#34;</span>,<span style="color:#099">80</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#34;howie6&#34;</span>,<span style="color:#008080">null</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查询全部</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查询某个字段</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">条件查询</span>,<span style="color:#a61717;background-color:#e3d2d2">查询</span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span><span style="color:#a61717;background-color:#e3d2d2">学生的信息</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>in关键字查询,<span style="color:#a61717;background-color:#e3d2d2">也可以使用</span>not<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">in</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">IN</span>(<span style="color:#099">1</span>,<span style="color:#099">2</span>,<span style="color:#099">3</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#000;font-weight:bold">between</span><span style="color:#bbb"> </span>and关键字查询<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">between</span><span style="color:#bbb"> </span><span style="color:#099">2</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">and</span><span style="color:#bbb"> </span><span style="color:#099">5</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">空值</span>(<span style="color:#008080">NULL</span>)<span style="color:#a61717;background-color:#e3d2d2">查询，使用</span>IS<span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#a61717;background-color:#e3d2d2">来判断</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>grade<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">is</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>distinct关键字查询<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">distinct</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>like关键字查询,<span style="color:#a61717;background-color:#e3d2d2">查询以</span>h开头<span style="color:#a61717;background-color:#e3d2d2">，</span>e结尾的数据<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">like</span><span style="color:#bbb"> </span><span style="color:#d14">&#34;h%e&#34;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>and关键字多条件查询,or关键字的使用也是类似<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">5</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">and</span><span style="color:#bbb"> </span>grade<span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">60</span>;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-1-2高级查询">2-1-2.高级查询</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">聚合函数</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#900;font-weight:bold">count</span>()<span style="color:#a61717;background-color:#e3d2d2">函数</span>,<span style="color:#900;font-weight:bold">sum</span>()<span style="color:#a61717;background-color:#e3d2d2">函数</span>,<span style="color:#900;font-weight:bold">avg</span>()<span style="color:#a61717;background-color:#e3d2d2">函数</span>,<span style="color:#900;font-weight:bold">max</span>()<span style="color:#a61717;background-color:#e3d2d2">函数</span>,<span style="color:#900;font-weight:bold">min</span>()<span style="color:#a61717;background-color:#e3d2d2">函数</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">count</span>(<span style="color:#000;font-weight:bold">*</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">sum</span>(grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">avg</span>(grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">max</span>(grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">min</span>(grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">对查询结果进行排序</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">order</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">by</span><span style="color:#bbb"> </span>grade;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">分组查询</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">单独使用</span>group<span style="color:#bbb"> </span>by分组<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">group</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">by</span><span style="color:#bbb"> </span>grade;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">2</span>.<span style="color:#a61717;background-color:#e3d2d2">和聚合函数一起使用</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">count</span>(<span style="color:#000;font-weight:bold">*</span>),grade<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">group</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">by</span><span style="color:#bbb"> </span>grade;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">3</span>.<span style="color:#a61717;background-color:#e3d2d2">和</span>having关键字一起使用<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">sum</span>(grade),name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">group</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">by</span><span style="color:#bbb"> </span>grade<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">having</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">sum</span>(grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">&gt;</span><span style="color:#099">100</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">使用</span>limit限制查询结果的数量<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">limit</span><span style="color:#bbb"> </span><span style="color:#099">5</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">limit</span><span style="color:#bbb"> </span><span style="color:#099">2</span>,<span style="color:#099">2</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">order</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">by</span><span style="color:#bbb"> </span>grade<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">desc</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">limit</span><span style="color:#bbb"> </span><span style="color:#099">2</span>,<span style="color:#099">2</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">函数</span>,mysql提供了许多函数<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">concat</span>(id,<span style="color:#d14">&#39;:&#39;</span>,name,<span style="color:#d14">&#39;:&#39;</span>,grade)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">为表取别名</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span>stu<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>stu.name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;howie&#34;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">为字段取别名</span>,as关键字也可以不写<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span>stu_name,grade<span style="color:#bbb"> </span>stu_grade<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-2多表操作">2-2.多表操作</h3>
+<p>介绍知识点如下：</p>
+<ul>
+<li>1.了解外键</li>
+<li>2.了解关联关系</li>
+<li>3.了解各种连接查询多表的数据</li>
+<li>4.了解子查询，会使用各种关键字以及比较运算符查询多表中的数据</li>
+</ul>
+<h4 id="2-2-1外键">2-2-1.外键</h4>
+<blockquote>
+<p>外键是指引用另一个表中的一列或者多列，被引用的列应该具有主键约束或者唯一性约束，用于建立和加强两个数据表之间的连接。</p>
+</blockquote>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建表</span>class,student<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">class</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">   </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">   </span>classname<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">   </span>stu_id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">   </span>stu_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">   </span>cid<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb">      </span><span style="color:#998;font-style:italic">-- 表示班级id，它就是class表的外键
+</span><span style="color:#998;font-style:italic"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">添加外键约束</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">constraint</span><span style="color:#bbb"> </span>FK_ID<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">foreign</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>(cid)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">references</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">class</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除外键约束</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">foreign</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span><span style="color:#bbb"> </span>FK_ID;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>看下图可知外键添加成功：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-087e13adbb0e1994.png" />   
+    </p>
+<h4 id="2-2-2操作关联表">2-2-2.操作关联表</h4>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">数据表有三种关联关系，多对一、多对多、一对一</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">学生</span>(student)<span style="color:#a61717;background-color:#e3d2d2">和班级</span>(class)<span style="color:#a61717;background-color:#e3d2d2">是多对一关系，添加数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">首选添加外键约束</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">add</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">constraint</span><span style="color:#bbb"> </span>FK_ID<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">foreign</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>(cid)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">references</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">class</span>(id);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">添加数据</span>,<span style="color:#a61717;background-color:#e3d2d2">这两个表便有了关联若插入中文在终端显示空白，可设置</span>set<span style="color:#bbb"> </span>names<span style="color:#bbb"> </span><span style="color:#d14">&#39;gbk&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#099">1</span>,<span style="color:#d14">&#34;软件一班&#34;</span>),(<span style="color:#099">2</span>,<span style="color:#d14">&#34;软件二班&#34;</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#099">1</span>,<span style="color:#d14">&#34;howie&#34;</span>,<span style="color:#099">1</span>),(<span style="color:#099">2</span>,<span style="color:#d14">&#34;howie1&#34;</span>,<span style="color:#099">2</span>),(<span style="color:#099">3</span>,<span style="color:#d14">&#34;howie2&#34;</span>,<span style="color:#099">1</span>),(<span style="color:#099">4</span>,<span style="color:#d14">&#34;howie3&#34;</span>,<span style="color:#099">2</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">交叉连接</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">cross</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">join</span><span style="color:#bbb"> </span>class;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">内连接，该功能也可以使用</span>where语句实现<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>student.stu_name,class.classname<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">join</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span>class.id<span style="color:#000;font-weight:bold">=</span>student.cid;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">外连接</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">首先在</span>student,class表中插入数据<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#099">3</span>,<span style="color:#d14">&#34;软件三班&#34;</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">左连接，右连接</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>s.stu_id,s.stu_name,c.classname<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span>s<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">left</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">join</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span>c<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span>c.id<span style="color:#000;font-weight:bold">=</span>s.cid;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>s.stu_id,s.stu_name,c.classname<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span>s<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">right</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">join</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span>c<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">on</span><span style="color:#bbb"> </span>c.id<span style="color:#000;font-weight:bold">=</span>s.cid;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">复合条件连接查询就是添加过滤条件</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">子查询</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>in关键字子查询跟上面的in关键字查询类似<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>cid<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">in</span>(<span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>exists关键字查询,<span style="color:#a61717;background-color:#e3d2d2">相当于测试，不产生数据，只返回</span><span style="color:#008080">true</span><span style="color:#a61717;background-color:#e3d2d2">或者</span><span style="color:#008080">false</span><span style="color:#a61717;background-color:#e3d2d2">，只有返回</span><span style="color:#008080">true</span><span style="color:#a61717;background-color:#e3d2d2">，外层才会执行，具体看下图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">exists</span>(<span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">12</span>);<span style="color:#bbb">   </span><span style="color:#998;font-style:italic">-- 外层不会执行
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">exists</span>(<span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>id<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>);<span style="color:#bbb">    </span><span style="color:#998;font-style:italic">-- 外层会执行
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span>any关键字查询<span style="color:#bbb">
+</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>cid<span style="color:#000;font-weight:bold">&gt;</span><span style="color:#900;font-weight:bold">any</span>(<span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>class);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span>all关键字查询<span style="color:#bbb">
+</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>cid<span style="color:#000;font-weight:bold">=</span><span style="color:#900;font-weight:bold">any</span>(<span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>class);<span style="color:#bbb">
+</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>具体结果请看下图：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-2c85dd353f7d03b8.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-05b727ee995cc414.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-e778d07773ae7b83.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-a18ce0a5a97d4bd8.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-ab0f4706d4d6b2cf.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-f4f71a1de7bf0667.png" />   
+    </p>
+<h2 id="三-事务与存储过程">三 、事务与存储过程</h2>
+<blockquote>
+<p>事务的概念，会开启、提交和回滚事务
+事务的四种隔离级别
+创建存储过程
+调用、查看、修改和删除存储过程</p>
+</blockquote>
+<h3 id="3-1-事务管理">3-1 事务管理</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql">start<span style="color:#bbb"> </span>transaction;<span style="color:#bbb">  </span><span style="color:#998;font-style:italic">-- 开启事务
+</span><span style="color:#998;font-style:italic"></span>commit;<span style="color:#bbb">             </span><span style="color:#998;font-style:italic">-- 提交事务
+</span><span style="color:#998;font-style:italic"></span>rollback;<span style="color:#bbb">           </span><span style="color:#998;font-style:italic">-- 取消事务(回滚)
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建表</span>account<span style="color:#a61717;background-color:#e3d2d2">，插入数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">account</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">auto_increment</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">40</span>),<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>money<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">account</span>(name,money)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#d14">&#39;a&#39;</span>,<span style="color:#099">1000</span>),(<span style="color:#d14">&#39;b&#39;</span>,<span style="color:#099">2000</span>),(<span style="color:#d14">&#39;c&#39;</span>,<span style="color:#099">3000</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">利用事务实现转账功能，首先开启事务，然后执行语句，提交事务</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>start<span style="color:#bbb"> </span>transaction;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">-</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">+</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;b&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span>commit;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">事务的提交，通过这个命令查看</span>mysql提交方式<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">@@</span>autocommit;<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">-- 若为1，表示自动提交，为0，就要手动提交
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">若事务的提交方式为手动提交</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">@@</span>autocommit<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">=</span><span style="color:#bbb"> </span><span style="color:#099">0</span>;<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">-- 设置为手动提交
+</span><span style="color:#998;font-style:italic"></span>start<span style="color:#bbb"> </span>transaction;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">+</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">-</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;b&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">现在执行</span>select<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">可以看到转账成功，若此时退出数据库重新登录，会看到各账户余额没有改变，所以一定要用</span>commit语句提交事务<span style="color:#a61717;background-color:#e3d2d2">，否则会失败</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">事务的回滚，别忘记设置为手动提交的模式</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>start<span style="color:#bbb"> </span>transaction;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">-</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>money<span style="color:#000;font-weight:bold">=</span>money<span style="color:#000;font-weight:bold">+</span><span style="color:#099">100</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;b&#39;</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">若此时</span>a不想转账给b<span style="color:#a61717;background-color:#e3d2d2">，可以使用事务的回滚</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>rollback;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">事务的隔离级别</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">read</span><span style="color:#bbb"> </span>uncommitted;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">read</span><span style="color:#bbb"> </span>committed;<span style="color:#bbb">
+</span><span style="color:#bbb"></span>repeatable<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">read</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span>serializable;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-2-存储过程">3-2 存储过程</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建查看</span>student表的存储过程<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建</span>student表<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb"> 
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">auto_increment</span>,<span style="color:#bbb"> 
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">4</span>),<span style="color:#bbb"> 
+</span><span style="color:#bbb">  </span>grade<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span><span style="color:#bbb"> 
+</span><span style="color:#bbb"></span>)<span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">default</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">character</span><span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>utf8;<span style="color:#bbb">
+</span><span style="color:#bbb"></span>delimiter<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">//</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic">-- 将mysql的结束符设置为//
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">procedure</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">Proc</span>()<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>begin<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>end<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">//</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>delimiter<span style="color:#bbb"> </span>;<span style="color:#bbb">   </span><span style="color:#998;font-style:italic">-- 将mysql的结束符设置为;
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">call</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">Proc</span>();<span style="color:#bbb">  </span><span style="color:#998;font-style:italic">-- 这样就可以调用该存储过程
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">变量的使用</span>,mysql中变量不用事前申明<span style="color:#a61717;background-color:#e3d2d2">，在用的时候直接用“</span><span style="color:#000;font-weight:bold">@</span><span style="color:#a61717;background-color:#e3d2d2">变量名”使用就可以</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">@</span>number<span style="color:#000;font-weight:bold">=</span><span style="color:#099">100</span>;<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">-- 或set @num:=1;
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">定义条件和处理程序</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">光标的使用</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#099">1</span>.<span style="color:#a61717;background-color:#e3d2d2">声明光标</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">DECLARE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span>cursor_name<span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">CURSOR</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">FOR</span><span style="color:#bbb"> </span>select_statement<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#099">2</span>.<span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">光标</span>OPEN语句<span style="color:#bbb">
+</span><span style="color:#bbb"></span>OPEN<span style="color:#bbb"> </span>cursor_name<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#099">3</span>.<span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">光标</span>FETCH语句<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">FETCH</span><span style="color:#bbb"> </span>cursor_name<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">INTO</span><span style="color:#bbb"> </span>var_name<span style="color:#bbb"> </span>[,<span style="color:#bbb"> </span>var_name]<span style="color:#bbb"> </span>...<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#099">4</span>.<span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">光标</span>CLOSE语句<span style="color:#bbb">
+</span><span style="color:#bbb"></span>CLOSE<span style="color:#bbb"> </span>cursor_name<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">流程控制的使用</span><span style="color:#bbb">  </span><span style="color:#a61717;background-color:#e3d2d2">不做介绍</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-3-调用存储过程">3-3 调用存储过程</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">定义存储过程</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>delimiter<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">//</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">procedure</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">proc1</span>(<span style="color:#000;font-weight:bold">in</span><span style="color:#bbb"> </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">4</span>),<span style="color:#000;font-weight:bold">out</span><span style="color:#bbb"> </span>num<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span>)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>begin<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">count</span>(<span style="color:#000;font-weight:bold">*</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>num<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>name<span style="color:#000;font-weight:bold">=</span>name;<span style="color:#bbb">
+</span><span style="color:#bbb"></span>end<span style="color:#000;font-weight:bold">//</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>delimiter<span style="color:#bbb"> </span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">调用存储过程</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">call</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">proc1</span>(<span style="color:#d14">&#34;tom&#34;</span>,<span style="color:#000;font-weight:bold">@</span>num)<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">-- 查找名为tom学生人数
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看结果</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">@</span>num;<span style="color:#bbb">  </span><span style="color:#998;font-style:italic">-- 看下图
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-38362382cb4c6cda.png" />   
+    </p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看存储过程</span><span style="color:#bbb">
+</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">procedure</span><span style="color:#bbb"> </span>status<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">like</span><span style="color:#bbb"> </span><span style="color:#d14">&#39;p%&#39;</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">\</span>G<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">-- 获得以p开头的存储过程信息
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改存储过程</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span><span style="color:#a61717;background-color:#e3d2d2">{</span><span style="color:#000;font-weight:bold">procedure</span><span style="color:#000;font-weight:bold">|</span>function<span style="color:#a61717;background-color:#e3d2d2">}</span><span style="color:#bbb"> </span>sp_name[characteristic...]<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除存储过程</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">procedure</span><span style="color:#bbb"> </span>proc1;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四视图">四、视图</h2>
+<blockquote>
+<p>如何创建视图
+查看、修改、更新、删除视图</p>
+</blockquote>
+<h3 id="4-1视图的基本操作">4-1、视图的基本操作</h3>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">在单表上创建视图</span>,<span style="color:#a61717;background-color:#e3d2d2">重新创建</span>student表<span style="color:#a61717;background-color:#e3d2d2">，插入数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">auto_increment</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">10</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>math<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>chinese<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">float</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">student</span>(name,math,chinese)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;howie1&#39;</span>,<span style="color:#099">66</span>,<span style="color:#099">77</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;howie2&#39;</span>,<span style="color:#099">66</span>,<span style="color:#099">77</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;howie3&#39;</span>,<span style="color:#099">66</span>,<span style="color:#099">77</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">开始创建视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span>stu_view<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>math,chinese,math<span style="color:#000;font-weight:bold">+</span>chinese<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">  </span><span style="color:#998;font-style:italic">-- 下图可看出创建成功
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">也可以创建自定义字段名称的视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">stu_view2</span>(math,chin,sum)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>math,chinese,math<span style="color:#000;font-weight:bold">+</span>chinese<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-a32a60623f4140c4.png" />   
+    
+
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-9597565720bf4dfe.png" />   
+    </p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">在多表上创建视图，创建表</span>stu_info<span style="color:#a61717;background-color:#e3d2d2">，插入数据</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">stu_info</span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">int</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">auto_increment</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>class<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">10</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">not</span><span style="color:#bbb"> </span><span style="color:#008080">null</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>addr<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">100</span>)<span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">stu_info</span>(class,addr)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;1&#39;</span>,<span style="color:#d14">&#39;anhui&#39;</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;2&#39;</span>,<span style="color:#d14">&#39;fujian&#39;</span>),<span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#d14">&#39;3&#39;</span>,<span style="color:#d14">&#39;guangdong&#39;</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">创建视图</span>stu_class<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">stu_class</span>(id,name,class)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> 
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>student.id,student.name,stu_info.class<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> 
+</span><span style="color:#bbb"></span>student,stu_info<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>student.id<span style="color:#000;font-weight:bold">=</span>stu_info.id;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">查看视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">desc</span><span style="color:#bbb"> </span>stu_class;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span>status<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">like</span><span style="color:#bbb"> </span><span style="color:#d14">&#39;stu_class&#39;</span><span style="color:#a61717;background-color:#e3d2d2">\</span>G<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">show</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span>stu_class<span style="color:#a61717;background-color:#e3d2d2">\</span>G<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">修改视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">or</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">replace</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span>stu_view<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">*</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">alter</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span>stu_view<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">as</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">select</span><span style="color:#bbb"> </span>chinese<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>student;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">更新视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">update</span><span style="color:#bbb"> </span>stu_view<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">set</span><span style="color:#bbb"> </span>chinese<span style="color:#000;font-weight:bold">=</span><span style="color:#099">100</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">insert</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">into</span><span style="color:#bbb"> </span>student<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">values</span>(<span style="color:#008080">null</span>,<span style="color:#d14">&#39;haha&#39;</span>,<span style="color:#099">100</span>,<span style="color:#099">100</span>);<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">delete</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">from</span><span style="color:#bbb"> </span>stu_view2<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">where</span><span style="color:#bbb"> </span>math<span style="color:#000;font-weight:bold">=</span><span style="color:#099">100</span>;<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">//</span><span style="color:#a61717;background-color:#e3d2d2">删除视图</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">drop</span><span style="color:#bbb"> </span>view<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">if</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">exists</span><span style="color:#bbb"> </span>stu_view2;<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="img" src="https://images-1252557999.file.myqcloud.com/uPic/1157824-5bd260c21fc6265c.png" />   
+    </p>
+<h2 id="五总结">五、总结</h2>
+<blockquote>
+<p>笔记参考《MySql数据库入门》
+基本命令就这么多，仍需多多敲写巩固
+以上命令本人全部敲过，若有错误，敬请指出，希望有帮助，谢谢。</p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2016/03_mysql-tutorial/">https://www.howie6879.cn/post/2016/03_mysql-tutorial/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/02_markdown-tutorial/">Markdown简明教程</a></li>
+        
+        <li><a href="/post/2016/01_build-jianshu-app-with-chrome/">快速将网页版简书打造成具有个人特色的简书桌面应用</a></li>
+        
+        <li><a href="/resume/"></a></li>
+        
+        <li><a href="/page/search/">Search</a></li>
+        
+        <li><a href="/page/archives/">归档</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/mysql'>MySQL</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

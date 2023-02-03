@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>nndl_note: 神经⽹络可以计算任何函数的可视化证明 | 老胡的储物柜</title>
+  <meta property="og:title" content="nndl_note: 神经⽹络可以计算任何函数的可视化证明 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-11-02T21:13:58&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-11-22T21:13:58&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="nndl_note: 神经⽹络可以计算任何函数的可视化证明"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/12_a_visual_proof_that_neural_nets_can_compute_any_function/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nndl_note: 神经⽹络可以计算任何函数的可视化证明</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年11月2日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+<ul>
+<li><a href="#两个预先声明">两个预先声明</a></li>
+<li><a href="#一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</a></li>
+<li><a href="#多个输入变量">多个输入变量</a></li>
+<li><a href="#s型神经元的延伸">S型神经元的延伸</a></li>
+<li><a href="#修补阶跃函数">修补阶跃函数</a></li>
+<li><a href="#结论">结论</a></li>
+</ul>
+
+<!-- /code_chunk_output -->
+
+<p>本章其实和前面章节的关联性不大，所以大可将本章作为小短文来阅读，当然基本的深度学习基础还是要有的。</p>
+
+<p>主要介绍了神经⽹络拥有的⼀种普遍性，比如说不管目标函数是怎样的，神经网络总是能够对任何可能的输入$x$，其值$f(x)$（或者说近似值）是网络的输出，哪怕是多输入和多输出也是如此，我们大可直接得出一个结论：</p>
+
+<blockquote>
+<p>不论我们想要计算什么样的函数，我们都确信存在⼀个神经⽹络（多层）可以计算它</p>
+</blockquote>
+
+<p>试想以下这种普遍性代表着什么，我觉得代表着做更多可能的事情（将其看做计算一种函数）：</p>
+
+<ul>
+<li>比如将中文翻译成英文</li>
+<li>比如根据⼀个mp4视频⽂件⽣成⼀个描述电影情节并讨论表演质量的问题</li>
+<li>...</li>
+</ul>
+
+<p>现实往往是残酷的，我们知道有这个网络存在，比如中文翻译成英文的网络，通常情况下想得往往不可得，网络在那里，但更可能我们得不到，怎么办？</p>
+
+<p>前面我们知道，我们通过学习算法来拟合函数，学习算法和普遍性的结合是⼀种有趣的混合，直到现在，本书⼀直是着重谈学习算法，到了本章，我们来看看普遍性，看看它究竟意味着什么。</p>
+
+<h2 id="两个预先声明">两个预先声明</h2>
+
+<p>在解释为何普遍性定理成⽴前，关于<strong>神经⽹络可以计算任何函数</strong>有两个预先声明需要注意一下：</p>
+
+<ul>
+<li>这句话不是说⼀个⽹络可以被⽤来准确地计算任何函数，而是说，我们可以获得尽可能好的⼀个近似，通过增加隐藏元的数量，我们可以提升近似的精度，同时对于目标精度，我们需要确定精度范围：$|g(x)-f(x)|&lt;\epsilon$，其中$\epsilon&gt;0$</li>
+<li>按照上⾯的⽅式近似的函数类其实是连续函数，如果函数不是连续的，也就是会有突然、极陡的跳跃，那么⼀般来说⽆法使⽤⼀个神经⽹络进⾏近似，这并不意外，因为神经⽹络计算的就是输⼊的连续函数</li>
+</ul>
+
+<blockquote>
+<p>普遍性定理的表述：包含⼀个隐藏层的神经⽹络可以被⽤来按照任意给定的精度来近似任何连续函数</p>
+</blockquote>
+
+<p>接下来的内容会使⽤有两个隐藏层的⽹络来证明这个结果的弱化版本，在问题中会简要介绍如何通过⼀些微调把这个解释适应于只使⽤⼀个隐藏层的⽹络并给出证明。</p>
+
+<h2 id="一个输入和一个输出的普遍性">一个输入和一个输出的普遍性</h2>
+
+<p>先从一个简单的函数$f(x)$（即只有一个输入和一个输出）开始，我们将利用神经网络来近似这个连续函数：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093257.png" alt=""></figure></p>
+
+<p>第一章我们就探讨过多层感知机实现异或，这次同样的，我们加入一个隐藏层就可以让函数<strong>舞动起来</strong>，比如下面这个有一个隐藏层、两个隐藏神经元的网络：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093617.png" alt=""></figure></p>
+
+<p>第一步，暂时只考虑顶层的神经元，第一章也讲过S型神经元，所以输出范围类似上图右上角，重点看看这个S型函数，前面已经说过：</p>
+
+<p><span  class="math">\[
+\sigma(z) \equiv 1 /\left(1+e^{-z}\right)
+\]</span></p>
+
+<p>其中：$z=wx+b$，参见右上角的图，让我们考虑一下几个情况：</p>
+
+<ol>
+<li>当$x$不变，$b$逐渐增加的情况下，输出会在原来的基础上变大，图像会相对向左边运动，因为$w$没变，所以图像形状不会变</li>
+<li>上述情况让$b$键减小，图像会右移，同样图像形状不变</li>
+<li>当$b$不变，$w$减小，很显然，图像的<code>陡峭</code>程度会下降，反之亦然</li>
+</ol>
+
+<p>下图是书中给出的图示：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191107172558.png" alt=""></figure></p>
+
+<p>其实我们完全可以自己绘制这个过程，利用<code>Python</code>的<code>matplotlib</code>可以很好地完成这个事情：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">matplotlib.pyplot</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">plt</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">sigmoid</span>(w, b, x):
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1.0</span> <span style="color:#000;font-weight:bold">/</span> (<span style="color:#099">1.0</span> <span style="color:#000;font-weight:bold">+</span> np<span style="color:#000;font-weight:bold">.</span>exp(<span style="color:#000;font-weight:bold">-</span>(w <span style="color:#000;font-weight:bold">*</span> x <span style="color:#000;font-weight:bold">+</span> b)))
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">plot_sigmoid</span>(w, b):
+    x <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>arange(<span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span>, <span style="color:#099">2</span>, <span style="color:#099">0.1</span>)
+    y <span style="color:#000;font-weight:bold">=</span> sigmoid(w, b, x)
+    plt<span style="color:#000;font-weight:bold">.</span>plot(x, y)</code></pre></td></tr></table>
+</div>
+</div>
+<p>先看下$b$增减下图像的移动情况：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#000;font-weight:bold">.</span>figure(<span style="color:#099">12</span>)
+plt<span style="color:#000;font-weight:bold">.</span>subplots_adjust(wspace<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.2</span>, hspace<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.5</span>)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">221</span>)
+<span style="color:#998;font-style:italic"># 绘制原始图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 8 b = -4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">8</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">222</span>)
+<span style="color:#998;font-style:italic"># b增加的图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">8</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">223</span>)
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">8</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">224</span>)
+<span style="color:#998;font-style:italic"># b减小的图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 8 b = 1&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">8</span>, <span style="color:#099">1</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>show()</code></pre></td></tr></table>
+</div>
+</div>
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108084652.png" alt=""></figure></p>
+
+<p>再看下$w$增减下图像的伸缩情况：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#000;font-weight:bold">.</span>figure(<span style="color:#099">12</span>)
+plt<span style="color:#000;font-weight:bold">.</span>subplots_adjust(wspace<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.2</span>, hspace<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.5</span>)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">221</span>)
+<span style="color:#998;font-style:italic"># 绘制原始图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 8 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">8</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">222</span>)
+<span style="color:#998;font-style:italic"># w减小的图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 3 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">3</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">223</span>)
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 3 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">3</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>subplot(<span style="color:#099">224</span>)
+<span style="color:#998;font-style:italic"># w增加的图像</span>
+plt<span style="color:#000;font-weight:bold">.</span>title(<span style="color:#d14">&#34;w = 105 b = 4&#34;</span>)
+w, b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">105</span>, <span style="color:#099">4</span>
+plot_sigmoid(w, b)
+
+plt<span style="color:#000;font-weight:bold">.</span>show()</code></pre></td></tr></table>
+</div>
+</div>
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108084950.png" alt=""></figure></p>
+
+<p>首先通过这两张图验证了上面的三点结论，最后可以看到我们得到的图像就像是一个阶跃函数</p>
+
+<p>为什么需要千方百计地引出阶跃函数出来，这是因为在输出层我们在将所有隐藏神经元的贡献值叠加在一起的时候，分析阶跃函数比<code>S</code>型函数容易。我们该怎么做？结合前面的经验，只要将$w$设置成一个比较大的值，然后通过修改$b$就可以左右移动来定义阶跃函数的位置</p>
+
+<p>思考下，阶跃发生的点在哪？让我们令$wx+b=0$，即可得出阶跃发生的点可以用$s=-b/w$进行表示，现在我们就可以使用$s$来极大简化我们描述神经元的方式</p>
+
+<p>目前为止我们专注于仅仅从顶部隐藏神经元输出，让我们看看整个网络的行为，尤其，我们假设隐藏神经元在计算以阶跃点$s_1$（顶部神经元）和$s_2$（底部神经元参数化的阶跃函数，它们各自有输出权重$w_1$和$w_2$：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108094016.png" alt=""></figure></p>
+
+<p>为何隐藏层的加权输出如上图，这理解一下，隐藏层的两个神经元的输出可以想象成阶跃函数，那么:</p>
+
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出就是<code>1.8</code></li>
+<li>x介于两者之间，输出就是<code>0.6</code></li>
+</ul>
+
+<p>接下来，我们进行这样一个设置：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191108095019.png" alt=""></figure></p>
+
+<p>说明一下：</p>
+
+<ul>
+<li>x小于<code>0.4</code>，输出肯定是<code>0</code></li>
+<li>x大于<code>0.6</code>，输出还是<code>0</code></li>
+<li>x介于两者之间，输出就是<code>0.8</code></li>
+</ul>
+
+<p>这边主要得出的一个结论是，我们可以通过$w_1,w_2$来定义加权输出图像中凸起的位置和高度，为了减少混乱，用一个参数$h$表示高度：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191114091159.png" alt=""></figure></p>
+
+<blockquote>
+<p>现在我们脑中应该有个清晰的概念，那就是对于神经元的加权输出组合$\sum_{j} w_{j} a_{j}$，我们可以通过对$s$和$h$的调整来控制输出函数，从而让加权输出变成我们心目中的输出</p>
+</blockquote>
+
+<p>好了，说明结束，接下来看看最开始绘制出来而函数：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191106093257-20220403213542023.png" alt=""></figure></p>
+
+<p>这个函数的表达式为：</p>
+
+<p><span  class="math">\[
+f(x)=0.2+0.4 x^{2}+0.3 x \sin (15 x)+0.05 \cos (50 x)
+\]</span></p>
+
+<p>现在面临的问题是使用一个神经网络来计算它，前面我们着重分析了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是要注意，虽然我们经过参数的调整，得到了我们想要的目标函数，此时这个函数是隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是实际上网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$，也就是说：</p>
+
+<ul>
+<li>第一步：我们将隐藏神经元的加权组合$\sum_{j} w_{j} a_{j}$近似成了$f(x)$</li>
+<li>第二步：但是神经网络的输出却是$\sigma(f(x))$</li>
+</ul>
+
+<p>$\sigma(f(x))$的函数输出和$f(x)$的函数输出那可是大相径庭</p>
+
+<blockquote>
+<p>我们控制住了隐藏神经元输出的加权组合$\sum_{j} w_{j} a_{j}$，但是没有控制住网络的输出是：$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+</blockquote>
+
+<p>那么此时我们面临的问题就是怎么让$\sigma(\sum_{j} w_{j} a_{j}+b)$近似于$f(x)$</p>
+
+<p>在上述情况下，可操作性的无非就是在加权输出上面做文章，所以我们可以设计一个神经网络，其隐藏层有个加权输出：</p>
+
+<p><span  class="math">\[
+\sigma^{-1} \circ f(x)
+\]</span></p>
+
+<p>其中$\sigma^{-1}$是$\sigma$的反函数</p>
+
+<p>很容易可以得出$\sigma^{-1} \circ f(x)$的结果输入到$\sigma$中输出还是$f(x)$，所以我们控制住了$\sigma(\sum_{j} w_{j} a_{j}+b)$</p>
+
+<p>接下来就是调节参数直到拟合到我们满意的程度（⽬标函数和⽹络实际计算函数的平均偏差来衡量）</p>
+
+<h2 id="多个输入变量">多个输入变量</h2>
+
+<p>上一节已经说明了一个输入和一个输出的普遍性，接下来可以尝试考虑多个输入变量的情况，假设有两个输入：$x,y$，分别对应权重$w_1,w_2$，以及一个神经元上的偏置$b$，看看他们如何影响神经元的输出：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122172304.png" alt=""></figure></p>
+
+<blockquote>
+<p>思考：将$w_2$设置为0，再不断调整$w1$，输出会怎样变化？</p>
+</blockquote>
+
+<p>首先，输出不受输入$y$影响，其次，按照上一节的惯性，图像应该是会变<code>陡峭</code>，会接近到类似阶跃函数，不同的是此时图像是三维的：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122172954.png" alt=""></figure></p>
+
+<p>和上面一样，我们可以通过修改偏置的位置来设置移动阶跃点：</p>
+
+<p><span  class="math">\[
+s_{x} \equiv-b / w_{1}
+\]</span></p>
+
+<p>凸起的期望高度用相应的权重$h$表示，可以通过分别设置<code>x</code>或<code>y</code>输入神经元的权重为<code>0</code>来分别控制<code>y</code>或<code>x</code>方向的凹凸函数</p>
+
+<p>让我们考虑当我们叠加两个凹凸函数时会发⽣什么，⼀个沿$x$⽅向，另⼀个沿$y$⽅向，两者都有⾼度$h$：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122175706.png" alt=""></figure></p>
+
+<p>试着改变参数<code>h</code>，正如你能看到，这引起输出权重的变化，以及<code>x</code>和<code>y</code>上凹凸函数的⾼度：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122180038.png" alt=""></figure></p>
+
+<p>我们构建的有点像是<strong>塔形</strong>函数，如果我们能构建这样的塔型函数，那么我们能使⽤它们来近似任意的函数，仅仅通过在不同位置累加许多不同⾼度的塔</p>
+
+<p>以此类推，三个变量的四位函数也不在话下，在发散一下思维，$m$维也可以用完全相同的思想来实现。</p>
+
+<h2 id="s型神经元的延伸">S型神经元的延伸</h2>
+
+<p>我们已经证明了由$S$型神经元构成的⽹络可以计算任何函数，若输入为: $x_1, x_2 ...x_j$，输出为：</p>
+
+<p><span  class="math">\[
+\sigma\left(\sum_{j} w_{j} x_{j}+b\right)
+\]</span></p>
+
+<p>其中$\sigma$是$S$型函数，函数图像如下：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122221101.png" alt=""></figure></p>
+
+<p>如果我们考虑⼀个不同类型的神经元，它使⽤其它激活函数，⽐如如下的$s(z)$，会怎样？</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122221806.png" alt=""></figure></p>
+
+<p>此时神经元的输出为：</p>
+
+<p><span  class="math">\[
+s\left(\sum_{j} w_{j} x_{j}+b\right)
+\]</span></p>
+
+<p>同样的，我们依然可以利用这个函数来通过对权重和偏置的修改来得到一个阶跃函数的近似：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122222028.png" alt=""></figure></p>
+
+<p>这样我们可以和前面一样来推出任何目标函数，当然，这要求$s(z)$具有以下条件：</p>
+
+<ul>
+<li>$s(z)$ 在 $z \rightarrow-\infty$ 和 $z \rightarrow \infty$时是定义明确的</li>
+<li>这两个界限是在我们的阶跃函数上取的两个值，并且这两个界限彼此不同，否则就只能一马平川了哈哈</li>
+</ul>
+
+<h2 id="修补阶跃函数">修补阶跃函数</h2>
+
+<p>我们用神经元近似阶跃函数的时候，实际上有一个很窄的故障窗口，如下图说明，在这⾥函数会表现得和阶跃函数⾮常不同：</p>
+
+<p><figure><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191122223022.png" alt=""></figure></p>
+
+<p>其实理论上来说，只要权重够大，情况可以随着变好，刚刚是从函数本身出发，避免拟合的函数有问题，换个角度，我们可以从拟合的函数出发，我们利用$1/M$的神经元来模拟目标函数的$1/M$，其实也是变相地将目标函数的权重变大，从而达到效果</p>
+
+<h2 id="结论">结论</h2>
+
+<blockquote>
+<p>普遍性告诉我们神经⽹络能计算任何函数；而实际经验依据提⽰深度⽹络最能适⽤于学习能够解决许多现实世界问题的函数</p>
+</blockquote>
+
+<p>本章主要解答了是否使⽤⼀个神经⽹络可以计算任意特定函数的问题，这个自然是的。理论上我们只要两个隐藏层就可以计算任何函数，但深度学习又是什么情况呢？</p>
+
+<p>正如在第⼀章中表明过，深度⽹络有⼀个分级结构，使其尤其适⽤于学习分级的知识，这看上去可⽤于解决现实世界的问题，我个人觉得是单层虽然能拟合各种目标函数，这没错，但是一样的数据，单层网络并不能找到理想中的那个函数，虽然有可能对目前的数据拟合得很好，但是使用深度网络却可以更好地提升泛化能力。</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+</ul>
+
+<p>搞定收工，有兴趣欢迎关注我的公众号：</p>
+
+<div align=center><img width="20%" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg" /></div>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/12_a_visual_proof_that_neural_nets_can_compute_any_function/">https://www.howie6879.cn/post/2019/12_a_visual_proof_that_neural_nets_can_compute_any_function/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/11_improving_the_way_neural_networks_learn/">nndl_note: 改进神经⽹络的学习⽅法</a></li>
+        
+        <li><a href="/post/2019/08_how_does_the_back_propagation_algorithm_work/">nndl_note: 反向传播算法如何工作</a></li>
+        
+        <li><a href="/post/2019/07_use_neural_network_recognize_handwriting/">nndl_note: 识别手写字</a></li>
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+        <li><a href="/post/2018/07_how-to-create-asimple-neural-network-in-python/">如何用Python创建一个简单的神经网络</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0'>神经网络与深度学习</a></li>
+                
+                <li><a href='/tags/nndl-book'>nndl-book</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

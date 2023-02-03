@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>Python之朴素贝叶斯对展会数据分类 | 老胡的储物柜</title>
+  <meta property="og:title" content="Python之朴素贝叶斯对展会数据分类 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2016-09-08T20:34:40&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2016-09-08T20:34:40&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="Python之朴素贝叶斯对展会数据分类"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2016/06_python-naive-bayes-classification-of-exhibition-data/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#目的">目的</a></li>
+    <li><a href="#数据">数据</a>
+      <ul>
+        <li><a href="#数据的准备">数据的准备</a></li>
+        <li><a href="#分词提取">分词&amp;&amp;提取</a></li>
+      </ul>
+    </li>
+    <li><a href="#编码">编码</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Python之朴素贝叶斯对展会数据分类</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2016年9月8日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/mldl'>ML&amp;DL</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <h2 id="目的">目的</h2>
+<p>在公司实习，分别从国内国外两个网站爬取了一些展会数据，在数据处理上目前需要将其按照各个类别分类好，并提供对应展会地址的经纬度，国内数据如下：</p>
+<p>
+        <img class="mx-auto" alt="LN1uza" src="https://images-1252557999.file.myqcloud.com/uPic/LN1uza.jpg" />   
+    </p>
+<p>国内数据比较少，占四百多条，在类别上来看有所属行业这一列，所以比较好处理，国外数据就有些尴尬：</p>
+<p>
+        <img class="mx-auto" alt="q5IgUt" src="https://images-1252557999.file.myqcloud.com/uPic/q5IgUt.jpg" />   
+    </p>
+<p>国外网站展会数据将近五万多条，跟分类有关的只有<code>categories</code>这一列数据，都是一些标签词，还偏少。</p>
+<p>现在需要将五万多条展会数据进行分类，如何解决这个问题，我觉得可以写个<strong>朴素贝叶斯分类器</strong>。</p>
+<h2 id="数据">数据</h2>
+<p>朴素贝叶斯分类器是利用样本数据来进行训练的，每个样本必须含有一组特征词以及对应的分类。</p>
+<h3 id="数据的准备">数据的准备</h3>
+<p>获取的国内数据就很适合作为训练数据，可以将其处理成如下格式作为样本输入：</p>
+<p>
+        <img class="mx-auto" alt="6P4Pcs" src="https://images-1252557999.file.myqcloud.com/uPic/6P4Pcs.jpg" />   
+    </p>
+<p>训练数据主要是这两列，<strong>所属行业</strong>以及<strong>展会范围</strong>，每一行的类别都有其对应的展会范围，将这些作为训练数据实在再好不过，我们将其称之为<strong>训练集</strong>。</p>
+<p>那么相对应，国外待分类的展会数据便是<strong>测试集</strong>。</p>
+<p>我们将利用训练好的分类器，将测试集一一输入，看看能否得到期望的输出结果。</p>
+<p>可是现在有个问题，作为<strong>训练集</strong>的国内数据只有四百多条，实在太少，于是我只能再去那个国内展会网站将以前的展会数据尽量爬取下来，最终<strong>训练集</strong>达到了<code>39555</code>条，虽说数量还是不够，但是不试试最终分类器的分类结果，说不定准确率还可以呢？</p>
+<h3 id="分词提取">分词&amp;&amp;提取</h3>
+<p>不积小流，无以成江海，以小见大，咱们看这样一条数据:</p>
+<pre tabindex="0"><code>所属行业：建材五金
+展会范围：各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等
+</code></pre><p>思考一下，这一条数据的<strong>所属行业</strong>和<strong>展会范围</strong>有什么关系，我们将从这里得到编写分类器的出发点。</p>
+<p>在这条数据中，展会范围的内容是具有一定的代表性的，其代表这条数据的描述很偏向建材五金这个行业。</p>
+<p>那我么是不是可以提炼出这个描述的关键词，从而让这个关键词代表建材五金这个行业。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 可以利用结巴分词</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">jieba.analyse</span>
+con <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;各类卫生洁具、浴室家具和配件、面盆、马桶、淋浴房、浴缸、花洒、水龙头及配件、浴室照明、镜子、五金挂件等&#34;</span>
+feature <span style="color:#000;font-weight:bold">=</span> jieba<span style="color:#000;font-weight:bold">.</span>analyse<span style="color:#000;font-weight:bold">.</span>extract_tags(con, <span style="color:#099">8</span>)
+<span style="color:#0086b3">print</span>(feature)
+<span style="color:#998;font-style:italic"># output：[&#39;配件&#39;, &#39;各类&#39;, &#39;家具&#39;, &#39;五金&#39;, &#39;照明&#39;, &#39;浴室&#39;, &#39;淋浴房&#39;, &#39;浴缸&#39;]</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>那么刚刚那条数据可以这样看：</p>
+<pre tabindex="0"><code># data_01
+所属行业：建材五金
+描述关键词：'配件', '各类', '家具', '五金', '照明', '浴室', '淋浴房', '浴缸'
+</code></pre><p>以此类推，如果一条未分类数据的关键词也是这样，那是不是可以将该数据归为建材五金这个类别，是的，你可以这么干。</p>
+<p>但有个问题，若该未分类数据的关键词只含有以上关键词的某个，比如：</p>
+<pre tabindex="0"><code># data_02
+所属行业：未知
+描述关键词：'配件','家具'
+</code></pre><p>这样子若分为建材五金不大对吧，我倒觉得应该分为房产家居，这个问题可以解决，就让我们的概率出场吧。</p>
+<p>大三的时候学过概率统计，也记得一个公式名为<strong>贝叶斯定理</strong>。</p>
+<p>
+        <img class="mx-auto" alt="oc8yAG" src="https://images-1252557999.file.myqcloud.com/uPic/oc8yAG.jpg" />   
+    </p>
+<p>这表示计算条件概率的公式:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">P(A\B) <span style="color:#000;font-weight:bold">=</span> P(B\A)<span style="color:#000;font-weight:bold">*</span>P(A)<span style="color:#000;font-weight:bold">/</span>P(B) <span style="color:#000;font-weight:bold">==</span> 后验概率 <span style="color:#000;font-weight:bold">=</span> 先验概率 ｘ 调整因子
+<span style="color:#998;font-style:italic"># 这样写会不会更加清晰</span>
+P(category\keywords) <span style="color:#000;font-weight:bold">=</span> P(category) <span style="color:#000;font-weight:bold">*</span> P(keywords\category)<span style="color:#000;font-weight:bold">/</span> P(keywords)
+<span style="color:#998;font-style:italic">## 朴素贝叶斯便是假设即将被组合的各个概率是独立的，可以理解成keyword1出现在category1的概率和keyword2出现在category1的概率是没有关系的，是独立的。</span>
+P(category\keywords) <span style="color:#000;font-weight:bold">=</span> P(category) <span style="color:#000;font-weight:bold">*</span> P(keyword1\category)P(keyword2\category)<span style="color:#000;font-weight:bold">...</span>P(keywordn\category)<span style="color:#000;font-weight:bold">/</span> P(keywords)
+</code></pre></td></tr></table>
+</div>
+</div><p>总结就是，我们先求出样本空间中每个分类的概率<em>P(category)</em>——<strong>先验概率</strong></p>
+<p>再求出一组待分类数据的关键词在各个类别中的概率<em>P(keywords\category)</em>——<strong>调整因子</strong></p>
+<p>最后<strong>先验概率</strong> <strong>*</strong>  <strong>调整因子</strong>得出<strong>后验概率</strong>，再经过比较，后验概率最大的，便是待分类数据最可能的类别。</p>
+<p>我们的准备很充足了，但在写分类器之前，还是先将下面要用到的数据提前提取出来。</p>
+<p>2.2.1.确定训练数据有多少类别</p>
+<p>2.2.2.训练数据的关键词集合，为了方便后续计算，将其转为<strong>id:word</strong>的格式存为<em>id_word.txt</em></p>
+<p>
+        <img class="mx-auto" alt="mwCMnv" src="https://images-1252557999.file.myqcloud.com/uPic/mwCMnv.jpg" />   
+    </p>
+<p>2.2.3.计算出每个关键词在每个不同类别出现的概率，将其转为**category=id:pro(id)**的格式存为<em>tf_id_word.txt</em></p>
+<p>
+        <img class="mx-auto" alt="1kHCLr" src="https://images-1252557999.file.myqcloud.com/uPic/1kHCLr.jpg" />   
+    </p>
+<p>2.2.4.求出样本空间中每个分类的概率<em>P(category)</em>——<strong>先验概率</strong>，将其转为**category:pro(category)**的格式存为<em>type_pro.txt</em></p>
+<p>
+        <img class="mx-auto" alt="oS99Bj" src="https://images-1252557999.file.myqcloud.com/uPic/oS99Bj.jpg" />   
+    </p>
+<h2 id="编码">编码</h2>
+<p>经过前面的步骤，现在编写代码实在简单，不过有两点要注意。</p>
+<p>其一是关键词并不是在每个类别都会出现，这样会导致P(keyword\category) = 0，进而导致整个后验概率为0，为了解决这个问题，可以引入拉普拉斯平滑，这样便确保不会出现为0的情况，具体代码中有介绍。</p>
+<p>其二是若每个调整因子的数值都很小，大家都知道很小的值相乘，会导致结果变得更小，这样子表现出各个分类结果的后验概率便会出现问题，这个问题便是下溢出问题，解决办法便是将其转化为对数，对数相乘便是对数相加，这样便很巧妙的解决了这个问题。</p>
+<p>好了，直接上代码，让我们看看分类的结果吧。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># -*-coding:utf-8-*-</span>
+__author__ <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;howie&#39;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">jieba.analyse</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">pandas</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">pd</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">math</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Pridict</span>(<span style="color:#0086b3">object</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    利用txt/中数据进行朴素贝叶斯算法训练
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
+        <span style="color:#998;font-style:italic"># 初始化结果字典</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>resultData <span style="color:#000;font-weight:bold">=</span> {}
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">getKeyword</span>(<span style="color:#999">self</span>, path):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        通过结巴分词进行关键词提取
+</span><span style="color:#d14">        :param path: 待分词文件路径 相关参数可更改 也可不调用直接写
+</span><span style="color:#d14">        :return: keywordDic = {index:[&#39;word1&#39;,&#39;word2&#39;...]}
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        keywordDic <span style="color:#000;font-weight:bold">=</span> {}
+        df <span style="color:#000;font-weight:bold">=</span> pd<span style="color:#000;font-weight:bold">.</span>read_csv(path)
+        <span style="color:#000;font-weight:bold">for</span> des <span style="color:#000;font-weight:bold">in</span> df<span style="color:#000;font-weight:bold">.</span>values:
+            jieba<span style="color:#000;font-weight:bold">.</span>analyse<span style="color:#000;font-weight:bold">.</span>set_idf_path(<span style="color:#d14">&#39;txt/type_dict.txt&#39;</span>)
+            feature <span style="color:#000;font-weight:bold">=</span> jieba<span style="color:#000;font-weight:bold">.</span>analyse<span style="color:#000;font-weight:bold">.</span>extract_tags(des[<span style="color:#099">15</span>], <span style="color:#099">8</span>)
+            keywordDic[des[<span style="color:#099">16</span>]] <span style="color:#000;font-weight:bold">=</span> feature
+        <span style="color:#000;font-weight:bold">return</span> keywordDic
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">idDic</span>(<span style="color:#999">self</span>, keywordDic):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        将每条待分类关键词替换成对应的单词向量
+</span><span style="color:#d14">        :param keywordDic:格式 keywordDic = {index:[&#39;word1&#39;,&#39;word2&#39;...]}
+</span><span style="color:#d14">        :return: keywordDic = {&#39;1&#39;: [&#39;12198&#39;, &#39;16311&#39;, &#39;6253&#39;, &#39;8302&#39;]}
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">with</span> <span style="color:#0086b3">open</span>(<span style="color:#d14">&#39;txt/id_word.txt&#39;</span>, <span style="color:#d14">&#39;r&#39;</span>, encoding<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;utf8&#39;</span>) <span style="color:#000;font-weight:bold">as</span> of:
+            lines <span style="color:#000;font-weight:bold">=</span> of<span style="color:#000;font-weight:bold">.</span>read()<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;</span><span style="color:#d14">\n</span><span style="color:#d14">&#39;</span>)
+        <span style="color:#000;font-weight:bold">for</span> key, values <span style="color:#000;font-weight:bold">in</span> keywordDic<span style="color:#000;font-weight:bold">.</span>items():
+            id_word <span style="color:#000;font-weight:bold">=</span> []
+            <span style="color:#000;font-weight:bold">for</span> eachValue <span style="color:#000;font-weight:bold">in</span> values:
+                id_word <span style="color:#000;font-weight:bold">+=</span> [eachLine<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;:&#39;</span>)[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">for</span> eachLine <span style="color:#000;font-weight:bold">in</span> lines <span style="color:#000;font-weight:bold">if</span> eachValue <span style="color:#000;font-weight:bold">==</span> eachLine<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;:&#39;</span>)[<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>]]
+            keywordDic[key] <span style="color:#000;font-weight:bold">=</span> id_word
+        <span style="color:#000;font-weight:bold">return</span> keywordDic
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">calPro</span>(<span style="color:#999">self</span>, keywordDic):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        计算每一组待分类数据关键词对应概率总和
+</span><span style="color:#d14">        :param keywordDic:格式 keywordDic = {&#39;1&#39;: [&#39;12198&#39;, &#39;16311&#39;, &#39;6253&#39;, &#39;8302&#39;]}
+</span><span style="color:#d14">        :return: result = {&#39;1&#39;: {&#39;type1&#39;: -33.23204707236557, &#39;type3&#39;: -31.376043125934267, &#39;type3&#39;: -27.385192803356617...}
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        result <span style="color:#000;font-weight:bold">=</span> {}
+        <span style="color:#998;font-style:italic"># print(keywordDic)</span>
+        <span style="color:#998;font-style:italic"># 获取每个类别关键词出现概率</span>
+        <span style="color:#000;font-weight:bold">with</span> <span style="color:#0086b3">open</span>(<span style="color:#d14">&#39;txt/tf_id_word.txt&#39;</span>, <span style="color:#d14">&#39;r&#39;</span>, encoding<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;utf8&#39;</span>) <span style="color:#000;font-weight:bold">as</span> of:
+            lines <span style="color:#000;font-weight:bold">=</span> of<span style="color:#000;font-weight:bold">.</span>read()<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;</span><span style="color:#d14">\n</span><span style="color:#d14">&#39;</span>)[<span style="color:#099">0</span>:<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>]
+        <span style="color:#998;font-style:italic"># 循环待分类数据</span>
+        <span style="color:#000;font-weight:bold">for</span> key, values <span style="color:#000;font-weight:bold">in</span> keywordDic<span style="color:#000;font-weight:bold">.</span>items():
+            result[key] <span style="color:#000;font-weight:bold">=</span> {}
+            <span style="color:#998;font-style:italic"># 读取分类概率文件中读取每行数据</span>
+            <span style="color:#000;font-weight:bold">for</span> eachLine <span style="color:#000;font-weight:bold">in</span> lines:
+                valLen <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">len</span>(values)
+                valPro <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">list</span>(<span style="color:#0086b3">map</span>(<span style="color:#000;font-weight:bold">lambda</span> x: <span style="color:#d14">&#39;&#39;</span>, [x <span style="color:#000;font-weight:bold">for</span> x <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">0</span>, valLen)]))
+                laplace <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>
+                <span style="color:#998;font-style:italic"># 分类名称 该分类下关键词概率</span>
+                lineData <span style="color:#000;font-weight:bold">=</span> eachLine<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#34;=&#34;</span>)
+                <span style="color:#998;font-style:italic"># 该分类下每个关键词概率</span>
+                eachLineData <span style="color:#000;font-weight:bold">=</span> lineData[<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>]<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#34;#&#34;</span>)
+                <span style="color:#998;font-style:italic"># 循环每个待分类字典的关键字向量</span>
+                <span style="color:#000;font-weight:bold">for</span> index,eachValue <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(values):
+                    <span style="color:#998;font-style:italic"># 每个关键词对应的词向量以及词概率 得到所有关键词该分类下的概率列表</span>
+                    resPro <span style="color:#000;font-weight:bold">=</span> [eachPro<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;:&#39;</span>)[<span style="color:#099">1</span>] <span style="color:#000;font-weight:bold">for</span> eachPro <span style="color:#000;font-weight:bold">in</span> eachLineData <span style="color:#000;font-weight:bold">if</span> eachValue <span style="color:#000;font-weight:bold">==</span> eachPro<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;:&#39;</span>)[<span style="color:#099">0</span>]]
+                    <span style="color:#998;font-style:italic"># 防止待分类关键词概率为0，添加拉普拉斯平滑</span>
+                    laplace <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">str</span>(<span style="color:#099">1</span> <span style="color:#000;font-weight:bold">/</span> (valLen <span style="color:#000;font-weight:bold">+</span> <span style="color:#0086b3">len</span>(eachLineData)))
+                    valPro[index] <span style="color:#000;font-weight:bold">=</span> (resPro[<span style="color:#099">0</span>] <span style="color:#000;font-weight:bold">if</span> resPro <span style="color:#000;font-weight:bold">else</span> laplace)
+                valPrlLen <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">int</span>(valLen <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>)
+                <span style="color:#998;font-style:italic"># 处理关键词为空 增加限制条件，排除小概率分类影响后验概率大小</span>
+                <span style="color:#000;font-weight:bold">if</span> valPro:
+                    <span style="color:#000;font-weight:bold">if</span> valPro<span style="color:#000;font-weight:bold">.</span>count(laplace) <span style="color:#000;font-weight:bold">&lt;=</span> valPrlLen:
+                        <span style="color:#998;font-style:italic"># 防止下溢出转化为对数相加</span>
+                        typePro <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>([math<span style="color:#000;font-weight:bold">.</span>log(<span style="color:#0086b3">float</span>(x)) <span style="color:#000;font-weight:bold">for</span> x <span style="color:#000;font-weight:bold">in</span> valPro])
+                        result[key][lineData[<span style="color:#099">0</span>]] <span style="color:#000;font-weight:bold">=</span> typePro
+                <span style="color:#000;font-weight:bold">else</span>:
+                    <span style="color:#998;font-style:italic"># 将该待分类数据标记为None</span>
+                    result[key] <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+        <span style="color:#000;font-weight:bold">return</span> result
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">resPro</span>(<span style="color:#999">self</span>, result):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        为各个分类乘上先验概率 提高分类成功率
+</span><span style="color:#d14">        :param result: 格式 result = {&#39;1&#39;: {&#39;type1&#39;: -33.23204707236557, &#39;type3&#39;: -31.376043125934267, &#39;type3&#39;: -27.385192803356617...}
+</span><span style="color:#d14">        :return: resultData = {&#39;1&#39;: {&#39;type&#39;: -28.135469210164924}}
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">for</span> eachKey, eachVal <span style="color:#000;font-weight:bold">in</span> result<span style="color:#000;font-weight:bold">.</span>items():
+            <span style="color:#998;font-style:italic"># 初始化每个待分类数据字典 储存最可能分类的概率</span>
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>resultData[eachKey] <span style="color:#000;font-weight:bold">=</span> {}
+            <span style="color:#998;font-style:italic"># 初始化最终分类结果概率</span>
+            allPro <span style="color:#000;font-weight:bold">=</span> {}
+            <span style="color:#000;font-weight:bold">if</span> eachVal:
+                <span style="color:#998;font-style:italic"># print(eachVal)</span>
+                <span style="color:#000;font-weight:bold">with</span> <span style="color:#0086b3">open</span>(<span style="color:#d14">&#39;txt/type_pro.txt&#39;</span>, <span style="color:#d14">&#39;r&#39;</span>, encoding<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;utf8&#39;</span>) <span style="color:#000;font-weight:bold">as</span> of:
+                    lines <span style="color:#000;font-weight:bold">=</span> of<span style="color:#000;font-weight:bold">.</span>read()<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;</span><span style="color:#d14">\n</span><span style="color:#d14">&#39;</span>)
+                <span style="color:#000;font-weight:bold">for</span> line <span style="color:#000;font-weight:bold">in</span> lines:
+                    lineData <span style="color:#000;font-weight:bold">=</span> line<span style="color:#000;font-weight:bold">.</span>split(<span style="color:#d14">&#39;:&#39;</span>)
+                    <span style="color:#998;font-style:italic"># 乘上该分类概率 即先验概率</span>
+                    allPro <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(allPro,<span style="color:#000;font-weight:bold">**</span>{key:(value <span style="color:#000;font-weight:bold">+</span> math<span style="color:#000;font-weight:bold">.</span>log(<span style="color:#0086b3">float</span>(lineData[<span style="color:#099">1</span>]))) <span style="color:#000;font-weight:bold">for</span> key, value <span style="color:#000;font-weight:bold">in</span> eachVal<span style="color:#000;font-weight:bold">.</span>items() <span style="color:#000;font-weight:bold">if</span> key <span style="color:#000;font-weight:bold">==</span> lineData[<span style="color:#099">0</span>]})
+                    <span style="color:#998;font-style:italic"># 返回各个分类对应后验概率最大值</span>
+                    largest <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">max</span>(<span style="color:#0086b3">zip</span>(allPro<span style="color:#000;font-weight:bold">.</span>values(),allPro<span style="color:#000;font-weight:bold">.</span>keys()))
+                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>resultData[eachKey][largest[<span style="color:#099">1</span>]] <span style="color:#000;font-weight:bold">=</span> largest[<span style="color:#099">0</span>]
+            <span style="color:#000;font-weight:bold">else</span>:
+                <span style="color:#998;font-style:italic"># 无法分类</span>
+                <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>resultData[eachKey] <span style="color:#000;font-weight:bold">=</span> {<span style="color:#d14">&#39;failed&#39;</span>: <span style="color:#000;font-weight:bold">None</span>}
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>resultData
+
+
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">mainPri</span>(keywordDic):
+    pri <span style="color:#000;font-weight:bold">=</span> Pridict()
+    dic <span style="color:#000;font-weight:bold">=</span> pri<span style="color:#000;font-weight:bold">.</span>idDic(keywordDic)
+    result <span style="color:#000;font-weight:bold">=</span> pri<span style="color:#000;font-weight:bold">.</span>calPro(dic)
+    resultData <span style="color:#000;font-weight:bold">=</span> pri<span style="color:#000;font-weight:bold">.</span>resPro(result)
+    <span style="color:#000;font-weight:bold">return</span> resultData
+
+</code></pre></td></tr></table>
+</div>
+</div><p>初步写好分类器，其实这才是任务的开始，分类器的最重要的是第二部分的数据提取，接下来需要通过不断地训练，让数据变得更加优雅美丽，从而让分类器的结果趋于完美，本人苦逼地调了一个星期，现在也就勉强能用。</p>
+<p>让我们看看分类器的分类效果：</p>
+<p>
+        <img class="mx-auto" alt="0Th8w1" src="https://images-1252557999.file.myqcloud.com/uPic/0Th8w1.jpg" />   
+    </p>
+<p>可以看到分类器给出的参考分类很有代表性，这一段就此结束，若有错误，敬请指出，谢谢。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">https://www.howie6879.cn/post/2016/06_python-naive-bayes-classification-of-exhibition-data/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/05_about-python-decorator/">python之装饰器</a></li>
+        
+        <li><a href="/post/2016/04_package-py-lib-with-cx_freeze/">cx_Freeze打包py文件</a></li>
+        
+        <li><a href="/post/2016/03_mysql-tutorial/">MySQL基本操作命令汇总</a></li>
+        
+        <li><a href="/post/2016/02_markdown-tutorial/">Markdown简明教程</a></li>
+        
+        <li><a href="/post/2016/01_build-jianshu-app-with-chrome/">快速将网页版简书打造成具有个人特色的简书桌面应用</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0'>机器学习</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

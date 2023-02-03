@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>k8s学习之路.基础.[02.概念介绍] | 老胡的储物柜</title>
+  <meta property="og:title" content="k8s学习之路.基础.[02.概念介绍] - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2021-01-11T22:17:08&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2021-01-11T22:17:08&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="[k8s基础概念 k8s学习教程]"
+  />
+  <meta
+    name="description"
+    content="介绍k8s的基础概念"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.cn/post/2021/02_k8s_note_02_basic_concept/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#引入">引入</a></li>
+    <li><a href="#pod">Pod</a>
+      <ul>
+        <li><a href="#如何定义并创建一个pod">如何定义并创建一个Pod</a></li>
+        <li><a href="#标签">标签</a></li>
+        <li><a href="#命名空间">命名空间</a></li>
+        <li><a href="#外部访问">外部访问</a></li>
+      </ul>
+    </li>
+    <li><a href="#service">Service</a>
+      <ul>
+        <li><a href="#介绍">介绍</a></li>
+        <li><a href="#定义-service">定义 Service</a></li>
+      </ul>
+    </li>
+    <li><a href="#deployment">Deployment</a>
+      <ul>
+        <li><a href="#介绍-1">介绍</a></li>
+        <li><a href="#replicaset">ReplicaSet</a></li>
+      </ul>
+    </li>
+    <li><a href="#statefulset">StatefulSet</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">k8s学习之路.基础.[02.概念介绍]</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年1月11日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E4%BA%91%E5%8E%9F%E7%94%9F'>云原生</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>俗话说，磨刀不误砍柴工。上一章，我们成功搭建了k8s集群，接下来我们主要花时间了解一下k8s的相关概念，为后续掌握更高级的知识提前做好准备。</p>
+<p>本文主要讲解以下四个概念：</p>
+<ul>
+<li><code>Pod</code></li>
+<li><code>Deployment</code></li>
+<li><code>Service</code></li>
+<li><code>Namespace</code></li>
+</ul>
+<h2 id="引入">引入</h2>
+<p>让我们使用<code>Deployment</code>运行一个无状态应用来开启此章节吧，比如运行一个<code>nginx Deployment</code>（创建文件：<code>nginx-deployment.yaml</code>）：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>apps/v1<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Deployment<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>nginx-deployment<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">labels</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">app</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">replicas</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">selector</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">matchLabels</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">app</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">template</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">labels</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">app</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">spec</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">containers</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">image</span>:<span style="color:#bbb"> </span>nginx:latest<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">        </span>- <span style="color:#000080">containerPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>配置文件第二行，有个<code>kind</code>字段，表示的是此时<code>yaml</code>配置的类型，即<code>Deployment</code>。什么是<code>Deployment</code>？这里我先不做解释，让我们先实践，看能不能在使用过程中体会出这个类型的概念意义。</p>
+<p>在终端执行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f ./nginx-deployment.yaml
+<span style="color:#998;font-style:italic"># 输出</span>
+deployment.apps/nginx-deployment created
+</code></pre></td></tr></table>
+</div>
+</div><p>然后通过以下命令分别查看集群中创建的 Deployment 和 Pod 的状态：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 查看 Deployment</span>
+kubectl get deployments
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   1/1     <span style="color:#099">1</span>            <span style="color:#099">1</span>           2m29s
+
+<span style="color:#998;font-style:italic"># 查看 Pod</span>
+kubectl get pods
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-585449566-qslv5   1/1     Running   <span style="color:#099">0</span>          2m38s
+
+<span style="color:#998;font-style:italic"># 查看 Deployment 的信息</span>
+kubectl describe deployment nginx	
+
+<span style="color:#998;font-style:italic"># 删除 Deployment</span>
+kubectl delete deployment nginx-deployment
+
+<span style="color:#998;font-style:italic"># 查看 Pod 的信息</span>
+<span style="color:#998;font-style:italic"># kubectl describe pod &lt;pod-name&gt;</span>
+<span style="color:#998;font-style:italic"># 这里的 &lt;pod-name&gt; 是某一 Pod 的名称</span>
+kubectl describe pod  nginx-deployment-585449566-qslv5
+
+<span style="color:#998;font-style:italic"># 进入容器</span>
+kubectl <span style="color:#0086b3">exec</span> -it nginx-deployment-585449566-qslv5 -- /bin/bash
+</code></pre></td></tr></table>
+</div>
+</div><p>此时我们已经成功在k8s上部署了一个实例的nginx应用程序。但是，等等！我们好像又看到了一个新的名词<code>Pod</code>，这又是什么？让我们带着疑问继续往下看吧。</p>
+<h2 id="pod">Pod</h2>
+<blockquote>
+<p>在Kubernetes中，最小的管理元素不是一个个独立的容器，而是pod（目的在于解决容器间<strong>紧密协作</strong>关系的难题）</p>
+</blockquote>
+<p>
+        <img class="mx-auto" alt="Kubernetes教程：Pod概念" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/module_03_pods.ccc5ba54.svg" />   
+    </p>
+<p><code>Pod</code>是一组并置的容器，代表了<code>Kubernetes</code>中的基本构建模块:</p>
+<ul>
+<li>一个<code>Pod</code>包含：
+<ul>
+<li>一个或多个容器（container）</li>
+<li>容器（container）的一些共享资源：存储、网络等</li>
+</ul>
+</li>
+<li>一个<code>Pod</code>的所有容器都运行在同一个节点</li>
+</ul>
+<p>容器可以被管理，但是容器里面的多个进程实际上是不好被管理的，所以<strong>容器被设计为每个容器只运行一个进程</strong>。</p>
+<p>容器的本质实际上就是一个进程，<strong>Namespace 做隔离，Cgroups 做限制，rootfs 做文件系统</strong>。在一个容器只能运行一个进程的前提下，实际开发过程中一个应用是由多个容器紧密协作才可以成功地运行起来。因此，我们需要另一种更高级的结构来将容器绑定在一起，并将它们作为一个单元进行管理，这就是<code>Pod</code>出现的目的。</p>
+<h3 id="如何定义并创建一个pod">如何定义并创建一个Pod</h3>
+<p>创建文件<code>nginx-pod.yaml</code>:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+      - containerPort: <span style="color:#099">80</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>相关字段解释如下：</p>
+<ul>
+<li>kind: 该配置的类型，这里是 Pod</li>
+<li>metadata：元数据
+<ul>
+<li>name：Pod的名称</li>
+<li>labels：标签</li>
+</ul>
+</li>
+<li>spec：期望Pod实现的功能
+<ul>
+<li>containers：容器相关配置
+<ul>
+<li>name：container名称</li>
+<li>image：镜像</li>
+<li>ports：容器端口
+<ul>
+<li>containerPort：应用监听的端口</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>运行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 创建</span>
+kubectl create -f nginx-pod.yaml
+<span style="color:#998;font-style:italic"># 输出</span>
+pod/nginx created
+
+<span style="color:#998;font-style:italic"># 查看</span>
+kubectl get pods
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx                               1/1     Running   <span style="color:#099">0</span>          43s
+
+<span style="color:#998;font-style:italic"># 查看 Pod 完整的描述性文件 </span>
+<span style="color:#998;font-style:italic"># yaml 是你想看的格式 也可以是 json</span>
+kubectl get po nginx -o yaml
+
+<span style="color:#998;font-style:italic"># 删除 Pod</span>
+kubectl delete -f nginx-pod.yaml
+</code></pre></td></tr></table>
+</div>
+</div><p>这里简单介绍了用声明式API怎么创建<code>Pod</code>，但从技术角度看，<code>Pod</code>又是怎样被创建的呢？实际上<code>Pod</code>只是一个逻辑概念，<code>Pod</code>里的所有容器，共享的是同一个<code>Network Namespace</code>，并且可以声明共享同一个<code>Volume</code>。</p>
+<p><code>Pod</code>除了启动你定义的容器，还会启动一个<code>Infra</code>容器，这个容器使用的就是<code>k8s.gcr.io/pause</code>镜像，它的作用就是整一个<code>Network Namespace</code>方便用户容器加入，这就意味着<code>Pod</code>有以下特性：</p>
+<ul>
+<li>内部直接使用<code>127.0.0.1</code>通信，网络设备一致（<code>Infra</code>容器决定）</li>
+<li>只有一个IP地址</li>
+<li><code>Pod</code>的生命周期只跟<code>Infra</code>容器一致，而与用户容器无关</li>
+</ul>
+<h3 id="标签">标签</h3>
+<p>现在我们的集群里面只运行了一个<code>Pod</code>，但在实际环境中，我们运行数十上百个<code>Pod</code>也是一件很正常的事情，这样就引出了<code>Pod</code>管理上的问题，我们可以通过标签来组织<code>Pod</code>和所有其他<code>Kubernetes</code>对象。</p>
+<p>前面<code>nginx-pod.yaml</code>里面就声明了<code>labels</code>字段，标签为<code>name</code>，相关操作记录如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 查看标签</span>
+kubectl get pods --show-labels
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME                              READY   STATUS    RESTARTS   AGE   LABELS
+nginx                             1/1     Running   <span style="color:#099">0</span>          17m   <span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span>nginx
+
+<span style="color:#998;font-style:italic"># 增加标签</span>
+kubectl label pods nginx <span style="color:#008080">version</span><span style="color:#000;font-weight:bold">=</span>latest
+<span style="color:#998;font-style:italic"># 输出</span>
+pod/nginx labeled
+
+<span style="color:#998;font-style:italic"># 查看特定标签</span>
+kubectl get pods -l <span style="color:#d14">&#34;version=latest&#34;</span> --show-labels
+
+<span style="color:#998;font-style:italic"># 更新标签</span>
+kubectl label pods nginx <span style="color:#008080">version</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span> --overwrite
+
+<span style="color:#998;font-style:italic"># 删除标签</span>
+kubectl label pods nginx version-
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="命名空间">命名空间</h3>
+<p>利用标签，我们可以将<code>Pod</code>和其他对象组织成一个组，这是最小粒度的分类，当我们需要将对象分割成完全独立且不重叠的组时，比如我想单独基于<code>k8s</code>搭建一套<code>Flink</code>集群，我不用想让我的<code>Flink</code>和前面搭建的<code>Nginx</code>放在一起，这个时候，命名空间（namespace）的作用就体现出来了。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 列出所有的命名空间</span>
+kubectl get ns
+<span style="color:#998;font-style:italic"># 输出，我们目前都是在 default 命名空间中进行操作</span>
+NAME                   STATUS   AGE
+default                Active   20d
+kube-node-lease        Active   20d
+kube-public            Active   20d
+kube-system            Active   20d
+kubernetes-dashboard   Active   19d
+</code></pre></td></tr></table>
+</div>
+</div><p>让我们创建一个命名空间<code>vim cus-ns.yaml</code>，输入:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Namespace
+metadata:
+  name: cus-ns
+</code></pre></td></tr></table>
+</div>
+</div><p>让我们在终端实践一番：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 开始创建命名空间</span>
+kubectl create -f cus-ns.yaml
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME                   STATUS   AGE
+cus-ns                 Active   6s
+
+<span style="color:#998;font-style:italic"># 为新建资源选择命名空间</span>
+kubectl create -f nginx-pod.yaml -n cus-ns
+</code></pre></td></tr></table>
+</div>
+</div><p>这里我们可以暂时先做一个总结，如前面所说，<code>Pod</code>可以表示<code>k8s</code>中的基本部署单元。经过前面的讲解，你应该知道以下一些知识点：</p>
+<ul>
+<li>手动增删改查<code>Pod</code></li>
+<li>让其服务化（<code>Service</code>）</li>
+</ul>
+<p>但是在实际使用中，我们并不会直接人工干预来管理<code>Pod</code>，为什么呢？当<code>Pod</code>健康出问题或者需要进行更新等操作时，人是没有精力来做这种维护管理工作的，但我们擅长创造工具来自动化这些繁琐的事情，所以我们可以使用后面介绍的<code>Deployment</code>。</p>
+<h3 id="外部访问">外部访问</h3>
+<p>此时我们已经启动了一个<code>nginx</code>，我们有哪些方法可以对<code>Pod</code>进行连接测试呢？</p>
+<p>可以使用如下命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl port-forward nginx 8088:80
+<span style="color:#998;font-style:italic"># 输出</span>
+Forwarding from 127.0.0.1:8088 -&gt; <span style="color:#099">80</span>
+Forwarding from <span style="color:#000;font-weight:bold">[</span>::1<span style="color:#000;font-weight:bold">]</span>:8088 -&gt; <span style="color:#099">80</span>
+
+<span style="color:#998;font-style:italic"># 再开一个终端访问测试或者打开浏览器</span>
+curl http://0.0.0.0:8088/
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="image-20210105230002954" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210105230002954.png" />   
+    </p>
+<p>显然，成功访问，但是这个有个问题就是此端口不会长期开放，一旦一定时间内没有访问，就会自动断掉，我们需要其他的方式来进行访问，比如后面会提到的<code>Service</code>，这里就简单运行个命令，大家感受一下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 创建一个服务对象</span>
+<span style="color:#998;font-style:italic"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
+kubectl expose po nginx --port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">80</span> --target-port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">80</span> --type<span style="color:#000;font-weight:bold">=</span>NodePort  --name nginx-http
+<span style="color:#998;font-style:italic"># 输出</span>
+service/nginx-http exposed
+
+<span style="color:#998;font-style:italic"># 查看服务</span>
+kubectl get svc
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT<span style="color:#000;font-weight:bold">(</span>S<span style="color:#000;font-weight:bold">)</span>        AGE
+kubernetes   ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        16d
+nginx-http   NodePort    10.102.141.232   &lt;none&gt;        80:32220/TCP   1s
+
+<span style="color:#998;font-style:italic"># 终端访问测试</span>
+curl http://0.0.0.0:32220/
+<span style="color:#998;font-style:italic"># 输出 html, 表示成功端口成功开放给外部</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="service">Service</h2>
+<blockquote>
+<p>Service 服务的主要作用就是替代 Pod 对外暴露一个不变的访问地址</p>
+</blockquote>
+<p>在本文第二节<code>Pod</code>部分的<code>外部访问</code>小节，就已经提到并演示了<code>Service</code>，它很方便地将我们的服务端口成功开放给外部访问。</p>
+<h3 id="介绍">介绍</h3>
+<p>我们的<code>Pod</code>是有生命周期的，它们可以被创建、销毁，但是一旦被销毁，这个对象的相关痕迹就没有了，哪怕我们用<code>ReplicaSet</code>让他又<em>复生</em>了，但是新<code>Pod</code> 的<code>IP</code>我们是没法管控的。</p>
+<p>很显然，如果我们的后端服务的接口地址总是在变，我们的前端人员心中定然大骂，怎么办？这就轮到<code>Service</code>出场了。</p>
+<h3 id="定义-service">定义 Service</h3>
+<p>前面我们创建了一个名为<code>nginx-http</code>的<code>Services</code>，用的是命令行；接下来我们介绍一下配置文件的形式，在<code>nginx-deployment.yaml</code>后面增加以下配置：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#555">---</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Service<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">selector</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">app</span>:<span style="color:#bbb"> </span>nginx<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">type</span>:<span style="color:#bbb">  </span>NodePort<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span>- <span style="color:#000080">nodePort</span>:<span style="color:#bbb"> </span><span style="color:#099">30068</span><span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8068</span><span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">protocol</span>:<span style="color:#bbb"> </span>TCP<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">targetPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>相信上述配置，大部分的字段看起来都没什么问题了吧，先说一下端口这块的含义：</p>
+<ul>
+<li>nodePort：通过任意节点的<code>30068</code>端口来访问<code>Service</code></li>
+<li>port：集群内的其他容器组可通过<code>8068</code>端口访问<code>Service</code></li>
+<li>targetPort：<code>Pod</code>内容器的开发端口</li>
+</ul>
+<p>这里我想强调的是<code>type</code>字段，说明如下：</p>
+<ul>
+<li>ClusterIP：默认类型，服务只能够在集群内部可以访问</li>
+<li>NodePort：通过每个 Node 上的 IP 和静态端口（<code>NodePort</code>）暴露服务</li>
+<li>LoadBalancer：使用云提供商的负载均衡器，可以向外部暴露服务。</li>
+</ul>
+<p>关于<code>LoadBalancer</code>，基本上是云商会提供此类型，如果是我们自行搭建的，就没有此类型可选，但是很多开源项目默认是启用这种类型，我们可以自行打一个补丁来解决这个问题：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl patch svc <span style="color:#000;font-weight:bold">{</span>your-svc-name<span style="color:#000;font-weight:bold">}</span> -n default -p <span style="color:#d14">&#39;{&#34;spec&#34;: {&#34;type&#34;: &#34;LoadBalancer&#34;, &#34;externalIPs&#34;:[&#34;0.0.0.0&#34;]}}&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>执行生效命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f ./nginx-deployment.yaml
+<span style="color:#998;font-style:italic"># 输出</span>
+deployment.apps/nginx-deployment unchanged
+service/nginx created
+
+<span style="color:#998;font-style:italic"># 查看服务</span>
+kubectl get services -o wide
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT<span style="color:#000;font-weight:bold">(</span>S<span style="color:#000;font-weight:bold">)</span>          AGE     SELECTOR
+nginx        NodePort    10.110.245.214   &lt;none&gt;        8068:30068/TCP   11m     <span style="color:#008080">app</span><span style="color:#000;font-weight:bold">=</span>nginx
+
+<span style="color:#998;font-style:italic"># 终端测试</span>
+curl http://0.0.0.0:30068/
+</code></pre></td></tr></table>
+</div>
+</div><p>除了前面提的两种方法（<code>NodePort</code>、<code>LoadBalancer</code>），还有另外一种方法——<code>Ingress</code>资源。我们为什么需要引入<code>Ingress</code>，最主要的原因是<code>LoadBalancer</code>需要公有的IP地址，自行搭建的就不要考虑了。</p>
+<p>而<code>Ingress</code>非常强大，它位于多个服务之前，充当集群中的<strong>智能路由器</strong>或入口点：</p>
+<p>
+        <img class="mx-auto" alt="Ingress.png" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/ab886a9dd4e912cf6f5a1f3ed983ac4c.png" />   
+    </p>
+<h2 id="deployment">Deployment</h2>
+<p>窥一斑而知全豹，好好了解完<code>Pod</code>之后，再继续了解<code>k8s</code>的概念也就水到渠成了。我们一般不会直接创建<code>Pod</code>，毕竟通过创建<code>Deployment</code>资源可以很方便的创建管理<code>Pod</code>（水平扩展、伸缩），并支持声明式地更新应用程序。</p>
+<h3 id="介绍-1">介绍</h3>
+<p>本章第一小节<strong>引入</strong>部分就是以<code>Deployment</code>举例，当时启动配置文件我们看到了一个<code>Deployment</code>资源和一个<code>Pod</code>，查看命令如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get deployments
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   0/1     <span style="color:#099">1</span>            <span style="color:#099">0</span>           4s
+
+kubectl get pods
+<span style="color:#998;font-style:italic"># 输出 如果名字有变化不用在意，只是我重新创建了一个 Deployment </span>
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-585449566-mnrtn   1/1     Running   <span style="color:#099">0</span>          2m1s
+</code></pre></td></tr></table>
+</div>
+</div><p>这里我们再增加一条命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get replicasets.apps
+<span style="color:#998;font-style:italic"># 输出</span>
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-585449566   <span style="color:#099">1</span>         <span style="color:#099">1</span>         <span style="color:#099">1</span>       10m
+</code></pre></td></tr></table>
+</div>
+</div><p>嗯嗯~，让我们捋一捋，当我们创建一个<code>Deployment</code>对象时，<code>k8s</code>不会只创建一个<code>Deployment</code>资源，还会创建另外的<code>ReplicaSet </code>以及1个<code>Pod </code>对象。所以问题来了， <code>ReplicaSet</code>又是个是什么东西？</p>
+<h3 id="replicaset">ReplicaSet</h3>
+<p>如果你更新了<code>Deployment</code>的<code>Pod</code>模板，那么<code>Deployment</code>就需要通过滚动更新（rolling update）的方式进行更新。</p>
+<p>而滚动更新，离不开<code>ReplicaSet</code>，说到<code>ReplicaSet</code>就得说到<code>ReplicationController</code>（弃用）。</p>
+<blockquote>
+<p><code>ReplicationController</code>是一种<code>k8s</code>资源，其会持续监控正在运行的pod列表，从而保证<code>Pod</code>的稳定（在现有<code>Pod</code>丢失时启动一个新<code>Pod</code>），也能轻松实现<code>Pod</code>的水平伸缩</p>
+</blockquote>
+<p><code>ReplicaSet</code>的行为与<code>ReplicationController</code>完全相同，但<code>Pod</code>选择器的表达能力更强（允许匹配缺少某个标签的Pod，或包含特定标签名的Pod）。所以我们可以将<code>Deployment</code>当成一种更高阶的资源，用于部署应用程序，并以声明的方式管理应用，而不是通过<code>ReplicaSet</code>进行部署，上述命令的创建关系如下图：</p>
+<p>
+        <img class="mx-auto" alt="image-20210110174652178" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210110174652178.png" />   
+    </p>
+<p>如上图，<code>Deployment</code>的控制器，实际上控制的是<code>ReplicaSet</code>的数目，以及每个<code>ReplicaSet</code>的属性。我们可以说<code>Deployment</code>是一个两层控制器：</p>
+<blockquote>
+<p>Deployment&ndash;&gt;ReplicaSet&ndash;&gt;Pod</p>
+</blockquote>
+<p>这种形式下滚动更新是极好的，但这里有个前提条件那就是<code>Pod</code>是无状态的，如果运行的容器必须依赖此时的相关运行数据，那么回滚后这些存在于容器的数据或者一些相关运行状态值就不存在了，对于这种情况，该怎么办？此时需要的就是<code>StatefulSet</code>（部署有状态的多副本应用）。</p>
+<h2 id="statefulset">StatefulSet</h2>
+<p>如果通过<code>ReplicaSet</code>创建多个<code>Pod</code>副本（其中描述了关联到特定持久卷声明的数据卷），那么这些副本都将共享这个持久卷声明的数据卷。</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/CB_3NC5VK5SeDyX6Np6Ln_00500.jpeg" />   
+    </p>
+<p>那如何运行一个pod的多个副本，让每个pod都有独立的存储卷呢？对于这个问题，之前学习的相关知识都不能提供比较好的解决方案。<code>k8s</code>提供了<code>Statefulset</code>资源来运行这类Pod，它是专门定制的一类应用，这类应用中每一个实例都是不可替代的个体，都拥有稳定的名字和状态。</p>
+<p>对于有状态的应用（实例之间有不对等的关系或者依赖外部数据），主要需要对以下两种类型的状态进行复刻：</p>
+<ul>
+<li>存储状态：应用的多个实例分别绑定了不同的存储数据，也就是让每个Pod都有自己独立的存储卷</li>
+<li>拓扑状态：应用的多个实例之间不是完全对等的关系，各个Pod需要按照一定的顺序启动</li>
+</ul>
+<h2 id="参考">参考</h2>
+<p>本章的基本概念就介绍到这里了，谢谢！本部分内容有参考如下文章：</p>
+<ul>
+<li><a href="https://kuboard.cn/learning/k8s-basics/kubernetes-basics.html">学习Kubernetes基础知识</a></li>
+<li><a href="https://draveness.me/kubernetes-deployment/">详解 Kubernetes Deployment 的实现原理</a></li>
+<li><a href="https://jimmysong.io/kubernetes-handbook/concepts/deployment.html">Kubernetes 中文指南</a>：Deployment</li>
+<li><a href="https://jimmysong.io/kubernetes-handbook/concepts/service.html">Kubernetes 中文指南</a>：Service</li>
+<li><a href="https://time.geekbang.org/column/intro/100015201?code=UhApqgxa4VLIA591OKMTemuH1%2FWyLNNiHZ2CRYYdZzY%3D">深入剖析Kubernetes</a>：容器编排部分</li>
+<li>Kubernetes in Action中文版：第3、4、5、9章</li>
+</ul>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2021/02_k8s_note_02_basic_concept/">https://www.howie6879.cn/post/2021/02_k8s_note_02_basic_concept/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2021/01_k8s_note_01_installation/">k8s学习之路.基础.[01.走进Kubernetes]</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF'>k8s学习之路</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

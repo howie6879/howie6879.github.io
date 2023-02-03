@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="统计学习方法概述 #  第一章主要对全书内容做了一个内容的概括：
+ 统计学习：定义、研究对象和方法 监督学习 统计学习三要素：模型、策略、算法 模型评估与选择：包括正则化、交叉验证与学习的泛化能力 生成模型与判别模型 分类问题、标注问题与回归问题  统计学习 #  什么是统计学习
+统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习
+统计学习的特点
+ 统计学习以计算机及网络为平台，是建立在计算机及 网络之上的 统计学习以数据为研究对象，是数据驱动的学科 统计学习的目的是对数据进行预测与分析 统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析 统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论  什么是机器学习
+如果一个程序可以在任务T上，随着经验E的增加，效果P也可以随之增加，则称这个程序可以从经验中学习。 &mdash; 卡内基美隆大学的Tom Michael Mitchell教授
+ 如果以垃圾邮件为例，一个程序指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；任务T指的是区分垃圾邮件的任务；经验E为已经区分过是否为垃圾邮件的历史邮件；效果P为机器学习算法在区分是否为垃圾邮件任务上的准确率
+ 统计学习的目的
+统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析
+统计学习的方法
+ 监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归 非监督学习（unsupervised learning）：聚类、降维 半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM） 强化学习（reinforcement learning）：蒙特卡洛方法  监督学习 #  基本概念 #   输入空间（input space）：输入所有可能取值的集合 输出空间（output space）：输出所有可能取值的集合 特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间 联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - 机器学习-联合概率分布笔记 假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）  人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="统计学习方法概述 #  第一章主要对全书内容做了一个内容的概括：
+ 统计学习：定义、研究对象和方法 监督学习 统计学习三要素：模型、策略、算法 模型评估与选择：包括正则化、交叉验证与学习的泛化能力 生成模型与判别模型 分类问题、标注问题与回归问题  统计学习 #  什么是统计学习
+统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习
+统计学习的特点
+ 统计学习以计算机及网络为平台，是建立在计算机及 网络之上的 统计学习以数据为研究对象，是数据驱动的学科 统计学习的目的是对数据进行预测与分析 统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析 统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论  什么是机器学习
+如果一个程序可以在任务T上，随着经验E的增加，效果P也可以随之增加，则称这个程序可以从经验中学习。 &mdash; 卡内基美隆大学的Tom Michael Mitchell教授
+ 如果以垃圾邮件为例，一个程序指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；任务T指的是区分垃圾邮件的任务；经验E为已经区分过是否为垃圾邮件的历史邮件；效果P为机器学习算法在区分是否为垃圾邮件任务上的准确率
+ 统计学习的目的
+统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析
+统计学习的方法
+ 监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归 非监督学习（unsupervised learning）：聚类、降维 半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM） 强化学习（reinforcement learning）：蒙特卡洛方法  监督学习 #  基本概念 #   输入空间（input space）：输入所有可能取值的集合 输出空间（output space）：输出所有可能取值的集合 特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间 联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - 机器学习-联合概率分布笔记 假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）  人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" /><meta property="article:section" content="docs" />
+
+
+
+<title>01.统计学习方法概论 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class=" active">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01.统计学习方法概论</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#统计学习">统计学习</a></li>
+    <li><a href="#监督学习">监督学习</a>
+      <ul>
+        <li><a href="#基本概念">基本概念</a></li>
+        <li><a href="#问题的形式化">问题的形式化</a></li>
+      </ul>
+    </li>
+    <li><a href="#统计学习三要素">统计学习三要素</a>
+      <ul>
+        <li><a href="#模型">模型</a></li>
+        <li><a href="#策略">策略</a></li>
+        <li><a href="#算法">算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#模型评估与模型选择">模型评估与模型选择</a>
+      <ul>
+        <li><a href="#训练误差与测试误差">训练误差与测试误差</a></li>
+        <li><a href="#过拟合与模型选择">过拟合与模型选择</a></li>
+      </ul>
+    </li>
+    <li><a href="#正则化与交叉验证">正则化与交叉验证</a>
+      <ul>
+        <li><a href="#正则化">正则化</a></li>
+        <li><a href="#交叉验证">交叉验证</a></li>
+      </ul>
+    </li>
+    <li><a href="#泛化能力">泛化能力</a>
+      <ul>
+        <li><a href="#泛化误差">泛化误差</a></li>
+        <li><a href="#泛化误差上界">泛化误差上界</a></li>
+      </ul>
+    </li>
+    <li><a href="#生成模型与判别模型">生成模型与判别模型</a></li>
+    <li><a href="#分类问题">分类问题</a></li>
+    <li><a href="#标注问题">标注问题</a></li>
+    <li><a href="#回归问题">回归问题</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="统计学习方法概述">
+  统计学习方法概述
+  <a class="anchor" href="#%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95%e6%a6%82%e8%bf%b0">#</a>
+</h1>
+<p>第一章主要对全书内容做了一个内容的概括：</p>
+<ul>
+<li>统计学习：定义、研究对象和方法</li>
+<li>监督学习</li>
+<li>统计学习三要素：模型、策略、算法</li>
+<li>模型评估与选择：包括正则化、交叉验证与学习的泛化能力</li>
+<li>生成模型与判别模型</li>
+<li>分类问题、标注问题与回归问题</li>
+</ul>
+<h2 id="统计学习">
+  统计学习
+  <a class="anchor" href="#%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0">#</a>
+</h2>
+<p><strong>什么是统计学习</strong></p>
+<p>统计学习是关于计算机基于数据构建概率统计模型并运用模型对数据进行预测与分析的一门学科，统计学习也称为统计机器学习</p>
+<p><strong>统计学习的特点</strong></p>
+<ul>
+<li>统计学习以计算机及网络为平台，是建立在计算机及 网络之上的</li>
+<li>统计学习以数据为研究对象，是数据驱动的学科</li>
+<li>统计学习的目的是对数据进行预测与分析</li>
+<li>统计学习以方法为中心，统计学习方法构建模型并应用模型进行预测与分析</li>
+<li>统计学习是概率论、统计学、信息论、计算理论、最优化理论及计算机科学等多个领域的交叉学科，并且在发展中逐步形成独自的理论体系与方法论</li>
+</ul>
+<p><strong>什么是机器学习</strong></p>
+<p>如果<code>一个程序</code>可以在<code>任务T</code>上，随着<code>经验E</code>的增加，<code>效果P</code>也可以随之增加，则称这个程序可以从经验中学习。 &mdash; 卡内基美隆大学的Tom Michael Mitchell教授</p>
+<blockquote>
+<p>如果以垃圾邮件为例，<code>一个程序</code>指的是用到的机器学习算法，比如：朴素贝叶斯、逻辑回归；<code>任务T</code>指的是区分垃圾邮件的任务；<code>经验E</code>为已经区分过是否为垃圾邮件的历史邮件；<code>效果P</code>为机器学习算法在区分是否为垃圾邮件任务上的准确率</p>
+</blockquote>
+<p><strong>统计学习的目的</strong></p>
+<p>统计学习用于对数据进行预测与分析，特别是对未知新数据进行预测与分析</p>
+<p><strong>统计学习的方法</strong></p>
+<ul>
+<li>监督学习（supervised learning）：KNN、决策树、贝叶斯、逻辑回归</li>
+<li>非监督学习（unsupervised learning）：聚类、降维</li>
+<li>半监督学习（semisupervised learning）：self-training（自训练算法）、Graph-based Semi-supervised Learning（基于图的半监督算法）、Semi-supervised supported vector machine（半监督支持向量机，S3VM）</li>
+<li>强化学习（reinforcement learning）：蒙特卡洛方法</li>
+</ul>
+<h2 id="监督学习">
+  监督学习
+  <a class="anchor" href="#%e7%9b%91%e7%9d%a3%e5%ad%a6%e4%b9%a0">#</a>
+</h2>
+<h3 id="基本概念">
+  基本概念
+  <a class="anchor" href="#%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5">#</a>
+</h3>
+<ul>
+<li>输入空间（input space）：输入所有可能取值的集合</li>
+<li>输出空间（output space）：输出所有可能取值的集合</li>
+<li>特征空间（feature space）：每个具体的输入是一个实例（instance），通常由特征向量（feature vector）表示。这时，所有特征向量存在的空间称为特征空间</li>
+<li>联合概率分布：统计学习假设数据存在一定的统计规律，X和Y具有联合概率分布的假设就是监督学习关于数据的基本假设 - <a href="https://blog.csdn.net/tiankong_/article/details/78332666">机器学习-联合概率分布笔记</a></li>
+<li>假设空间：学习的目的在于找到最好的模型，模型属于由输入空间到输出空间的映射的集合，这个集合就是假设空间（hypothesis space）</li>
+</ul>
+<p>人们根据输入、输出变量的不同类型，对预测任务给予不同的名称：</p>
+<ul>
+<li>分类问题：输出变量为有限个离散变量的预测问题</li>
+<li>回归问题：输入变量与输出变量均为连续变量的预测问题</li>
+<li>标注问题：输入变量与输出变量均为变量序列的预测问题</li>
+</ul>
+<h3 id="问题的形式化">
+  问题的形式化
+  <a class="anchor" href="#%e9%97%ae%e9%a2%98%e7%9a%84%e5%bd%a2%e5%bc%8f%e5%8c%96">#</a>
+</h3>
+<p>监督学习利用训练数据集学习一个模型，再用模型对测试样本集进行预测 （prediction）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/72A50DED-998C-4C8F-B20D-3FC2257CE2B4.png" alt="" /></p>
+<p>输入训练集 -&gt; 生成模型 -&gt; 预测，由于训练集是人工给出的，所以称之为监督学习</p>
+<h2 id="统计学习三要素">
+  统计学习三要素
+  <a class="anchor" href="#%e7%bb%9f%e8%ae%a1%e5%ad%a6%e4%b9%a0%e4%b8%89%e8%a6%81%e7%b4%a0">#</a>
+</h2>
+<p>统计学习方法由三要素构成，可以简单地表示为：<strong>方法 = 模型 + 策略 + 算法</strong></p>
+<h3 id="模型">
+  模型
+  <a class="anchor" href="#%e6%a8%a1%e5%9e%8b">#</a>
+</h3>
+<p>在监督学习过程中，模型就是所要学习的条件概率分布或决策函数。模型的假设空间（hypothesis space）包含所有可能的条件概率分布或决策函数</p>
+<p>例如，假设决策函数是输入变量的线性函数，那么模型的假设空间就是所有这些线性函数构成的函数集合，假设空间中的模型一般有无穷多个</p>
+<h3 id="策略">
+  策略
+  <a class="anchor" href="#%e7%ad%96%e7%95%a5">#</a>
+</h3>
+<p>知道模型的交涉空间后，现在的目的就是选择出最优的一个模型出来，而这就是统计学习的目标，这里引入两个概念：</p>
+<ul>
+<li>损失函数（loss function）：用于度量模型一次预测的好坏</li>
+<li>风险函数（risk function）：度量平均意义下模型预测的好坏</li>
+</ul>
+<p><strong>损失函数和风险函数</strong></p>
+<p>监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))</p>
+<p>统计学习中常用的损失函数有如下几种：</p>
+<ul>
+<li>0-1损失函数（0-1 loss function）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/42CD0528-7011-4AA9-A79C-514587FA8DD7.png" alt="" /></li>
+<li>平方损失函数（quadratic loss function）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5B51ED16-2F58-4CED-B7EA-03CE52ABC835.png" alt="" /></li>
+<li>绝对损失函数（absolute loss function）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/329F0C27-AE06-4580-BB67-9BA522AA9D33.png" alt="" /></li>
+<li>对数损失函数（logarithmic loss function）或对数似然损失函数（loglikelihood loss function）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/502CA9B6-2E10-46C6-9F8D-BF8CAA4140C0.png" alt="" /></li>
+</ul>
+<p>有了上面概念的铺垫，又可以引入下面两个概念：</p>
+<ul>
+<li>模型f(X)关于联合分布P(X,Y)的平均意义下的损失：风险函数（risk function）或期望损失（expected loss）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C419536B-5085-4FAD-A822-D9EE9F9C4733.png" alt="" /></li>
+<li>模型f(X)关于训练数据集的平均损失：经验风险（empirical risk）或经验损失（empirical loss）：
+<img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/B39854FF-891B-44A5-9D55-564E049EA825.png" alt="" /></li>
+</ul>
+<p>当样本数量足够的情况下，经验风险是趋近于期望风险的，但是现实中样本数量是有限的，，所以用经验风险估计期望风险常常并不理想，要对经验风险进行一定的矫正</p>
+<p>这就关系到监督学习的两个基本策略：<strong>经验风险最小化和结构风险最小化</strong></p>
+<p><strong>经验风险最小化与结构风险最小化</strong></p>
+<p>在假设空间、损失函数以及训练数据集确定的情况下，经验风险函数式（1.10）就可以确定，经验风险最小化（empirical risk minimization，ERM）的策略认为，经验风险最小的模型是最优的模型</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/7196AB5B-A29F-4F0B-A92E-1E038E9DA6AF.png" alt="" /></p>
+<p>当样本数量过小，可能会出现<strong>过拟合</strong>问题，结构风险最小化（structural risk minimization，SRM）是为了防止过拟合而提出来的策略</p>
+<p>结构风险最小化等价于正则化（regularization）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/5882A701-300C-4107-8CBC-99658B6D7BEA.png" alt="" /></p>
+<p>加上结构风险最小化的策略，此时的最优模型就是下面的最优化问题求解：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/85C6CF7E-ABA1-4DA9-A9D6-8A6F2990355C.png" alt="" /></p>
+<p>这样，监督学习问题就变成了经验风险或结构风险函数的最优化问题（1.11）和（1.13），这时经验或结构风险函数是最优化的目标函数</p>
+<h3 id="算法">
+  算法
+  <a class="anchor" href="#%e7%ae%97%e6%b3%95">#</a>
+</h3>
+<p>统计学习基于训练数据集，根据学习策略，从假设空间中选择最优模型，最后需要考虑用什么样的计算方法求解最优模型，这时，统计学习问题归结为最优化问题，统计学习的算法成为求解最优化问题的算法：</p>
+<h2 id="模型评估与模型选择">
+  模型评估与模型选择
+  <a class="anchor" href="#%e6%a8%a1%e5%9e%8b%e8%af%84%e4%bc%b0%e4%b8%8e%e6%a8%a1%e5%9e%8b%e9%80%89%e6%8b%a9">#</a>
+</h2>
+<h3 id="训练误差与测试误差">
+  训练误差与测试误差
+  <a class="anchor" href="#%e8%ae%ad%e7%bb%83%e8%af%af%e5%b7%ae%e4%b8%8e%e6%b5%8b%e8%af%95%e8%af%af%e5%b7%ae">#</a>
+</h3>
+<p>对于我们利用学习方法通过训练给出的模型，我们希望这个模型能较好的具有以下两点能力：</p>
+<ul>
+<li>拟合能力：已知数据的预测比较合理</li>
+<li>泛化能力：未知数据的预测比较合理</li>
+</ul>
+<p>前面说过，损失函数能够度量模型预测的好坏，所以基于损失函数的模型的训练误差（training error）和模型的测试误差（test error）就自然成为学习方法评估的标准：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/D2733ADB-7BDB-4A8D-8F2B-E38E51ABC182.png" alt="" /></p>
+<h3 id="过拟合与模型选择">
+  过拟合与模型选择
+  <a class="anchor" href="#%e8%bf%87%e6%8b%9f%e5%90%88%e4%b8%8e%e6%a8%a1%e5%9e%8b%e9%80%89%e6%8b%a9">#</a>
+</h3>
+<p>我们认为在假设空间存在一个真的模型，那么我们选择的模型的目标就是尽量接近这个真模型，假设空间很可能含有不同复杂度的模型，所以此时我们的目标就变成了寻找一个复杂度合适的模型，这里引出一个概念，过拟合（over fitting） - 所选模型的复杂度则比真模型更高</p>
+<p>接下来我们的问题就转接成了需找一个模型复杂度适当的模型，前面一节我们介绍了训练误差与测试误差，那么训练误差与测试误差和模型的复杂度有没有什么关系呢，看下图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/57BE978D-6617-4A80-9D2A-937508E6366A.png" alt="" /></p>
+<p>可以看到，训练误差和模型复杂度的关系是：随着模型复杂度的增加，训练误差逐渐递减，趋向于0（此时可能过拟合），但是测试误差会有个最小值（此时才是最合适的复杂度）</p>
+<p>那么我们的学习目的就出来了：选择复杂度适当的模型，以达到使测试误差最小</p>
+<p>现在目的就很明确了，就是需要一个途径比较测试误差，选出最值小的，从而选出我们的模型：</p>
+<ul>
+<li>正则化</li>
+<li>交叉验证</li>
+</ul>
+<h2 id="正则化与交叉验证">
+  正则化与交叉验证
+  <a class="anchor" href="#%e6%ad%a3%e5%88%99%e5%8c%96%e4%b8%8e%e4%ba%a4%e5%8f%89%e9%aa%8c%e8%af%81">#</a>
+</h2>
+<h3 id="正则化">
+  正则化
+  <a class="anchor" href="#%e6%ad%a3%e5%88%99%e5%8c%96">#</a>
+</h3>
+<p>在统计学习三要素那一节讲过结构风险最小化策略，此策略的目的就是防止过拟合，正则化是结构风险最小化策略的实现，是在经验风险上加一个正则化项（regularizer）或罚项(penalty term)：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/94BCF3C8-4EF6-4FE3-8E0B-C404E93B55BF.png" alt="" /></p>
+<p>正则化的作用是选择经验风险与模型复杂度同时较小的模型</p>
+<h3 id="交叉验证">
+  交叉验证
+  <a class="anchor" href="#%e4%ba%a4%e5%8f%89%e9%aa%8c%e8%af%81">#</a>
+</h3>
+<p>交叉验证的基本想法是重复地使用数据，把给定的数据进行切分，将切分的数据集组合为训练集与测试集，在此基础上反复地进行训练、测试以及模型选择，交叉验证有如下三种方式：</p>
+<ul>
+<li>简单交叉验证</li>
+<li>S折交叉验证</li>
+<li>留一交叉验证</li>
+</ul>
+<h2 id="泛化能力">
+  泛化能力
+  <a class="anchor" href="#%e6%b3%9b%e5%8c%96%e8%83%bd%e5%8a%9b">#</a>
+</h2>
+<p>学习方法的泛化能力（generalization  ability）是指由该方法学习到的模型对未知数据的预测能力，是学习方法本质上重要的性质</p>
+<h3 id="泛化误差">
+  泛化误差
+  <a class="anchor" href="#%e6%b3%9b%e5%8c%96%e8%af%af%e5%b7%ae">#</a>
+</h3>
+<p><strong>泛化误差的定义</strong></p>
+<p>对于一个学到的模型，其对未知数的预测就是泛化误差（generalization error），其实就是策略那节讲的风险函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/C0F55EFF-18AE-41DE-A8EE-91112A9047DF.png" alt="" /></p>
+<p>泛化误差反映了学习方法的泛化能力，如果一种方法学习的模型比另一种方法学习的模型具有更小的泛化误差，那么这种方法就更有效</p>
+<h3 id="泛化误差上界">
+  泛化误差上界
+  <a class="anchor" href="#%e6%b3%9b%e5%8c%96%e8%af%af%e5%b7%ae%e4%b8%8a%e7%95%8c">#</a>
+</h3>
+<p>学习方法的泛化能力分析往往是通过研究泛化误差的概率上界进行的，简称为泛化误 差上界（generalization error bound）</p>
+<p>泛化误差上界性质如下：</p>
+<ul>
+<li>它是样本容量的函数，当样本容量增加时，泛化上界趋于0</li>
+<li>它是假设空间容量（capacity）的函数，假设空间容量越大，模型就越难学，泛化误差上界就越大</li>
+</ul>
+<h2 id="生成模型与判别模型">
+  生成模型与判别模型
+  <a class="anchor" href="#%e7%94%9f%e6%88%90%e6%a8%a1%e5%9e%8b%e4%b8%8e%e5%88%a4%e5%88%ab%e6%a8%a1%e5%9e%8b">#</a>
+</h2>
+<p>监督学习方法可以分为：</p>
+<ul>
+<li>生成方法（generative approach）：生成方法可以还原出联合概率分布<code>P(X,Y)</code>，而判别方法则不能；生成方法的学习收敛速度更快，即当样本容量增加的时候，学到的模型可以更快地收敛于真实模型；当存在隐变量时，仍可以用生成方法学习，此时判别方法就不能用</li>
+<li>判别方法（discriminative approach）：判别方法直接学习的是条件概率<code>P(Y|X)</code>或决策函数<code>f(X)</code>，直接面对预测，往往学习的准确率更高；由于直接学习<code>P(Y|X)</code>或<code>f(X)</code>，可以对数据进行各种程度上 的抽象、定义特征并使用特征，因此可以简化学习问题</li>
+</ul>
+<p>所学到的模型分别称为：</p>
+<ul>
+<li>生成模型（generative model）：
+<ul>
+<li>朴素贝叶斯法</li>
+<li>隐马尔可夫模型</li>
+</ul>
+</li>
+<li>判别模型（discriminative model）：
+<ul>
+<li>k近邻法</li>
+<li>感知机</li>
+<li>决策树</li>
+<li>逻辑斯谛回归模型</li>
+<li>最大熵模型</li>
+<li>支持向量机</li>
+<li>提升方法</li>
+<li>条件随机场</li>
+<li>&hellip;&hellip;</li>
+</ul>
+</li>
+</ul>
+<h2 id="分类问题">
+  分类问题
+  <a class="anchor" href="#%e5%88%86%e7%b1%bb%e9%97%ae%e9%a2%98">#</a>
+</h2>
+<blockquote>
+<p>在监督学习中，当输出变量Y取有限个离散值时，预测问题便成为分类问题，监督学习从数据中学习一个分类模型或分类决策函数，称为分类器（classifier）</p>
+</blockquote>
+<p>许多统计学习方法可以用于分类：</p>
+<ul>
+<li>k近邻法</li>
+<li>感知机</li>
+<li>朴素贝叶斯法</li>
+<li>决策树</li>
+<li>决策列表</li>
+<li>逻辑斯谛回归模型</li>
+<li>支持向量机</li>
+<li>提升方法</li>
+<li>贝叶斯网络</li>
+<li>神经网络</li>
+<li>Winnow</li>
+<li>&hellip;&hellip;</li>
+</ul>
+<p>评价分类器性能的指标一般是分类准确率（accuracy）：对于给定的测试数据集，分类器正确分类的样本数与总样本数之比，也就是损失函数是0-1损失时测试数据集上的准确率，见图<code>1.17</code></p>
+<p>对于二类分类问题常用的评价指标是精确率（precision）与召回率（recall），因为是二分类，所以一共有四中预测情况：</p>
+<ul>
+<li>TP——将正类预测为正类数</li>
+<li>FN——将正类预测为负类数</li>
+<li>FP——将负类预测为正类数</li>
+<li>TN——将负类预测为负类数</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/F10C9303-79C3-4134-8481-C895631C84CC.png" alt="" /></p>
+<h2 id="标注问题">
+  标注问题
+  <a class="anchor" href="#%e6%a0%87%e6%b3%a8%e9%97%ae%e9%a2%98">#</a>
+</h2>
+<blockquote>
+<p>标注问题的目标在于学习一个模型， 使它能够对观测序列给出标记序列作为预测</p>
+</blockquote>
+<p>许多统计学习方法可以用于标注：</p>
+<ul>
+<li>隐马尔可夫模型</li>
+<li>条件随机场</li>
+</ul>
+<p>评价标注模型的指标与评价分类模型的指标一样，常用的有标注准确率、精确率和召回率，其定义与分类模型相同</p>
+<h2 id="回归问题">
+  回归问题
+  <a class="anchor" href="#%e5%9b%9e%e5%bd%92%e9%97%ae%e9%a2%98">#</a>
+</h2>
+<p>回归用于预测输入变量（自变量）和输出变量（因变量）之间的关系，特别是当输入变量的值发生变化时，输出变量的值随之发生的变化，回归问题按照输入变量的个数，分为一元回归和多元回归；按照输入变量和输出变量之间关系的类型即模型的类型，分为线性回归和非线性回归</p>
+<h2 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h2>
+<p>一些参考链接：</p>
+<ul>
+<li><a href="https://github.com/WenDesi/lihang_book_algorithm">致力于将李航博士《统计学习方法》一书中所有算法实现一遍</a></li>
+<li><a href="https://github.com/zzqboy/static_study">《统计学习方法》的读书笔记，重现了大部分的课后题，仅供参考</a></li>
+<li><a href="https://segmentfault.com/a/1190000015561652#articleHeader2">深度学习中的概率知识详解</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#统计学习">统计学习</a></li>
+    <li><a href="#监督学习">监督学习</a>
+      <ul>
+        <li><a href="#基本概念">基本概念</a></li>
+        <li><a href="#问题的形式化">问题的形式化</a></li>
+      </ul>
+    </li>
+    <li><a href="#统计学习三要素">统计学习三要素</a>
+      <ul>
+        <li><a href="#模型">模型</a></li>
+        <li><a href="#策略">策略</a></li>
+        <li><a href="#算法">算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#模型评估与模型选择">模型评估与模型选择</a>
+      <ul>
+        <li><a href="#训练误差与测试误差">训练误差与测试误差</a></li>
+        <li><a href="#过拟合与模型选择">过拟合与模型选择</a></li>
+      </ul>
+    </li>
+    <li><a href="#正则化与交叉验证">正则化与交叉验证</a>
+      <ul>
+        <li><a href="#正则化">正则化</a></li>
+        <li><a href="#交叉验证">交叉验证</a></li>
+      </ul>
+    </li>
+    <li><a href="#泛化能力">泛化能力</a>
+      <ul>
+        <li><a href="#泛化误差">泛化误差</a></li>
+        <li><a href="#泛化误差上界">泛化误差上界</a></li>
+      </ul>
+    </li>
+    <li><a href="#生成模型与判别模型">生成模型与判别模型</a></li>
+    <li><a href="#分类问题">分类问题</a></li>
+    <li><a href="#标注问题">标注问题</a></li>
+    <li><a href="#回归问题">回归问题</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

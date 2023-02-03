@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.80.0" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="神经网络基础 #  要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如：
+ 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降  带着问题出发 #  在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对MNIST数据集进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念
+MNIST数据集是一份手写字训练集，出自MNIST，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：
+ 拥有60,000个示例的训练集，以及10,000个示例的测试集 图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示 图片分为10类， 分别对应从0～9，共10个阿拉伯数字  压缩包内容如下：
+ train-images-idx3-ubyte.gz: training set images (9912422 bytes) train-labels-idx1-ubyte.gz: training set labels (28881 bytes) t10k-images-idx3-ubyte.gz: test set images (1648877 bytes) t10k-labels-idx1-ubyte.gz: test set labels (4542 bytes)  上图：
+图片生成代码如下：
+%matplotlib inline import matplotlib import matplotlib.pyplot as plt import numpy as np from keras.datasets import mnist (train_images, train_labels), (test_images, test_labels) = mnist.">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="神经网络基础 #  要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如：
+ 什么是感知器 什么是神经网络 张量以及运算 微分 梯度下降  带着问题出发 #  在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对MNIST数据集进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念
+MNIST数据集是一份手写字训练集，出自MNIST，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：
+ 拥有60,000个示例的训练集，以及10,000个示例的测试集 图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示 图片分为10类， 分别对应从0～9，共10个阿拉伯数字  压缩包内容如下：
+ train-images-idx3-ubyte.gz: training set images (9912422 bytes) train-labels-idx1-ubyte.gz: training set labels (28881 bytes) t10k-images-idx3-ubyte.gz: test set images (1648877 bytes) t10k-labels-idx1-ubyte.gz: test set labels (4542 bytes)  上图：
+图片生成代码如下：
+%matplotlib inline import matplotlib import matplotlib.pyplot as plt import numpy as np from keras.datasets import mnist (train_images, train_labels), (test_images, test_labels) = mnist." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/01_explore/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" />
+
+<title>01.神经网络基础 | Kubernetes 学习之路</title>
+<link rel="manifest" href="/k8s/manifest.json">
+<link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/k8s/book.min.6c7c6446dfdee7c8c933e9bbc6e80ee3ed6c913b2a59519f2092c3c6a9d63e55.css" integrity="sha256-bHxkRt/e58jJM&#43;m7xugO4&#43;1skTsqWVGfIJLDxqnWPlU=">
+<script defer src="/k8s/en.search.min.2bc7cd7ebd3a0d1af6c23ed0016d71da562bf62e394375848e6909d4f5ca27d3.js" integrity="sha256-K8fNfr06DRr2wj7QAW1x2lYr9i45Q3WEjmkJ1PXKJ9M="></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <head>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css"
+        integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.js"
+        integrity="sha384-483A6DwYfKeDa0Q52fJmxFXkcPCFfnXMoXblOkJ4JcA8zATN6Tm78UNL72AKk+0O"
+        crossorigin="anonymous"></script>
+</head>
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/k8s"><span>Kubernetes 学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：探索</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_explore/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class=" active">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_explore/02.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">02.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01_explore/03.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">03.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/02_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8Python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var menu=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(event){localStorage.setItem("menu.scrollTop",menu.scrollTop);});menu.scrollTop=localStorage.getItem("menu.scrollTop");})();</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/k8s/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01.神经网络基础</strong>
+
+  <label for="toc-control">
+    
+    <img src="/k8s/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#带着问题出发">带着问题出发</a></li>
+    <li><a href="#感知器">感知器</a></li>
+    <li><a href="#s型神经元">S型神经元</a></li>
+    <li><a href="#神经网络">神经网络</a></li>
+    <li><a href="#神经网络的数据表示">神经网络的数据表示</a>
+      <ul>
+        <li><a href="#标量">标量</a></li>
+        <li><a href="#向量">向量</a></li>
+        <li><a href="#矩阵">矩阵</a></li>
+        <li><a href="#3d张量与更高维张量">3D张量与更高维张量</a></li>
+        <li><a href="#关键属性">关键属性</a></li>
+        <li><a href="#在numpy中操作张量">在Numpy中操作张量</a></li>
+        <li><a href="#数据批量的概念">数据批量的概念</a></li>
+        <li><a href="#现实世界的数据张量">现实世界的数据张量</a></li>
+      </ul>
+    </li>
+    <li><a href="#张量运算">张量运算</a>
+      <ul>
+        <li><a href="#逐元素计算">逐元素计算</a></li>
+        <li><a href="#广播">广播</a></li>
+        <li><a href="#张量点积">张量点积</a></li>
+        <li><a href="#张量变形">张量变形</a></li>
+      </ul>
+    </li>
+    <li><a href="#梯度优化">梯度优化</a>
+      <ul>
+        <li><a href="#再回到感知器">再回到感知器</a></li>
+        <li><a href="#什么是导数">什么是导数</a></li>
+        <li><a href="#什么是梯度">什么是梯度</a></li>
+        <li><a href="#随机梯度下降">随机梯度下降</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a>
+      <ul>
+        <li><a href="#说明">说明</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="神经网络基础">
+  神经网络基础
+  <a class="anchor" href="#%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e5%9f%ba%e7%a1%80">#</a>
+</h1>
+<p>要想入门以及往下理解深度学习，其中一些概念可能是无法避免地需要你理解一番，比如：</p>
+<ul>
+<li>什么是感知器</li>
+<li>什么是神经网络</li>
+<li>张量以及运算</li>
+<li>微分</li>
+<li>梯度下降</li>
+</ul>
+<h2 id="带着问题出发">
+  带着问题出发
+  <a class="anchor" href="#%e5%b8%a6%e7%9d%80%e9%97%ae%e9%a2%98%e5%87%ba%e5%8f%91">#</a>
+</h2>
+<p>在开始之前希望你有一点机器学习方面的知识，解决问题的前提是提出问题，我们提出这样一个问题，对<code>MNIST数据集</code>进行分析，然后在解决问题的过程中一步一步地来捋清楚其中涉及到的概念</p>
+<p><code>MNIST数据集</code>是一份手写字训练集，出自<code>MNIST</code>，相信你对它不会陌生，它是机器学习领域的一个经典数据集，感觉任意一个教程都拿它来说事，不过这也侧面证明了这个数据集的经典，这里简单介绍一下：</p>
+<ul>
+<li>拥有60,000个示例的训练集，以及10,000个示例的测试集</li>
+<li>图片都由一个28 ×28 的矩阵表示，每张图片都由一个784 维的向量表示</li>
+<li>图片分为10类， 分别对应从0～9，共10个阿拉伯数字</li>
+</ul>
+<p>压缩包内容如下：</p>
+<ul>
+<li>train-images-idx3-ubyte.gz:  training set images (9912422 bytes)</li>
+<li>train-labels-idx1-ubyte.gz:  training set labels (28881 bytes)</li>
+<li>t10k-images-idx3-ubyte.gz:   test set images (1648877 bytes)</li>
+<li>t10k-labels-idx1-ubyte.gz:   test set labels (4542 bytes)</li>
+</ul>
+<p>上图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/0A0F8531-ACD0-4843-8A4F-F16C82720088.png" alt="" /></p>
+<p>图片生成代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">%</span>matplotlib inline
+
+<span style="color:#f92672">import</span> matplotlib
+<span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#f92672">as</span> plt
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+
+<span style="color:#f92672">from</span> keras.datasets <span style="color:#f92672">import</span> mnist
+
+(train_images, train_labels), (test_images, test_labels) <span style="color:#f92672">=</span> mnist<span style="color:#f92672">.</span>load_data()
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">plot_digits</span>(instances, images_per_row<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>, <span style="color:#f92672">**</span>options):
+    size <span style="color:#f92672">=</span> <span style="color:#ae81ff">28</span>
+    images_per_row <span style="color:#f92672">=</span> min(len(instances), images_per_row)
+    images <span style="color:#f92672">=</span> instances
+    n_rows <span style="color:#f92672">=</span> (len(instances) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">//</span> images_per_row <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+    row_images <span style="color:#f92672">=</span> []
+    n_empty <span style="color:#f92672">=</span> n_rows <span style="color:#f92672">*</span> images_per_row <span style="color:#f92672">-</span> len(instances)
+    images<span style="color:#f92672">.</span>append(np<span style="color:#f92672">.</span>zeros((size, size <span style="color:#f92672">*</span> n_empty)))
+    <span style="color:#66d9ef">for</span> row <span style="color:#f92672">in</span> range(n_rows):
+        rimages <span style="color:#f92672">=</span> images[row <span style="color:#f92672">*</span> images_per_row : (row <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> images_per_row]
+        row_images<span style="color:#f92672">.</span>append(np<span style="color:#f92672">.</span>concatenate(rimages, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>))
+    image <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate(row_images, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+    plt<span style="color:#f92672">.</span>imshow(image, cmap <span style="color:#f92672">=</span> matplotlib<span style="color:#f92672">.</span>cm<span style="color:#f92672">.</span>binary, <span style="color:#f92672">**</span>options)
+    plt<span style="color:#f92672">.</span>axis(<span style="color:#e6db74">&#34;off&#34;</span>)
+
+plt<span style="color:#f92672">.</span>figure(figsize<span style="color:#f92672">=</span>(<span style="color:#ae81ff">9</span>,<span style="color:#ae81ff">9</span>))
+plot_digits(train_images[:<span style="color:#ae81ff">100</span>], images_per_row<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+plt<span style="color:#f92672">.</span>show()
+</code></pre></div><p>不过你不用急着尝试，接下来我们可以一步一步慢慢来分析手写字训练集</p>
+<p>看这一行代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(train_images, train_labels), (test_images, test_labels) <span style="color:#f92672">=</span> mnist<span style="color:#f92672">.</span>load_data()
+</code></pre></div><p><code>MNIST数据集</code>通过<code>keras.datasets</code>加载，其中<code>train_images</code>和<code>train_labels</code>构成了训练集，另外两个则是测试集：</p>
+<ul>
+<li>train_images.shape: (60000, 28, 28)</li>
+<li>train_labels.shape: (60000,)</li>
+</ul>
+<p>我们要做的事情很简单，将训练集丢到神经网络里面去，训练后生成了我们期望的神经网络模型，然后模型再对测试集进行预测，我们只需要判断预测的数字是不是正确的即可</p>
+<p>在用代码构建一个神经网络之前，我先简单介绍一下到底什么是神经网络，让我们从感知器开始</p>
+<h2 id="感知器">
+  感知器
+  <a class="anchor" href="#%e6%84%9f%e7%9f%a5%e5%99%a8">#</a>
+</h2>
+<blockquote>
+<p>感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络</p>
+</blockquote>
+<p>感知器的工作方式如下所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/2977DAE0-ECE3-4BC5-AF1C-90D51DCBE9AB.png" alt="" /></p>
+<p>左侧三个变量分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/5F74C39F-956D-4ABE-B12B-1F1CCABB9F63.png" alt="" /></p>
+<p>此时，output可以表示为：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/CD964C69-3677-4B34-8A98-1DAAF45BA6B3.png" alt="" /></p>
+<p>上面右侧的式子是一个阶跃函数，就是和Sigmoid、Relu一样作用的激活函数，然后我们就可以自己实现一个感知器：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Perceptron</span>:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    代码实现 Frank Rosenblatt 提出的感知器的与非门，加深对感知器的理解
+</span><span style="color:#e6db74">    blog: https://www.howie6879.cn/post/33/
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self, act_func, input_nums<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>):
+        <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        实例化一些基本参数
+</span><span style="color:#e6db74">        :param act_func: 激活函数
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+        <span style="color:#75715e"># 激活函数</span>
+        self<span style="color:#f92672">.</span>act_func <span style="color:#f92672">=</span> act_func
+        <span style="color:#75715e"># 权重 已经确定只会有两个二进制输入</span>
+        self<span style="color:#f92672">.</span>w <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros(input_nums)
+        <span style="color:#75715e"># 偏置项</span>
+        self<span style="color:#f92672">.</span>b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fit</span>(self, input_vectors, labels, learn_nums<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>, rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.1</span>):
+        <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        训练出合适的 w 和 b
+</span><span style="color:#e6db74">        :param input_vectors: 样本训练数据集
+</span><span style="color:#e6db74">        :param labels: 标记值
+</span><span style="color:#e6db74">        :param learn_nums: 学习多少次
+</span><span style="color:#e6db74">        :param rate: 学习率
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(learn_nums):
+            <span style="color:#66d9ef">for</span> index, input_vector <span style="color:#f92672">in</span> enumerate(input_vectors):
+                label <span style="color:#f92672">=</span> labels[index]
+                output <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>predict(input_vector)
+                delta <span style="color:#f92672">=</span> label <span style="color:#f92672">-</span> output
+                self<span style="color:#f92672">.</span>w <span style="color:#f92672">+=</span> input_vector <span style="color:#f92672">*</span> rate <span style="color:#f92672">*</span> delta
+                self<span style="color:#f92672">.</span>b <span style="color:#f92672">+=</span> rate <span style="color:#f92672">*</span> delta
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;此时感知器权重为{0}，偏置项为{1}&#34;</span><span style="color:#f92672">.</span>format(self<span style="color:#f92672">.</span>w, self<span style="color:#f92672">.</span>b))
+        <span style="color:#66d9ef">return</span> self
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict</span>(self, input_vector):
+        <span style="color:#66d9ef">if</span> isinstance(input_vector, list):
+            input_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(input_vector)
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>act_func(sum(self<span style="color:#f92672">.</span>w <span style="color:#f92672">*</span> input_vector) <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>b)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">f</span>(z):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    激活函数
+</span><span style="color:#e6db74">    :param z: (w1*x1+w2*x2+...+wj*xj) + b
+</span><span style="color:#e6db74">    :return: 1 or 0
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">if</span> z <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">else</span> <span style="color:#ae81ff">0</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_and_gate_training_data</span>():
+    <span style="color:#e6db74">&#39;&#39;&#39;
+</span><span style="color:#e6db74">    AND 训练数据集
+</span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+    input_vectors <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]])
+    labels <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>])
+    <span style="color:#66d9ef">return</span> input_vectors, labels
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    输出如下：
+</span><span style="color:#e6db74">        此时感知器权重为[ 0.1  0.2]，偏置项为-0.2 与门
+</span><span style="color:#e6db74">        1 and 1 = 1
+</span><span style="color:#e6db74">        1 and 0 = 0
+</span><span style="color:#e6db74">        0 and 1 = 0
+</span><span style="color:#e6db74">        0 and 0 = 0
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    <span style="color:#75715e"># 获取样本数据</span>
+    and_input_vectors, and_labels <span style="color:#f92672">=</span> get_and_gate_training_data()
+    <span style="color:#75715e"># 实例化感知器模型</span>
+    p <span style="color:#f92672">=</span> Perceptron(f)
+    <span style="color:#75715e"># 开始学习 AND</span>
+    p_and <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>fit(and_input_vectors, and_labels)
+    <span style="color:#75715e"># 开始预测 AND</span>
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;1 and 1 = </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> p_and<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]))
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;1 and 0 = </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> p_and<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>]))
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;0 and 1 = </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> p_and<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>]))
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;0 and 0 = </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> p_and<span style="color:#f92672">.</span>predict([<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]))
+
+</code></pre></div><h2 id="s型神经元">
+  S型神经元
+  <a class="anchor" href="#s%e5%9e%8b%e7%a5%9e%e7%bb%8f%e5%85%83">#</a>
+</h2>
+<p>神经元和感知器本质上是一样的，他们的区别在于激活函数不同，比如跃迁函数改为Sigmoid函数</p>
+<p>神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/19333562-3B02-4E17-96C2-5B7D44F99FA5.png" alt="" /></p>
+<p>以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案</p>
+<p>所以，我们需要S型神经元，因为S型神经元返回的是[0,1]之间的任何实数，这样的话权重和偏置的微⼩改动只会引起输出的微⼩变化，此时的output可以表示为σ(w⋅x+b)，而σ就是S型函数，S型函数中S指的是Sigmoid函数，定义如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/5E03C070-79F5-48F7-8EFB-A15171C3EF74.png" alt="" /></p>
+<h2 id="神经网络">
+  神经网络
+  <a class="anchor" href="#%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c">#</a>
+</h2>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/B1AA88E4-E903-40C6-A345-6A7908238FDD.png" alt="" /></p>
+<p>神经网络其实就是按照一定规则连接起来的多个神经元，一个神经网络由以下组件构成：</p>
+<ul>
+<li>输入层：接受传递数据，这里应该是 784 个神经元</li>
+<li>隐藏层：发掘出特征</li>
+<li>各层之间的权重：自动学习出来</li>
+<li>每个隐藏层都会有一个精心设计的激活函数，比如Sigmoid、Relu激活函数</li>
+<li>输出层，10个输出</li>
+<li>上⼀层的输出作为下⼀层的输⼊，信息总是向前传播，从不反向回馈：前馈神经网络</li>
+<li>有回路，其中反馈环路是可⾏的：递归神经网络</li>
+</ul>
+<p>从输入层传入<code>手写字训练集</code>，然后通过隐藏层向前传递训练集数据，最后输出层会输出10个概率值，总和为1。现在，我们可以看看<code>Keras</code>代码:</p>
+<p>第一步，对数据进行预处理，我们知道，原本数据形状是<code>(60000, 28, 28)</code>，取值区间为<code>[0, 255]</code>，现在改为<code>[0, 1]</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">60000</span>, <span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>)) 
+train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#39;float32&#39;</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">255</span>
+
+test_images <span style="color:#f92672">=</span> test_images<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">10000</span>, <span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>)) 
+test_images <span style="color:#f92672">=</span> test_images<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#39;float32&#39;</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">255</span>
+</code></pre></div><p>然后对标签进行分类编码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> keras.utils <span style="color:#f92672">import</span> to_categorical
+
+train_labels <span style="color:#f92672">=</span> to_categorical(train_labels) 
+test_labels <span style="color:#f92672">=</span> to_categorical(test_labels)
+</code></pre></div><p>第二步，编写模型：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> keras <span style="color:#f92672">import</span> models 
+<span style="color:#f92672">from</span> keras <span style="color:#f92672">import</span> layers
+
+network <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>Sequential() 
+network<span style="color:#f92672">.</span>add(layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">512</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, input_shape<span style="color:#f92672">=</span>(<span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>,))) 
+network<span style="color:#f92672">.</span>add(layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">10</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;softmax&#39;</span>)
+            
+network<span style="color:#f92672">.</span>compile(optimizer<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;rmsprop&#39;</span>,loss<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;categorical_crossentropy&#39;</span>, metrics<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;accuracy&#39;</span>])
+network<span style="color:#f92672">.</span>fit(train_images, train_labels, epochs<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>, batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">128</span>)
+</code></pre></div><p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/8FC079F8-7379-479D-A478-6FED187D8A9C.png" alt="" /></p>
+<p>一个隐藏层，激活函数选用<code>relu</code>，输出层使用<code>softmax</code>返回一个由10个概率值（总和为 1）组成的数组</p>
+<p>训练过程中显示了两个数字：一个是网络在训练数据上的损失<code>loss</code>，另一个是网络在 训练数据上的精度<code>acc</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/0EC7913A-205C-4BF2-BCB6-075411819AA3.png" alt="" /></p>
+<p>很简单，我们构建和训练一个神经网络，就这么几行代码，之所以写的这么剪短，是因为<code>keras</code>接接口封装地比较好用，但是里面的理论知识我们还是需要好好研究下</p>
+<h2 id="神经网络的数据表示">
+  神经网络的数据表示
+  <a class="anchor" href="#%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e7%9a%84%e6%95%b0%e6%8d%ae%e8%a1%a8%e7%a4%ba">#</a>
+</h2>
+<p><code>TensorFlow</code>里面的<code>Tensor</code>是张量的意思，上面例子里面存储在多维Numpy数组中的数据就是张量：张量是数据容器，矩阵就是二维张量，张量是矩阵向任意维度的推广，张量的维度称为轴</p>
+<h3 id="标量">
+  标量
+  <a class="anchor" href="#%e6%a0%87%e9%87%8f">#</a>
+</h3>
+<p>包含一个数字的张量叫做标量（0D张量），如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(<span style="color:#ae81ff">12</span>)
+<span style="color:#66d9ef">print</span>(x, x<span style="color:#f92672">.</span>ndim)
+<span style="color:#75715e"># 12, 0</span>
+</code></pre></div><p>张量轴的个数也叫做阶(rank)</p>
+<h3 id="向量">
+  向量
+  <a class="anchor" href="#%e5%90%91%e9%87%8f">#</a>
+</h3>
+<p>数字组成的数组叫做向量（1D张量），如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">14</span>, <span style="color:#ae81ff">7</span>])
+<span style="color:#66d9ef">print</span>(x, x<span style="color:#f92672">.</span>ndim)
+<span style="color:#75715e"># [12  3  6 14  7] 1</span>
+</code></pre></div><h3 id="矩阵">
+  矩阵
+  <a class="anchor" href="#%e7%9f%a9%e9%98%b5">#</a>
+</h3>
+<p>向量组成的数组叫做矩阵（2D张量），如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">78</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">79</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">35</span>, <span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">80</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">36</span>, <span style="color:#ae81ff">2</span>]])
+<span style="color:#66d9ef">print</span>(x, x<span style="color:#f92672">.</span>ndim)
+<span style="color:#75715e"># [[ 5 78  2 34  0]</span>
+<span style="color:#75715e"># [ 6 79  3 35  1]</span>
+<span style="color:#75715e"># [ 7 80  4 36  2]] 2</span>
+</code></pre></div><h3 id="3d张量与更高维张量">
+  3D张量与更高维张量
+  <a class="anchor" href="#3d%e5%bc%a0%e9%87%8f%e4%b8%8e%e6%9b%b4%e9%ab%98%e7%bb%b4%e5%bc%a0%e9%87%8f">#</a>
+</h3>
+<p>将多个矩阵组合成一个新的数组就是一个3D张量，如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">78</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">79</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">35</span>, <span style="color:#ae81ff">1</span>]], [[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">78</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">79</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">35</span>, <span style="color:#ae81ff">1</span>]], [[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">78</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">79</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">35</span>, <span style="color:#ae81ff">1</span>]]])
+<span style="color:#66d9ef">print</span>(x, x<span style="color:#f92672">.</span>ndim)
+<span style="color:#75715e"># (array([[[ 5, 78,  2, 34,  0],</span>
+<span style="color:#75715e">#          [ 6, 79,  3, 35,  1]],</span>
+<span style="color:#75715e">#  </span>
+<span style="color:#75715e">#         [[ 5, 78,  2, 34,  0],</span>
+<span style="color:#75715e">#          [ 6, 79,  3, 35,  1]],</span>
+<span style="color:#75715e">#  </span>
+<span style="color:#75715e">#         [[ 5, 78,  2, 34,  0],</span>
+<span style="color:#75715e">#          [ 6, 79,  3, 35,  1]]]), 3)</span>
+</code></pre></div><p>将多个3D张量组合成一个数组，可以创建一个4D张量</p>
+<h3 id="关键属性">
+  关键属性
+  <a class="anchor" href="#%e5%85%b3%e9%94%ae%e5%b1%9e%e6%80%a7">#</a>
+</h3>
+<p>张量是由以下三个关键属性来定义：</p>
+<ul>
+<li>轴的个数：3D张量三个轴，矩阵两个轴</li>
+<li>形状：是一个整数元祖，比如前面矩阵为(3, 5)，向量(5,)，3D张量为(3, 2, 5)</li>
+<li>数据类型</li>
+</ul>
+<h3 id="在numpy中操作张量">
+  在Numpy中操作张量
+  <a class="anchor" href="#%e5%9c%a8numpy%e4%b8%ad%e6%93%8d%e4%bd%9c%e5%bc%a0%e9%87%8f">#</a>
+</h3>
+<p>以前面加载的<code>train_images</code>为：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(train_images, train_labels), (test_images, test_labels) <span style="color:#f92672">=</span> mnist<span style="color:#f92672">.</span>load_data()
+</code></pre></div><p>比如进行切片选择<code>10~100</code>个数字：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images[<span style="color:#ae81ff">10</span>:<span style="color:#ae81ff">100</span>]<span style="color:#f92672">.</span>shape
+<span style="color:#75715e"># (90, 28, 28)</span>
+</code></pre></div><h3 id="数据批量的概念">
+  数据批量的概念
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e6%89%b9%e9%87%8f%e7%9a%84%e6%a6%82%e5%bf%b5">#</a>
+</h3>
+<p>深度学习模型会将数据集随机分割成小批量进行处理，比如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">batch <span style="color:#f92672">=</span> train_images[:<span style="color:#ae81ff">128</span>]
+batch<span style="color:#f92672">.</span>shape
+<span style="color:#75715e"># (128, 28, 28)</span>
+</code></pre></div><h3 id="现实世界的数据张量">
+  现实世界的数据张量
+  <a class="anchor" href="#%e7%8e%b0%e5%ae%9e%e4%b8%96%e7%95%8c%e7%9a%84%e6%95%b0%e6%8d%ae%e5%bc%a0%e9%87%8f">#</a>
+</h3>
+<p>下面将介绍下现实世界中数据的形状：</p>
+<ul>
+<li>向量数据：2D张量，(samples, features)</li>
+<li>时间序列数据或者序列数据：3D张量，(samples, timesteps, features)</li>
+<li>图像：4D张量，(samples, height, width, channels) 或 (samples, channels, height, width)</li>
+<li>视频：5D张量，(samples, frames, height, width, channels) 或 (samples, frames, channels, height, width)</li>
+</ul>
+<h2 id="张量运算">
+  张量运算
+  <a class="anchor" href="#%e5%bc%a0%e9%87%8f%e8%bf%90%e7%ae%97">#</a>
+</h2>
+<p>类似于计算机程序的计算可以转化为二进制计算，深度学习计算可以转化为数值数据张量上的一些<strong>张量运算</strong>(tensor operation)</p>
+<p>上面模型的隐藏层代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">512</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</code></pre></div><p>这一层可以理解为一个函数，输入一个2D张量，输出一个2D张量，就如同上面感知机那一节最后输出的计算函数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">output = relu(dot(W, input) + b)
+</code></pre></div><h3 id="逐元素计算">
+  逐元素计算
+  <a class="anchor" href="#%e9%80%90%e5%85%83%e7%b4%a0%e8%ae%a1%e7%ae%97">#</a>
+</h3>
+<p>Relu 和加法运算都是逐元素的运算，比如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 输入示例</span>
+input_x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">1</span>]])
+<span style="color:#75715e"># 权重</span>
+W <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">1</span>]])
+<span style="color:#75715e"># 计算输出 z</span>
+z <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>dot(W, input_x)
+
+<span style="color:#75715e"># 实现激活函数</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">naive_relu</span>(x):
+    <span style="color:#66d9ef">assert</span> len(x<span style="color:#f92672">.</span>shape) <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>
+    x <span style="color:#f92672">=</span> x<span style="color:#f92672">.</span>copy()
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]):
+        <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(x<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>]):
+            x[i, j] <span style="color:#f92672">=</span> max(x[i, j], <span style="color:#ae81ff">0</span>) 
+    <span style="color:#66d9ef">return</span> x
+
+<span style="color:#75715e"># 激活函数对应的输出</span>
+output <span style="color:#f92672">=</span> naive_relu(z)
+output
+</code></pre></div><h3 id="广播">
+  广播
+  <a class="anchor" href="#%e5%b9%bf%e6%92%ad">#</a>
+</h3>
+<p>张量运算那节中，有这样一段代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">output <span style="color:#f92672">=</span> relu(dot(W, input) <span style="color:#f92672">+</span> b)
+</code></pre></div><p><code>dot(W, input)</code>是2D张量，<code>b</code>是向量，两个形状不同的张量相加，会发生什么？</p>
+<p>如果没有歧义的话，较小的张量会被广播，用来匹配较大张量的形状：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">input_x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">3</span>]])
+<span style="color:#75715e"># 权重</span>
+W <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>], [<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>]])
+b <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>])
+<span style="color:#75715e"># 计算输出 z</span>
+z <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>dot(W, input_x) <span style="color:#f92672">+</span> b
+<span style="color:#75715e"># array([[24],</span>
+<span style="color:#75715e">#        [32]])</span>
+</code></pre></div><h3 id="张量点积">
+  张量点积
+  <a class="anchor" href="#%e5%bc%a0%e9%87%8f%e7%82%b9%e7%a7%af">#</a>
+</h3>
+<p>点积运算，也叫张量积，如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+
+<span style="color:#75715e"># 输入示例</span>
+input_x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">1</span>]])
+<span style="color:#75715e"># 权重</span>
+W <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">1</span>], [<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">1</span>]])
+np<span style="color:#f92672">.</span>dot(W, input_x)
+</code></pre></div><p>两个向量之间的点积是一个标量：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">naive_vector_dot</span>(x, y):
+    <span style="color:#66d9ef">assert</span> len(x<span style="color:#f92672">.</span>shape) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">assert</span> len(y<span style="color:#f92672">.</span>shape) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> 
+    <span style="color:#66d9ef">assert</span> x<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">==</span> y<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]
+    z <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]):
+        z <span style="color:#f92672">+=</span> x[i] <span style="color:#f92672">*</span> y[i] 
+    <span style="color:#66d9ef">return</span> z
+
+x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>])
+y <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>])
+
+naive_vector_dot(x, y)
+
+<span style="color:#75715e"># 5.0</span>
+</code></pre></div><p>矩阵和向量点积后是一个向量：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">np<span style="color:#f92672">.</span>dot(W, [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>])
+<span style="color:#75715e"># array([20, 26])</span>
+</code></pre></div><h3 id="张量变形">
+  张量变形
+  <a class="anchor" href="#%e5%bc%a0%e9%87%8f%e5%8f%98%e5%bd%a2">#</a>
+</h3>
+<p>前面对数据进行预处理的时候：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">60000</span>, <span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>)) 
+train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#39;float32&#39;</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">255</span>
+</code></pre></div><p>上面的例子将输入数据的shape变成了(60000, 784)，张量变形指的就是改变张量的行和列，得到想要的形状，前后数据集个数不变，经常遇到一个特殊的张量变形是转置(transposition)，如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((<span style="color:#ae81ff">300</span>, <span style="color:#ae81ff">20</span>))
+x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>transpose(x)
+x<span style="color:#f92672">.</span>shape
+<span style="color:#75715e"># (20, 300)</span>
+</code></pre></div><h2 id="梯度优化">
+  梯度优化
+  <a class="anchor" href="#%e6%a2%af%e5%ba%a6%e4%bc%98%e5%8c%96">#</a>
+</h2>
+<p>针对每个输入，神经网络都会通过下面的函数对输入数据进行变换：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">output <span style="color:#f92672">=</span> relu(dot(W, input_x) <span style="color:#f92672">+</span> b)
+</code></pre></div><p>其中：</p>
+<ul>
+<li>relu：激活函数</li>
+<li>W：是一个张量，表示权重，第一步可以取较小的随机值进行随机初始化</li>
+<li>b：是一个张量，表示偏置</li>
+</ul>
+<p>现在我们需要一个算法来让我们找到权重和偏置，从而使得y=y(x)可以拟合样本输入的x</p>
+<h3 id="再回到感知器">
+  再回到感知器
+  <a class="anchor" href="#%e5%86%8d%e5%9b%9e%e5%88%b0%e6%84%9f%e7%9f%a5%e5%99%a8">#</a>
+</h3>
+<p>感知器学习的过程就是其中权重和偏置不断调优更新的过程，其中的偏置可以理解成输入为1的权重值，那么权重是怎么更新的呢？</p>
+<p>首先，介绍一个概念，损失函数，引用李航老师统计学习方法书中的一个解释：</p>
+<blockquote>
+<p>监督学习问题是在假设空间中选取模型f作为决策函数，对于给定的输入X，由f(X)给出相应的输出Y，这个输出的预测值f(X)与真实值Y可能一致也可能不一致，用一个损失函数（loss function）或代价函数（cost function）来度量预测错误的程度，损失函数是f(X)和Y的非负实值函数，记作L(Y,f(X))</p>
+</blockquote>
+<p>其中模型f(X)关于训练数据集的平均损失，我们称之为：经验风险（empirical risk），上述的权重调整，就是在不断地让经验风险最小，求出最好的模型f(X)，我们暂时不考虑正则化，此时我们经验风险的最优化的目标函数就是：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/142D8E83-65C1-4491-ADCC-EDE7280AD1C1.png" alt="" /></p>
+<p>求解出此目标函数最小时对应的权重值，就是我们感知器里面对应的权重值，在推导之前，我们还得明白两个概念：</p>
+<ul>
+<li>什么是导数</li>
+<li>什么是梯度</li>
+</ul>
+<h3 id="什么是导数">
+  什么是导数
+  <a class="anchor" href="#%e4%bb%80%e4%b9%88%e6%98%af%e5%af%bc%e6%95%b0">#</a>
+</h3>
+<p>假设有一个连续的光滑函数<code>f(x) = y</code>，什么是函数连续性？指的是x的微小变化只能导致y的微小变化。</p>
+<p>假设f(x)上的两点<code>a,b</code>足够接近，那么<code>a,b</code>可以近似为一个线性函数，此时他们斜率为<code>k</code>，那么可以说斜率k是f在b点的<strong>导数</strong></p>
+<p>总之，导数描述了改变x后f(x)会如何变化，如果你希望减小f(x)的值，只需要将x沿着导数的反方向移动一小步即可，反之亦然</p>
+<h3 id="什么是梯度">
+  什么是梯度
+  <a class="anchor" href="#%e4%bb%80%e4%b9%88%e6%98%af%e6%a2%af%e5%ba%a6">#</a>
+</h3>
+<p>梯度是张量运算的导数，是导数这一概念向多元函数导数的推广，它指向函数值上升最快的方向，函数值下降最快的方向自然就是梯度的反方向</p>
+<h3 id="随机梯度下降">
+  随机梯度下降
+  <a class="anchor" href="#%e9%9a%8f%e6%9c%ba%e6%a2%af%e5%ba%a6%e4%b8%8b%e9%99%8d">#</a>
+</h3>
+<p>推导过程如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/sgd.jpg" alt="" /></p>
+<p>感知器代码里面的这段:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">self<span style="color:#f92672">.</span>w <span style="color:#f92672">+=</span> input_vector <span style="color:#f92672">*</span> rate <span style="color:#f92672">*</span> delta
+</code></pre></div><p>就对应上面式子里面推导出来的规则</p>
+<h2 id="总结">
+  总结
+  <a class="anchor" href="#%e6%80%bb%e7%bb%93">#</a>
+</h2>
+<p>再来看看全部的手写字识别模型代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> keras <span style="color:#f92672">import</span> models 
+<span style="color:#f92672">from</span> keras <span style="color:#f92672">import</span> layers
+<span style="color:#f92672">from</span> keras.utils <span style="color:#f92672">import</span> to_categorical
+
+(train_images, train_labels), (test_images, test_labels) <span style="color:#f92672">=</span> mnist<span style="color:#f92672">.</span>load_data()
+
+train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">60000</span>, <span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>)) 
+train_images <span style="color:#f92672">=</span> train_images<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#39;float32&#39;</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">255</span>
+
+test_images <span style="color:#f92672">=</span> test_images<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">10000</span>, <span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>)) 
+test_images <span style="color:#f92672">=</span> test_images<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#39;float32&#39;</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">255</span>
+
+train_labels <span style="color:#f92672">=</span> to_categorical(train_labels) 
+test_labels <span style="color:#f92672">=</span> to_categorical(test_labels)
+
+
+network <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>Sequential() 
+network<span style="color:#f92672">.</span>add(layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">512</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, input_shape<span style="color:#f92672">=</span>(<span style="color:#ae81ff">28</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">28</span>,))) 
+network<span style="color:#f92672">.</span>add(layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">10</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;softmax&#39;</span>))
+
+network<span style="color:#f92672">.</span>compile(optimizer<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;rmsprop&#39;</span>,loss<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;categorical_crossentropy&#39;</span>, metrics<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;accuracy&#39;</span>])
+network<span style="color:#f92672">.</span>fit(train_images, train_labels, epochs<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>, batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">128</span>)
+
+test_loss, test_acc <span style="color:#f92672">=</span> network<span style="color:#f92672">.</span>evaluate(test_images, test_labels)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;test_acc:&#39;</span>, test_acc)
+</code></pre></div><ul>
+<li>输入数据保存在<code>float32</code>格式的<code>Numpy</code>张量中，形状分别是(60000, 784)和(10000, 784)</li>
+<li>神经网络结构为：1个输入层、一个隐藏层、一个输出层</li>
+<li>categorical_crossentropy是针对分类模型的损失函数</li>
+<li>每批128个样本，共迭代5次，一共更新(469 * 5) = 2345次</li>
+</ul>
+<h3 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h3>
+<p>对本文有影响的书籍文章如下，感谢他们的付出：</p>
+<ul>
+<li>[统计学习方法] 第一章</li>
+<li><a href="http://neuralnetworksanddeeplearning.com/chap1.html">Neural Networks and Deep Learning</a> 第一章</li>
+<li><a href="https://www.amazon.com/Deep-Learning-Python-Francois-Chollet/dp/1617294438">Deep Learning with Python</a> 第二章</li>
+<li><a href="https://github.com/apachecn/hands-on-ml-zh">hands_on_Ml_with_Sklearn_and_TF</a></li>
+<li><a href="https://www.zybuluo.com/hanbingtao/note/448086">hanbt零基础入门深度学习系列</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#带着问题出发">带着问题出发</a></li>
+    <li><a href="#感知器">感知器</a></li>
+    <li><a href="#s型神经元">S型神经元</a></li>
+    <li><a href="#神经网络">神经网络</a></li>
+    <li><a href="#神经网络的数据表示">神经网络的数据表示</a>
+      <ul>
+        <li><a href="#标量">标量</a></li>
+        <li><a href="#向量">向量</a></li>
+        <li><a href="#矩阵">矩阵</a></li>
+        <li><a href="#3d张量与更高维张量">3D张量与更高维张量</a></li>
+        <li><a href="#关键属性">关键属性</a></li>
+        <li><a href="#在numpy中操作张量">在Numpy中操作张量</a></li>
+        <li><a href="#数据批量的概念">数据批量的概念</a></li>
+        <li><a href="#现实世界的数据张量">现实世界的数据张量</a></li>
+      </ul>
+    </li>
+    <li><a href="#张量运算">张量运算</a>
+      <ul>
+        <li><a href="#逐元素计算">逐元素计算</a></li>
+        <li><a href="#广播">广播</a></li>
+        <li><a href="#张量点积">张量点积</a></li>
+        <li><a href="#张量变形">张量变形</a></li>
+      </ul>
+    </li>
+    <li><a href="#梯度优化">梯度优化</a>
+      <ul>
+        <li><a href="#再回到感知器">再回到感知器</a></li>
+        <li><a href="#什么是导数">什么是导数</a></li>
+        <li><a href="#什么是梯度">什么是梯度</a></li>
+        <li><a href="#随机梯度下降">随机梯度下降</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a>
+      <ul>
+        <li><a href="#说明">说明</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

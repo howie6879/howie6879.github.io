@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>CentOS7分布式部署pyspider | 老胡的储物柜</title>
+  <meta property="og:title" content="CentOS7分布式部署pyspider - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2016-10-10T17:33:51&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2016-10-10T17:33:51&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="CentOS7分布式部署pyspider"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2016/09_deploy-pyspider/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">CentOS7分布式部署pyspider</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2016年10月10日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h4 id="搭建环境">搭建环境：</h4>
+<blockquote>
+<p><strong>系统版本：</strong><code>Linux centos-linux.shared 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux</code></p>
+<p><strong>python版本</strong>：<code>Python 3.5.1 </code></p>
+</blockquote>
+<h5 id="搭建python3环境">搭建python3环境：</h5>
+<p>本人在尝试过后选择集成环境<strong>Anaconda</strong></p>
+<!-- raw HTML omitted -->
+<h6 id="编译">编译</h6>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 下载依赖</span>
+yum install -y ncurses-devel openssl openssl-devel zlib-devel gcc make glibc-devel libffi-devel glibc-static glibc-utils sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-deve
+<span style="color:#998;font-style:italic"># 下载python版本</span>
+wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz
+<span style="color:#998;font-style:italic"># 或者使用国内源</span>
+wget http://mirrors.sohu.com/python/3.5.1/Python-3.5.1.tgz
+mv Python-3.5.1.tgz /usr/local/src;<span style="color:#0086b3">cd</span> /usr/local/src
+<span style="color:#998;font-style:italic"># 解压</span>
+tar -zxf Python-3.5.1.tgz;<span style="color:#0086b3">cd</span> Python-3.5.1
+<span style="color:#998;font-style:italic"># 编译安装</span>
+./configure --prefix<span style="color:#000;font-weight:bold">=</span>/usr/local/python3.5 --enable-shared
+make <span style="color:#000;font-weight:bold">&amp;&amp;</span> make install
+<span style="color:#998;font-style:italic"># 建立软链接</span>
+ln -s /usr/local/python3.5/bin/python3 /usr/bin/python3
+<span style="color:#0086b3">echo</span> <span style="color:#d14">&#34;/usr/local/python3.5/lib&#34;</span> &gt; /etc/ld.so.conf.d/python3.5.conf
+ldconfig
+<span style="color:#998;font-style:italic"># 验证python3</span>
+python3
+<span style="color:#998;font-style:italic"># Python 3.5.1 (default, Oct  9 2016, 11:44:24)</span>
+<span style="color:#998;font-style:italic"># [GCC 4.8.5 20150623 (Red Hat 4.8.5-4)] on linux</span>
+<span style="color:#998;font-style:italic"># Type &#34;help&#34;, &#34;copyright&#34;, &#34;credits&#34; or &#34;license&#34; for more information.</span>
+<span style="color:#998;font-style:italic"># &gt;&gt;&gt;</span>
+<span style="color:#998;font-style:italic"># pip</span>
+/usr/local/python3.5/bin/pip3 install --upgrade pip
+ln -s /usr/local/python3.5/bin/pip /usr/bin/pip
+<span style="color:#998;font-style:italic"># 本人在安装时出现问题 将pip重装</span>
+wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
+python get-pip.py
+</code></pre></td></tr></table>
+</div>
+</div><h6 id="集成环境anaconda">集成环境anaconda</h6>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 也可考虑集成环境anaconda(推荐)</span>
+wget https://repo.continuum.io/archive/Anaconda3-4.2.0-Linux-x86_64.sh
+<span style="color:#998;font-style:italic"># 直接安装即可</span>
+./Anaconda3-4.2.0-Linux-x86_64.sh
+<span style="color:#998;font-style:italic"># 若出错，可能是解压失败</span>
+yum install bzip2
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="安装mariadb">安装mariaDB</h5>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 安装</span>
+yum -y install mariadb mariadb-server
+<span style="color:#998;font-style:italic"># 启动</span>
+systemctl start mariadb
+<span style="color:#998;font-style:italic"># 设置为开机启动</span>
+systemctl <span style="color:#0086b3">enable</span> mariadb
+<span style="color:#998;font-style:italic"># 配置密码 默认为空</span>
+mysql_secure_installation
+<span style="color:#998;font-style:italic"># 登录</span>
+mysql -u root -p
+<span style="color:#998;font-style:italic"># 创建一个用户 自己设定账户密码</span>
+CREATE USER <span style="color:#d14">&#39;user_name&#39;</span>@<span style="color:#d14">&#39;localhost&#39;</span> IDENTIFIED BY <span style="color:#d14">&#39;user_pass&#39;</span>;
+GRANT ALL PRIVILEGES ON *.* TO <span style="color:#d14">&#39;user_name&#39;</span>@<span style="color:#d14">&#39;localhost&#39;</span> WITH GRANT OPTION;
+CREATE USER <span style="color:#d14">&#39;user_name&#39;</span>@<span style="color:#d14">&#39;%&#39;</span> IDENTIFIED BY <span style="color:#d14">&#39;user_pass&#39;</span>;
+GRANT ALL PRIVILEGES ON *.* TO <span style="color:#d14">&#39;user_name&#39;</span>@<span style="color:#d14">&#39;%&#39;</span> WITH GRANT OPTION;
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="安装pyspider">安装pyspider</h5>
+<p>本人使用<code>Anaconda</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 搭建虚拟环境sbird python版本3.*</span>
+conda create -n sbird <span style="color:#008080">python</span><span style="color:#000;font-weight:bold">=</span>3*
+<span style="color:#998;font-style:italic"># 进入环境</span>
+<span style="color:#0086b3">source</span> activate sbird
+<span style="color:#998;font-style:italic"># 安装pyspider</span>
+pip install pyspider
+<span style="color:#998;font-style:italic"># 报错 </span>
+<span style="color:#998;font-style:italic"># it does not exist.  The exported locale is &#34;en_US.UTF-8&#34; but it is not supported</span>
+<span style="color:#998;font-style:italic"># 执行 可写入.bashrc</span>
+<span style="color:#0086b3">export</span> <span style="color:#008080">LC_ALL</span><span style="color:#000;font-weight:bold">=</span>en_US.utf-8
+<span style="color:#0086b3">export</span> <span style="color:#008080">LANG</span><span style="color:#000;font-weight:bold">=</span>en_US.utf-8
+<span style="color:#998;font-style:italic">#ImportError: pycurl: libcurl link-time version (7.29.0) is older than compile-time version (7.49.0)</span>
+conda install pycurl
+<span style="color:#998;font-style:italic"># 退出</span>
+<span style="color:#0086b3">source</span> deactivate sbird
+<span style="color:#998;font-style:italic"># 若在虚拟机内 出现无法访问localhost:5000 可关闭防火墙</span>
+systemctl stop firewalld.service
+<span style="color:#998;font-style:italic">#########直接运行源码==============</span>
+mkdir git;<span style="color:#0086b3">cd</span> git
+<span style="color:#998;font-style:italic"># 下载</span>
+git clone https://github.com/binux/pyspider.git
+<span style="color:#998;font-style:italic"># 安装</span>
+/root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
+</code></pre></td></tr></table>
+</div>
+</div><p>其他方法</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 搭建虚拟环境</span>
+pip install virtualenv
+mkdir python;<span style="color:#0086b3">cd</span> python
+<span style="color:#998;font-style:italic"># 创建虚拟环境pyenv3</span>
+virtualenv -p /usr/bin/python3 pyenv3
+<span style="color:#998;font-style:italic"># 进入虚拟环境 激活环境</span>
+<span style="color:#0086b3">cd</span> pyenv3/
+<span style="color:#0086b3">source</span> ./bin/activate
+pip install pyspider
+<span style="color:#998;font-style:italic"># 若pycurl报错 </span>
+yum install libcurl-devel
+<span style="color:#998;font-style:italic"># 继续</span>
+pip install pyspider
+<span style="color:#998;font-style:italic"># 关闭</span>
+deactivate
+</code></pre></td></tr></table>
+</div>
+</div><p>本人推荐用anaconda方式安装</p>
+<p>若pyspider运行过程中出现错误，参考<code>anaconda</code>安装部分，至此，访问<code>localhost:5000</code>可看到页面。</p>
+<h5 id="安装supervisor">安装Supervisor</h5>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 安装</span>
+yum install supervisor -y
+<span style="color:#998;font-style:italic"># 若无法检索 则添加阿里的epel源</span>
+vim /etc/yum.repos.d/epel.repo
+<span style="color:#998;font-style:italic"># 添加以下内容</span>
+<span style="color:#000;font-weight:bold">[</span>epel<span style="color:#000;font-weight:bold">]</span>
+<span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span>Extra Packages <span style="color:#000;font-weight:bold">for</span> Enterprise Linux <span style="color:#099">7</span> - <span style="color:#008080">$basearch</span>
+<span style="color:#008080">baseurl</span><span style="color:#000;font-weight:bold">=</span>http://mirrors.aliyun.com/epel/7/<span style="color:#008080">$basearch</span>
+http://mirrors.aliyuncs.com/epel/7/<span style="color:#008080">$basearch</span>
+<span style="color:#008080">failovermethod</span><span style="color:#000;font-weight:bold">=</span>priority
+<span style="color:#008080">enabled</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>
+<span style="color:#008080">gpgcheck</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+<span style="color:#008080">gpgkey</span><span style="color:#000;font-weight:bold">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+<span style="color:#000;font-weight:bold">[</span>epel-debuginfo<span style="color:#000;font-weight:bold">]</span>
+<span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span>Extra Packages <span style="color:#000;font-weight:bold">for</span> Enterprise Linux <span style="color:#099">7</span> - <span style="color:#008080">$basearch</span> - Debug
+<span style="color:#008080">baseurl</span><span style="color:#000;font-weight:bold">=</span>http://mirrors.aliyun.com/epel/7/<span style="color:#008080">$basearch</span>/debug
+http://mirrors.aliyuncs.com/epel/7/<span style="color:#008080">$basearch</span>/debug
+<span style="color:#008080">failovermethod</span><span style="color:#000;font-weight:bold">=</span>priority
+<span style="color:#008080">enabled</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+<span style="color:#008080">gpgkey</span><span style="color:#000;font-weight:bold">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+<span style="color:#008080">gpgcheck</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+
+<span style="color:#000;font-weight:bold">[</span>epel-source<span style="color:#000;font-weight:bold">]</span>
+<span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span>Extra Packages <span style="color:#000;font-weight:bold">for</span> Enterprise Linux <span style="color:#099">7</span> - <span style="color:#008080">$basearch</span> - Source
+<span style="color:#008080">baseurl</span><span style="color:#000;font-weight:bold">=</span>http://mirrors.aliyun.com/epel/7/SRPMS
+http://mirrors.aliyuncs.com/epel/7/SRPMS
+<span style="color:#008080">failovermethod</span><span style="color:#000;font-weight:bold">=</span>priority
+<span style="color:#008080">enabled</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+<span style="color:#008080">gpgkey</span><span style="color:#000;font-weight:bold">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+<span style="color:#008080">gpgcheck</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>
+<span style="color:#998;font-style:italic"># 安装</span>
+yum install supervisor -y
+<span style="color:#998;font-style:italic"># 测试是否安装成功</span>
+echo_supervisord_conf
+</code></pre></td></tr></table>
+</div>
+</div><h6 id="supervisor用法">Supervisor用法</h6>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">supervisord
+supervisorctl
+<span style="color:#998;font-style:italic"># 假设创建进程pyspider01</span>
+vim /etc/supervisord.d/pyspider01.ini
+<span style="color:#998;font-style:italic"># 写入以下内容</span>
+<span style="color:#000;font-weight:bold">[</span>program:pyspider01<span style="color:#000;font-weight:bold">]</span>
+
+<span style="color:#0086b3">command</span>      <span style="color:#000;font-weight:bold">=</span> /root/anaconda3/envs/sbird/bin/python  /root/git/pyspider/run.py
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> /root/git/pyspider
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> root
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> %<span style="color:#000;font-weight:bold">(</span>program_name<span style="color:#000;font-weight:bold">)</span>s
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> 500MB
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> /pyspider/supervisor/pyspider01.log
+<span style="color:#998;font-style:italic"># 重载</span>
+supervisorctl reload
+<span style="color:#998;font-style:italic"># 启动</span>
+supervisorctl start pyspider01
+<span style="color:#998;font-style:italic"># 也可这样启动</span>
+supervisord -c /etc/supervisord.conf
+<span style="color:#998;font-style:italic"># 查看状态</span>
+supervisorctl status
+<span style="color:#998;font-style:italic"># output </span>
+pyspider01                       RUNNING   pid 4026, uptime 0:02:40
+<span style="color:#998;font-style:italic"># 关闭</span>
+supervisorctl shutdown
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="安装redis">安装redis</h5>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 消息队列采用redis</span>
+mkdir download;<span style="color:#0086b3">cd</span> download
+wget http://download.redis.io/releases/redis-3.2.4.tar.gz
+tar xzf redis-3.2.4.tar.gz
+<span style="color:#0086b3">cd</span> redis-3.2.4
+make
+<span style="color:#998;font-style:italic"># 或者直接yum安装</span>
+yum -y install redis
+<span style="color:#998;font-style:italic"># 启动</span>
+systemctl start redis.service
+<span style="color:#998;font-style:italic"># 重启</span>
+systemctl restart redis.service
+<span style="color:#998;font-style:italic"># 停止</span>
+systemctl stop redis.service
+<span style="color:#998;font-style:italic"># 查看状态</span>
+systemctl status redis.service
+<span style="color:#998;font-style:italic"># 更改文件/etc/redis.conf</span>
+vim /etc/redis.conf
+<span style="color:#998;font-style:italic"># 更改内容</span>
+daemonize no 改为 daemonize yes
+<span style="color:#0086b3">bind</span> 127.0.0.1 改为 <span style="color:#0086b3">bind</span> 10.211.55.22<span style="color:#000;font-weight:bold">(</span>当前服务器ip<span style="color:#000;font-weight:bold">)</span>
+<span style="color:#998;font-style:italic"># 重启redis</span>
+systemctl restart redis.service
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="heading"></h5>
+<h5 id="关于自启动">关于自启动</h5>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># Supervisor添加到自启动服务</span>
+systemctl <span style="color:#0086b3">enable</span> supervisord.service
+<span style="color:#998;font-style:italic"># redis添加到自启动服务</span>
+systemctl <span style="color:#0086b3">enable</span> redis.service
+<span style="color:#998;font-style:italic"># 关闭防火墙自启动</span>
+systemctl disable firewalld.service
+</code></pre></td></tr></table>
+</div>
+</div><p>至此，pyspider单个服务器运行环境搭建且部署完毕，启动<code>localhost:5000</code>进入web界面。</p>
+<p>也可编写脚本运行，在<code>/pyspider/supervisor/pyspider01.log</code>查看运行状态。</p>
+<h4 id="分布式部署">分布式部署</h4>
+<p>刚才配置的服务器，将其命名为<code>centos01</code>，按照这样的配置，再分别部署两台<code>centos02、centos03</code>。</p>
+<p>如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">服务器名称</th>
+<th style="text-align:center">ip</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">centos01</td>
+<td style="text-align:center">10.211.55.22</td>
+<td style="text-align:center">redis,mariaDB, scheduler</td>
+</tr>
+<tr>
+<td style="text-align:center">centos02</td>
+<td style="text-align:center">10.211.55.23</td>
+<td style="text-align:center">fetcher, processor, result_worker,phantomjs</td>
+</tr>
+<tr>
+<td style="text-align:center">centos03</td>
+<td style="text-align:center">10.211.55.24</td>
+<td style="text-align:center">fetcher, processor,,result_worker,webui</td>
+</tr>
+</tbody>
+</table>
+<h5 id="centos01">centos01</h5>
+<p>进入服务器<code>centos01</code>，经过第一步，基本环境已经搭好，首先编辑配置文件<code>/pyspider/config.json</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#000080">&#34;taskdb&#34;</span>: <span style="color:#d14">&#34;mysql+taskdb://user_name:user_pass@10.211.55.22:3306/taskdb&#34;</span>,
+  <span style="color:#000080">&#34;projectdb&#34;</span>: <span style="color:#d14">&#34;mysql+projectdb://user_name:user_pass@10.211.55.22:3306/projectdb&#34;</span>,
+  <span style="color:#000080">&#34;resultdb&#34;</span>: <span style="color:#d14">&#34;mysql+resultdb://user_name:user_pass@10.211.55.22:3306/resultdb&#34;</span>,
+  <span style="color:#000080">&#34;message_queue&#34;</span>: <span style="color:#d14">&#34;redis://10.211.55.22:6379/db&#34;</span>,
+  <span style="color:#000080">&#34;logging-config&#34;</span>: <span style="color:#d14">&#34;/pyspider/logging.conf&#34;</span>,
+  <span style="color:#000080">&#34;phantomjs-proxy&#34;</span>:<span style="color:#d14">&#34;10.211.55.23:25555&#34;</span>,
+  <span style="color:#000080">&#34;webui&#34;</span>: {
+    <span style="color:#000080">&#34;username&#34;</span>: <span style="color:#d14">&#34;&#34;</span>,
+    <span style="color:#000080">&#34;password&#34;</span>: <span style="color:#d14">&#34;&#34;</span>,
+    <span style="color:#000080">&#34;need-auth&#34;</span>: <span style="color:#000;font-weight:bold">false</span>,
+  <span style="color:#000080">&#34;host&#34;</span>:<span style="color:#d14">&#34;10.211.55.24&#34;</span>,
+  <span style="color:#000080">&#34;port&#34;</span>:<span style="color:#d14">&#34;5000&#34;</span>,
+  <span style="color:#000080">&#34;scheduler-rpc&#34;</span>:<span style="color:#d14">&#34;http:// 10.211.55.22:5002&#34;</span>,
+  <span style="color:#000080">&#34;fetcher-rpc&#34;</span>:<span style="color:#d14">&#34;http://10.211.55.23:5001&#34;</span>
+  },
+  <span style="color:#000080">&#34;fetcher&#34;</span>: {
+    <span style="color:#000080">&#34;xmlrpc&#34;</span>:<span style="color:#000;font-weight:bold">true</span>,
+    <span style="color:#000080">&#34;xmlrpc-host&#34;</span>: <span style="color:#d14">&#34;0.0.0.0&#34;</span>,
+    <span style="color:#000080">&#34;xmlrpc-port&#34;</span>: <span style="color:#d14">&#34;5001&#34;</span>
+  },
+  <span style="color:#000080">&#34;scheduler&#34;</span>: {
+    <span style="color:#000080">&#34;xmlrpc&#34;</span>:<span style="color:#000;font-weight:bold">true</span>,
+    <span style="color:#000080">&#34;xmlrpc-host&#34;</span>: <span style="color:#d14">&#34;0.0.0.0&#34;</span>,
+    <span style="color:#000080">&#34;xmlrpc-port&#34;</span>: <span style="color:#d14">&#34;5002&#34;</span>
+  }
+}
+
+</code></pre></td></tr></table>
+</div>
+</div><p>尝试运行下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
+<span style="color:#998;font-style:italic"># 报错</span>
+ImportError: No module named <span style="color:#d14">&#39;mysql&#39;</span>
+<span style="color:#998;font-style:italic"># 下载 mysql-connector-python</span>
+<span style="color:#0086b3">cd</span> ~/git/
+git clone https://github.com/mysql/mysql-connector-python.git
+<span style="color:#998;font-style:italic"># 安装</span>
+<span style="color:#0086b3">source</span> activate sbird
+<span style="color:#0086b3">cd</span> mysql-connector-python
+python setup.py install
+<span style="color:#998;font-style:italic"># 安装redis</span>
+pip install redis
+<span style="color:#0086b3">source</span> deactivate
+<span style="color:#998;font-style:italic"># 运行</span>
+/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json scheduler
+<span style="color:#998;font-style:italic"># 输出 ok</span>
+<span style="color:#000;font-weight:bold">[</span>I <span style="color:#099">161010</span> 15:57:25 scheduler:644<span style="color:#000;font-weight:bold">]</span> scheduler starting...
+<span style="color:#000;font-weight:bold">[</span>I <span style="color:#099">161010</span> 15:57:25 scheduler:779<span style="color:#000;font-weight:bold">]</span> scheduler.xmlrpc listening on 0.0.0.0:5002
+<span style="color:#000;font-weight:bold">[</span>I <span style="color:#099">161010</span> 15:57:25 scheduler:583<span style="color:#000;font-weight:bold">]</span> in 5m: new:0,success:0,retry:0,failed:0
+</code></pre></td></tr></table>
+</div>
+</div><p>运行成功后，可直接更改<code>/etc/supervisord.d/pyspider01.ini</code>如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vim" data-lang="vim">[program:pyspider01]<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>command      = <span style="color:#009926">/root/</span>anaconda3<span style="color:#009926">/envs/</span>sbird<span style="color:#009926">/bin/</span>python <span style="color:#009926">/root/</span>git<span style="color:#009926">/pyspider/</span>run.py -c <span style="color:#009926">/pyspider/</span>config.json scheduler<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>directory    = <span style="color:#009926">/root/</span>git/pyspider<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>user         = root<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>process_name = %(program_name)s<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>autostart    = true<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>autorestart  = true<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>startsecs    = <span style="color:#099">3</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>redirect_stderr         = true<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>stdout_logfile_maxbytes = <span style="color:#099">500</span>MB<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>stdout_logfile_backups  = <span style="color:#099">10</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span>stdout_logfile          = <span style="color:#009926">/pyspider/</span>supervisor/pyspider01.log<span style="color:#a61717;background-color:#e3d2d2">
+</span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 重载</span>
+supervisorctl reload
+<span style="color:#998;font-style:italic"># 查看状态</span>
+supervisorctl status
+</code></pre></td></tr></table>
+</div>
+</div><p><code>centos01</code>部署完毕。</p>
+<h5 id="centos02">centos02</h5>
+<p>在<code>centos02</code>中，需要运行<code>result_worker、processor、phantomjs、fetcher</code></p>
+<p>分别建立文件：</p>
+<p><code>/etc/supervisord.d/result_worker.ini</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="color:#000;font-weight:bold">[program:result_worker]</span>
+
+<span style="color:#008080">command</span>      <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json result_worker</span>
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/git/pyspider</span>
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">root</span>
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">%(program_name)s</span>
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">500MB</span>
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/supervisor/result_worker.log</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>/etc/supervisord.d/processor.ini</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="color:#000;font-weight:bold">[program:processor]</span>
+
+<span style="color:#008080">command</span>      <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json processor</span>
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/git/pyspider</span>
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">root</span>
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">%(program_name)s</span>
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">500MB</span>
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/supervisor/processor.log</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>/etc/supervisord.d/phantomjs.ini</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="color:#000;font-weight:bold">[program:phantomjs]</span>
+
+<span style="color:#008080">command</span>      <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/phantomjs --config=/pyspider/pjsconfig.json /pyspider/phantomjs_fetcher.js 25555</span>
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/git/pyspider</span>
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">root</span>
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">%(program_name)s</span>
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">500MB</span>
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/supervisor/phantomjs.log</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>/etc/supervisord.d/fetcher.ini</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="color:#000;font-weight:bold">[program:fetcher]</span>
+
+<span style="color:#008080">command</span>      <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json fetcher</span>
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/git/pyspider</span>
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">root</span>
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">%(program_name)s</span>
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">500MB</span>
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/supervisor/fetcher.log</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在<code>pyspider</code>目录中建立pjsconfig.json</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#a61717;background-color:#e3d2d2">/*--ignore-ssl-errors=true</span> <span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#000080">&#34;ignoreSslErrors&#34;</span>: <span style="color:#000;font-weight:bold">true</span>,
+  
+  <span style="color:#a61717;background-color:#e3d2d2">/*--ssl-protocol=true</span> <span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#000080">&#34;sslprotocol&#34;</span>: <span style="color:#d14">&#34;any&#34;</span>,
+  
+  <span style="color:#a61717;background-color:#e3d2d2">/*</span> <span style="color:#a61717;background-color:#e3d2d2">Same</span> <span style="color:#a61717;background-color:#e3d2d2">as:</span> <span style="color:#a61717;background-color:#e3d2d2">--output-encoding=utf8</span> <span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#000080">&#34;outputEncoding&#34;</span>: <span style="color:#d14">&#34;utf8&#34;</span>,
+  
+  <span style="color:#a61717;background-color:#e3d2d2">/*</span> <span style="color:#a61717;background-color:#e3d2d2">persistent</span> <span style="color:#a61717;background-color:#e3d2d2">Cookies.</span> <span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#a61717;background-color:#e3d2d2">/*cookiesfile=</span><span style="color:#000080">&#34;e:/phontjscookies.txt&#34;</span>,<span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#a61717;background-color:#e3d2d2">cookiesfile=</span><span style="color:#000080">&#34;pyspider/phontjscookies.txt&#34;</span>,
+  
+  <span style="color:#a61717;background-color:#e3d2d2">/*</span> <span style="color:#a61717;background-color:#e3d2d2">load</span> <span style="color:#a61717;background-color:#e3d2d2">image</span> <span style="color:#a61717;background-color:#e3d2d2">*/</span>
+  <span style="color:#a61717;background-color:#e3d2d2">autoLoadImages</span> <span style="color:#a61717;background-color:#e3d2d2">=</span> <span style="color:#a61717;background-color:#e3d2d2">false</span>
+}
+
+</code></pre></td></tr></table>
+</div>
+</div><p>下载phantomjs至<code>/pyspider/</code>文件夹，将<code>git/pyspider/pyspider/fetcher/phantomjs_fetcher.js</code>复制到<code>phantomjs_fetcher.js</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 重载</span>
+supervisorctl reload
+<span style="color:#998;font-style:italic"># 查看状态</span>
+supervisorctl status
+<span style="color:#998;font-style:italic"># output</span>
+fetcher                          RUNNING   pid 3446, uptime 0:00:07
+phantomjs                        RUNNING   pid 3448, uptime 0:00:07
+processor                        RUNNING   pid 3447, uptime 0:00:07
+result_worker                    RUNNING   pid 3445, uptime 0:00:07
+</code></pre></td></tr></table>
+</div>
+</div><p><code>centos02</code>部署完毕。</p>
+<h5 id="centos03">centos03</h5>
+<p>部署这三个进程<code>fetcher, processor, result_worker</code>和<code>centos02</code> 一样，本服务器主要是在前面的基础上加上<code>webui</code></p>
+<p>建立文件：</p>
+<p><code>/etc/supervisord.d/webui.ini</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="color:#000;font-weight:bold">[program:webui]</span>
+
+<span style="color:#008080">command</span>      <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/anaconda3/envs/sbird/bin/python /root/git/pyspider/run.py -c /pyspider/config.json webui</span>
+<span style="color:#008080">directory</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/root/git/pyspider</span>
+<span style="color:#008080">user</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">root</span>
+<span style="color:#008080">process_name</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">%(program_name)s</span>
+<span style="color:#008080">autostart</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">autorestart</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">startsecs</span>    <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">3</span>
+
+<span style="color:#008080">redirect_stderr</span>         <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">true</span>
+<span style="color:#008080">stdout_logfile_maxbytes</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">500MB</span>
+<span style="color:#008080">stdout_logfile_backups</span>  <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">10</span>
+<span style="color:#008080">stdout_logfile</span>          <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">/pyspider/supervisor/webui.log</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 重载</span>
+supervisorctl reload
+<span style="color:#998;font-style:italic"># 查看状态</span>
+supervisorctl status
+<span style="color:#998;font-style:italic"># output</span>
+fetcher                          RUNNING   pid 2724, uptime 0:00:07
+processor                        RUNNING   pid 2725, uptime 0:00:07
+result_worker                    RUNNING   pid 2723, uptime 0:00:07
+webui                            RUNNING   pid 2726, uptime 0:00:07
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="总结">总结</h4>
+<p>访问 http://10.211.55.25:5000 即可，尽情爬取吧。</p>
+<p>
+        <img class="mx-auto" alt="EQIEle" src="https://images-1252557999.file.myqcloud.com/uPic/EQIEle.jpg" />   
+    </p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2016/09_deploy-pyspider/">https://www.howie6879.cn/post/2016/09_deploy-pyspider/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2016/08_happy-birthday-to-my-girlfriend/">祝你生日快乐</a></li>
+        
+        <li><a href="/post/2016/07_company-name-to-website/">Python之由公司名推算出公司官网(余弦相似度)</a></li>
+        
+        <li><a href="/post/2016/06_python-naive-bayes-classification-of-exhibition-data/">Python之朴素贝叶斯对展会数据分类</a></li>
+        
+        <li><a href="/post/2016/05_about-python-decorator/">python之装饰器</a></li>
+        
+        <li><a href="/post/2016/04_package-py-lib-with-cx_freeze/">cx_Freeze打包py文件</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/centos'>CentOS</a></li>
+                
+                <li><a href='/tags/spider'>Spider</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>以Ruia为例：如何实现一个Python爬虫框架 | 老胡的储物柜</title>
+  <meta property="og:title" content="以Ruia为例：如何实现一个Python爬虫框架 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2019-03-15T08:37:56&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2019-03-15T08:37:56&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="以Ruia为例：如何实现一个Python爬虫框架"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">以Ruia为例：如何实现一个Python爬虫框架</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2019年3月15日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE'>项目</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/ruia_banner.png" />   
+    </p>
+<p>这篇文章的题目有点大，但这并不是说我自觉对Python爬虫这块有多大见解，我只不过是想将自己的一些经验付诸于笔，对于如何写一个爬虫框架，我想一步一步地结合具体代码来讲述如何从零开始编写一个自己的爬虫框架</p>
+<p>2018年到如今，我花精力比较多的一个开源项目算是<code>Ruia</code>了，这是一个基于<code>Python3.6+</code>的异步爬虫框架，当时也获得一些推荐，比如<code>Github Trending Python</code>语言榜单第二，目前<code>Ruia</code>还在开发中，<code>Star</code>数目不过<code>700+</code>，如果各位有兴趣，欢迎一起开发，来波<code>star</code>我也不会拒绝哈~</p>
+<blockquote>
+<p>什么是爬虫框架</p>
+</blockquote>
+<p>说这个之前，得先说说什么是<strong>框架</strong>：</p>
+<ul>
+<li>是实现业界标准的组件规范：比如众所周知的<code>MVC</code>开发规范</li>
+<li>提供规范所要求之基础功能的软件产品：比如<code>Django</code>框架就是<code>MVC</code>的开发框架，但它还提供了其他基础功能帮助我们快速开发，比如中间件、认证系统等</li>
+</ul>
+<p>框架的关注点在于规范二字，好，我们要写的Python爬虫框架规范是什么？</p>
+<p>很简单，爬虫框架就是对爬虫流程规范的实现，不清楚的朋友可以看上一篇文章<a href="https://www.howie6879.cn/post/2019/02_talk_about_python_spider/">谈谈对Python爬虫的理解</a>，下面总结一下爬虫流程：</p>
+<ul>
+<li>请求&amp;响应</li>
+<li>解析</li>
+<li>持久化</li>
+</ul>
+<p>这三个流程有没有可能以一种优雅的形式串联起来，<code>Ruia</code>目前是这样实现的，请看代码示例：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191125084850.png" />   
+    </p>
+<p>可以看到，<code>Item &amp; Field</code>类结合一起实现了字段的解析提取，<code>Spider</code>类结合<code>Request * Response</code>类实现了对爬虫程序整体的控制，从而可以如同流水线一般编写爬虫，最后返回的<code>item</code>可以根据使用者自身的需求进行持久化，这几行代码，我们就实现了获取目标网页请求、字段解析提取、持久化这三个流程</p>
+<p>实现了基本流程规范之后，我们继而就可以考虑一些基础功能，让使用者编写爬虫可以更加轻松，比如：中间件(Ruia里面的Middleware)、提供一些<code>hook</code>让用户编写爬虫更方便(比如ruia-motor)</p>
+<p>这些想明白之后，接下来就可以愉快地编写自己心目中的爬虫框架了</p>
+<blockquote>
+<p>如何踏出第一步</p>
+</blockquote>
+<p>首先，我对Ruia爬虫框架的定位很清楚，基于<code>asyncio &amp; aiohttp</code>的一个轻量的、异步爬虫框架，怎么实现呢，我觉得以下几点需要遵守：</p>
+<ul>
+<li>轻量级，专注于抓取、解析和良好的API接口</li>
+<li>插件化，各个模块耦合程度尽量低，目的是容易编写自定义插件</li>
+<li>速度，异步无阻塞框架，需要对速度有一定追求</li>
+</ul>
+<p>什么是爬虫框架如今我们已经很清楚了，现在急需要做的就是将流程规范利用Python语言实现出来，怎么实现，分为哪几个模块，可以看如下图示：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20191125084914.png" />   
+    </p>
+<p>同时让我们结合上面一节的<code>Ruia</code>代码来从业务逻辑角度看看这几个模块到底是什么意思：</p>
+<ul>
+<li>Request：请求</li>
+<li>Response：响应</li>
+<li>Item &amp; Field：解析提取</li>
+<li>Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来</li>
+</ul>
+<p>这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆<code>Ruia</code>框架到本地：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 请确保本地Python环境是3.6+</span>
+git clone https://github.com/howie6879/ruia.git
+<span style="color:#998;font-style:italic"># 安装pipenv</span>
+pip install pipenv 
+<span style="color:#998;font-style:italic"># 安装依赖包</span>
+pipenv install --dev
+</code></pre></td></tr></table>
+</div>
+</div><p>然后用<code>PyCharm</code>打开<code>Ruia</code>项目：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190313142545.png" />   
+    </p>
+<p>选择刚刚<code>pipenv</code>配置好的python解释器：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190313142712.png" />   
+    </p>
+<p>此时可以完整地看到项目代码：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190314093946.png" />   
+    </p>
+<p>好，环境以及源码准备完毕，接下来将结合代码讲述一个爬虫框架的编写流程</p>
+<blockquote>
+<p>Request &amp; Response</p>
+</blockquote>
+<p><code>Request</code>类的目的是对<code>aiohttp</code>加一层封装进行模拟请求，功能如下：</p>
+<ul>
+<li>封装GET、POST两种请求方式</li>
+<li>增加回调机制</li>
+<li>自定义重试次数、休眠时间、超时、重试解决方案、请求是否成功验证等功能</li>
+<li>将返回的一系列数据封装成<code>Response</code>类返回</li>
+</ul>
+<p>接下来就简单了，不过就是实现上述需求，首先，需要实现一个函数来抓取目标<code>url</code>，比如命名为<code>fetch</code>:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">aiohttp</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">async_timeout</span>
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">typing</span> <span style="color:#000;font-weight:bold">import</span> Coroutine
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Request</span>:
+    <span style="color:#998;font-style:italic"># Default config</span>
+    REQUEST_CONFIG <span style="color:#000;font-weight:bold">=</span> {
+        <span style="color:#d14">&#39;RETRIES&#39;</span>: <span style="color:#099">3</span>,
+        <span style="color:#d14">&#39;DELAY&#39;</span>: <span style="color:#099">0</span>,
+        <span style="color:#d14">&#39;TIMEOUT&#39;</span>: <span style="color:#099">10</span>,
+        <span style="color:#d14">&#39;RETRY_FUNC&#39;</span>: Coroutine,
+        <span style="color:#d14">&#39;VALID&#39;</span>: Coroutine
+    }
+
+    METHOD <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#39;GET&#39;</span>, <span style="color:#d14">&#39;POST&#39;</span>]
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, url, method<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;GET&#39;</span>, request_config<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>, request_session<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url <span style="color:#000;font-weight:bold">=</span> url
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">=</span> method<span style="color:#000;font-weight:bold">.</span>upper()
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config <span style="color:#000;font-weight:bold">=</span> request_config <span style="color:#000;font-weight:bold">or</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>REQUEST_CONFIG
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> request_session
+
+    <span style="color:#3c5d5d;font-weight:bold">@property</span>
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">current_request_session</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> aiohttp<span style="color:#000;font-weight:bold">.</span>ClientSession()
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>close_request_session <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">True</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session
+
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fetch</span>(<span style="color:#999">self</span>):
+        <span style="color:#d14">&#34;&#34;&#34;Fetch all the information by using aiohttp&#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DELAY&#39;</span>, <span style="color:#099">0</span>) <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
+            <span style="color:#000;font-weight:bold">await</span> asyncio<span style="color:#000;font-weight:bold">.</span>sleep(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config[<span style="color:#d14">&#39;DELAY&#39;</span>])
+
+        timeout <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;TIMEOUT&#39;</span>, <span style="color:#099">10</span>)
+        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> async_timeout<span style="color:#000;font-weight:bold">.</span>timeout(timeout):
+            resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_make_request()
+        <span style="color:#000;font-weight:bold">try</span>:
+            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>text()
+        <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">UnicodeDecodeError</span>:
+            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>read()
+        resp_dict <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+            rl<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url,
+            method<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method,
+            encoding<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>get_encoding(),
+            html<span style="color:#000;font-weight:bold">=</span>resp_data,
+            cookies<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>cookies,
+            headers<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>headers,
+            status<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>status,
+            history<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>history
+        )
+        <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session<span style="color:#000;font-weight:bold">.</span>close()
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#0086b3">type</span>(<span style="color:#d14">&#39;Response&#39;</span>, (), resp_dict)
+
+
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_make_request</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;GET&#39;</span>:
+            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
+        <span style="color:#000;font-weight:bold">else</span>:
+            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>post(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
+        resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> request_func
+        <span style="color:#000;font-weight:bold">return</span> resp
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
+    resp <span style="color:#000;font-weight:bold">=</span> loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(Request(<span style="color:#d14">&#39;https://docs.python-ruia.org/&#39;</span>)<span style="color:#000;font-weight:bold">.</span>fetch())
+    <span style="color:#0086b3">print</span>(resp<span style="color:#000;font-weight:bold">.</span>status)
+
+
+</code></pre></td></tr></table>
+</div>
+</div><p>实际运行一下，会输出请求状态<code>200</code>，就这样简单封装一下，我们已经有了自己的请求类<code>Request</code>，接下来只需要再完善一下重试机制以及将返回的属性封装一下就基本完成了：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 重试函数</span>
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_retry</span>(<span style="color:#999">self</span>):
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
+        retry_times <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRIES&#39;</span>, <span style="color:#099">3</span>) <span style="color:#000;font-weight:bold">-</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">-=</span> <span style="color:#099">1</span>
+        retry_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRY_FUNC&#39;</span>)
+        <span style="color:#000;font-weight:bold">if</span> retry_func <span style="color:#000;font-weight:bold">and</span> iscoroutinefunction(retry_func):
+            request_ins <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> retry_func(weakref<span style="color:#000;font-weight:bold">.</span>proxy(<span style="color:#999">self</span>))
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(request_ins, Request):
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> request_ins<span style="color:#000;font-weight:bold">.</span>fetch()
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>fetch()
+
+</code></pre></td></tr></table>
+</div>
+</div><p>最终代码见<code>ruia/request.py</code>即可，接下来就可以利用<code>Request</code>来实际请求一个目标网页，如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190313180601.png" />   
+    </p>
+<p>这段代码请求了目标网页<code>https://docs.python-ruia.org/</code>并返回了<code>Response</code>对象，其中<code>Response</code>提供属性介绍如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190313130731.png" />   
+    </p>
+<blockquote>
+<p>Field &amp; Item</p>
+</blockquote>
+<p>实现了对目标网页的请求，接下来就是对目标网页进行字段提取，我觉得<code>ORM</code>的思想很适合用在这里，我们只需要定义一个<code>Item</code>类，类里面每个属性都可以用<code>Field</code>类来定义，然后只需要传入<code>url</code>或者<code>html</code>，执行过后<code>Item</code>类里面 定义的属性会自动被提取出来变成目标字段值</p>
+<p>可能说起来比较拗口，下面直接演示一下可能你就明白这样写的好，假设你的需求是获取<code>HackerNews</code>网页的<code>title</code>和<code>url</code>，可以这样实现：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
+    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
+    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
+    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
+
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">main</span>():
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(url<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://news.ycombinator.com/&#34;</span>):
+        <span style="color:#0086b3">print</span>(item<span style="color:#000;font-weight:bold">.</span>title, item<span style="color:#000;font-weight:bold">.</span>url)
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+     items <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>run(main())
+</code></pre></td></tr></table>
+</div>
+</div><p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190314094841.png" />   
+    </p>
+<p>从输出结果可以看到，<code>title</code>和<code>url</code>属性已经被赋与实际的目标值，这样写起来是不是很简洁清晰也很明了呢？</p>
+<p>来看看怎么实现，<code>Field</code>类的目的是提供多种方式让开发者提取网页字段，比如：</p>
+<ul>
+<li>XPath</li>
+<li>CSS Selector</li>
+<li>RE</li>
+</ul>
+<p>所以我们只需要根据需求，定义父类然后再利用不同的提取方式实现子类即可，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">BaseField</span>(<span style="color:#0086b3">object</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    BaseField class
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, default: <span style="color:#0086b3">str</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>, many: <span style="color:#0086b3">bool</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        Init BaseField class
+</span><span style="color:#d14">        url: http://lxml.de/index.html
+</span><span style="color:#d14">        :param default: default value
+</span><span style="color:#d14">        :param many: if there are many fields in one page
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>default <span style="color:#000;font-weight:bold">=</span> default
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>many <span style="color:#000;font-weight:bold">=</span> many
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">extract</span>(<span style="color:#999">self</span>, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs):
+        <span style="color:#000;font-weight:bold">raise</span> <span style="color:#900;font-weight:bold">NotImplementedError</span>(<span style="color:#d14">&#39;extract is not implemented.&#39;</span>)
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">_LxmlElementField</span>(BaseField):
+    <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AttrField</span>(_LxmlElementField):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    This field is used to get  attribute.
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+	  <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HtmlField</span>(_LxmlElementField):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    This field is used to get raw html data.
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">TextField</span>(_LxmlElementField):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    This field is used to get text.
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+	  <span style="color:#000;font-weight:bold">pass</span>
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RegexField</span>(BaseField):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    This field is used to get raw html code by regular expression.
+</span><span style="color:#d14">    RegexField uses standard library `re` inner, that is to say it has a better performance than _LxmlElementField.
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    <span style="color:#000;font-weight:bold">pass</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>核心类就是上面的代码，具体实现请看<code>ruia/field.py</code></p>
+<p>接下来继续说<code>Item</code>部分，这部分实际上是对<code>ORM</code>那块的实现，用到的知识点是<code>元类</code>，因为我们需要控制类的创建行为：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ItemMeta</span>(<span style="color:#0086b3">type</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    Metaclass for an item
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __new__(<span style="color:#999">cls</span>, name, bases, attrs):
+        __fields <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>({(field_name, attrs<span style="color:#000;font-weight:bold">.</span>pop(field_name))
+                         <span style="color:#000;font-weight:bold">for</span> field_name, <span style="color:#0086b3">object</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">list</span>(attrs<span style="color:#000;font-weight:bold">.</span>items())
+                         <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(<span style="color:#0086b3">object</span>, BaseField)})
+        attrs[<span style="color:#d14">&#39;__fields&#39;</span>] <span style="color:#000;font-weight:bold">=</span> __fields
+        new_class <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">type</span><span style="color:#000;font-weight:bold">.</span>__new__(<span style="color:#999">cls</span>, name, bases, attrs)
+        <span style="color:#000;font-weight:bold">return</span> new_class
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Item</span>(metaclass<span style="color:#000;font-weight:bold">=</span>ItemMeta):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    Item class for each item
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>ignore_item <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>results <span style="color:#000;font-weight:bold">=</span> {}
+</code></pre></td></tr></table>
+</div>
+</div><p>这一层弄明白接下来就很简单了，还记得上一篇文章《谈谈对Python爬虫的理解》里面说的四个类型的目标网页么：</p>
+<ul>
+<li>单页面单目标</li>
+<li>单页面多目标</li>
+<li>多页面单目标</li>
+<li>多页面多目标</li>
+</ul>
+<p>本质来说就是要获取网页的单目标以及多目标（多页面可以放在Spider那块实现），<code>Item</code>类只需要定义两个方法就能实现：</p>
+<ul>
+<li>get_item()：单目标</li>
+<li>get_items()：多目标，需要定义好<code>target_item</code></li>
+</ul>
+<p>具体实现见：<code>ruia/item.py</code></p>
+<blockquote>
+<p>Spider</p>
+</blockquote>
+<p>在<code>Ruia</code>框架中，为什么要有<code>Spider</code>，有以下原因：</p>
+<ul>
+<li>真实世界爬虫是多个页面的（或深度或广度），利用<code>Spider</code>可以对这些进行 有效的管理</li>
+<li>制定一套爬虫程序的编写标准，可以让开发者容易理解、交流，能迅速产出高质量爬虫程序</li>
+<li>自由地定制插件</li>
+</ul>
+<p>接下来说说代码实现，<code>Ruia</code>框架的<code>API</code>写法我有参考<code>Scrapy</code>，各个函数之间的联结也是使用回调，但是你也可以直接使用<code>await</code>，可以直接看代码示例：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item, Spider
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
+    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
+    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
+    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsSpider</span>(Spider):
+    start_urls <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">f</span><span style="color:#d14">&#39;https://news.ycombinator.com/news?p=</span><span style="color:#d14">{</span>index<span style="color:#d14">}</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">for</span> index <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">1</span>, <span style="color:#099">3</span>)]
+
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse</span>(<span style="color:#999">self</span>, response):
+        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(html<span style="color:#000;font-weight:bold">=</span>response<span style="color:#000;font-weight:bold">.</span>html):
+            <span style="color:#000;font-weight:bold">yield</span> item
+
+
+<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+    HackerNewsSpider<span style="color:#000;font-weight:bold">.</span>start()
+</code></pre></td></tr></table>
+</div>
+</div><p>使用起来还是挺简洁的，输出如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider started!
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380434912</span>
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380435048</span>
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>1&gt;
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>2&gt;
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Stopping spider: Ruia
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Total requests: <span style="color:#099">2</span>
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Time usage: 0:00:03.426335
+<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider finished!
+</code></pre></td></tr></table>
+</div>
+</div><p><code>Spider</code>的核心部分在于对请求<code>URL</code>的请求控制，目前采用的是生产消费者模式来处理，具体函数如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190314103244.png" />   
+    </p>
+<p>详细代码，见<code>ruia/spider.py</code></p>
+<blockquote>
+<p>更多</p>
+</blockquote>
+<p>至此，爬虫框架的核心部分已经实现完毕，基础功能同样一个不落地实现了，接下来要做的就是：</p>
+<ul>
+<li>实现更多优雅地功能</li>
+<li>实现更多的插件，让生态丰富起来</li>
+<li>修BUG</li>
+</ul>
+<p>项目地址点击阅读原文或者在<code>github</code>搜索<code>ruia</code>，如果你有兴趣，请参与进来吧！</p>
+<p>如果觉得写得不错，点个好看来个<code>star</code>呗~</p>
+<!-- raw HTML omitted -->
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/">https://www.howie6879.cn/post/2019/03_how_to_build_a_web_scraping_framework_with_python/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/02_talk_about_python_spider/">谈谈对Python爬虫的理解</a></li>
+        
+        <li><a href="/post/2017/08_talospider-intro/">talospider - 简单的爬虫框架</a></li>
+        
+        <li><a href="/post/2017/01_itbooks/">ITBooks—简单的书籍下载小工具</a></li>
+        
+        <li><a href="/post/2016/09_deploy-pyspider/">CentOS7分布式部署pyspider</a></li>
+        
+        <li><a href="/post/2019/01_neural_network_foundation/">神经网络基础</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/spider'>Spider</a></li>
+                
+                <li><a href='/tags/ruia'>Ruia</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

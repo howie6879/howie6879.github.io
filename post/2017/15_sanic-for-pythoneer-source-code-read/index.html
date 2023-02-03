@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>Sanic 源码阅读 - 基于0.1.2 | 老胡的储物柜</title>
+  <meta property="og:title" content="Sanic 源码阅读 - 基于0.1.2 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2017-12-20T10:10:49&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2017-12-20T10:10:49&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="Sanic 源码阅读 - 基于0.1.2"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2017/15_sanic-for-pythoneer-source-code-read/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#simple_serverpy">simple_server.py</a></li>
+    <li><a href="#blueprintspy">blueprints.py</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Sanic 源码阅读 - 基于0.1.2</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2017年12月20日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p><code>Sanic</code>是一个可以使用<code>async/await</code>语法编写项目的异步非阻塞框架，它写法类似于<code>Flask</code>，但使用了异步特性，而且还使用<code>uvloop</code>作为事件循环，其底层使用的是<code>libuv</code>，从而使 <code>Sanic</code>的速度优势更加明显。</p>
+<p>如果你：</p>
+<ul>
+<li>想深入了解Sanic，迫切想知道它的运行机制</li>
+<li>直接阅读源码，做一些定制</li>
+<li>学习</li>
+</ul>
+<p>将Sanic-0.1.2阅读完后，我觉得你应该有以下基础再阅读源码才会理解地比较好：</p>
+<ul>
+<li>理解<a href="http://blog.howie6879.cn/2016/09/28/04/">装饰器</a></li>
+<li>理解协程</li>
+</ul>
+<!-- raw HTML omitted -->
+<p>Sanic-0.1.2 的核心文件如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">.
+├── __init__.py
+├── blueprints.py
+├── config.py
+├── exceptions.py
+├── log.py
+├── request.py
+├── response.py
+├── router.py
+├── sanic.py
+├── server.py
+└── utils.py
+
+</code></pre></td></tr></table>
+</div>
+</div><p>通过运行下面的示例，这些文件都会被我们看到它的作用，拭目以待吧。</p>
+<h2 id="simple_serverpy">simple_server.py</h2>
+<p>让我们从<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/examples/simple_server.py">simple_server</a>开始吧，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_0_1_2.src</span> <span style="color:#000;font-weight:bold">import</span> Sanic
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_0_1_2.src.response</span> <span style="color:#000;font-weight:bold">import</span> json
+
+app <span style="color:#000;font-weight:bold">=</span> Sanic(__name__)
+
+
+<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/&#34;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#34;test&#34;</span>: <span style="color:#000;font-weight:bold">True</span>})
+
+
+app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>)
+
+</code></pre></td></tr></table>
+</div>
+</div><p>或许你直接把<a href="https://github.com/howie6879/sanic_annotation">sanic_annotation</a>项目直接clone到本地比较方便调试+理解：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone https://github.com/howie6879/sanic_annotation
+<span style="color:#0086b3">cd</span> sanic_annotation/sanic_0_1_2/examples/
+</code></pre></td></tr></table>
+</div>
+</div><p>那么，现在一切准备就绪，开始阅读吧。</p>
+<p>前两行代码导入包：</p>
+<ul>
+<li><code>Sanic</code>：构建一个 Sanic 服务必须要实例化的类</li>
+<li><code>json</code>：以json格式返回结果，实际上是HTTPResponse类，根据实例化参数content_type的不同，构建不同的实例，如：
+<ul>
+<li><code>text</code>：<code>content_type=&quot;text/plain; charset=utf-8&quot;</code></li>
+<li><code>html</code>：<code>content_type=&quot;text/html; charset=utf-8&quot;</code></li>
+</ul>
+</li>
+</ul>
+<p>实例化一个<code>Sanic</code>对象，<code>app = Sanic(__name__)</code>，可见<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py">sanic.py</a>，我已经在这个文件里面做了一些注释，这里也详细说下<code>Sanic</code>类：</p>
+<ul>
+<li>
+<p>route()：装饰器，构建uri和视图函数的映射关系，调用Router().add()方法</p>
+</li>
+<li>
+<p>exception()：装饰器，和上面差不多，不过针对的是错误处理类Handler</p>
+</li>
+<li>
+<p>middleware()：装饰器，针对中间件</p>
+</li>
+<li>
+<p>register_blueprint()：注册视图的函数，接受第一个参数是视图类<code>blueprint</code>，再调用该类下的<code>register</code>方法实现将此蓝图下的<code>route、exception、middleware</code>统一注册到<code>app.route、app.exception、app.exception</code></p>
+</li>
+<li>
+<p>handle_request()：这是一个很重要的异步函数，当服务启动后，如果客户端发来一个有效的请求，会自动执行 <code>on_message_complete</code>函数，该函数的目的是异步调用 <code>handle_request</code>函数，<code>handle_request</code>函数会回调<code>write_response</code>函数，<code>write_response</code>接受的参数是此uri请求对应的视图函数，比如上面demo中，如果客户端请求'/'，那么这里<code>write_response</code>就会接受<code>json({&quot;test&quot;: True})</code>，然后进一步处理，再返回给客户端</p>
+</li>
+<li>
+<p>run()：Sanic服务的启动函数，必须执行，实际上会继续调用<code>server.serve</code>函数，详情下面会详细讲</p>
+</li>
+<li>
+<p>stop()：终止服务</p>
+</li>
+</ul>
+<p>其实上面这部分介绍已经讲了Sanic基本的运行逻辑，如果你理解了，那下面的讲解对你来说是轻轻松松，如果不怎么明白，也不要紧，这是只是一个大体的介绍，跟着步骤来，也很容易理解，继续看代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 此处将路由 / 与视图函数 test 关联起来</span>
+<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/&#34;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#34;test&#34;</span>: <span style="color:#000;font-weight:bold">True</span>})
+
+</code></pre></td></tr></table>
+</div>
+</div><p><code>app.route</code>，上面介绍过，随着Sanic服务的启动而启动，可定义参数<code>uri, methods</code></p>
+<p>目的是为<code>url</code>的<code>path</code>和视图函数对应起来，构建一对映射关系，本例中<code>Sanic.router</code>类下的<code>Router.routes = []</code></p>
+<p>会增加一个名为<code>Route</code>的<code>namedtuple</code>，如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">[Route(handler<span style="color:#000;font-weight:bold">=&lt;</span>function test at <span style="color:#099">0x10a0f6488</span><span style="color:#000;font-weight:bold">&gt;</span>, methods<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>, pattern<span style="color:#000;font-weight:bold">=</span>re<span style="color:#000;font-weight:bold">.</span>compile(<span style="color:#d14">&#39;^/$&#39;</span>), parameters<span style="color:#000;font-weight:bold">=</span>[])]
+</code></pre></td></tr></table>
+</div>
+</div><p>看到没，<code>uri '/'</code> 和视图函数<code>test</code>对应起来了，如果客户端请求<code>'/'</code>，当服务器监听到这个请求的时候,<code>handle_request</code>可以通过参数中的<code>request.url</code>来找到视图函数<code>test</code>并且执行，随即生成视图返回</p>
+<p>那么这里<code>write_response</code>就会接受视图函数test返回的<code>json({&quot;test&quot;: True})</code></p>
+<p>说下<code>Router</code>类，这个类的目的就是添加和获取路由对应的视图函数，把它想象成<code>dict</code>或许更容易理解：</p>
+<ul>
+<li>add(self, uri, methods, handler)：添加一个映射关系到self.routes</li>
+<li>get(self, request)：获取request.url对应的视图函数</li>
+</ul>
+<p>最后一行，<code>app.run(host=&quot;0.0.0.0&quot;, port=8000)</code>，Sanic 下的<code>run</code>函数，启动一个<code>http server</code>，主要是启动<code>run</code>里面的<code>serve</code>函数，参数如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#000;font-weight:bold">try</span>:
+    serve(
+        host<span style="color:#000;font-weight:bold">=</span>host,
+        port<span style="color:#000;font-weight:bold">=</span>port,
+        debug<span style="color:#000;font-weight:bold">=</span>debug,
+        <span style="color:#998;font-style:italic"># 服务开始后启动的函数</span>
+        after_start<span style="color:#000;font-weight:bold">=</span>after_start,
+        <span style="color:#998;font-style:italic"># 在服务关闭前启动的函数</span>
+        before_stop<span style="color:#000;font-weight:bold">=</span>before_stop,
+        <span style="color:#998;font-style:italic"># Sanic(__name__).handle_request()</span>
+        request_handler<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>handle_request,
+        <span style="color:#998;font-style:italic"># 默认读取Config</span>
+        request_timeout<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>config<span style="color:#000;font-weight:bold">.</span>REQUEST_TIMEOUT,
+        request_max_size<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>config<span style="color:#000;font-weight:bold">.</span>REQUEST_MAX_SIZE,
+    )
+<span style="color:#000;font-weight:bold">except</span>:
+    <span style="color:#000;font-weight:bold">pass</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>让我们将目光投向<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a>，这也是Sanic框架的核心代码：</p>
+<ul>
+<li>
+<p>serve()：里面会创建一个TCP服务的协程，然后通过<code>loop.run_forever()</code>运行这个事件循环，以便接收客户端请求以及处理相关事件，每当一个新的客户端建立连接服务就会创建一个新的<code>Protocol</code>实例，接受请求与返回响应离不开其中的<code>HttpProtocol</code>，里面的函数支持接受数据、处理数据、执行视图函数、构建响应数据并返回给客户端</p>
+</li>
+<li>
+<p>HttpProtocol：<code>asyncio.Protocol</code>的子类，用来处理与客户端的通信，我在<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a>里写了对应的注释</p>
+</li>
+</ul>
+<p>至此，Sanic 服务启动了</p>
+<p>不要小看这一个小小的demo，执行一下，竟然涉及到下面这么多个文件，让我们总结一下：</p>
+<ul>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/sanic.py">sanic.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/server.py">server.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/router.py">router.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/request.py">request.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/response.py">response.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/exceptions.py">exceptions.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/config.py">config.py</a></p>
+</li>
+<li>
+<p><a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/log.py">log.py</a></p>
+</li>
+</ul>
+<p>除去<code>__init__.py</code>，<code>Sanic</code>项目一共就10个文件，这个小demo不显山不露水地竟然用到了8个，虽然其中几个没有怎么用到，但也足够说明，你如果理解了这个demo，<code>Sanic</code>的运行逻辑以及框架代码你已经了解地很深入了</p>
+<h2 id="blueprintspy">blueprints.py</h2>
+<p>这个例子看完，我们就能轻易地明白什么是<code>blueprints</code>，以及<code>blueprints</code>的运行方式，代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_0_1_2.src</span> <span style="color:#000;font-weight:bold">import</span> Sanic
+<span style="color:#998;font-style:italic"># 引入Blueprint</span>
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_0_1_2.src</span> <span style="color:#000;font-weight:bold">import</span> Blueprint
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_0_1_2.src.response</span> <span style="color:#000;font-weight:bold">import</span> json, text
+
+app <span style="color:#000;font-weight:bold">=</span> Sanic(__name__)
+blueprint <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;name&#39;</span>, url_prefix<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;/my_blueprint&#39;</span>)
+blueprint2 <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;name2&#39;</span>, url_prefix<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;/my_blueprint2&#39;</span>)
+
+
+<span style="color:#3c5d5d;font-weight:bold">@blueprint</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#39;/foo&#39;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">foo</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;hi from blueprint&#39;</span>})
+
+
+<span style="color:#3c5d5d;font-weight:bold">@blueprint2</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#39;/foo&#39;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">foo2</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;hi from blueprint2&#39;</span>})
+
+
+app<span style="color:#000;font-weight:bold">.</span>register_blueprint(blueprint)
+app<span style="color:#000;font-weight:bold">.</span>register_blueprint(blueprint2)
+
+app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>, debug<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+
+</code></pre></td></tr></table>
+</div>
+</div><p>让我们从这两行开始：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+blueprint <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;name&#39;</span>, url_prefix<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;/my_blueprint&#39;</span>)
+blueprint2 <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;name2&#39;</span>, url_prefix<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;/my_blueprint2&#39;</span>)
+</code></pre></td></tr></table>
+</div>
+</div><p>显然，<code>blueprint</code>以及<code>blueprint2</code>是<code>Blueprint</code>根据不同的参数生成的不同的实例对象，接下来要干嘛？没错，分析<a href="https://github.com/howie6879/sanic_annotation/blob/master/sanic_0_1_2/src/blueprints.py">blueprints.py</a>:</p>
+<ul>
+<li>BlueprintSetup：蓝图注册类
+<ul>
+<li>add_route：添加路由到app</li>
+<li>add_exception：添加对应抛出的错误到app</li>
+<li>add_middleware：添加中间件到app</li>
+</ul>
+</li>
+<li>Blueprint：蓝图类，接收两个参数：name(蓝图名称) url_prefix 该蓝图的url前缀
+<ul>
+<li>route：路由装饰器，将会生成一个匿名函数到self.deferred_functions列表里稍后一起处理注册到app里</li>
+<li>middleware：同上</li>
+<li>exception：同上</li>
+<li>record：注册一个回调函数到self.deferred_functions列表里面，</li>
+<li>make_setup_state：实例化BlueprintSetup</li>
+<li>register：注册视图，实际就是注册route、middleware、exception到app，此时会利用make_setup_state返回的BlueprintSetup示例进行对于的add_***一系列操作，相当于Sanic().route()效果</li>
+</ul>
+</li>
+</ul>
+<p>请看下<code>route</code>和<code>register</code>函数，然后再看下面的代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 生成一个匿名函数到self.deferred_functions列表里 包含三个参数 handler(foo), uri, methods</span>
+<span style="color:#3c5d5d;font-weight:bold">@blueprint</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#39;/foo&#39;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">foo</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;hi from blueprint&#39;</span>})
+
+
+<span style="color:#3c5d5d;font-weight:bold">@blueprint2</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#39;/foo&#39;</span>)
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">foo2</span>(request):
+    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;hi from blueprint2&#39;</span>})
+
+<span style="color:#998;font-style:italic"># 上一个例子说过这个函数，Sanic().register_blueprint() 注册蓝图</span>
+app<span style="color:#000;font-weight:bold">.</span>register_blueprint(blueprint)
+app<span style="color:#000;font-weight:bold">.</span>register_blueprint(blueprint2)
+</code></pre></td></tr></table>
+</div>
+</div><p>怎么样，现在来看，是不是很轻松，这一行<code>app.run(host=&quot;0.0.0.0&quot;, port=8000, debug=True)</code>服务启动代码不用多说吧？</p>
+<h2 id="总结">总结</h2>
+<p>看到这里，相信你已经完全理解了Sanic的运行机制，虽然还有<code>middleware&amp;exception</code>的注册以及调用机制没讲，但这和<code>route</code>的运行机制一样，如果你懂了<code>route</code>那么这两个也很简单</p>
+<p>本人技术微末，若有错误，请指出，不胜感激</p>
+<p>注解地址：<a href="https://github.com/howie6879/sanic_annotation">sanic_annotation</a></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2017/15_sanic-for-pythoneer-source-code-read/">https://www.howie6879.cn/post/2017/15_sanic-for-pythoneer-source-code-read/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2017/14_sanic-for-pythoneer-03/">Sanic 使用教程 - 3.项目结构</a></li>
+        
+        <li><a href="/post/2017/13_sanic-for-pythoneer-02/">Sanic 使用教程 - 2.配置</a></li>
+        
+        <li><a href="/post/2017/12_sanic-for-pythoneer-01/">Sanic 使用教程 - 1.初使用</a></li>
+        
+        <li><a href="/post/2017/07_owllook-intro/">owllook -- 一个简洁的网络小说搜索引擎</a></li>
+        
+        <li><a href="/post/2017/06_sanic-usage-record/">sanic使用记录</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/sanic'>Sanic</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

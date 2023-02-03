@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>Sanic 使用教程 - 5.数据库使用 | 老胡的储物柜</title>
+  <meta property="og:title" content="Sanic 使用教程 - 5.数据库使用 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2018-01-12T10:50:30&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2018-01-12T10:50:30&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="Sanic 使用教程 - 5.数据库使用"
+  />
+  
+  <meta name="author" content="howie.hu" />
+  <meta property="og:url" content="https://www.howie6879.cn/post/2018/01_sanic-for-pythoneer-05/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#操作mysql">操作Mysql</a></li>
+    <li><a href="#操作mongodb">操作MongoDB</a></li>
+    <li><a href="#操作redis">操作Redis</a></li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Sanic 使用教程 - 5.数据库使用</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2018年1月12日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>介绍中说的很明白，<code>Sanic</code> 是一个可以使用 <code>async/await</code> 语法编写项目的<strong>异步</strong>非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用<code>aihttp</code>而非<code>requests</code>，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。</p>
+<h2 id="操作mysql">操作Mysql</h2>
+<p>对于mysql数据库的异步操作，我只在一些脚本中用过，用的是<a href="https://github.com/aio-libs/aiomysql">aiomysql</a>，其中官方文档中讲得很清楚，也支持结合<code>sqlalchemy</code>编写<code>ORM</code>，然后aiomysql提供了自己编写的异步引擎。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
+<span style="color:#998;font-style:italic"># 这个才是关键</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：</p>
+<pre tabindex="0"><code class="language-shel" data-lang="shel">aio_mysql
+├── demo.py
+├── model.py
+└── requirements.txt
+</code></pre><p>建立表：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>test_mysql;<span style="color:#bbb">
+</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">TABLE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">user</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>(<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>id<span style="color:#bbb">        </span><span style="color:#458;font-weight:bold">INT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">AUTO_INCREMENT</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000;font-weight:bold">PRIMARY</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">KEY</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>user_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">16</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>pwd<span style="color:#bbb">       </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">32</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>real_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">6</span>)<span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>一切准备就绪，下面编写代码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># script: model.py</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">sqlalchemy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">sa</span>
+
+metadata <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>MetaData()
+
+user <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>Table(
+    <span style="color:#d14">&#39;user&#39;</span>,
+    metadata,
+    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;id&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>Integer, autoincrement<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>, primary_key<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>),
+    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;user_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">16</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;pwd&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">32</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;real_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">6</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+)
+
+<span style="color:#998;font-style:italic"># script: demo.py</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">model</span> <span style="color:#000;font-weight:bold">import</span> user,metadata
+
+
+<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">go</span>(loop):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    aiomysql项目地址：https://github.com/aio-libs/aiomysql
+</span><span style="color:#d14">    :param loop:
+</span><span style="color:#d14">    :return:
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    engine <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> create_engine(user<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;root&#39;</span>, db<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mysql&#39;</span>,
+                                 host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;127.0.0.1&#39;</span>, password<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, loop<span style="color:#000;font-weight:bold">=</span>loop)
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> engine<span style="color:#000;font-weight:bold">.</span>acquire() <span style="color:#000;font-weight:bold">as</span> conn:
+        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>insert()<span style="color:#000;font-weight:bold">.</span>values(user_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;user_name01&#39;</span>, pwd<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, real_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;real_name01&#39;</span>))
+        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(<span style="color:#d14">&#39;commit&#39;</span>)
+
+        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> row <span style="color:#000;font-weight:bold">in</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>select()):
+            <span style="color:#0086b3">print</span>(row<span style="color:#000;font-weight:bold">.</span>user_name, row<span style="color:#000;font-weight:bold">.</span>pwd)
+
+    engine<span style="color:#000;font-weight:bold">.</span>close()
+    <span style="color:#000;font-weight:bold">await</span> engine<span style="color:#000;font-weight:bold">.</span>wait_closed()
+
+
+loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
+loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(go(loop))
+
+</code></pre></td></tr></table>
+</div>
+</div><p>运行 python demo.py，会看到如下输出：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">user_name01 <span style="color:#099">123456</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>很简单吧，具体示例见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql">aio_mysql</a></p>
+<h2 id="操作mongodb">操作MongoDB</h2>
+<p>我业余写的一个项目，基本用的就是<code>MongoDB</code>来储存数据，对于异步操作<code>MongoDB</code>，目前Python主要用的是<a href="https://motor.readthedocs.io/en/stable/index.html">motor</a>，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">aio_mongo
+├── demo.py
+└── requirements.txt
+</code></pre></td></tr></table>
+</div>
+</div><p><code>MongoDB</code>是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开<code>demo.py</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> wraps
+
+<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">motor.motor_asyncio</span> <span style="color:#000;font-weight:bold">import</span> AsyncIOMotorClient
+
+MONGODB <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+    MONGO_HOST<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_HOST&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+    MONGO_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PORT&#39;</span>, <span style="color:#099">27017</span>),
+    MONGO_USERNAME<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+    MONGO_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+    DATABASE<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mongodb&#39;</span>,
+)
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBaseOld</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    默认实现了一个db只创建一次，缺点是更换集合麻烦
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    _db <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
+        <span style="color:#998;font-style:italic"># motor</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
+                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
+            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
+            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
+            database<span style="color:#000;font-weight:bold">=</span>db)
+        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
+
+    <span style="color:#3c5d5d;font-weight:bold">@property</span>
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">db</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>])[<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]]
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db
+</code></pre></td></tr></table>
+</div>
+</div><p>我最开始，使用的是这样种方式来连接<code>MongoDB</code>，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">singleton</span>(<span style="color:#999">cls</span>):
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/</span><span style="color:#d14">%E</span><span style="color:#d14">9</span><span style="color:#d14">%99%</span><span style="color:#d14">84</span><span style="color:#d14">%E</span><span style="color:#d14">5%BD</span><span style="color:#d14">%95%</span><span style="color:#d14">EF%BC%9A</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%85%</span><span style="color:#d14">B3</span><span style="color:#d14">%E</span><span style="color:#d14">4%BA</span><span style="color:#d14">%8E%E</span><span style="color:#d14">8%A3</span><span style="color:#d14">%85%</span><span style="color:#d14">E9%A5%B0</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%99%</span><span style="color:#d14">A8.md
+</span><span style="color:#d14">    :param cls: cls
+</span><span style="color:#d14">    :return: instance
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    _instances <span style="color:#000;font-weight:bold">=</span> {}
+
+    <span style="color:#3c5d5d;font-weight:bold">@wraps</span>(<span style="color:#999">cls</span>)
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">instance</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">cls</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> _instances:
+            _instances[<span style="color:#999">cls</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">cls</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw)
+        <span style="color:#000;font-weight:bold">return</span> _instances[<span style="color:#999">cls</span>]
+
+    <span style="color:#000;font-weight:bold">return</span> instance
+
+<span style="color:#3c5d5d;font-weight:bold">@singleton</span>
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBase</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    更改mongodb连接方式 单例模式下支持多库操作
+</span><span style="color:#d14">    About motor&#39;s doc: https://github.com/mongodb/motor
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    _db <span style="color:#000;font-weight:bold">=</span> {}
+    _collection <span style="color:#000;font-weight:bold">=</span> {}
+    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
+
+    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
+        <span style="color:#998;font-style:italic"># motor</span>
+        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
+                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
+            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
+            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
+            database<span style="color:#000;font-weight:bold">=</span>db)
+        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_db</span>(<span style="color:#999">self</span>, db<span style="color:#000;font-weight:bold">=</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        获取一个db实例
+</span><span style="color:#d14">        :param db: database name
+</span><span style="color:#d14">        :return: the motor db instance
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        <span style="color:#000;font-weight:bold">if</span> db <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db:
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(db)[db]
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db]
+
+    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_collection</span>(<span style="color:#999">self</span>, db_name, collection):
+        <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">        获取一个集合实例
+</span><span style="color:#d14">        :param db_name: database name
+</span><span style="color:#d14">        :param collection: collection name
+</span><span style="color:#d14">        :return: the motor collection instance
+</span><span style="color:#d14">        &#34;&#34;&#34;</span>
+        collection_key <span style="color:#000;font-weight:bold">=</span> db_name <span style="color:#000;font-weight:bold">+</span> collection
+        <span style="color:#000;font-weight:bold">if</span> collection_key <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection:
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_db(db_name)[collection]
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key]
+
+</code></pre></td></tr></table>
+</div>
+</div><p>为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo">aio_mongo</a></p>
+<h2 id="操作redis">操作Redis</h2>
+<p>对于Redis的异步操作，我选用的是<code>asyncio_redis</code>，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">aio_redis
+├── demo.py
+└── requirements.txt
+</code></pre></td></tr></table>
+</div>
+</div><p>建立一个redis连接池：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio_redis</span>
+
+REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+    IS_CACHE<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>,
+    REDIS_ENDPOINT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>),
+    REDIS_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>),
+    REDIS_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
+    DB<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>,
+    POOLSIZE<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>,
+)
+
+
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RedisSession</span>:
+    <span style="color:#d14">&#34;&#34;&#34;
+</span><span style="color:#d14">    建立redis连接池
+</span><span style="color:#d14">    &#34;&#34;&#34;</span>
+    _pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+
+    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_redis_pool</span>(<span style="color:#999">self</span>):
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool:
+            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> asyncio_redis<span style="color:#000;font-weight:bold">.</span>Pool<span style="color:#000;font-weight:bold">.</span>create(
+                host<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">str</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>)), port<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>)),
+                poolsize<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;POOLSIZE&#39;</span>, <span style="color:#099">10</span>)), password<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
+                db<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DB&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
+            )
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool
+
+</code></pre></td></tr></table>
+</div>
+</div><p>具体见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py">aio_redis</a>，使用起来很简单，不做多叙述。</p>
+<h2 id="说明">说明</h2>
+<p>如果你使用其它类型的数据库，其实使用方式也是类似。
+本章代码地址，见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05">demo05</a></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2018/01_sanic-for-pythoneer-05/">https://www.howie6879.cn/post/2018/01_sanic-for-pythoneer-05/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2018/00_sanic-for-pythoneer-04/">Sanic 使用教程 - 4.展示一个页面</a></li>
+        
+        <li><a href="/post/2017/15_sanic-for-pythoneer-source-code-read/">Sanic 源码阅读 - 基于0.1.2</a></li>
+        
+        <li><a href="/post/2017/14_sanic-for-pythoneer-03/">Sanic 使用教程 - 3.项目结构</a></li>
+        
+        <li><a href="/post/2017/13_sanic-for-pythoneer-02/">Sanic 使用教程 - 2.配置</a></li>
+        
+        <li><a href="/post/2017/12_sanic-for-pythoneer-01/">Sanic 使用教程 - 1.初使用</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/sanic'>Sanic</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

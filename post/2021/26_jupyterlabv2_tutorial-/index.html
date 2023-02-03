@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+   <title>JupyterLab使用教程：程序员的笔记本神器v2.0 | 老胡的储物柜</title>
+  <meta property="og:title" content="JupyterLab使用教程：程序员的笔记本神器v2.0 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2021-11-15T20:35:47&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2021-11-15T20:35:47&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="python,rust,机器学习,游戏风控,sanic,项目管理,深度学习,公众号,小程序"
+  />
+  <meta
+    name="description"
+    content="JupyterLab使用教程，构造属于你的跨平台Web在线交互式代码实验室"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.cn/post/2021/26_jupyterlabv2_tutorial-/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.cn/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.cn/">首页</a>
+                    
+                    <a  href="https://www.howie6879.cn/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#介绍">介绍</a></li>
+    <li><a href="#安装">安装</a></li>
+    <li><a href="#基本功能">基本功能</a>
+      <ul>
+        <li><a href="#设置密码">设置密码</a></li>
+        <li><a href="#代码交互">代码交互</a></li>
+        <li><a href="#toc目录">TOC目录</a></li>
+        <li><a href="#风格设置">风格设置</a></li>
+      </ul>
+    </li>
+    <li><a href="#插件">插件</a>
+      <ul>
+        <li><a href="#jupyterlab_code_formatterhttpsgithubcomryantam626jupyterlab_code_formatter"><a href="https://github.com/ryantam626/jupyterlab_code_formatter">jupyterlab_code_formatter</a></a></li>
+        <li><a href="#ipydrawiohttpsipydrawioreadthedocsioenstable"><a href="https://ipydrawio.readthedocs.io/en/stable/">ipydrawio</a></a></li>
+        <li><a href="#jupyterlab-unfoldhttpsgithubcomjupyterlab-contribjupyterlab-unfold"><a href="https://github.com/jupyterlab-contrib/jupyterlab-unfold">jupyterlab-unfold</a></a></li>
+        <li><a href="#theme">Theme</a></li>
+        <li><a href="#汉化">汉化</a></li>
+      </ul>
+    </li>
+    <li><a href="#容器化最佳实践">容器化最佳实践</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">JupyterLab使用教程：程序员的笔记本神器v2.0</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年11月15日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/python'>Python</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E5%B7%A5%E5%85%B7'>工具</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%95%99%E7%A8%8B'>教程</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>之前写过一份<code>JupyterLab</code>的使用教程，但是随着个人使用时间的增加和更多优秀插件的出现，断断续续我基于<code>JupyterLab:v3.0+</code>衍生出了自己的最佳实践，本篇文章将从以下方面更加全面地介绍<code>JupyterLab</code>：</p>
+<ul>
+<li>搭建安装</li>
+<li>基本功能</li>
+<li>插件推荐</li>
+<li>容器化最佳实践</li>
+</ul>
+<p>最终成品如下图所示，有兴趣的话一起来使用看看吧✨
+
+        <img class="mx-auto" alt="JupyterLab-demo" src="https://images-1252557999.file.myqcloud.com/uPic/RK8fvL.png" />   
+    </p>
+<h2 id="介绍">介绍</h2>
+<p>了解<code>JupyterLab</code>之前先说下什么是<code>Jupyter Notebook</code>，简单来说它是一个交互式的开发环境，其提供了在<code>Web</code>上编写运行代码的能力，还可以同时使用<code>md</code>语法编写文档。</p>
+<p>而<code>JupyterLab</code>是<code>Jupyter Notebook</code>的下一代产品，如今已经发展到第三个大版本了，其主要优势有：</p>
+<ul>
+<li>更现代化的界面设计和更灵活的架构</li>
+<li>提供终端交互和文件浏览器</li>
+<li>结合插件可以快速打造成Web上的IDE笔记本</li>
+</ul>
+<p>通过使用<code>JupyterLab</code>，我们能够以灵活，集成和可扩展的方式处理代码与文档，对于以下人群非常有帮助：</p>
+<ul>
+<li>随时随地希望试验一些代码片段，如Python、Julia、R、Go、Scala等</li>
+<li>大数据开发&amp;机器学习进行数据分析、处理、建模等</li>
+<li>作为笔记本，可以将代码的输入输出解释直接导出成笔记文档，结合插件还可以绘制流程图等</li>
+</ul>
+<h2 id="安装">安装</h2>
+<p>接下来，我将以Python为默认语言来搭建<code>JupyterLab</code>，这里我为了获取一个干净的环境直接使用<code>Docker</code>进行构建：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run -it --name jupyter_test -p 8888:8888 python:3.7-slim /bin/bash
+</code></pre></td></tr></table>
+</div>
+</div><p>用<code>Docker</code>目的是方便出错后删除重来，这里仅做演示，大家直接在本机操作即可，只需要确认你安装好了<code>Python</code>基本环境就行：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># Input</span>
+python
+
+<span style="color:#998;font-style:italic"># Output</span>
+Python 3.6.15 <span style="color:#000;font-weight:bold">(</span>default, Oct <span style="color:#099">13</span> 2021, 09:43:57<span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">[</span>GCC 10.2.1 20210110<span style="color:#000;font-weight:bold">]</span> on linux
+Type <span style="color:#d14">&#34;help&#34;</span>, <span style="color:#d14">&#34;copyright&#34;</span>, <span style="color:#d14">&#34;credits&#34;</span> or <span style="color:#d14">&#34;license&#34;</span> <span style="color:#000;font-weight:bold">for</span> more information.
+</code></pre></td></tr></table>
+</div>
+</div><p>有了<code>Python</code>环境就可以直接安装<code>JupyterLab</code>：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 先换源</span>
+pip config <span style="color:#0086b3">set</span> global.index-url https://pypi.douban.com/simple/
+<span style="color:#998;font-style:italic"># 一行命令搞定</span>
+pip install jupyterlab
+</code></pre></td></tr></table>
+</div>
+</div><p>这一行命令我们就已经安装好了<code>JupyterLab</code>，启动起来试试看吧：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">jupyter lab --allow-root --no-browser
+</code></pre></td></tr></table>
+</div>
+</div><p>直接访问：<code>http://127.0.0.1:8888/lab?token={TOKEN}</code>就能看到界面了！怎么样，方便吧。但是要想更加优雅地使用<code>JupyterLab</code>，还是得进行一些配置，让我们继续吧。</p>
+<h2 id="基本功能">基本功能</h2>
+<h3 id="设置密码">设置密码</h3>
+<p>每次启动<code>JupyterLab</code>默认是通过<code>Token</code>的形式进行访问的，但是<code>Token</code>每次都不一样，而且还会过期，所以我们还是设置成密码的形式进行访问吧：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 进入python交互环境</span>
+python
+</code></pre></td></tr></table>
+</div>
+</div><p>生成密码：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">notebook.auth</span> <span style="color:#000;font-weight:bold">import</span> passwd
+passwd()
+<span style="color:#998;font-style:italic"># 输入你自己设置登录JupyterLab界面的密码 然后会有一串输出，记得复制下来，等会配置需要使用</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>修改<code>JupyterLab</code> 配置文件：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># Input</span>
+jupyter lab --generate-config
+
+<span style="color:#998;font-style:italic"># Output</span>
+Writing default config to: /root/.jupyter/jupyter_lab_config.py
+</code></pre></td></tr></table>
+</div>
+</div><p>编辑这个文件<code>vim /root/.jupyter/jupyter_lab_config.py</code>，设置以下参数：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">c.ServerApp.allow_root <span style="color:#000;font-weight:bold">=</span> True
+c.ExtensionApp.open_browser <span style="color:#000;font-weight:bold">=</span> False
+c.ServerApp.password <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;argon2:$argon2id$v=19$m=10240,t=10,p=8$C2MHPsnHYOGQBXF30d7eag$bdeIwZFwzt7HOYkTECRPVA&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">jupyter lab
+</code></pre></td></tr></table>
+</div>
+</div><p>此时再次进入<code>http://127.0.0.1:8888/</code>就需要输入密码了，为了方便后续一些功能的演示，我们顺便建立一个交互式脚本吧，操作流程如下图：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/9RBjIW.png" />   
+    </p>
+<h3 id="代码交互">代码交互</h3>
+<blockquote>
+<p>代码提示</p>
+</blockquote>
+<p>进入文件后，我们先使用<code>!pip install numpy</code>安装一个第三方库用于测试。在代码关键字后按<code>Tab</code>即可看到代码提示：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/DG5jdh.png" />   
+    </p>
+<blockquote>
+<p>文档注释&amp;查看</p>
+</blockquote>
+<p>按<code>Shift + Tab</code>即可看到文档注释提示：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/vldGm0.png" />   
+    </p>
+<p>注：如果代码提示功能有问题，设置下<code>jedi</code>版本，<code>pip install jedi==0.17.2</code>。</p>
+<p>对于数据科学方向的程序员来说，一些常用库的文档查看特别方便，<code>Jupyterlab</code>已经将常用文档内置，还提供了关键函数搜索功能，再也不用打开官方文档查找了：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320123935.png" />   
+    </p>
+<blockquote>
+<p>代码调试</p>
+</blockquote>
+<p><code>JupyterLab</code>默认支持代码调试，使用也很简单，点击右上角的<code>Bug</code>图标开启即可：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/Hr2l3X.png" />   
+    </p>
+<blockquote>
+<p>文档多窗口</p>
+</blockquote>
+<p>一般开发者的屏幕都是比较大的，这个功能特别适合左边窗口实验代码，右边看教程文档的情景：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320123455.png" />   
+    </p>
+<blockquote>
+<p><code>cell</code>可以拖拽且输出可以新窗口显示</p>
+</blockquote>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320124146.png" />   
+    </p>
+<blockquote>
+<p>随时启动新的终端交互</p>
+</blockquote>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320124245.png" />   
+    </p>
+<h3 id="toc目录">TOC目录</h3>
+<p><code>JupyterLab</code>脚本是可以编写<code>MD</code>文本的，为了方便代码的可读性，侧边栏提供了目录展示功能，程序员可以更加方便地对自己代码进行管理：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/NRnOEU.png" />   
+    </p>
+<h3 id="风格设置">风格设置</h3>
+<blockquote>
+<p>按键风格</p>
+</blockquote>
+<p>支持<code>vim emacs</code>等按键风格：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320123958.png" />   
+    </p>
+<blockquote>
+<p>界面&amp;代码主题</p>
+</blockquote>
+<p><code>JupyterLab</code>默认提供了黑暗&amp;明亮两种主题，开发者可以自由使用，如果对于主题有更多要求，接下来在插件部分我会介绍我使用的插件主题：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/Ouehgc.png" />   
+    </p>
+<p>编辑器界面主题设置：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/20190320123535.png" />   
+    </p>
+<h2 id="插件">插件</h2>
+<p><code>JupyterLab</code>本身的功能了解上面那么多就已经够日常基本使用了，但是社区的开发者还是贡献了很多有意思的插件。接下来我会介绍一些比较基础但又很实用的插件，让大家的效率进一步提升。</p>
+<h3 id="jupyterlab_code_formatterhttpsgithubcomryantam626jupyterlab_code_formatter"><a href="https://github.com/ryantam626/jupyterlab_code_formatter">jupyterlab_code_formatter</a></h3>
+<p>代码格式写插件，我使用的是<code>Python</code>，用这个插件可以设置保存的时候自动用<code>black和isort</code>进行代码格式化，安装：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 安装插件</span>
+pip install jupyterlab_code_formatter
+<span style="color:#998;font-style:italic"># 安装格式化工具</span>
+pip install black isort
+</code></pre></td></tr></table>
+</div>
+</div><p>安装完成后，脚本界面右上角就会有一个格式化按钮，开发者也可以设置保存就触发格式化：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/PQjvBA.png" />   
+    </p>
+<h3 id="ipydrawiohttpsipydrawioreadthedocsioenstable"><a href="https://ipydrawio.readthedocs.io/en/stable/">ipydrawio</a></h3>
+<p>开发者除了日常开发，还有文档编写工作，涉及到文档编写，基本上都会涉及到流程图绘制需求，<code>ipydrawio</code>则可以让你方便地在<code>JupyterLab</code>绘制流程图，安装：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install ipydrawio<span style="color:#000;font-weight:bold">[</span>all<span style="color:#000;font-weight:bold">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用起来也非常方便，还可以分享出去，支持绘制的类型如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/mlWD97.jpg" />   
+    </p>
+<p>安装成功后和之前新建脚本的方式一样绘制流程图：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/VBsYTe.png" />   
+    </p>
+<h3 id="jupyterlab-unfoldhttpsgithubcomjupyterlab-contribjupyterlab-unfold"><a href="https://github.com/jupyterlab-contrib/jupyterlab-unfold">jupyterlab-unfold</a></h3>
+<p>这个插件让<code>JupyterLab</code>的文件浏览具有了和IDE一样的功能，原本<code>JupyterLab</code>在目录间跳转是一级一级进出，有了这个插件可以按照目录树的形式进行操作，极大地提升了打开不同目录下脚本的效率。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install jupyterlab-unfold
+</code></pre></td></tr></table>
+</div>
+</div><p>使用效果截图：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/BcaByz.jpg" />   
+    </p>
+<h3 id="theme">Theme</h3>
+<p><code>JupyterLab</code>本身仅提供了简单的黑白两套主题，但是我对代码主题还是挺有追求的，所以也在社区找了下看是否有比较好的主题实现，万幸我个人常用的主题都有其他人开源了出来，大家有兴趣了可以试试：</p>
+<ul>
+<li><a href="https://github.com/telamonian/theme-darcula">theme-darcula</a>：非常漂亮的<code>Darcula</code>主题，目前在<code>JupyterLab</code>主题里面热度最高</li>
+<li><a href="https://github.com/AllanChain/jupyterlab-theme-solarized-dark">jupyterlab-theme-solarized-dark</a>：<code>Solarized</code> 黑暗主题，效果可以看第一部分的效果展示图</li>
+</ul>
+<p>安装：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install theme-darcula
+pip install jupyterlab-theme-solarized-dark
+</code></pre></td></tr></table>
+</div>
+</div><p><code>Darcula</code>主题效果图如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/xrqZtr.png" />   
+    </p>
+<h3 id="汉化">汉化</h3>
+<p>官方针对中文用户提供了汉化包，还是挺良心的：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install jupyterlab-language-pack-zh-CN
+</code></pre></td></tr></table>
+</div>
+</div><p>效果如下：</p>
+<p>
+        <img class="mx-auto" alt="" src="https://images-1252557999.file.myqcloud.com/uPic/CzKfj2.png" />   
+    </p>
+<h2 id="容器化最佳实践">容器化最佳实践</h2>
+<p>为了方便在不同系统环境下能够快速使用<code>JupyterLab</code>，于是我选用<code>Docker</code>构建镜像，具体配置见<a href="https://github.com/howie6879/pylab/blob/master/docker/jupyterlab/Dockerfile">pylab-jupyterlab-docker</a>这样可以直接将配置和插件全部统一为镜像，这样有以下好处：</p>
+<ul>
+<li>跨平台，其他平台只要安装<code>Docker</code>就可以一键使用<code>JupyterLab</code></li>
+<li>插件配置：
+<ul>
+<li>保存则自动代码格式化</li>
+<li>主题支持：<code>Solarized</code>和<code>Darcula</code></li>
+<li>中文汉化支持，默认还是英文</li>
+<li>代码变量跳转支持</li>
+<li>流程图、目录树等</li>
+</ul>
+</li>
+<li>终端支持<code>oh my zsh</code></li>
+</ul>
+<p>所以上面介绍了这么多，你只需要看一遍下来熟悉下相关概念即可，倒是不用从头都搭一遍，如果你要使用，运行下面这行命令即可：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run --name jupyter_pylab -it -d --restart<span style="color:#000;font-weight:bold">=</span>always -p 0.0.0.0:8765:8888 -e <span style="color:#008080">SHELL</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;/bin/zsh&#34;</span> -v <span style="color:#d14">&#34;`pwd`:/project-dir&#34;</span> howie6879/jupyter-lab-for-python37:v3.1.4 --allow-root --no-browser --port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8888</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>享受<code>JupyterLab</code>吧，如有错漏，请留言交流，谢谢。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.cn/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.cn/post/2021/26_jupyterlabv2_tutorial-/">https://www.howie6879.cn/post/2021/26_jupyterlabv2_tutorial-/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019/04_how_to_use_jupyterlab/">JupyterLab使用教程：程序员的笔记本神器v1.0</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/jupyterlab'>jupyterlab</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://www.howie6879.cn/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.cn/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.cn/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.cn/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/08.liuli_deploy_on_pi/" title="Liuli在树莓派上的部署教程">Liuli在树莓派上的部署教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/06_coder_or_engineer/" title="杂谈|程序员还是工程师">杂谈|程序员还是工程师</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/05_pic-url-solution/" title="我的图床解决方案，超详细！">我的图床解决方案，超详细！</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/04_build_novel_info_flow_based_on_liuli/" title="基于Liuli追更&amp;阅读小说">基于Liuli追更&amp;阅读小说</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/03_talk_about_happy/" title="2022开工随笔，谈幸福感">2022开工随笔，谈幸福感</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/02_build_a_clean_wechat_rss_based_liuli/" title="基于Liuli构建纯净的RSS公众号信息流">基于Liuli构建纯净的RSS公众号信息流</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.cn/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.cn/categories/%E9%A1%B9%E7%9B%AE/">项目 (14)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.cn/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.cn/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.cn/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.cn/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.cn/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.cn/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.cn/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.cn/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.cn/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.cn/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.cn/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.cn/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.cn/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.cn/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.cn/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.cn/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.cn/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.cn/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.cn/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

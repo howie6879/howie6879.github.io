@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="深度学习 #  基于第一章节的学习，我们知道单层神经网络无法处理异或问题；如果需要计算多层神经网络，当时的计算机又缺少足够的计算能力，因此60年代末神经网络第一次进入了寒冬。
+随后80年代，方向传播算法的出现解决了多层神经网络所需要的复杂计算问题（这也意味着异或问题的解决），但是由于数据集量级的影响，神经网络的能力被过拟合问题限制住了脚本，同时当时的SVM如日中天并且拥有极强的解释性，于是神经有一次陷入风雪。
+摩尔定律一直在发挥着作用，终于到了2006年，Hinton在Science上提出了深度置信网络的神经网络模型，这是神经网络重回巅峰的代表性事件。随后发生的事情大家都有所耳闻：
+ 2012年ImageNet竞赛夺冠 2017年AlphaGo和柯洁的围棋对决 各种深度神经网络的商业化实践&hellip;  现在，我们正处于第三次神经网络的复兴潮流中央。经过前面几章的探索，我们已经了解了深度神经⽹络通常⽐浅层神经⽹络更加难以训练，但是为了获得比浅层网络更加强大的能力，我们需要训练深度网络，本章主要讨论可以⽤来训练深度神经⽹络的技术，并在实战中应⽤它们。
+本章是一个大章节，主要围绕的是从简单的浅层网络到卷积神经网络来慢慢构建强大的网络，从而解决MNIST手写字识别的问题。
+在这个过程中，我们需要研究的相关技术有：卷积、池化、使用GPU来更好地训练、训练数据的算法性拓展、Dropout、网络的综合使用等。
+介绍卷积网络 #  在第一章识别手写字中，我们就利用全连接神经网络基于MNIST训练集构建了一个可以识别手写字的深度学习模型。
+让我们基于上面的网络结构思考下面几个问题：
+ 参数过多：对于手写字，第一层的输入图像大小是$28*28=784$个，因此第一个隐藏层的每个神经元到输入层都有784个权重参数，大家可以基于此计算一下，五层的全连接神经网络，参数将极其庞大会导致训练效率不高并且容易出现过拟合； 局表示不变性特征：目前的网络并没有考虑图像的空间结构，它在完全相同的基础上去对待相距很远和彼此接近的输⼊像素；自然图像中的物体都具有局部不变性特征，比如尺度缩放、平移、旋转等操作不影响其语义信息．而全连接前馈网络很难提取这些 局部不变性特征，一般需要进行数据增强来提高性能。  卷积神经网络（Convolutional Neural Network，CNN 或 ConvNet）是一类特殊的人工神经网络，也是第一章提到的多层感知器（MLP）的变种。
+我们可以从生物学角度出发，来看看卷积神经网络有哪些基本特征。我们知道视觉皮层的细胞存在 一个复杂的构造，这些细胞对视觉输入空间的子区域非常敏感，我们称之为感受野。在全连接网络中我们会将所有的输入神经元都连接到下一个隐藏的神经元，但这次我们不这么干，我们选择一个$5*5$的区域进行局部区域的连接：
+这个输⼊图像的区域被称为隐藏神经元的局部感受野，然后在整个输⼊图像上交叉移动局部感受野，此时我们的$2828=784$个输入，用$55$的局部感受野，此时第一个隐藏层就会有$24*24$个神经元：
+参考 #   Neural Networks and Deep Learning Neural Networks and Deep Learning 中文版 神经网络与深度学习-邱锡鹏 解析卷积神经网络  ">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="深度学习 #  基于第一章节的学习，我们知道单层神经网络无法处理异或问题；如果需要计算多层神经网络，当时的计算机又缺少足够的计算能力，因此60年代末神经网络第一次进入了寒冬。
+随后80年代，方向传播算法的出现解决了多层神经网络所需要的复杂计算问题（这也意味着异或问题的解决），但是由于数据集量级的影响，神经网络的能力被过拟合问题限制住了脚本，同时当时的SVM如日中天并且拥有极强的解释性，于是神经有一次陷入风雪。
+摩尔定律一直在发挥着作用，终于到了2006年，Hinton在Science上提出了深度置信网络的神经网络模型，这是神经网络重回巅峰的代表性事件。随后发生的事情大家都有所耳闻：
+ 2012年ImageNet竞赛夺冠 2017年AlphaGo和柯洁的围棋对决 各种深度神经网络的商业化实践&hellip;  现在，我们正处于第三次神经网络的复兴潮流中央。经过前面几章的探索，我们已经了解了深度神经⽹络通常⽐浅层神经⽹络更加难以训练，但是为了获得比浅层网络更加强大的能力，我们需要训练深度网络，本章主要讨论可以⽤来训练深度神经⽹络的技术，并在实战中应⽤它们。
+本章是一个大章节，主要围绕的是从简单的浅层网络到卷积神经网络来慢慢构建强大的网络，从而解决MNIST手写字识别的问题。
+在这个过程中，我们需要研究的相关技术有：卷积、池化、使用GPU来更好地训练、训练数据的算法性拓展、Dropout、网络的综合使用等。
+介绍卷积网络 #  在第一章识别手写字中，我们就利用全连接神经网络基于MNIST训练集构建了一个可以识别手写字的深度学习模型。
+让我们基于上面的网络结构思考下面几个问题：
+ 参数过多：对于手写字，第一层的输入图像大小是$28*28=784$个，因此第一个隐藏层的每个神经元到输入层都有784个权重参数，大家可以基于此计算一下，五层的全连接神经网络，参数将极其庞大会导致训练效率不高并且容易出现过拟合； 局表示不变性特征：目前的网络并没有考虑图像的空间结构，它在完全相同的基础上去对待相距很远和彼此接近的输⼊像素；自然图像中的物体都具有局部不变性特征，比如尺度缩放、平移、旋转等操作不影响其语义信息．而全连接前馈网络很难提取这些 局部不变性特征，一般需要进行数据增强来提高性能。  卷积神经网络（Convolutional Neural Network，CNN 或 ConvNet）是一类特殊的人工神经网络，也是第一章提到的多层感知器（MLP）的变种。
+我们可以从生物学角度出发，来看看卷积神经网络有哪些基本特征。我们知道视觉皮层的细胞存在 一个复杂的构造，这些细胞对视觉输入空间的子区域非常敏感，我们称之为感受野。在全连接网络中我们会将所有的输入神经元都连接到下一个隐藏的神经元，但这次我们不这么干，我们选择一个$5*5$的区域进行局部区域的连接：
+这个输⼊图像的区域被称为隐藏神经元的局部感受野，然后在整个输⼊图像上交叉移动局部感受野，此时我们的$2828=784$个输入，用$55$的局部感受野，此时第一个隐藏层就会有$24*24$个神经元：
+参考 #   Neural Networks and Deep Learning Neural Networks and Deep Learning 中文版 神经网络与深度学习-邱锡鹏 解析卷积神经网络  " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" /><meta property="article:section" content="docs" />
+
+
+
+<title>06.深度学习 | 机器学习之路</title>
+<link rel="manifest" href="/ml_book/manifest.json">
+<link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ml_book"><span>机器学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基石</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：探索 NNDL</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class=" active">06.深度学习</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：统计学习方法</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第四部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ml_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>06.深度学习</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ml_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#介绍卷积网络">介绍卷积网络</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="深度学习">
+  深度学习
+  <a class="anchor" href="#%e6%b7%b1%e5%ba%a6%e5%ad%a6%e4%b9%a0">#</a>
+</h1>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/boat-5889919_1280.png" alt="boat-5889919_1280" /></p>
+<p>基于第一章节的学习，我们知道单层神经网络无法处理<strong>异或</strong>问题；如果需要计算多层神经网络，当时的计算机又缺少足够的计算能力，因此60年代末神经网络第一次进入了寒冬。</p>
+<p>随后80年代，方向传播算法的出现解决了多层神经网络所需要的复杂计算问题（这也意味着异或问题的解决），但是由于数据集量级的影响，神经网络的能力被过拟合问题限制住了脚本，同时当时的<code>SVM</code>如日中天并且拥有极强的解释性，于是神经有一次陷入风雪。</p>
+<p>摩尔定律一直在发挥着作用，终于到了2006年，<code>Hinton</code>在<code>Science</code>上提出了<strong>深度置信网络</strong>的神经网络模型，这是神经网络重回巅峰的代表性事件。随后发生的事情大家都有所耳闻：</p>
+<ul>
+<li>2012年<code>ImageNet</code>竞赛夺冠</li>
+<li>2017年<code>AlphaGo</code>和柯洁的围棋对决</li>
+<li>各种深度神经网络的商业化实践&hellip;</li>
+</ul>
+<p>现在，我们正处于第三次神经网络的复兴潮流中央。经过前面几章的探索，我们已经了解了深度神经⽹络通常⽐浅层神经⽹络更加难以训练，但是为了获得比浅层网络更加强大的能力，我们需要训练深度网络，本章主要讨论可以⽤来训练深度神经⽹络的技术，并在实战中应⽤它们。</p>
+<p>本章是一个大章节，主要围绕的是从简单的浅层网络到卷积神经网络来慢慢构建强大的网络，从而解决<code>MNIST</code>手写字识别的问题。</p>
+<p>在这个过程中，我们需要研究的相关技术有：卷积、池化、使用GPU来更好地训练、训练数据的算法性拓展、Dropout、网络的综合使用等。</p>
+<h2 id="介绍卷积网络">
+  介绍卷积网络
+  <a class="anchor" href="#%e4%bb%8b%e7%bb%8d%e5%8d%b7%e7%a7%af%e7%bd%91%e7%bb%9c">#</a>
+</h2>
+<p>在第一章<strong>识别手写字</strong>中，我们就利用全连接神经网络基于<code>MNIST</code>训练集构建了一个可以识别手写字的深度学习模型。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210112220944373.png" alt="image-20210112220944373" /></p>
+<p>让我们基于上面的网络结构思考下面几个问题：</p>
+<ul>
+<li>参数过多：对于手写字，第一层的输入图像大小是$28*28=784$个，因此第一个隐藏层的每个神经元到输入层都有784个权重参数，大家可以基于此计算一下，五层的全连接神经网络，参数将极其庞大会导致训练效率不高并且容易出现过拟合；</li>
+<li>局表示不变性特征：目前的网络并没有考虑图像的空间结构，它在完全相同的基础上去对待相距很远和彼此接近的输⼊像素；自然图像中的物体都具有局部不变性特征，比如尺度缩放、平移、旋转等操作不影响其语义信息．而全连接前馈网络很难提取这些 局部不变性特征，一般需要进行数据增强来提高性能。</li>
+</ul>
+<p>卷积神经网络（Convolutional Neural Network，CNN 或 ConvNet）是一类特殊的人工神经网络，也是第一章提到的多层感知器（MLP）的变种。</p>
+<p>我们可以从生物学角度出发，来看看卷积神经网络有哪些基本特征。我们知道视觉皮层的细胞存在 一个复杂的构造，这些细胞对视觉输入空间的子区域非常敏感，我们称之为<strong>感受野</strong>。在全连接网络中我们会将所有的输入神经元都连接到下一个隐藏的神经元，但这次我们不这么干，我们选择一个$5*5$的区域进行局部区域的连接：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210112225008050.png" alt="image-20210112225008050" /></p>
+<p>这个输⼊图像的区域被称为隐藏神经元的<strong>局部感受野</strong>，然后在整个输⼊图像上交叉移动局部感受野，此时我们的$28<em>28=784$个输入，用$5</em>5$的局部感受野，此时第一个隐藏层就会有$24*24$个神经元：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210112225311394.png" alt="image-20210112225311394" /></p>
+<h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<ul>
+<li><a href="http://neuralnetworksanddeeplearning.com/index.html">Neural Networks and Deep Learning</a></li>
+<li><a href="https://github.com/zhanggyb/nndl">Neural Networks and Deep Learning 中文版</a></li>
+<li><a href="https://nndl.github.io/">神经网络与深度学习-邱锡鹏</a></li>
+<li>解析卷积神经网络</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" alt="wechat_howie" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {equationNumbers: { autoNumber: "AMS" }}
+  });
+</script>
+
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#介绍卷积网络">介绍卷积网络</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

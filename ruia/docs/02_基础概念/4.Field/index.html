@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Selector #  Selector通过Field类实现，为开发者提供了CSS Selector和XPath两种方式提取目标数据，具体由下面两个类实现：
+ AttrField(BaseField)：提取网页标签的属性数据 TextField(BaseField)：提取网页标签的text数据  Core arguments #  所有的Field共有的参数：
+ default: str, 设置默认值，建议定义，否则找不到字段时会报错 many: bool, 返回值将是一个列表  AttrField、TextField、HtmlField共用参数：
+ css_select：str, 利用CSS Selector提取目标数据 xpath_select：str, 利用XPath提取目标数据  AttrField需要一个额外的参数：
+ attr：目标标签属性  RegexField需要一个额外的参数：
+ re_select: str, 正则表达式字符串  Usage #  from lxml import etree from ruia import AttrField, TextField, HtmlField, RegexField HTML = &#34;&#34;&#34; &lt;html&gt; &lt;head&gt; &lt;title&gt;ruia&lt;/title&gt; &lt;/head&gt; &lt;body&gt;¬ &lt;p&gt; &lt;a class=&#34;test_link&#34; href=&#34;https://github.com/howie6879/ruia&#34;&gt;hello github.&lt;/a&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt; &#34;&#34;&#34; html = etree.">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="Selector #  Selector通过Field类实现，为开发者提供了CSS Selector和XPath两种方式提取目标数据，具体由下面两个类实现：
+ AttrField(BaseField)：提取网页标签的属性数据 TextField(BaseField)：提取网页标签的text数据  Core arguments #  所有的Field共有的参数：
+ default: str, 设置默认值，建议定义，否则找不到字段时会报错 many: bool, 返回值将是一个列表  AttrField、TextField、HtmlField共用参数：
+ css_select：str, 利用CSS Selector提取目标数据 xpath_select：str, 利用XPath提取目标数据  AttrField需要一个额外的参数：
+ attr：目标标签属性  RegexField需要一个额外的参数：
+ re_select: str, 正则表达式字符串  Usage #  from lxml import etree from ruia import AttrField, TextField, HtmlField, RegexField HTML = &#34;&#34;&#34; &lt;html&gt; &lt;head&gt; &lt;title&gt;ruia&lt;/title&gt; &lt;/head&gt; &lt;body&gt;¬ &lt;p&gt; &lt;a class=&#34;test_link&#34; href=&#34;https://github.com/howie6879/ruia&#34;&gt;hello github.&lt;/a&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt; &#34;&#34;&#34; html = etree." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" /><meta property="article:section" content="docs" />
+
+
+
+<title>4. Field | Ruia</title>
+<link rel="manifest" href="/ruia/manifest.json">
+<link rel="icon" href="/ruia/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/ruia/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/ruia/en.search.min.101897924ddfa2441ef62c0731fab334d40d8f0f26f09d00b54369ad9ee6a30d.js" integrity="sha256-EBiXkk3fokQe9iwHMfqzNNQNjw8m8J0AtUNprZ7mow0="></script>
+<style>
+
+img[src$='#center']
+{
+    display: block;
+    margin: 0.7rem auto;  
+     
+}
+
+img[src$='#floatleft']
+{
+    float:left;
+    margin: 0.7rem;       
+     
+}
+
+img[src$='#floatright']
+{
+    float:right;
+    margin: 0.7rem;       
+     
+}
+</style>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/ruia"><span>Ruia</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/howie6879/ruia" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://docs.python-ruia.org/" target="_blank" rel="noopener">
+        English
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class="">❤️ 快速开始</a>
+  
+
+          
+  <ul>
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>入门指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>基础概念</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class="">1. Request</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class=" active">4. Field</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>开发指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>实践指南</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class="">1.谈谈对 Python 爬虫的理解</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/ruia/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>4. Field</strong>
+
+  <label for="toc-control">
+    
+    <img src="/ruia/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#core-arguments">Core arguments</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#how-it-works">How It Works?</a>
+      <ul>
+        <li><a href="#关于regexfield">关于<code>RegexField</code></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="selector">
+  Selector
+  <a class="anchor" href="#selector">#</a>
+</h1>
+<p><code>Selector</code>通过<code>Field</code>类实现，为开发者提供了<code>CSS Selector</code>和<code>XPath</code>两种方式提取目标数据，具体由下面两个类实现：</p>
+<ul>
+<li><a href="https://github.com/howie6879/ruia/blob/master/ruia/field.py">AttrField(BaseField)</a>：提取网页标签的属性数据</li>
+<li><a href="https://github.com/howie6879/ruia/blob/master/ruia/field.py">TextField(BaseField)</a>：提取网页标签的text数据</li>
+</ul>
+<h2 id="core-arguments">
+  Core arguments
+  <a class="anchor" href="#core-arguments">#</a>
+</h2>
+<p>所有的<code>Field</code>共有的参数：</p>
+<ul>
+<li>default: str, 设置默认值，建议定义，否则找不到字段时会报错</li>
+<li>many: bool, 返回值将是一个列表</li>
+</ul>
+<p><code>AttrField</code>、<code>TextField</code>、<code>HtmlField</code>共用参数：</p>
+<ul>
+<li>css_select：str, 利用<code>CSS Selector</code>提取目标数据</li>
+<li>xpath_select：str, 利用<code>XPath</code>提取目标数据</li>
+</ul>
+<p><code>AttrField</code>需要一个额外的参数：</p>
+<ul>
+<li>attr：目标标签属性</li>
+</ul>
+<p><code>RegexField</code>需要一个额外的参数：</p>
+<ul>
+<li>re_select: str, 正则表达式字符串</li>
+</ul>
+<h2 id="usage">
+  Usage
+  <a class="anchor" href="#usage">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> lxml <span style="color:#f92672">import</span> etree
+
+<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, TextField, HtmlField, RegexField
+
+HTML <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">&lt;html&gt;
+</span><span style="color:#e6db74">    &lt;head&gt;
+</span><span style="color:#e6db74">        &lt;title&gt;ruia&lt;/title&gt;
+</span><span style="color:#e6db74">    &lt;/head&gt;
+</span><span style="color:#e6db74">    &lt;body&gt;¬
+</span><span style="color:#e6db74">        &lt;p&gt;
+</span><span style="color:#e6db74">            &lt;a class=&#34;test_link&#34; href=&#34;https://github.com/howie6879/ruia&#34;&gt;hello github.&lt;/a&gt;
+</span><span style="color:#e6db74">        &lt;/p&gt;
+</span><span style="color:#e6db74">    &lt;/body&gt;
+</span><span style="color:#e6db74">&lt;/html&gt;
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+
+html <span style="color:#f92672">=</span> etree<span style="color:#f92672">.</span>HTML(HTML)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_css_select</span>():
+    field <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;head title&#34;</span>)
+    value <span style="color:#f92672">=</span> field<span style="color:#f92672">.</span>extract(html_etree<span style="color:#f92672">=</span>html)
+    <span style="color:#66d9ef">assert</span> value <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;ruia&#34;</span>
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_xpath_select</span>():
+    field <span style="color:#f92672">=</span> TextField(xpath_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/html/head/title&#39;</span>)
+    value <span style="color:#f92672">=</span> field<span style="color:#f92672">.</span>extract(html_etree<span style="color:#f92672">=</span>html)
+    <span style="color:#66d9ef">assert</span> value <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;ruia&#34;</span>
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_attr_field</span>():
+    attr_field <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;p a.test_link&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
+    value <span style="color:#f92672">=</span> attr_field<span style="color:#f92672">.</span>extract(html_etree<span style="color:#f92672">=</span>html)
+    <span style="color:#66d9ef">assert</span> value <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;https://github.com/howie6879/ruia&#34;</span>
+    
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_html_field</span>():
+    field <span style="color:#f92672">=</span> HtmlField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.test_link&#34;</span>)
+    <span style="color:#66d9ef">assert</span> field<span style="color:#f92672">.</span>extract(html_etree<span style="color:#f92672">=</span>html) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;&lt;a class=&#34;test_link&#34; href=&#34;https://github.com/howie6879/ruia&#34;&gt;hello github.&lt;/a&gt;&#39;</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_re_field</span>():
+    field <span style="color:#f92672">=</span> RegexField(re_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;&lt;title&gt;(.*?)&lt;/title&gt;&#39;</span>)
+    href <span style="color:#f92672">=</span> field<span style="color:#f92672">.</span>extract(html<span style="color:#f92672">=</span>HTML)
+    <span style="color:#66d9ef">assert</span> href <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;ruia&#39;</span>
+
+</code></pre></div><h2 id="how-it-works">
+  How It Works?
+  <a class="anchor" href="#how-it-works">#</a>
+</h2>
+<p>定好<code>CSS Selector</code>或<code>XPath</code>规则，然后利用<code>lxml</code>实现对目标<code>html</code>进行目标数据的提取</p>
+<h3 id="关于regexfield">
+  关于<code>RegexField</code>
+  <a class="anchor" href="#%e5%85%b3%e4%ba%8eregexfield">#</a>
+</h3>
+<p>详细信息请参阅<a href="https://github.com/howie6879/ruia/blob/master/docs/en/topics/selector.md">英文文档</a>。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#core-arguments">Core arguments</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#how-it-works">How It Works?</a>
+      <ul>
+        <li><a href="#关于regexfield">关于<code>RegexField</code></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
