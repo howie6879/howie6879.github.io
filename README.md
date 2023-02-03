@@ -11,4 +11,4 @@
 
 最后，欢迎一起交流：
 
-<div align=center><img width="300px" height="300px" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<div align=center><img width="80%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
