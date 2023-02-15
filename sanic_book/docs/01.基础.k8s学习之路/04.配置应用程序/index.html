@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.80.0" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="配置应用程序 #  使用Docker部署应用程序时，一般常用的配置方式有：
+ 配置内嵌 启动传参配置 环境变量  经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：
+ gitRepo hostPath NFS  再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于Kubernetes的顶级资源对象中，那就是ConfigMap。
+传递命令行参数 #  在上一节容器持久化存储的emptyDir概念介绍部分，我们引入了一个fortune-pod的例子，再回顾一下之前的配置文件吧，如下：
+apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 此应用程序设定了每隔10s就会自动生成输出到html，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。
+创建文件fortune-pod-args.yaml，输入以下内容：
+apiVersion: v1 kind: Pod metadata: name: fortune2s spec: containers: - image: luksa/fortune:args args: [&#34;2&#34;] name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 看到配置文件中的args字段了么？这个就是传给镜像luksa/fortune:args控制时间的参数，让我们启动看看吧。">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="配置应用程序 #  使用Docker部署应用程序时，一般常用的配置方式有：
+ 配置内嵌 启动传参配置 环境变量  经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：
+ gitRepo hostPath NFS  再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于Kubernetes的顶级资源对象中，那就是ConfigMap。
+传递命令行参数 #  在上一节容器持久化存储的emptyDir概念介绍部分，我们引入了一个fortune-pod的例子，再回顾一下之前的配置文件吧，如下：
+apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 此应用程序设定了每隔10s就会自动生成输出到html，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。
+创建文件fortune-pod-args.yaml，输入以下内容：
+apiVersion: v1 kind: Pod metadata: name: fortune2s spec: containers: - image: luksa/fortune:args args: [&#34;2&#34;] name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 看到配置文件中的args字段了么？这个就是传给镜像luksa/fortune:args控制时间的参数，让我们启动看看吧。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" />
+
+<title>04.配置应用程序 | Kubernetes 学习之路</title>
+<link rel="manifest" href="/k8s/manifest.json">
+<link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/k8s/book.min.6c7c6446dfdee7c8c933e9bbc6e80ee3ed6c913b2a59519f2092c3c6a9d63e55.css" integrity="sha256-bHxkRt/e58jJM&#43;m7xugO4&#43;1skTsqWVGfIJLDxqnWPlU=">
+<script defer src="/k8s/en.search.min.1abee38d79c0464e24fb29d5a3d767d30e4964c211ad22d198112a35c3791610.js" integrity="sha256-Gr7jjXnARk4k&#43;ynVo9dn0w5JZMIRrSLRmBEqNcN5FhA="></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/k8s"><span>Kubernetes 学习之路</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：基础</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/01.%E8%B5%B0%E8%BF%9BKubernetes/" class="">01.走进 Kubernetes</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class="">03.容器持久化存储</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class=" active">04.配置应用程序</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/01.%E5%9F%BA%E7%A1%80.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第三部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/k8s/docs/03.%E9%99%84%E5%BD%95.k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var menu=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(event){localStorage.setItem("menu.scrollTop",menu.scrollTop);});menu.scrollTop=localStorage.getItem("menu.scrollTop");})();</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/k8s/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>04.配置应用程序</strong>
+
+  <label for="toc-control">
+    
+    <img src="/k8s/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#传递命令行参数">传递命令行参数</a></li>
+    <li><a href="#设置环境变量">设置环境变量</a></li>
+    <li><a href="#configmap">ConfigMap</a>
+      <ul>
+        <li><a href="#创建">创建</a></li>
+        <li><a href="#作为环境变量传入容器">作为环境变量传入容器</a></li>
+        <li><a href="#configmap卷">ConfigMap卷</a></li>
+      </ul>
+    </li>
+    <li><a href="#secret">Secret</a>
+      <ul>
+        <li><a href="#创建-1">创建</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="配置应用程序">
+  配置应用程序
+  <a class="anchor" href="#%e9%85%8d%e7%bd%ae%e5%ba%94%e7%94%a8%e7%a8%8b%e5%ba%8f">#</a>
+</h1>
+<p>使用<code>Docker</code>部署应用程序时，一般常用的配置方式有：</p>
+<ul>
+<li>配置内嵌</li>
+<li>启动传参配置</li>
+<li>环境变量</li>
+</ul>
+<p>经过前面容器持久化存储的介绍，我们很容易能想到是以挂载卷的形式，比如：</p>
+<ul>
+<li>gitRepo</li>
+<li>hostPath</li>
+<li>NFS</li>
+</ul>
+<p>再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于<code>Kubernetes</code>的顶级资源对象中，那就是<code>ConfigMap</code>。</p>
+<h2 id="传递命令行参数">
+  传递命令行参数
+  <a class="anchor" href="#%e4%bc%a0%e9%80%92%e5%91%bd%e4%bb%a4%e8%a1%8c%e5%8f%82%e6%95%b0">#</a>
+</h2>
+<p>在上一节<strong>容器持久化存储</strong>的<code>emptyDir</code>概念介绍部分，我们引入了一个<code>fortune-pod</code>的例子，再回顾一下之前的配置文件吧，如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">fortune</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">containers</span>:
+  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">luksa/fortune</span>
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html-generator</span>
+    <span style="color:#f92672">volumeMounts</span>:
+    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/htdocs</span>
+  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine</span>
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">web-server</span>
+    <span style="color:#f92672">volumeMounts</span>:
+    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html</span>
+      <span style="color:#f92672">readOnly</span>: <span style="color:#66d9ef">true</span>
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">80</span>
+      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+  <span style="color:#f92672">volumes</span>:
+  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+    <span style="color:#f92672">emptyDir</span>: {}
+</code></pre></div><p>此应用程序设定了每隔<code>10s</code>就会自动生成输出到<code>html</code>，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。</p>
+<p>创建文件<code>fortune-pod-args.yaml</code>，输入以下内容：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">fortune2s</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">containers</span>:
+  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">luksa/fortune:args</span>
+    <span style="color:#f92672">args</span>: [<span style="color:#e6db74">&#34;2&#34;</span>]
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html-generator</span>
+    <span style="color:#f92672">volumeMounts</span>:
+    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/htdocs</span>
+  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine</span>
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">web-server</span>
+    <span style="color:#f92672">volumeMounts</span>:
+    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html</span>
+      <span style="color:#f92672">readOnly</span>: <span style="color:#66d9ef">true</span>
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">80</span>
+      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+  <span style="color:#f92672">volumes</span>:
+  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+    <span style="color:#f92672">emptyDir</span>: {}
+</code></pre></div><p>看到配置文件中的<code>args</code>字段了么？这个就是传给镜像<code>luksa/fortune:args</code>控制时间的参数，让我们启动看看吧。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-args.yaml
+<span style="color:#75715e"># 输出</span>
+pod/fortune2s created
+
+<span style="color:#75715e"># 查看状态</span>
+kubectl get pods
+<span style="color:#75715e"># 输出</span>
+NAME      READY   STATUS    RESTARTS   AGE
+fortune   2/2     Running   <span style="color:#ae81ff">0</span>          2m27s
+
+<span style="color:#75715e"># 暂时服务化</span>
+kubectl port-forward fortune2s 8080:80
+</code></pre></div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>2s</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; curl 127.0.0.1:8080                                                                                              
+Stay away from flying saucers today.
+</code></pre></div><h2 id="设置环境变量">
+  设置环境变量
+  <a class="anchor" href="#%e8%ae%be%e7%bd%ae%e7%8e%af%e5%a2%83%e5%8f%98%e9%87%8f">#</a>
+</h2>
+<blockquote>
+<p>与容器的命令和参数设置相同，环境变量列表无法在pod创建后被修改</p>
+</blockquote>
+<p>设置环境变量非常简单，我们只需要在<code>pod</code>中指定环境变量即可；当然，这里有个前提是你需要将修改镜像让其支持读取环境变量。</p>
+<p>我们直接使用书中的例子：<code>vim fortune-pod-env.yaml</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      value: <span style="color:#e6db74">&#34;30&#34;</span>
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: true
+    ports:
+    - containerPort: <span style="color:#ae81ff">80</span>
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span style="color:#f92672">{}</span>
+</code></pre></div><p>可以看到配置中声明了<code>INTERVAL</code>环境变量值为<code>30</code>，在终端中实践一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env.yaml
+<span style="color:#75715e"># 输出</span>
+pod/fortune-env created
+
+<span style="color:#75715e"># 查看状态</span>
+kubectl get pods
+<span style="color:#75715e"># 输出</span>
+NAME      READY   STATUS    RESTARTS   AGE
+fortune-env   2/2     Running   <span style="color:#ae81ff">0</span>          10s
+
+<span style="color:#75715e"># 暂时服务化</span>
+kubectl port-forward fortune-env 8080:80
+</code></pre></div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>30s</code>。</p>
+<p>现在应用程序的所有配置基本上可以说是硬编码的形式进行配置，并且<code>yaml</code>配置文件总是有配置相关的字段，有没有办法让镜像和配置文件解耦呢？</p>
+<p><code>k8s</code>提供了名为<code>ConfigMap</code>的资源对象解决这个问题。</p>
+<h2 id="configmap">
+  ConfigMap
+  <a class="anchor" href="#configmap">#</a>
+</h2>
+<p>资源对象<code>ConﬁgMap</code>提供了向容器中注入配置信息的机制，它本质上就是一个键/值对映射，可以用来保存单个值或者配置文件。</p>
+<p><code>ConﬁgMap</code>是不需要被读取的，它映射的内容通过环境变量或者卷文件的形式传给容器。一般直接在<code>pod</code>的定义里面就可以声明<code>ConﬁgMap</code>，这样就可以根据不同的环境创建不同的配置，流程交互如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210316203507993.png" alt="image-20210316203507993" /></p>
+<h3 id="创建">
+  创建
+  <a class="anchor" href="#%e5%88%9b%e5%bb%ba">#</a>
+</h3>
+<p>还是用之前应用程序为例，配置专注于环境变量<code>INTERVAL</code>，创建命令如下所示：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-literal<span style="color:#f92672">=</span>sleep-interval<span style="color:#f92672">=</span><span style="color:#ae81ff">25</span>
+<span style="color:#75715e"># 输出</span>
+configmap/fortune-config created
+
+<span style="color:#75715e"># 获取相关描述</span>
+kubectl get configmap fortune-config -o yaml
+
+<span style="color:#75715e"># 查看 configmap</span>
+kubectl get configmap
+
+<span style="color:#75715e"># 删除</span>
+kubectl delete configmap fortune-config
+</code></pre></div><p>此外，<code>k8s</code>还可以直接填写配置文件来进行创建<code>vim fortune-config.yaml</code>，输入如下内容：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ConfigMap</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">fortune-config</span>
+<span style="color:#f92672">data</span>:
+  <span style="color:#f92672">sleep-interval</span>: <span style="color:#e6db74">&#34;25&#34;</span>
+</code></pre></div><p>然后执行：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-config.yaml
+<span style="color:#75715e"># 输出</span>
+configmap/fortune-config created
+</code></pre></div><p>其实还有更多的创建方式，大概提一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 从文件内容创建ConfigMap条目</span>
+kubectl create configmap my-config --from-file<span style="color:#f92672">=</span>config-file.conf
+<span style="color:#75715e"># 从文件夹创建ConfigMap</span>
+kubectl create configmap my-config --from-file<span style="color:#f92672">=</span>/path/to/dir
+<span style="color:#75715e"># 合并不同选项</span>
+kubectl create configmap my-config 
+	--from-file<span style="color:#f92672">=</span>foo.json 
+	--from-file<span style="color:#f92672">=</span>bar<span style="color:#f92672">=</span>foobar.conf 
+	--from-file<span style="color:#f92672">=</span>config-opts/ 
+	--from-literal<span style="color:#f92672">=</span>some<span style="color:#f92672">=</span>thing 
+</code></pre></div><h3 id="作为环境变量传入容器">
+  作为环境变量传入容器
+  <a class="anchor" href="#%e4%bd%9c%e4%b8%ba%e7%8e%af%e5%a2%83%e5%8f%98%e9%87%8f%e4%bc%a0%e5%85%a5%e5%ae%b9%e5%99%a8">#</a>
+</h3>
+<p>如何将映射中的值传递给<code>pod</code>的容器？最简单的方法是给容器设置环境变量，通过在配置中声明<code>valueFrom</code>，具体操作<code>vim fortune-pod-env-configmap.yaml</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env-from-configmap
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom: 
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: true
+    ports:
+    - containerPort: <span style="color:#ae81ff">80</span>
+      protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span style="color:#f92672">{}</span>
+
+</code></pre></div><p>让我们启动<code>pod</code>实践看看：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env-configmap.yaml
+<span style="color:#75715e"># 输出</span>
+pod/fortune-env-from-configmap created
+
+<span style="color:#75715e"># 查看状态</span>
+kubectl get pods
+<span style="color:#75715e"># 输出</span>
+NAME                         READY   STATUS    RESTARTS   AGE
+fortune-env-from-configmap   2/2     Running   <span style="color:#ae81ff">0</span>          19s
+
+<span style="color:#75715e"># 暂时服务化</span>
+kubectl port-forward fortune-env-from-configmap 8080:80
+
+<span style="color:#75715e"># 删除pod</span>
+kubectl delete pods fortune-env-from-configmap
+</code></pre></div><p>现在我们已经成功在<code>pod</code>中使用了<code>ConfigMap</code>资源，不过这种使用方式是比较低效的，考虑这样一个情况：如果环境变量比较多，这样单独一个个环境变量的设置方式是个程序员都没法忍受的。</p>
+<p>一般在框架里面加载一些环境变量都会利用前缀机制来进行批量加载，比如<code>Sanic</code>框架会读取<code>SANIC_</code>开头的环境变量自动加载。</p>
+<p><code>k8s</code>也提供了这样类似的机制，配置声明如下图示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210317214756738.png" alt="image-20210317214756738" /></p>
+<h3 id="configmap卷">
+  ConfigMap卷
+  <a class="anchor" href="#configmap%e5%8d%b7">#</a>
+</h3>
+<blockquote>
+<p>环境变量或者命令行参数值作为配置值通常适用于变量值较短的场景。由于ConfigMap中可以包含完整的配置文件内容，当你想要将其暴露给容器时，可以借助前面章节提到过的一种称为configMap卷的特殊卷格式。</p>
+</blockquote>
+<p>首先删除前面声明建立的<code>cf</code>资源：<code>kubectl delete configmap fortune-config</code>。然后建立文件夹<code>configmap-files</code>，首先建立<code>Nginx</code>配置文件：<code>vim my-nginx-config.conf</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">server <span style="color:#f92672">{</span>
+    listen              80;
+    server_name         www.kubia-example.com;
+
+    gzip on;
+    gzip_types text/plain application/xml;
+
+    location / <span style="color:#f92672">{</span>
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    <span style="color:#f92672">}</span>
+
+<span style="color:#f92672">}</span>
+</code></pre></div><p>另外在该文件夹中添加一个名为<code>sleep-interval</code>的文本文件，输入<code>25</code>，类似前面声明环境变量。</p>
+<p>接下来从文件夹创建<code>ConfigMap</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-file<span style="color:#f92672">=</span>configmap-files
+<span style="color:#75715e"># 输出</span>
+configmap/fortune-config created
+
+<span style="color:#75715e"># 验证</span>
+kubectl get configmap fortune-config -o yaml
+</code></pre></div><p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210317215834820.png" alt="image-20210317215834820" /></p>
+<p>创建包含<code>ConfigMap</code>条目内容的卷只需要创建一个引用<code>ConfigMap</code>名称的卷并挂载到容器中：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210317215931773-20210318145409491.png" alt="image-20210317215931773" /></p>
+<p>创建配置文件：<code>vim fortune-pod-configmap-volume.yaml</code>，输入如下内容：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-configmap-volume
+spec:
+  containers:
+  - image: luksa/fortune:env
+    env:
+    - name: INTERVAL
+      valueFrom:
+        configMapKeyRef:
+          name: fortune-config
+          key: sleep-interval
+    name: html-generator
+    volumeMounts:
+    - name: html
+      mountPath: /var/htdocs
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+      readOnly: true
+    - name: config
+      mountPath: /etc/nginx/conf.d
+      readOnly: true
+    - name: config
+      mountPath: /tmp/whole-fortune-config-volume
+      readOnly: true
+    ports:
+      - containerPort: <span style="color:#ae81ff">80</span>
+        name: http
+        protocol: TCP
+  volumes:
+  - name: html
+    emptyDir: <span style="color:#f92672">{}</span>
+  - name: config
+    configMap:
+      name: fortune-config
+</code></pre></div><h2 id="secret">
+  Secret
+  <a class="anchor" href="#secret">#</a>
+</h2>
+<p>前面说的，都是针对非敏感信息的配置数据，对于一些敏感数据，例如：密码、OAuth token、ssh 密钥等，就可以使用<code>Secret</code>资源了。</p>
+<p><code>Secret</code>结构和使用方法都与<code>ConfigMap</code>类似，<code>k8s</code>通过仅仅将<code>Secret</code>分发到需要访问<code>Secret</code>的<code>pod</code>所在的机器节点来保障其安全性。另外，<code>Secret</code>只会存储在节点的内存中，永不写入物理存储。</p>
+<h3 id="创建-1">
+  创建
+  <a class="anchor" href="#%e5%88%9b%e5%bb%ba-1">#</a>
+</h3>
+<p>以创建一个包含用户名密码的<code>secret</code>资源为例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 创建文件</span>
+echo -n <span style="color:#e6db74">&#39;admin&#39;</span> &gt; ./username.txt
+echo -n <span style="color:#e6db74">&#39;1f2d1e2e67df&#39;</span> &gt; ./password.txt
+
+<span style="color:#75715e"># 创建资源</span>
+kubectl create secret generic db-user-pass --from-file<span style="color:#f92672">=</span>./username.txt --from-file<span style="color:#f92672">=</span>./password.txt
+
+<span style="color:#75715e"># 输出</span>
+secret/db-user-pass created
+
+<span style="color:#75715e"># 查看</span>
+kubectl get secrets
+
+<span style="color:#75715e"># 输出</span>
+NAME                  TYPE                                  DATA   AGE
+db-user-pass          Opaque                                <span style="color:#ae81ff">2</span>      23s
+default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#ae81ff">3</span>      54d
+</code></pre></div><p><code>db-user-pass</code>很好理解，就是刚才创建的<code>sevret</code>资源，<code>default-token-nlxkq</code>是什么呢？这是一种默认被挂载至所有容器的<code>Secret</code>。</p>
+<h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<p>本章关于配置应用程序就介绍到这里了，谢谢！本部分内容有参考如下文章：</p>
+<ul>
+<li><a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-pod-configmap/">配置 Pod 使用 ConfigMap</a></li>
+<li><a href="https://kuboard.cn/learning/k8s-intermediate/config/secrets/">Secret概述</a></li>
+<li><a href="https://github.com/luksa/kubernetes-in-action">Kubernetes in Action</a>中文版：可以算是第7章的读书笔记</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'k8s_note',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname, 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#传递命令行参数">传递命令行参数</a></li>
+    <li><a href="#设置环境变量">设置环境变量</a></li>
+    <li><a href="#configmap">ConfigMap</a>
+      <ul>
+        <li><a href="#创建">创建</a></li>
+        <li><a href="#作为环境变量传入容器">作为环境变量传入容器</a></li>
+        <li><a href="#configmap卷">ConfigMap卷</a></li>
+      </ul>
+    </li>
+    <li><a href="#secret">Secret</a>
+      <ul>
+        <li><a href="#创建-1">创建</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

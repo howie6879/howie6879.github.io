@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="项目结构 #  通过前面的讲解，我们了解了Sanic的运行方式以及编写一个好的配置方案，是不是想要立马编写一个应用练练手呢？别急，请先看完这一章节，了解一下你要写的应用得用什么样的结构。
+在github上也看了不少的Python项目吧，相信你也清楚，一个项目，在最外层他们应该是一样的，简单概括下，大概是下面这样的结构:
+pro_name ├── docs # 项目文档说明 ├── src or pro_name/# 项目名称 ├── tests # 测试用例 ├── README.md # 项目介绍 └──requirements.txt # 该项目依赖的第三方库 那接下来需要讨论的，就是 src 或者说pro_name（这个就看你心情命名了，一般与最外层一样的名字）的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+普通的项目结构 #  一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .gitignore └──requirements.txt 任意一个 rss 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，run.py 内容如下：">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="项目结构 #  通过前面的讲解，我们了解了Sanic的运行方式以及编写一个好的配置方案，是不是想要立马编写一个应用练练手呢？别急，请先看完这一章节，了解一下你要写的应用得用什么样的结构。
+在github上也看了不少的Python项目吧，相信你也清楚，一个项目，在最外层他们应该是一样的，简单概括下，大概是下面这样的结构:
+pro_name ├── docs # 项目文档说明 ├── src or pro_name/# 项目名称 ├── tests # 测试用例 ├── README.md # 项目介绍 └──requirements.txt # 该项目依赖的第三方库 那接下来需要讨论的，就是 src 或者说pro_name（这个就看你心情命名了，一般与最外层一样的名字）的内部结构该是什么样的呢？
+本章将写一个 rss 解析展示的项目用做演示。
+普通的项目结构 #  一个普通的项目：
+ 不需要添加后续模块功能 快速开发使用，不需要维护 无较复杂的前端需求 用完就走  那么就可以像 demo01 中一样，只需要添加一个 run.py 或者叫做 app.py 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。
+新建一个项目如下：
+sample01 ├── docs │ └── demo.md ├── src │ └── run.py ├── tests ├── .gitignore └──requirements.txt 任意一个 rss 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，run.py 内容如下：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/sanic_book/docs/01_skill/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/" /><meta property="article:section" content="docs" />
+
+
+
+<title>3.项目结构 | Sanic-For-Pythoneer</title>
+<link rel="manifest" href="/sanic_book/manifest.json">
+<link rel="icon" href="/sanic_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/sanic_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/sanic_book/en.search.min.6d7549c099dca5309fba7d4b35d3cb52dc5f25880339f30b6e69fc306636523e.js" integrity="sha256-bXVJwJncpTCfun1LNdPLUtxfJYgDOfMLbmn8MGY2Uj4="></script>
+<style>
+
+  img[src$='#center']
+  {
+      display: block;
+      margin: 0.7rem auto;  
+       
+  }
+  
+  img[src$='#floatleft']
+  {
+      float:left;
+      margin: 0.7rem;       
+       
+  }
+  
+  img[src$='#floatright']
+  {
+      float:right;
+      margin: 0.7rem;       
+       
+  }
+  </style>
+  
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/sanic_book"><span>Sanic-For-Pythoneer</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：技巧</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/1.%E5%88%9D%E4%BD%BF%E7%94%A8/" class="">1.初使用</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/2.%E9%85%8D%E7%BD%AE/" class="">2.配置</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/" class=" active">3.项目结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/" class="">4.展示一个页面</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/" class="">5.数据库使用</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" class="">6.常用的技巧</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/7.%E5%8F%AF%E9%9D%A0%E7%9A%84%E6%89%A9%E5%B1%95/" class="">7.可靠的扩展</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/8.%E6%B5%8B%E8%AF%95%E4%B8%8E%E9%83%A8%E7%BD%B2/" class="">8.测试与部署</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%9F%BA%E4%BA%8E0.1.2/" class="">Sanic源码阅读：基于0.1.2</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8/" class="">关于装饰器</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/sanic_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>3.项目结构</strong>
+
+  <label for="toc-control">
+    
+    <img src="/sanic_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#项目结构">项目结构</a>
+      <ul>
+        <li><a href="#普通的项目结构">普通的项目结构</a></li>
+        <li><a href="#项目结构具体说明">项目结构具体说明</a></li>
+        <li><a href="#说明">说明</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="项目结构">
+  项目结构
+  <a class="anchor" href="#%e9%a1%b9%e7%9b%ae%e7%bb%93%e6%9e%84">#</a>
+</h2>
+<p>通过前面的讲解，我们了解了<code>Sanic</code>的运行方式以及编写一个好的配置方案，是不是想要立马编写一个应用练练手呢？别急，请先看完这一章节，了解一下你要写的应用得用什么样的结构。</p>
+<p>在<code>github</code>上也看了不少的<code>Python</code>项目吧，相信你也清楚，一个项目，在最外层他们应该是一样的，简单概括下，大概是下面这样的结构:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pro_name
+├── docs            <span style="color:#75715e"># 项目文档说明</span>
+├── src or pro_name/# 项目名称
+├── tests           <span style="color:#75715e"># 测试用例</span>
+├── README.md       <span style="color:#75715e"># 项目介绍</span>
+└──requirements.txt <span style="color:#75715e"># 该项目依赖的第三方库</span>
+</code></pre></div><p>那接下来需要讨论的，就是 <code>src</code> 或者说<code>pro_name</code>（这个就看你心情命名了，一般与最外层一样的名字）的内部结构该是什么样的呢？</p>
+<p>本章将写一个 <code>rss</code> 解析展示的项目用做演示。</p>
+<h3 id="普通的项目结构">
+  普通的项目结构
+  <a class="anchor" href="#%e6%99%ae%e9%80%9a%e7%9a%84%e9%a1%b9%e7%9b%ae%e7%bb%93%e6%9e%84">#</a>
+</h3>
+<p>一个普通的项目：</p>
+<ul>
+<li>不需要添加后续模块功能</li>
+<li>快速开发使用，不需要维护</li>
+<li>无较复杂的前端需求</li>
+<li>用完就走</li>
+</ul>
+<p>那么就可以像 <code>demo01</code> 中一样，只需要添加一个 <a href="https://github.com/howie6879/Sanic-For-Pythoner/blob/master/examples/demo03/sample01/src/run.py">run.py</a> 或者叫做 <code>app.py</code> 文件（反正这是一个启动文件，命名可随意），不论是配置、路由都写在一起就好了。</p>
+<p>新建一个项目如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sample01
+├── docs
+│   └── demo.md
+├── src
+│   └── run.py
+├── tests
+├── .gitignore
+└──requirements.txt
+</code></pre></div><p>任意一个 <code>rss</code> 源，假设项目需要将其中的文章标题以及链接提取并展示出来，比如以json格式返回，这属于很简单的功能，可以说只有一段逻辑，<code>run.py</code> 内容如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Sanic
+<span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json
+<span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
+
+app <span style="color:#f92672">=</span> Sanic()
+
+
+<span style="color:#a6e22e">@app</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/&#34;</span>)
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">index</span>(request):
+    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+    feed <span style="color:#f92672">=</span> parse(url)
+    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+    data <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+        data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
+    <span style="color:#66d9ef">return</span> json(data)
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">8000</span>)
+</code></pre></div><p>访问 <code>http://0.0.0.0:8000/</code>，会返回一串json，如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/03-01.png" alt="rss-json" /></p>
+<p>和我们想象地一样，返回了一串<code>json</code>，接下来，问题升级，我想要将标题链接用页面展示，该怎么弄？</p>
+<p>很容易想到，我们需要一个页面模板来承载数据，然后将json数据写入到页面模板中，最后用 <code>jinja2</code> 的 <code>template</code> 将其渲染。</p>
+<p>道理我们都懂，<code>Sanic</code>具体需要怎么渲染呢？说白了就是对<code>jinja2</code>的使用，如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Sanic
+<span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json, text, html
+<span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
+<span style="color:#f92672">from</span> jinja2 <span style="color:#f92672">import</span> Template
+
+app <span style="color:#f92672">=</span> Sanic()
+
+<span style="color:#75715e"># 后面会使用更方便的模板引用方式</span>
+template <span style="color:#f92672">=</span> Template(
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    &lt;!DOCTYPE html&gt;
+</span><span style="color:#e6db74">&lt;html lang=&#34;en&#34;&gt;
+</span><span style="color:#e6db74">&lt;head&gt;
+</span><span style="color:#e6db74">    &lt;meta charset=&#34;UTF-8&#34;&gt;
+</span><span style="color:#e6db74">    &lt;title&gt;rss阅读&lt;/title&gt;
+</span><span style="color:#e6db74">    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1&#34;&gt;
+</span><span style="color:#e6db74">&lt;/head&gt;
+</span><span style="color:#e6db74">&lt;body&gt;
+</span><span style="color:#e6db74">&lt;article class=&#34;markdown-body&#34;&gt;
+</span><span style="color:#e6db74">    {</span><span style="color:#e6db74">% f</span><span style="color:#e6db74">or article in articles %}
+</span><span style="color:#e6db74">    &lt;b&gt;&lt;a href=&#34;{{article.link}}&#34;&gt;{{article.title}}&lt;/a&gt;&lt;/b&gt;&lt;br/&gt;
+</span><span style="color:#e6db74">    &lt;i&gt;{{article.published}}&lt;/i&gt;&lt;br/&gt;
+</span><span style="color:#e6db74">    &lt;hr/&gt;
+</span><span style="color:#e6db74">    {</span><span style="color:#e6db74">% e</span><span style="color:#e6db74">ndfor %}
+</span><span style="color:#e6db74">&lt;/article&gt;
+</span><span style="color:#e6db74">&lt;/body&gt;
+</span><span style="color:#e6db74">&lt;/html&gt;
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+)
+
+
+<span style="color:#a6e22e">@app</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/&#34;</span>)
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">index</span>(request):
+    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+    feed <span style="color:#f92672">=</span> parse(url)
+    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+    data <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+        data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
+    <span style="color:#66d9ef">return</span> json(data)
+
+
+<span style="color:#a6e22e">@app</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/html&#34;</span>)
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rss_html</span>(request):
+    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+    feed <span style="color:#f92672">=</span> parse(url)
+    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+    data <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+        data<span style="color:#f92672">.</span>append(
+            {<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>], <span style="color:#e6db74">&#34;published&#34;</span>: article[<span style="color:#e6db74">&#34;published&#34;</span>]})
+    html_content <span style="color:#f92672">=</span> template<span style="color:#f92672">.</span>render(articles<span style="color:#f92672">=</span>data)
+    <span style="color:#66d9ef">return</span> html(html_content)
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">8000</span>)
+</code></pre></div><p>具体结构代码见<a href="https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample01">sample01</a>，运行起来，然后输入 <code>http://0.0.0.0:8000/html</code> 就可以看到被展示出来的页面^_^</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/03-02.png" alt="rss-html" /></p>
+<p>假设需要编写前端页面比较多，那么你就需要添加<code>statics</code> 以及 <code>templates</code> 文件夹用来管理各个界面模块，具体下面会介绍。</p>
+<h3 id="项目结构具体说明">
+  项目结构具体说明
+  <a class="anchor" href="#%e9%a1%b9%e7%9b%ae%e7%bb%93%e6%9e%84%e5%85%b7%e4%bd%93%e8%af%b4%e6%98%8e">#</a>
+</h3>
+<p>当编写的项目过于复杂，我都会将其当做一个第三方包来管理项目中涉及的各种模块，比如 <a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo03/sample02">sample02</a>，目录下面你会发现有个 <code>__init__.py</code> 文件，它初始化了当前目录下的应用，然后代码中引用某个函数可以这么写：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> src.views <span style="color:#f92672">import</span> app
+</code></pre></div><p>这样，你的应用下面的模块引用起来就会特别方便，就像使用一个第三方模块一样，灵巧且方便。</p>
+<p>每个项目的内部分布以及命名可能不一样（甚至目录比应该或多或少），但大体意思可能差不多，下面介绍本次项目 <code>src</code> 下的一些文件目录结构：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sample02
+├── docs
+│   └── demo.md
+├── src
+│   ├── config <span style="color:#75715e"># 配置 </span>
+│   ├── statics <span style="color:#75715e"># css、js、img</span>
+│   ├── templates <span style="color:#75715e"># Jinja2模板</span>
+│   └── views <span style="color:#75715e"># 路由、逻辑处理</span>
+│   ├── __init__.py
+│   ├── run.py <span style="color:#75715e"># 启动文件</span>
+├── tests
+└── requirements.txt
+</code></pre></div><p>此处就可以将 <code>sample02</code> 当成一个包了，实践是检验真理的唯一标准，让我们来试试看：</p>
+<p>首先新建文件 <code>/views/rss.py</code> ，具体代码可以看这里 <a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo03/sample02">sample02</a>，下面的代码片段可没办法很好的运行:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">enable_async <span style="color:#f92672">=</span> sys<span style="color:#f92672">.</span>version_info <span style="color:#f92672">&gt;=</span> (<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">6</span>)
+
+app <span style="color:#f92672">=</span> Sanic()
+
+<span style="color:#75715e"># jinjia2 config</span>
+env <span style="color:#f92672">=</span> Environment(
+    loader<span style="color:#f92672">=</span>PackageLoader(<span style="color:#e6db74">&#39;views.rss&#39;</span>, <span style="color:#e6db74">&#39;../templates&#39;</span>),
+    autoescape<span style="color:#f92672">=</span>select_autoescape([<span style="color:#e6db74">&#39;html&#39;</span>, <span style="color:#e6db74">&#39;xml&#39;</span>, <span style="color:#e6db74">&#39;tpl&#39;</span>]),
+    enable_async<span style="color:#f92672">=</span>enable_async)
+
+
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">template</span>(tpl, <span style="color:#f92672">**</span>kwargs):
+    template <span style="color:#f92672">=</span> env<span style="color:#f92672">.</span>get_template(tpl)
+    rendered_template <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> template<span style="color:#f92672">.</span>render_async(<span style="color:#f92672">**</span>kwargs)
+    <span style="color:#66d9ef">return</span> html(rendered_template)
+
+
+<span style="color:#a6e22e">@app</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/html&#34;</span>)
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rss_html</span>(request):
+    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+    feed <span style="color:#f92672">=</span> parse(url)
+    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+    data <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+        data<span style="color:#f92672">.</span>append(
+            {<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>], <span style="color:#e6db74">&#34;published&#34;</span>: article[<span style="color:#e6db74">&#34;published&#34;</span>]})
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">await</span> template(<span style="color:#e6db74">&#39;rss.html&#39;</span>, articles<span style="color:#f92672">=</span>articles)
+</code></pre></div><p>这里使用异步的方式引入了 <code>jinja2</code> ，需要注意的是python版本必须3.6+，否则就得使用同步的方式来引入 <code>jinja2</code> ，后面章节会继续介绍。</p>
+<p>此时启动文件 <code>run.py</code> 只要引入 <code>/views/rss.py</code> 的 <code>app</code> 实例即可：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># !/usr/bin/env python</span>
+<span style="color:#f92672">import</span> sys
+<span style="color:#f92672">import</span> os
+
+sys<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>append(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>abspath(__file__))))
+<span style="color:#f92672">from</span> src.views <span style="color:#f92672">import</span> app
+<span style="color:#f92672">from</span> src.config <span style="color:#f92672">import</span> CONFIG
+
+app<span style="color:#f92672">.</span>statics(<span style="color:#e6db74">&#39;/statics&#39;</span>, CONFIG<span style="color:#f92672">.</span>BASE_DIR <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/statics&#39;</span>)
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">8000</span>)
+</code></pre></div><p>还有一些css文件这里就不介绍，具体代码请看<a href="https://github.com/howie6879/Sanic-For-Pythoner/tree/master/examples/demo03/sample02">sample02</a>，运行起来，然后输入 <code>http://0.0.0.0:8000/html</code> 就好，效果如下图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/03-03.png" alt="rss-html" /></p>
+<h3 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h3>
+<p>关于 <code>views templates statics</code> 内部的构造也是值得一写，这就涉及到蓝图 <code>Blueprint</code> ，后面介绍蓝图的时候会进行介绍。</p>
+<p>代码地址：<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo03/">demo03</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg#center" alt="老胡的储物柜" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#项目结构">项目结构</a>
+      <ul>
+        <li><a href="#普通的项目结构">普通的项目结构</a></li>
+        <li><a href="#项目结构具体说明">项目结构具体说明</a></li>
+        <li><a href="#说明">说明</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

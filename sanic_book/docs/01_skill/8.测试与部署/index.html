@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta name="generator" content="Hugo 0.88.1" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="测试与部署 #  在项目结构那一节说过，一个服务的基本结构大概是怎么样的，这里再列出来回顾下：
+pro_name ├── docs # 项目文档说明 ├── src or pro_name/# 项目名称 ├── tests # 测试用例 ├── README.md # 项目介绍 └──requirements.txt # 该项目依赖的第三方库 一个服务编写完成后，在部署之前，你需要做的一步就是进行单元测试，首先你要确定目前的代码是可以完美运行的，然后测试用例还可以让你在下次修改代码逻辑进行版本迭代的时候，只要再跑一次对应的测试用例就可以快速地确定此次的版本依旧是完美的，大大节省时间，一般集成测试的时候都需要跑测试用例的脚本。
+本次使用的例子还是继续在demo06的基础上进行演示，提醒一下诸位，在继续阅读前可以先大致看下目录中test的代码哈。
+测试 #  单元测试 #  Sanic进行单元测试的时候，官方推荐使用的是pytest，具体怎么对Sanic构建的服务进行测试呢，别急，Sanic开发团队提供了关于pytest的插件，见pytest-sanic，使用起来也是非常简单。
+让我们结合前面的例子，利用pytest-sanic测试一下demo06中的rss api服务，先看下目录结构：
+tests ├── setting.py └── test_rss.py 首先在setting.py中定好请求的数据：
+# setting.py def rss_data(): return { &#34;name&#34;: &#34;howie6879&#34; } 然后编写对应的测试用例，这里是关于/v1/post/rss/的一个POST请求测试，代码如下：
+# test_rss.py async def test_http_rss(test_cli): data = setting.rss_data() response = await test_cli.post(&#39;/v1/post/rss/&#39;, data=ujson.dumps(data)) resp_json = await response.json() assert resp_json[&#39;status&#39;] == 1 # 运行测试 pytest tests/test_rss.">
+<meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
+<meta property="og:description" content="测试与部署 #  在项目结构那一节说过，一个服务的基本结构大概是怎么样的，这里再列出来回顾下：
+pro_name ├── docs # 项目文档说明 ├── src or pro_name/# 项目名称 ├── tests # 测试用例 ├── README.md # 项目介绍 └──requirements.txt # 该项目依赖的第三方库 一个服务编写完成后，在部署之前，你需要做的一步就是进行单元测试，首先你要确定目前的代码是可以完美运行的，然后测试用例还可以让你在下次修改代码逻辑进行版本迭代的时候，只要再跑一次对应的测试用例就可以快速地确定此次的版本依旧是完美的，大大节省时间，一般集成测试的时候都需要跑测试用例的脚本。
+本次使用的例子还是继续在demo06的基础上进行演示，提醒一下诸位，在继续阅读前可以先大致看下目录中test的代码哈。
+测试 #  单元测试 #  Sanic进行单元测试的时候，官方推荐使用的是pytest，具体怎么对Sanic构建的服务进行测试呢，别急，Sanic开发团队提供了关于pytest的插件，见pytest-sanic，使用起来也是非常简单。
+让我们结合前面的例子，利用pytest-sanic测试一下demo06中的rss api服务，先看下目录结构：
+tests ├── setting.py └── test_rss.py 首先在setting.py中定好请求的数据：
+# setting.py def rss_data(): return { &#34;name&#34;: &#34;howie6879&#34; } 然后编写对应的测试用例，这里是关于/v1/post/rss/的一个POST请求测试，代码如下：
+# test_rss.py async def test_http_rss(test_cli): data = setting.rss_data() response = await test_cli.post(&#39;/v1/post/rss/&#39;, data=ujson.dumps(data)) resp_json = await response.json() assert resp_json[&#39;status&#39;] == 1 # 运行测试 pytest tests/test_rss." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.howie6879.cn/sanic_book/docs/01_skill/8.%E6%B5%8B%E8%AF%95%E4%B8%8E%E9%83%A8%E7%BD%B2/" /><meta property="article:section" content="docs" />
+
+
+
+<title>8.测试与部署 | Sanic-For-Pythoneer</title>
+<link rel="manifest" href="/sanic_book/manifest.json">
+<link rel="icon" href="/sanic_book/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/sanic_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
+<script defer src="/sanic_book/en.search.min.6d7549c099dca5309fba7d4b35d3cb52dc5f25880339f30b6e69fc306636523e.js" integrity="sha256-bXVJwJncpTCfun1LNdPLUtxfJYgDOfMLbmn8MGY2Uj4="></script>
+<style>
+
+  img[src$='#center']
+  {
+      display: block;
+      margin: 0.7rem auto;  
+       
+  }
+  
+  img[src$='#floatleft']
+  {
+      float:left;
+      margin: 0.7rem;       
+       
+  }
+  
+  img[src$='#floatright']
+  {
+      float:right;
+      margin: 0.7rem;       
+       
+  }
+  </style>
+  
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a href="/sanic_book"><span>Sanic-For-Pythoneer</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://www.howie6879.cn/" target="_blank" rel="noopener">
+        老胡的储物柜
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/wechat_howie.png" target="_blank" rel="noopener">
+        微信公众号
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/howie6879" target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第一部分：技巧</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/1.%E5%88%9D%E4%BD%BF%E7%94%A8/" class="">1.初使用</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/2.%E9%85%8D%E7%BD%AE/" class="">2.配置</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/" class="">3.项目结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/" class="">4.展示一个页面</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/" class="">5.数据库使用</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" class="">6.常用的技巧</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/7.%E5%8F%AF%E9%9D%A0%E7%9A%84%E6%89%A9%E5%B1%95/" class="">7.可靠的扩展</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/8.%E6%B5%8B%E8%AF%95%E4%B8%8E%E9%83%A8%E7%BD%B2/" class=" active">8.测试与部署</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span>第二部分：附录</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%9F%BA%E4%BA%8E0.1.2/" class="">Sanic源码阅读：基于0.1.2</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8/" class="">关于装饰器</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/sanic_book/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>8.测试与部署</strong>
+
+  <label for="toc-control">
+    
+    <img src="/sanic_book/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#测试与部署">测试与部署</a>
+      <ul>
+        <li><a href="#测试">测试</a></li>
+        <li><a href="#部署">部署</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="测试与部署">
+  测试与部署
+  <a class="anchor" href="#%e6%b5%8b%e8%af%95%e4%b8%8e%e9%83%a8%e7%bd%b2">#</a>
+</h2>
+<p>在项目结构那一节说过，一个服务的基本结构大概是怎么样的，这里再列出来回顾下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pro_name
+├── docs            <span style="color:#75715e"># 项目文档说明</span>
+├── src or pro_name/# 项目名称
+├── tests           <span style="color:#75715e"># 测试用例</span>
+├── README.md       <span style="color:#75715e"># 项目介绍</span>
+└──requirements.txt <span style="color:#75715e"># 该项目依赖的第三方库</span>
+</code></pre></div><p>一个服务编写完成后，在部署之前，你需要做的一步就是进行单元测试，首先你要确定目前的代码是可以完美运行的，然后测试用例还可以让你在下次修改代码逻辑进行版本迭代的时候，只要再跑一次对应的测试用例就可以快速地确定此次的版本依旧是完美的，大大节省时间，一般集成测试的时候都需要跑测试用例的脚本。</p>
+<p>本次使用的例子还是继续在<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample">demo06</a>的基础上进行演示，提醒一下诸位，在继续阅读前可以先大致看下目录中<code>test</code>的代码哈。</p>
+<h3 id="测试">
+  测试
+  <a class="anchor" href="#%e6%b5%8b%e8%af%95">#</a>
+</h3>
+<h4 id="单元测试">
+  单元测试
+  <a class="anchor" href="#%e5%8d%95%e5%85%83%e6%b5%8b%e8%af%95">#</a>
+</h4>
+<p>Sanic进行单元测试的时候，官方推荐使用的是<a href="https://github.com/pytest-dev/pytest">pytest</a>，具体怎么对Sanic构建的服务进行测试呢，别急，Sanic开发团队提供了关于<code>pytest</code>的插件，见<a href="https://github.com/yunstanford/pytest-sanic">pytest-sanic</a>，使用起来也是非常简单。</p>
+<p>让我们结合前面的例子，利用<a href="https://github.com/yunstanford/pytest-sanic">pytest-sanic</a>测试一下<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample">demo06</a>中的<code>rss api</code>服务，先看下目录结构：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">tests
+├── setting.py
+└── test_rss.py
+</code></pre></div><p>首先在<code>setting.py</code>中定好请求的数据：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># setting.py</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rss_data</span>():
+    <span style="color:#66d9ef">return</span> {
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie6879&#34;</span>
+    }
+</code></pre></div><p>然后编写对应的测试用例，这里是关于<code>/v1/post/rss/</code>的一个<code>POST</code>请求测试，代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># test_rss.py</span>
+<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_http_rss</span>(test_cli):
+    data <span style="color:#f92672">=</span> setting<span style="color:#f92672">.</span>rss_data()
+    response <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> test_cli<span style="color:#f92672">.</span>post(<span style="color:#e6db74">&#39;/v1/post/rss/&#39;</span>, data<span style="color:#f92672">=</span>ujson<span style="color:#f92672">.</span>dumps(data))
+    resp_json <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>json()
+    <span style="color:#66d9ef">assert</span> resp_json[<span style="color:#e6db74">&#39;status&#39;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>
+
+<span style="color:#75715e"># 运行测试 pytest tests/test_rss.py</span>
+<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">================================================= test session starts ==================================================
+</span><span style="color:#e6db74">platform darwin -- Python 3.6.0, pytest-3.2.3, py-1.4.34, pluggy-0.4.0
+</span><span style="color:#e6db74">rootdir: /Users/howie/Documents/programming/python/git/Sanic-For-Pythoneer/examples/demo06/sample, inifile:
+</span><span style="color:#e6db74">plugins: celery-4.0.2, sanic-0.1.5
+</span><span style="color:#e6db74">collected 2 items
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">tests/test_rss.py .s
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">========================================= 1 passed, 1 skipped in 2.13 seconds ==========================================
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</code></pre></div><p>可以看到测试通过，全部测试代码在<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample/tests">这里</a>，最好可以直接clone下来跑一遍，细心的朋友可能注意到了测试用例结果中的这句话<code>1 passed, 1 skipped in 2.13 seconds </code>，为什么会有一个测试跳过呢？</p>
+<p>因为在实际编写项目的过程中，你的测试用例很可能会分好多种，比如在编写微服务的过程中，同样一套处理逻辑，你需要分别实现<code>HTTP</code>和<code>gRPC</code>两种调用方式，测试代码里面我就多写了一个测试<code>gRPC</code>的配置，不过我设置了参数：<code>DIS_GRPC_TEST = True</code>，没有启用<code>gRPC</code>的测试，这里只是举个例子，具体还是要看诸位的需求，用本次的例子作为参考，就算改动起来也并没什么难度。</p>
+<h4 id="压力测试">
+  压力测试
+  <a class="anchor" href="#%e5%8e%8b%e5%8a%9b%e6%b5%8b%e8%af%95">#</a>
+</h4>
+<p>说完了如何对Sanic编写的服务进行单元测试，接下来稍微讲下如何进行压力测试，压力测试最好在内外网都进行测试下，当然服务器配置是你定，然后在多个服务器上部署好服务，启动起来，利用负载均衡给压测代码一个固定的ip，这样对于服务的水平扩展测试就会很方便。</p>
+<p>压测可以考虑使用<a href="https://github.com/locustio/locust">locust</a>，看看现在<code>tests</code>下的目录结构：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── locust_rss
+│   ├── __init__.py
+│   ├── action.py
+│   ├── locust_rss_http.py
+│   ├── locustfile.py
+│   └── utils.py
+├── setting.py
+└── test_rss.py
+</code></pre></div><p>新增了<code>locust_rss</code>文件夹，首先在<code>action.py</code>定义好请求地址与请求方式：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">HTTP_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://0.0.0.0:8000/v1/post/rss/&#34;</span>
+GRPC_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;0.0.0.0:8990&#34;</span>
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">json_requests</span>(client, data, url):
+    func_name <span style="color:#f92672">=</span> inspect<span style="color:#f92672">.</span>stack()[<span style="color:#ae81ff">1</span>][<span style="color:#ae81ff">3</span>]
+    headers <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;content-type&#39;</span>: <span style="color:#e6db74">&#39;application/json&#39;</span>}
+    <span style="color:#66d9ef">return</span> post_request(client, data<span style="color:#f92672">=</span>json<span style="color:#f92672">.</span>dumps(data), url<span style="color:#f92672">=</span>url, func_name<span style="color:#f92672">=</span>func_name, headers<span style="color:#f92672">=</span>headers)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">action_rss</span>(client):
+    data <span style="color:#f92672">=</span> {
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie6879&#34;</span>
+    }
+    json_requests(client, data, HTTP_URL)
+</code></pre></div><p>压测怎么个压测法，请求哪些接口，接口请求怎么分配，都在<code>locust_rss_http.py</code>里定好了：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RssBehavior</span>(TaskSet):
+    <span style="color:#a6e22e">@task</span>(<span style="color:#ae81ff">1</span>)
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">interface_rss</span>(self):
+        action<span style="color:#f92672">.</span>action_rss(self<span style="color:#f92672">.</span>client)
+</code></pre></div><p>然后需要发送请求给目标，还需要判断是否请求成功，这里将其封装成函数，放在<code>utils.py</code>里，比如<code>post_request</code>函数：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_request</span>(client, data, url, func_name<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, <span style="color:#f92672">**</span>kw):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    发起post请求
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    func_name <span style="color:#f92672">=</span> func_name <span style="color:#66d9ef">if</span> func_name <span style="color:#66d9ef">else</span> inspect<span style="color:#f92672">.</span>stack()[<span style="color:#ae81ff">1</span>][<span style="color:#ae81ff">3</span>]
+    <span style="color:#66d9ef">with</span> client<span style="color:#f92672">.</span>post(url, data<span style="color:#f92672">=</span>data, name<span style="color:#f92672">=</span>func_name, catch_response<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, <span style="color:#f92672">**</span>kw) <span style="color:#66d9ef">as</span> response:
+        result <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>content
+        res <span style="color:#f92672">=</span> to_json(result)
+        <span style="color:#66d9ef">if</span> res[<span style="color:#e6db74">&#39;status&#39;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>:
+            response<span style="color:#f92672">.</span>success()
+        <span style="color:#66d9ef">else</span>:
+            response<span style="color:#f92672">.</span>failure(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">%s</span><span style="color:#e6db74">-&gt; </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> (<span style="color:#e6db74">&#39;error&#39;</span>, result))
+        <span style="color:#66d9ef">return</span> result
+</code></pre></div><p><code>locustfile.py</code>是压测的启动文件，必不可少，我们先请求一次，看看能不能请求成功，如果成功了再将其正式运行起来：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cd Sanic-For-Pythoneer/examples/demo06/sample/tests/locust_rss
+
+<span style="color:#75715e"># 只想跑一次看看有没有问题 记得先将你编写的服务启动起来哦</span>
+locust -f locustfile.py --no-web -c <span style="color:#ae81ff">1</span> -n <span style="color:#ae81ff">1</span>
+
+<span style="color:#75715e"># Output: 表示没毛病</span>
+<span style="color:#f92672">[</span>2018-01-14 14:54:30,119<span style="color:#f92672">]</span> 192.168.2.100/INFO/locust.main: Shutting down <span style="color:#f92672">(</span>exit code 0<span style="color:#f92672">)</span>, bye.
+ Name                                                          <span style="color:#75715e"># reqs      # fails     Avg     Min     Max  |  Median   req/s</span>
+--------------------------------------------------------------------------------------------------------------------------------------------
+ POST action_rss                                                    <span style="color:#ae81ff">1</span>     0<span style="color:#f92672">(</span>0.00%<span style="color:#f92672">)</span>    <span style="color:#ae81ff">1756</span>    <span style="color:#ae81ff">1756</span>    <span style="color:#ae81ff">1756</span>  |    <span style="color:#ae81ff">1800</span>    0.00
+--------------------------------------------------------------------------------------------------------------------------------------------
+ Total                                                              <span style="color:#ae81ff">1</span>     0<span style="color:#f92672">(</span>0.00%<span style="color:#f92672">)</span>                                       0.00
+
+Percentage of the requests completed within given times
+ Name                                                           <span style="color:#75715e"># reqs    50%    66%    75%    80%    90%    95%    98%    99%   100%</span>
+--------------------------------------------------------------------------------------------------------------------------------------------
+ POST action_rss                                                     <span style="color:#ae81ff">1</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1800</span>   <span style="color:#ae81ff">1756</span>
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+</code></pre></div><p>好了，没问题了，可以执行<code>locust -f locustfile.py</code>，然后访问<code>http://0.0.0.0:8089/</code>，如下图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/01.jpg" alt="locust" /></p>
+<p>当然，这里只是大概讲解下如何进行压测，至于真实环境下，还是需要诸位继续摸索。</p>
+<h3 id="部署">
+  部署
+  <a class="anchor" href="#%e9%83%a8%e7%bd%b2">#</a>
+</h3>
+<p>千辛万苦，终于到了这一步，我们历经代码编写、单元测试、压力测试终于到了这一步，将我们的服务正式部署！</p>
+<p>在继续阅读之前，请你万万先读一遍<a href="http://sanic.readthedocs.io/en/latest/sanic/deploying.html">官方的Deploying</a>。</p>
+<p>好了，你现在肯定知道了Sanic服务的两种启动方式，分别如下：</p>
+<ul>
+<li>python -m sanic server.app &ndash;host=0.0.0.0 &ndash;port=8000 &ndash;workers=4</li>
+<li>gunicorn myapp:app &ndash;bind 0.0.0.0:8000 &ndash;worker-class sanic.worker.GunicornWorker</li>
+</ul>
+<p>至于选哪种启动方式，我觉得都可以，看你心情了，下面直接说下如何部署：</p>
+<ul>
+<li>Gunicorn + Supervisor + Caddy</li>
+<li>Docker</li>
+</ul>
+<p>对于用Gunicorn启动，可以将配置写在自己定义的配置文件中，比如<code>config/gunicorn.py</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># gunicorn.py</span>
+bind <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;127.0.0.1:8001&#39;</span>
+backlog <span style="color:#f92672">=</span> <span style="color:#ae81ff">2048</span>
+
+workers <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+worker_connections <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000</span>
+timeout <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
+keepalive <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+
+spew <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+daemon <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+umask <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</code></pre></div><p>然后直接运行<code>gunicorn -c config/gunicorn.py --worker-class sanic.worker.GunicornWorker server:app</code>就启动了。</p>
+<p>为了方便对此服务的管理，可以使用<code>Supervisor</code>来对服务进行启动、停止，比如使用如下配置：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>program:demo<span style="color:#f92672">]</span>
+command      <span style="color:#f92672">=</span> gunicorn -c config/gunicorn.py --worker-class sanic.worker.GunicornWorker server:app
+directory    <span style="color:#f92672">=</span> /your/path/
+user         <span style="color:#f92672">=</span> root
+process_name <span style="color:#f92672">=</span> %<span style="color:#f92672">(</span>program_name<span style="color:#f92672">)</span>s
+autostart    <span style="color:#f92672">=</span> true
+autorestart  <span style="color:#f92672">=</span> true
+startsecs    <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+redirect_stderr         <span style="color:#f92672">=</span> true
+stdout_logfile_maxbytes <span style="color:#f92672">=</span> 500MB
+stdout_logfile_backups  <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+stdout_logfile          <span style="color:#f92672">=</span> ~/supervisor/demo.log
+environment             <span style="color:#f92672">=</span> MODE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;PRO&#34;</span>
+</code></pre></div><p>最后，你需要对该服务(假设是一个网站)的&quot;站点&quot;进行配置，推荐使用Caddy服务器，<a href="https://github.com/mholt/caddy">Caddy</a>是使用Go编写的Web服务器，它简单易用且支持自动化HTTPS，你只需按照官方文档编写好你自己的Caddyfile，比如目前的例子：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">www.your.domain.com <span style="color:#f92672">{</span>
+    proxy / 127.0.0.1:8001
+    timeouts none
+    gzip
+<span style="color:#f92672">}</span>
+
+your.domain.com <span style="color:#f92672">{</span>
+    redir http://www.your.domain.com
+<span style="color:#f92672">}</span>
+</code></pre></div><p>在利用<code>Supervisor</code>守护一个Caddy的服务进程，至此，你的服务站点就搭建好了。</p>
+<p>现在<code>Docker</code>的崛起，使得我们的部署方式也发生了改变，我们完全可以将上面编写的服务<code>Docker</code>化，然后构建自己的集群，一个服务器启动一个服务节点，再启动一个镜像做负载均衡，岂不是美滋滋。</p>
+<p>这个例子中我已经写了一个<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample/Dockerfile">Dockerfile</a>，你可以按照如下方式进行启动：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker build -t demo:0.1 .
+docker run -d -p 8001:8001 demo:0.1
+</code></pre></div><p>我建议使用<code>daocloud</code>来体验一下，你可以关联自己主机，不一定非要用我这个例子中的服务镜像，你大可随意下载一个镜像</p>
+<h2 id="说明">
+  说明
+  <a class="anchor" href="#%e8%af%b4%e6%98%8e">#</a>
+</h2>
+<p>代码见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample">demo06</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/qrcode_for_gh_3f02ace79dfb_258.jpg#center" alt="老胡的储物柜" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+ 
+        
+<div class="guide-links">
+    
+    
+    </div>
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<footer>
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://www.howie6879.cn/css/gitalk.css?v=0.0.0">
+    <script src="https://www.howie6879.cn/js/gitalk.min.js?v=0.0.0"></script>
+    <script>
+        var gitalk = new Gitalk({
+            clientID: '2c38ed8e7f85da0f1510',
+            clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+            repo: 'howie6879.github.io',
+            owner: 'howie6879',
+            admin: ['howie6879'],
+            id: location.pathname.substr(0, 48), 
+            distractionFreeMode: false 
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</footer></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#测试与部署">测试与部署</a>
+      <ul>
+        <li><a href="#测试">测试</a></li>
+        <li><a href="#部署">部署</a></li>
+      </ul>
+    </li>
+    <li><a href="#说明">说明</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
