@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>k8s学习之路.基础.[04.配置应用程序] | 老胡的储物柜</title>
   <meta property="og:title" content="k8s学习之路.基础.[04.配置应用程序] - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -224,11 +228,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="post-content">
             <p>使用<code>Docker</code>部署应用程序时，一般常用的配置方式有：</p>
@@ -246,155 +245,155 @@
 <p>再结合边车模式来进行配置文件的管控是可行的，然而有一种更加简便的方法能将配置数据置于<code>Kubernetes</code>的顶级资源对象中，那就是<code>ConfigMap</code>。</p>
 <h2 id="传递命令行参数">传递命令行参数</h2>
 <p>在上一节<strong>容器持久化存储</strong>的<code>emptyDir</code>概念介绍部分，我们引入了一个<code>fortune-pod</code>的例子，再回顾一下之前的配置文件吧，如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Pod<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">containers</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>luksa/fortune<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html-generator<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/var/htdocs<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>nginx:alpine<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>web-server<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/usr/share/nginx/html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">readOnly</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">containerPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">protocol</span>:<span style="color:#bbb"> </span>TCP<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">volumes</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">emptyDir</span>:<span style="color:#bbb"> </span>{}<span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Pod<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">containers</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>luksa/fortune<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html-generator<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/var/htdocs<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>nginx:alpine<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>web-server<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/usr/share/nginx/html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">readOnly</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">containerPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">protocol</span>:<span style="color:#bbb"> </span>TCP<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">volumes</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">emptyDir</span>:<span style="color:#bbb"> </span>{}<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>此应用程序设定了每隔<code>10s</code>就会自动生成输出到<code>html</code>，现在我们要做的是通过命令行参数，自行设定隔多少秒自动生成内容。</p>
 <p>创建文件<code>fortune-pod-args.yaml</code>，输入以下内容：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Pod<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune2s<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">containers</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>luksa/fortune:args<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">args</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;2&#34;</span>]<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html-generator<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/var/htdocs<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>nginx:alpine<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>web-server<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/usr/share/nginx/html<span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">readOnly</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>- <span style="color:#000080">containerPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
-</span><span style="color:#bbb">      </span><span style="color:#000080">protocol</span>:<span style="color:#bbb"> </span>TCP<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">volumes</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000080">emptyDir</span>:<span style="color:#bbb"> </span>{}<span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>Pod<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune2s<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">spec</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">containers</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>luksa/fortune:args<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">args</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;2&#34;</span>]<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html-generator<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/var/htdocs<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">image</span>:<span style="color:#bbb"> </span>nginx:alpine<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>web-server<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">volumeMounts</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">mountPath</span>:<span style="color:#bbb"> </span>/usr/share/nginx/html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">readOnly</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">ports</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">containerPort</span>:<span style="color:#bbb"> </span><span style="color:#099">80</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">protocol</span>:<span style="color:#bbb"> </span>TCP<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">volumes</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>html<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">emptyDir</span>:<span style="color:#bbb"> </span>{}<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>看到配置文件中的<code>args</code>字段了么？这个就是传给镜像<code>luksa/fortune:args</code>控制时间的参数，让我们启动看看吧。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-args.yaml
-<span style="color:#998;font-style:italic"># 输出</span>
-pod/fortune2s created
-
-<span style="color:#998;font-style:italic"># 查看状态</span>
-kubectl get pods
-<span style="color:#998;font-style:italic"># 输出</span>
-NAME      READY   STATUS    RESTARTS   AGE
-fortune   2/2     Running   <span style="color:#099">0</span>          2m27s
-
-<span style="color:#998;font-style:italic"># 暂时服务化</span>
-kubectl port-forward fortune2s 8080:80
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f fortune-pod-args.yaml
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/fortune2s created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看状态</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME      READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>fortune   2/2     Running   <span style="color:#099">0</span>          2m27s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 暂时服务化</span>
+</span></span><span style="display:flex;"><span>kubectl port-forward fortune2s 8080:80
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>2s</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; curl 127.0.0.1:8080
-Stay away from flying saucers today.
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; curl 127.0.0.1:8080
+</span></span><span style="display:flex;"><span>Stay away from flying saucers today.
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="设置环境变量">设置环境变量</h2>
 <blockquote>
@@ -402,94 +401,94 @@ Stay away from flying saucers today.
 </blockquote>
 <p>设置环境变量非常简单，我们只需要在<code>pod</code>中指定环境变量即可；当然，这里有个前提是你需要将修改镜像让其支持读取环境变量。</p>
 <p>我们直接使用书中的例子：<code>vim fortune-pod-env.yaml</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
-kind: Pod
-metadata:
-  name: fortune-env
-spec:
-  containers:
-  - image: luksa/fortune:env
-    env:
-    - name: INTERVAL
-      value: <span style="color:#d14">&#34;30&#34;</span>
-    name: html-generator
-    volumeMounts:
-    - name: html
-      mountPath: /var/htdocs
-  - image: nginx:alpine
-    name: web-server
-    volumeMounts:
-    - name: html
-      mountPath: /usr/share/nginx/html
-      readOnly: <span style="color:#0086b3">true</span>
-    ports:
-    - containerPort: <span style="color:#099">80</span>
-      protocol: TCP
-  volumes:
-  - name: html
-    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Pod
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: fortune-env
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  containers:
+</span></span><span style="display:flex;"><span>  - image: luksa/fortune:env
+</span></span><span style="display:flex;"><span>    env:
+</span></span><span style="display:flex;"><span>    - name: INTERVAL
+</span></span><span style="display:flex;"><span>      value: <span style="color:#d14">&#34;30&#34;</span>
+</span></span><span style="display:flex;"><span>    name: html-generator
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /var/htdocs
+</span></span><span style="display:flex;"><span>  - image: nginx:alpine
+</span></span><span style="display:flex;"><span>    name: web-server
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /usr/share/nginx/html
+</span></span><span style="display:flex;"><span>      readOnly: <span style="color:#0086b3">true</span>
+</span></span><span style="display:flex;"><span>    ports:
+</span></span><span style="display:flex;"><span>    - containerPort: <span style="color:#099">80</span>
+</span></span><span style="display:flex;"><span>      protocol: TCP
+</span></span><span style="display:flex;"><span>  volumes:
+</span></span><span style="display:flex;"><span>  - name: html
+</span></span><span style="display:flex;"><span>    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到配置中声明了<code>INTERVAL</code>环境变量值为<code>30</code>，在终端中实践一下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env.yaml
-<span style="color:#998;font-style:italic"># 输出</span>
-pod/fortune-env created
-
-<span style="color:#998;font-style:italic"># 查看状态</span>
-kubectl get pods
-<span style="color:#998;font-style:italic"># 输出</span>
-NAME      READY   STATUS    RESTARTS   AGE
-fortune-env   2/2     Running   <span style="color:#099">0</span>          10s
-
-<span style="color:#998;font-style:italic"># 暂时服务化</span>
-kubectl port-forward fortune-env 8080:80
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f fortune-pod-env.yaml
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/fortune-env created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看状态</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME      READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>fortune-env   2/2     Running   <span style="color:#099">0</span>          10s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 暂时服务化</span>
+</span></span><span style="display:flex;"><span>kubectl port-forward fortune-env 8080:80
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>访问<code>127.0.0.1:8080</code>就会发现输出的频率变成了<code>30s</code>。</p>
 <p>现在应用程序的所有配置基本上可以说是硬编码的形式进行配置，并且<code>yaml</code>配置文件总是有配置相关的字段，有没有办法让镜像和配置文件解耦呢？</p>
@@ -502,199 +501,197 @@ kubectl port-forward fortune-env 8080:80
     </p>
 <h3 id="创建">创建</h3>
 <p>还是用之前应用程序为例，配置专注于环境变量<code>INTERVAL</code>，创建命令如下所示：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-literal<span style="color:#000;font-weight:bold">=</span>sleep-interval<span style="color:#000;font-weight:bold">=</span><span style="color:#099">25</span>
-<span style="color:#998;font-style:italic"># 输出</span>
-configmap/fortune-config created
-
-<span style="color:#998;font-style:italic"># 获取相关描述</span>
-kubectl get configmap fortune-config -o yaml
-
-<span style="color:#998;font-style:italic"># 查看 configmap</span>
-kubectl get configmap
-
-<span style="color:#998;font-style:italic"># 删除</span>
-kubectl delete configmap fortune-config
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create configmap fortune-config --from-literal<span style="color:#000;font-weight:bold">=</span>sleep-interval<span style="color:#000;font-weight:bold">=</span><span style="color:#099">25</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>configmap/fortune-config created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 获取相关描述</span>
+</span></span><span style="display:flex;"><span>kubectl get configmap fortune-config -o yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看 configmap</span>
+</span></span><span style="display:flex;"><span>kubectl get configmap
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 删除</span>
+</span></span><span style="display:flex;"><span>kubectl delete configmap fortune-config
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>此外，<code>k8s</code>还可以直接填写配置文件来进行创建<code>vim fortune-config.yaml</code>，输入如下内容：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>ConfigMap<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune-config<span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000080">data</span>:<span style="color:#bbb">
-</span><span style="color:#bbb">  </span><span style="color:#000080">sleep-interval</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;25&#34;</span><span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#000080">apiVersion</span>:<span style="color:#bbb"> </span>v1<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">kind</span>:<span style="color:#bbb"> </span>ConfigMap<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">metadata</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>fortune-config<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">data</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">sleep-interval</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;25&#34;</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>然后执行：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-config.yaml
-<span style="color:#998;font-style:italic"># 输出</span>
-configmap/fortune-config created
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f fortune-config.yaml
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>configmap/fortune-config created
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>其实还有更多的创建方式，大概提一下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 从文件内容创建ConfigMap条目</span>
-kubectl create configmap my-config --from-file<span style="color:#000;font-weight:bold">=</span>config-file.conf
-<span style="color:#998;font-style:italic"># 从文件夹创建ConfigMap</span>
-kubectl create configmap my-config --from-file<span style="color:#000;font-weight:bold">=</span>/path/to/dir
-<span style="color:#998;font-style:italic"># 合并不同选项</span>
-kubectl create configmap my-config
-	--from-file<span style="color:#000;font-weight:bold">=</span>foo.json
-	--from-file<span style="color:#000;font-weight:bold">=</span><span style="color:#008080">bar</span><span style="color:#000;font-weight:bold">=</span>foobar.conf
-	--from-file<span style="color:#000;font-weight:bold">=</span>config-opts/
-	--from-literal<span style="color:#000;font-weight:bold">=</span><span style="color:#008080">some</span><span style="color:#000;font-weight:bold">=</span>thing
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 从文件内容创建ConfigMap条目</span>
+</span></span><span style="display:flex;"><span>kubectl create configmap my-config --from-file<span style="color:#000;font-weight:bold">=</span>config-file.conf
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 从文件夹创建ConfigMap</span>
+</span></span><span style="display:flex;"><span>kubectl create configmap my-config --from-file<span style="color:#000;font-weight:bold">=</span>/path/to/dir
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 合并不同选项</span>
+</span></span><span style="display:flex;"><span>kubectl create configmap my-config
+</span></span><span style="display:flex;"><span>	--from-file<span style="color:#000;font-weight:bold">=</span>foo.json
+</span></span><span style="display:flex;"><span>	--from-file<span style="color:#000;font-weight:bold">=</span><span style="color:#008080">bar</span><span style="color:#000;font-weight:bold">=</span>foobar.conf
+</span></span><span style="display:flex;"><span>	--from-file<span style="color:#000;font-weight:bold">=</span>config-opts/
+</span></span><span style="display:flex;"><span>	--from-literal<span style="color:#000;font-weight:bold">=</span><span style="color:#008080">some</span><span style="color:#000;font-weight:bold">=</span>thing
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="作为环境变量传入容器">作为环境变量传入容器</h3>
 <p>如何将映射中的值传递给<code>pod</code>的容器？最简单的方法是给容器设置环境变量，通过在配置中声明<code>valueFrom</code>，具体操作<code>vim fortune-pod-env-configmap.yaml</code>:</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
-kind: Pod
-metadata:
-  name: fortune-env-from-configmap
-spec:
-  containers:
-  - image: luksa/fortune:env
-    env:
-    - name: INTERVAL
-      valueFrom:
-        configMapKeyRef:
-          name: fortune-config
-          key: sleep-interval
-    name: html-generator
-    volumeMounts:
-    - name: html
-      mountPath: /var/htdocs
-  - image: nginx:alpine
-    name: web-server
-    volumeMounts:
-    - name: html
-      mountPath: /usr/share/nginx/html
-      readOnly: <span style="color:#0086b3">true</span>
-    ports:
-    - containerPort: <span style="color:#099">80</span>
-      protocol: TCP
-  volumes:
-  - name: html
-    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Pod
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: fortune-env-from-configmap
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  containers:
+</span></span><span style="display:flex;"><span>  - image: luksa/fortune:env
+</span></span><span style="display:flex;"><span>    env:
+</span></span><span style="display:flex;"><span>    - name: INTERVAL
+</span></span><span style="display:flex;"><span>      valueFrom:
+</span></span><span style="display:flex;"><span>        configMapKeyRef:
+</span></span><span style="display:flex;"><span>          name: fortune-config
+</span></span><span style="display:flex;"><span>          key: sleep-interval
+</span></span><span style="display:flex;"><span>    name: html-generator
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /var/htdocs
+</span></span><span style="display:flex;"><span>  - image: nginx:alpine
+</span></span><span style="display:flex;"><span>    name: web-server
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /usr/share/nginx/html
+</span></span><span style="display:flex;"><span>      readOnly: <span style="color:#0086b3">true</span>
+</span></span><span style="display:flex;"><span>    ports:
+</span></span><span style="display:flex;"><span>    - containerPort: <span style="color:#099">80</span>
+</span></span><span style="display:flex;"><span>      protocol: TCP
+</span></span><span style="display:flex;"><span>  volumes:
+</span></span><span style="display:flex;"><span>  - name: html
+</span></span><span style="display:flex;"><span>    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>让我们启动<code>pod</code>实践看看：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod-env-configmap.yaml
-<span style="color:#998;font-style:italic"># 输出</span>
-pod/fortune-env-from-configmap created
-
-<span style="color:#998;font-style:italic"># 查看状态</span>
-kubectl get pods
-<span style="color:#998;font-style:italic"># 输出</span>
-NAME                         READY   STATUS    RESTARTS   AGE
-fortune-env-from-configmap   2/2     Running   <span style="color:#099">0</span>          19s
-
-<span style="color:#998;font-style:italic"># 暂时服务化</span>
-kubectl port-forward fortune-env-from-configmap 8080:80
-
-<span style="color:#998;font-style:italic"># 删除pod</span>
-kubectl delete pods fortune-env-from-configmap
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f fortune-pod-env-configmap.yaml
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/fortune-env-from-configmap created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看状态</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME                         READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>fortune-env-from-configmap   2/2     Running   <span style="color:#099">0</span>          19s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 暂时服务化</span>
+</span></span><span style="display:flex;"><span>kubectl port-forward fortune-env-from-configmap 8080:80
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 删除pod</span>
+</span></span><span style="display:flex;"><span>kubectl delete pods fortune-env-from-configmap
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>现在我们已经成功在<code>pod</code>中使用了<code>ConfigMap</code>资源，不过这种使用方式是比较低效的，考虑这样一个情况：如果环境变量比较多，这样单独一个个环境变量的设置方式是个程序员都没法忍受的。</p>
 <p>一般在框架里面加载一些环境变量都会利用前缀机制来进行批量加载，比如<code>Sanic</code>框架会读取<code>SANIC_</code>开头的环境变量自动加载。</p>
@@ -707,57 +704,57 @@ kubectl delete pods fortune-env-from-configmap
 <p>环境变量或者命令行参数值作为配置值通常适用于变量值较短的场景。由于 ConfigMap 中可以包含完整的配置文件内容，当你想要将其暴露给容器时，可以借助前面章节提到过的一种称为 configMap 卷的特殊卷格式。</p>
 </blockquote>
 <p>首先删除前面声明建立的<code>cf</code>资源：<code>kubectl delete configmap fortune-config</code>。然后建立文件夹<code>configmap-files</code>，首先建立<code>Nginx</code>配置文件：<code>vim my-nginx-config.conf</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">server <span style="color:#000;font-weight:bold">{</span>
-    listen              80;
-    server_name         www.kubia-example.com;
-
-    gzip on;
-    gzip_types text/plain application/xml;
-
-    location / <span style="color:#000;font-weight:bold">{</span>
-        root   /usr/share/nginx/html;
-        index  index.html index.htm;
-    <span style="color:#000;font-weight:bold">}</span>
-
-<span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>server <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    listen              80;
+</span></span><span style="display:flex;"><span>    server_name         www.kubia-example.com;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    gzip on;
+</span></span><span style="display:flex;"><span>    gzip_types text/plain application/xml;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    location / <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        root   /usr/share/nginx/html;
+</span></span><span style="display:flex;"><span>        index  index.html index.htm;
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>另外在该文件夹中添加一个名为<code>sleep-interval</code>的文本文件，输入<code>25</code>，类似前面声明环境变量。</p>
 <p>接下来从文件夹创建<code>ConfigMap</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create configmap fortune-config --from-file<span style="color:#000;font-weight:bold">=</span>configmap-files
-<span style="color:#998;font-style:italic"># 输出</span>
-configmap/fortune-config created
-
-<span style="color:#998;font-style:italic"># 验证</span>
-kubectl get configmap fortune-config -o yaml
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create configmap fortune-config --from-file<span style="color:#000;font-weight:bold">=</span>configmap-files
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>configmap/fortune-config created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 验证</span>
+</span></span><span style="display:flex;"><span>kubectl get configmap fortune-config -o yaml
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>
         <img class="mx-auto" alt="image-20210317215834820" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210317215834820.png" />   
@@ -767,134 +764,134 @@ kubectl get configmap fortune-config -o yaml
         <img class="mx-auto" alt="image-20210317215931773" src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/image-20210317215931773-20210318145409491.png" />   
     </p>
 <p>创建配置文件：<code>vim fortune-pod-configmap-volume.yaml</code>，输入如下内容：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apiVersion: v1
-kind: Pod
-metadata:
-  name: fortune-configmap-volume
-spec:
-  containers:
-  - image: luksa/fortune:env
-    env:
-    - name: INTERVAL
-      valueFrom:
-        configMapKeyRef:
-          name: fortune-config
-          key: sleep-interval
-    name: html-generator
-    volumeMounts:
-    - name: html
-      mountPath: /var/htdocs
-  - image: nginx:alpine
-    name: web-server
-    volumeMounts:
-    - name: html
-      mountPath: /usr/share/nginx/html
-      readOnly: <span style="color:#0086b3">true</span>
-    - name: config
-      mountPath: /etc/nginx/conf.d
-      readOnly: <span style="color:#0086b3">true</span>
-    - name: config
-      mountPath: /tmp/whole-fortune-config-volume
-      readOnly: <span style="color:#0086b3">true</span>
-    ports:
-      - containerPort: <span style="color:#099">80</span>
-        name: http
-        protocol: TCP
-  volumes:
-  - name: html
-    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
-  - name: config
-    configMap:
-      name: fortune-config
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Pod
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: fortune-configmap-volume
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  containers:
+</span></span><span style="display:flex;"><span>  - image: luksa/fortune:env
+</span></span><span style="display:flex;"><span>    env:
+</span></span><span style="display:flex;"><span>    - name: INTERVAL
+</span></span><span style="display:flex;"><span>      valueFrom:
+</span></span><span style="display:flex;"><span>        configMapKeyRef:
+</span></span><span style="display:flex;"><span>          name: fortune-config
+</span></span><span style="display:flex;"><span>          key: sleep-interval
+</span></span><span style="display:flex;"><span>    name: html-generator
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /var/htdocs
+</span></span><span style="display:flex;"><span>  - image: nginx:alpine
+</span></span><span style="display:flex;"><span>    name: web-server
+</span></span><span style="display:flex;"><span>    volumeMounts:
+</span></span><span style="display:flex;"><span>    - name: html
+</span></span><span style="display:flex;"><span>      mountPath: /usr/share/nginx/html
+</span></span><span style="display:flex;"><span>      readOnly: <span style="color:#0086b3">true</span>
+</span></span><span style="display:flex;"><span>    - name: config
+</span></span><span style="display:flex;"><span>      mountPath: /etc/nginx/conf.d
+</span></span><span style="display:flex;"><span>      readOnly: <span style="color:#0086b3">true</span>
+</span></span><span style="display:flex;"><span>    - name: config
+</span></span><span style="display:flex;"><span>      mountPath: /tmp/whole-fortune-config-volume
+</span></span><span style="display:flex;"><span>      readOnly: <span style="color:#0086b3">true</span>
+</span></span><span style="display:flex;"><span>    ports:
+</span></span><span style="display:flex;"><span>      - containerPort: <span style="color:#099">80</span>
+</span></span><span style="display:flex;"><span>        name: http
+</span></span><span style="display:flex;"><span>        protocol: TCP
+</span></span><span style="display:flex;"><span>  volumes:
+</span></span><span style="display:flex;"><span>  - name: html
+</span></span><span style="display:flex;"><span>    emptyDir: <span style="color:#000;font-weight:bold">{}</span>
+</span></span><span style="display:flex;"><span>  - name: config
+</span></span><span style="display:flex;"><span>    configMap:
+</span></span><span style="display:flex;"><span>      name: fortune-config
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="secret">Secret</h2>
 <p>前面说的，都是针对非敏感信息的配置数据，对于一些敏感数据，例如：密码、OAuth token、ssh 密钥等，就可以使用<code>Secret</code>资源了。</p>
 <p><code>Secret</code>结构和使用方法都与<code>ConfigMap</code>类似，<code>k8s</code>通过仅仅将<code>Secret</code>分发到需要访问<code>Secret</code>的<code>pod</code>所在的机器节点来保障其安全性。另外，<code>Secret</code>只会存储在节点的内存中，永不写入物理存储。</p>
 <h3 id="创建-1">创建</h3>
 <p>以创建一个包含用户名密码的<code>secret</code>资源为例：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 创建文件</span>
-<span style="color:#0086b3">echo</span> -n <span style="color:#d14">&#39;admin&#39;</span> &gt; ./username.txt
-<span style="color:#0086b3">echo</span> -n <span style="color:#d14">&#39;1f2d1e2e67df&#39;</span> &gt; ./password.txt
-
-<span style="color:#998;font-style:italic"># 创建资源</span>
-kubectl create secret generic db-user-pass --from-file<span style="color:#000;font-weight:bold">=</span>./username.txt --from-file<span style="color:#000;font-weight:bold">=</span>./password.txt
-
-<span style="color:#998;font-style:italic"># 输出</span>
-secret/db-user-pass created
-
-<span style="color:#998;font-style:italic"># 查看</span>
-kubectl get secrets
-
-<span style="color:#998;font-style:italic"># 输出</span>
-NAME                  TYPE                                  DATA   AGE
-db-user-pass          Opaque                                <span style="color:#099">2</span>      23s
-default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#099">3</span>      54d
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 创建文件</span>
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">echo</span> -n <span style="color:#d14">&#39;admin&#39;</span> &gt; ./username.txt
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">echo</span> -n <span style="color:#d14">&#39;1f2d1e2e67df&#39;</span> &gt; ./password.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 创建资源</span>
+</span></span><span style="display:flex;"><span>kubectl create secret generic db-user-pass --from-file<span style="color:#000;font-weight:bold">=</span>./username.txt --from-file<span style="color:#000;font-weight:bold">=</span>./password.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>secret/db-user-pass created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看</span>
+</span></span><span style="display:flex;"><span>kubectl get secrets
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME                  TYPE                                  DATA   AGE
+</span></span><span style="display:flex;"><span>db-user-pass          Opaque                                <span style="color:#099">2</span>      23s
+</span></span><span style="display:flex;"><span>default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#099">3</span>      54d
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>db-user-pass</code>很好理解，就是刚才创建的<code>sevret</code>资源，<code>default-token-nlxkq</code>是什么呢？这是一种默认被挂载至所有容器的<code>Secret</code>。</p>
 <h2 id="参考">参考</h2>
@@ -1004,8 +1001,6 @@ default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -1067,6 +1062,10 @@ default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -1102,10 +1101,6 @@ default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -1125,9 +1120,9 @@ default-token-nlxkq   kubernetes.io/service-account-token   <span style="color:#
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>nndl_note: 识别手写字 | 老胡的储物柜</title>
   <meta property="og:title" content="nndl_note: 识别手写字 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -214,11 +218,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="post-content">
             <!-- raw HTML omitted -->
@@ -371,93 +370,91 @@ $$</p>
 <p>一个分类⼿写数字的⽹络，大概就可以这样实现。</p>
 <h2 id="随机梯度下降算法">随机梯度下降算法</h2>
 <p>分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤<a href="http://yann.lecun.com/exdb/mnist/">MNIST</a>数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用<code>jupyter notebook</code>开始吧，如果没有，请自行检索教程安装，代码目录如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pylab
-└── datasets
-    └── MNIST_data
-        ├── t10k-images-idx3-ubyte.gz
-        ├── t10k-labels-idx1-ubyte.gz
-        ├── train-images-idx3-ubyte.gz
-        └── train-labels-idx1-ubyte.gz
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pylab
+</span></span><span style="display:flex;"><span>└── datasets
+</span></span><span style="display:flex;"><span>    └── MNIST_data
+</span></span><span style="display:flex;"><span>        ├── t10k-images-idx3-ubyte.gz
+</span></span><span style="display:flex;"><span>        ├── t10k-labels-idx1-ubyte.gz
+</span></span><span style="display:flex;"><span>        ├── train-images-idx3-ubyte.gz
+</span></span><span style="display:flex;"><span>        └── train-labels-idx1-ubyte.gz
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>然后使用<code> TensorFlow</code>来读取数据，看看下载的数据集到底是什么样子，可以在<code>mnist_data.ipynb</code>中添加如下代码：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">matplotlib</span> <span style="color:#000;font-weight:bold">import</span> pyplot <span style="color:#000;font-weight:bold">as</span> plt
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">tensorflow.examples.tutorials.mnist.input_data</span> <span style="color:#000;font-weight:bold">import</span> read_data_sets
-
-mnist <span style="color:#000;font-weight:bold">=</span> read_data_sets(<span style="color:#d14">&#34;../datasets/MNIST_data/&#34;</span>, one_hot<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">matplotlib</span> <span style="color:#000;font-weight:bold">import</span> pyplot <span style="color:#000;font-weight:bold">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">tensorflow.examples.tutorials.mnist.input_data</span> <span style="color:#000;font-weight:bold">import</span> read_data_sets
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mnist <span style="color:#000;font-weight:bold">=</span> read_data_sets(<span style="color:#d14">&#34;../datasets/MNIST_data/&#34;</span>, one_hot<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>查看一些基本信息：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Training data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>num_examples)
-<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Validating data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>validation<span style="color:#000;font-weight:bold">.</span>num_examples)
-<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Testing data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>test<span style="color:#000;font-weight:bold">.</span>num_examples)
-
-<span style="color:#998;font-style:italic"># 每张图片是长度为784的一维数组</span>
-<span style="color:#0086b3">print</span>(<span style="color:#0086b3">len</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">0</span>]))
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">display_digit</span>(image):
-    image <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">.</span>reshape([<span style="color:#099">28</span>,<span style="color:#099">28</span>])
-    plt<span style="color:#000;font-weight:bold">.</span>imshow(image, cmap<span style="color:#000;font-weight:bold">=</span>plt<span style="color:#000;font-weight:bold">.</span>get_cmap(<span style="color:#d14">&#39;gray_r&#39;</span>))
-    plt<span style="color:#000;font-weight:bold">.</span>show()
-
-<span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;样本真实数字为：</span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">list</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>labels[<span style="color:#099">1</span>])<span style="color:#000;font-weight:bold">.</span>index(<span style="color:#099">1</span>))
-<span style="color:#998;font-style:italic"># 显示图像</span>
-display_digit(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">1</span>])
-
-<span style="color:#998;font-style:italic"># Output</span>
-<span style="color:#998;font-style:italic"># Training data size: 55000</span>
-<span style="color:#998;font-style:italic"># Validating data size: 5000</span>
-<span style="color:#998;font-style:italic"># Testing data size: 10000</span>
-<span style="color:#998;font-style:italic"># 784</span>
-<span style="color:#998;font-style:italic"># 样本真实数字为：3</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Training data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>num_examples)
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Validating data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>validation<span style="color:#000;font-weight:bold">.</span>num_examples)
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Testing data size: </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> mnist<span style="color:#000;font-weight:bold">.</span>test<span style="color:#000;font-weight:bold">.</span>num_examples)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 每张图片是长度为784的一维数组</span>
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#0086b3">len</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">0</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">display_digit</span>(image):
+</span></span><span style="display:flex;"><span>    image <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">.</span>reshape([<span style="color:#099">28</span>,<span style="color:#099">28</span>])
+</span></span><span style="display:flex;"><span>    plt<span style="color:#000;font-weight:bold">.</span>imshow(image, cmap<span style="color:#000;font-weight:bold">=</span>plt<span style="color:#000;font-weight:bold">.</span>get_cmap(<span style="color:#d14">&#39;gray_r&#39;</span>))
+</span></span><span style="display:flex;"><span>    plt<span style="color:#000;font-weight:bold">.</span>show()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;样本真实数字为：</span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> <span style="color:#0086b3">list</span>(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>labels[<span style="color:#099">1</span>])<span style="color:#000;font-weight:bold">.</span>index(<span style="color:#099">1</span>))
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 显示图像</span>
+</span></span><span style="display:flex;"><span>display_digit(mnist<span style="color:#000;font-weight:bold">.</span>train<span style="color:#000;font-weight:bold">.</span>images[<span style="color:#099">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Training data size: 55000</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Validating data size: 5000</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Testing data size: 10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 784</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 样本真实数字为：3</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到显示如下图像：</p>
 <p>
@@ -484,109 +481,107 @@ $$</p>
 <p>终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。</p>
 <p>书籍作者很贴心地实现了模型代码，仓库见<a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a>，接下来我们一起来看看具体的实现代码吧。</p>
 <p>首先是实现一个<code>Network</code>类，</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">random</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Network</span>(<span style="color:#0086b3">object</span>):
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, sizes):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        初始化
-</span><span style="color:#d14">        :param sizes:
-</span><span style="color:#d14">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>num_layers <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">len</span>(sizes)
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>sizes <span style="color:#000;font-weight:bold">=</span> sizes
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>biases <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">for</span> y <span style="color:#000;font-weight:bold">in</span> sizes[<span style="color:#099">1</span>:]]
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>weights <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, x)
-                        <span style="color:#000;font-weight:bold">for</span> x, y <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">zip</span>(sizes[:<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>], sizes[<span style="color:#099">1</span>:])]
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">random</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Network</span>(<span style="color:#0086b3">object</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, sizes):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        初始化
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param sizes:
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>num_layers <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">len</span>(sizes)
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>sizes <span style="color:#000;font-weight:bold">=</span> sizes
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>biases <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">for</span> y <span style="color:#000;font-weight:bold">in</span> sizes[<span style="color:#099">1</span>:]]
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>weights <span style="color:#000;font-weight:bold">=</span> [np<span style="color:#000;font-weight:bold">.</span>random<span style="color:#000;font-weight:bold">.</span>randn(y, x)
+</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">for</span> x, y <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">zip</span>(sizes[:<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>], sizes[<span style="color:#099">1</span>:])]
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考<a href="https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py">network.py</a>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">sigmoid</span>(z):
-    <span style="color:#d14">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
-    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">/</span>(<span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">+</span>np<span style="color:#000;font-weight:bold">.</span>exp(<span style="color:#000;font-weight:bold">-</span>z))
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">sigmoid</span>(z):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">/</span>(<span style="color:#099">1.0</span><span style="color:#000;font-weight:bold">+</span>np<span style="color:#000;font-weight:bold">.</span>exp(<span style="color:#000;font-weight:bold">-</span>z))
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>代码已经准备就绪，下面可以开始进行模型训练：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">mnist_loader</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">network</span>
-
-training_data, validation_data, test_data <span style="color:#000;font-weight:bold">=</span> mnist_loader<span style="color:#000;font-weight:bold">.</span>load_data_wrapper()
-
-net <span style="color:#000;font-weight:bold">=</span> network<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])
-net<span style="color:#000;font-weight:bold">.</span>SGD(<span style="color:#0086b3">list</span>(training_data), <span style="color:#099">30</span>, <span style="color:#099">10</span>, <span style="color:#099">3.0</span>, test_data<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">list</span>(test_data))
-
-<span style="color:#998;font-style:italic"># Output</span>
-Epoch <span style="color:#099">0</span>: <span style="color:#099">9023</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">1</span>: <span style="color:#099">9222</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">2</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">3</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">4</span>: <span style="color:#099">9383</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">5</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">6</span>: <span style="color:#099">9432</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">7</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">8</span>: <span style="color:#099">9454</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">mnist_loader</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">network</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>training_data, validation_data, test_data <span style="color:#000;font-weight:bold">=</span> mnist_loader<span style="color:#000;font-weight:bold">.</span>load_data_wrapper()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>net <span style="color:#000;font-weight:bold">=</span> network<span style="color:#000;font-weight:bold">.</span>Network([<span style="color:#099">784</span>, <span style="color:#099">30</span>, <span style="color:#099">10</span>])
+</span></span><span style="display:flex;"><span>net<span style="color:#000;font-weight:bold">.</span>SGD(<span style="color:#0086b3">list</span>(training_data), <span style="color:#099">30</span>, <span style="color:#099">10</span>, <span style="color:#099">3.0</span>, test_data<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">list</span>(test_data))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Output</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">0</span>: <span style="color:#099">9023</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">1</span>: <span style="color:#099">9222</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">2</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">3</span>: <span style="color:#099">9312</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">4</span>: <span style="color:#099">9383</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">5</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">6</span>: <span style="color:#099">9432</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">7</span>: <span style="color:#099">9421</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">8</span>: <span style="color:#099">9454</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">10000</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>看结果，十次迭代后，轻轻松松突破94%</p>
 <h2 id="参考">参考</h2>
@@ -702,8 +697,6 @@ Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <s
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -765,6 +758,10 @@ Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <s
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -800,10 +797,6 @@ Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <s
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -823,9 +816,9 @@ Epoch <span style="color:#099">9</span>: <span style="color:#099">9447</span> <s
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

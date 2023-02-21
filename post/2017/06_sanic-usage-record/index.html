@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>sanic使用记录 | 老胡的储物柜</title>
   <meta property="og:title" content="sanic使用记录 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -222,11 +226,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="clear" style="display: none">
             <div class="toc-article">
@@ -239,13 +238,13 @@
 于是我利用业余时间使用<a href="https://github.com/channelcat/sanic">sanic</a>编写了这个项目。</p>
 <h2 id="前言">前言</h2>
 <p>在使用过程中，我尽量将程序编写成异步的，首先进行安装：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">python <span style="color:#000;font-weight:bold">-</span>m pip install sanic
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>python <span style="color:#000;font-weight:bold">-</span>m pip install sanic
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>sanic的<a href="http://sanic.readthedocs.io/en/latest/index.html">文档</a>写得很详细，但是在使用过程中我还是有些问题。
 下面记录的都是我在使用sanic过程中遇到的问题，后续有新问题会继续补充：</p>
@@ -261,466 +260,464 @@
 <h2 id="问题记录">问题记录</h2>
 <h3 id="blueprint">blueprint</h3>
 <p>借用官方文档的例子，一个简单的sanic服务就搭好了：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># main.py</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> json
-
-app <span style="color:#000;font-weight:bold">=</span> Sanic()
-
-<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/&#34;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
-    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#34;hello&#34;</span>: <span style="color:#d14">&#34;world&#34;</span>})
-
-<span style="color:#998;font-style:italic">#访问http://0.0.0.0:8000/即可</span>
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
-    app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># main.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#000;font-weight:bold">=</span> Sanic()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@app.route</span>(<span style="color:#d14">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#34;hello&#34;</span>: <span style="color:#d14">&#34;world&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#访问http://0.0.0.0:8000/即可</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>上面的例子可以当做一个完整的小应用，关于blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
 比如我现在编写的项目，我使用的是功能式架构，具体如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── server.py
-├── static
-│   └── novels
-│       ├── css
-│       │   ├── chapter.css
-│       │   ├── content.css
-│       │   ├── index.css
-│       │   ├── main.css
-│       │   └── result.css
-│       ├── img
-│       │   ├── bookMark.png
-│       │   ├── favicon.ico
-│       │   ├── read_bg.png
-│       │   └── read_content.png
-│       └── js
-│           ├── list.js
-│           └── main.js
-├── template
-│   └── novels
-│       ├── chapter.html
-│       ├── content.html
-│       ├── donate.html
-│       ├── feedback.html
-│       ├── index.html
-│       ├── main.html
-│       └── result.html
-└── views
-    └── novels_blueprint.py
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── server.py
+</span></span><span style="display:flex;"><span>├── static
+</span></span><span style="display:flex;"><span>│   └── novels
+</span></span><span style="display:flex;"><span>│       ├── css
+</span></span><span style="display:flex;"><span>│       │   ├── chapter.css
+</span></span><span style="display:flex;"><span>│       │   ├── content.css
+</span></span><span style="display:flex;"><span>│       │   ├── index.css
+</span></span><span style="display:flex;"><span>│       │   ├── main.css
+</span></span><span style="display:flex;"><span>│       │   └── result.css
+</span></span><span style="display:flex;"><span>│       ├── img
+</span></span><span style="display:flex;"><span>│       │   ├── bookMark.png
+</span></span><span style="display:flex;"><span>│       │   ├── favicon.ico
+</span></span><span style="display:flex;"><span>│       │   ├── read_bg.png
+</span></span><span style="display:flex;"><span>│       │   └── read_content.png
+</span></span><span style="display:flex;"><span>│       └── js
+</span></span><span style="display:flex;"><span>│           ├── list.js
+</span></span><span style="display:flex;"><span>│           └── main.js
+</span></span><span style="display:flex;"><span>├── template
+</span></span><span style="display:flex;"><span>│   └── novels
+</span></span><span style="display:flex;"><span>│       ├── chapter.html
+</span></span><span style="display:flex;"><span>│       ├── content.html
+</span></span><span style="display:flex;"><span>│       ├── donate.html
+</span></span><span style="display:flex;"><span>│       ├── feedback.html
+</span></span><span style="display:flex;"><span>│       ├── index.html
+</span></span><span style="display:flex;"><span>│       ├── main.html
+</span></span><span style="display:flex;"><span>│       └── result.html
+</span></span><span style="display:flex;"><span>└── views
+</span></span><span style="display:flex;"><span>    └── novels_blueprint.py
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
 最后只要将每个单独的blueprint在主启动文件进行注册就好，比如我的这个项目：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># server.py</span>
-<span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">novels_search.views.novels_blueprint</span> <span style="color:#000;font-weight:bold">import</span> bp
-
-app <span style="color:#000;font-weight:bold">=</span> Sanic(__name__)
-app<span style="color:#000;font-weight:bold">.</span>blueprint(bp)
-
-app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>, debug<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># server.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">novels_search.views.novels_blueprint</span> <span style="color:#000;font-weight:bold">import</span> bp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#000;font-weight:bold">=</span> Sanic(__name__)
+</span></span><span style="display:flex;"><span>app<span style="color:#000;font-weight:bold">.</span>blueprint(bp)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8000</span>, debug<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>具体的<code>novels_blueprint.py</code>请点击<a href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/novels_blueprint.py">这里</a></p>
 <h3 id="html-templates编写">html templates编写</h3>
 <p>编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># novels_blueprint.py片段</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Blueprint
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">jinja2</span> <span style="color:#000;font-weight:bold">import</span> Environment, PackageLoader, select_autoescape
-
-<span style="color:#998;font-style:italic"># 初始化blueprint并定义静态文件夹路径</span>
-bp <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;novels_blueprint&#39;</span>)
-bp<span style="color:#000;font-weight:bold">.</span>static(<span style="color:#d14">&#39;/static&#39;</span>, <span style="color:#d14">&#39;./static/novels&#39;</span>)
-
-<span style="color:#998;font-style:italic"># jinjia2 config</span>
-env <span style="color:#000;font-weight:bold">=</span> Environment(
-    loader<span style="color:#000;font-weight:bold">=</span>PackageLoader(<span style="color:#d14">&#39;views.novels_blueprint&#39;</span>, <span style="color:#d14">&#39;../templates/novels&#39;</span>),
-    autoescape<span style="color:#000;font-weight:bold">=</span>select_autoescape([<span style="color:#d14">&#39;html&#39;</span>, <span style="color:#d14">&#39;xml&#39;</span>, <span style="color:#d14">&#39;tpl&#39;</span>]))
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">template</span>(tpl, <span style="color:#000;font-weight:bold">**</span>kwargs):
-    template <span style="color:#000;font-weight:bold">=</span> env<span style="color:#000;font-weight:bold">.</span>get_template(tpl)
-    <span style="color:#000;font-weight:bold">return</span> html(template<span style="color:#000;font-weight:bold">.</span>render(kwargs))
-    
-<span style="color:#3c5d5d;font-weight:bold">@bp</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/&#34;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">index</span>(request):
-    <span style="color:#000;font-weight:bold">return</span> template(<span style="color:#d14">&#39;index.html&#39;</span>, title<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;index&#39;</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># novels_blueprint.py片段</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Blueprint
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">jinja2</span> <span style="color:#000;font-weight:bold">import</span> Environment, PackageLoader, select_autoescape
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 初始化blueprint并定义静态文件夹路径</span>
+</span></span><span style="display:flex;"><span>bp <span style="color:#000;font-weight:bold">=</span> Blueprint(<span style="color:#d14">&#39;novels_blueprint&#39;</span>)
+</span></span><span style="display:flex;"><span>bp<span style="color:#000;font-weight:bold">.</span>static(<span style="color:#d14">&#39;/static&#39;</span>, <span style="color:#d14">&#39;./static/novels&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># jinjia2 config</span>
+</span></span><span style="display:flex;"><span>env <span style="color:#000;font-weight:bold">=</span> Environment(
+</span></span><span style="display:flex;"><span>    loader<span style="color:#000;font-weight:bold">=</span>PackageLoader(<span style="color:#d14">&#39;views.novels_blueprint&#39;</span>, <span style="color:#d14">&#39;../templates/novels&#39;</span>),
+</span></span><span style="display:flex;"><span>    autoescape<span style="color:#000;font-weight:bold">=</span>select_autoescape([<span style="color:#d14">&#39;html&#39;</span>, <span style="color:#d14">&#39;xml&#39;</span>, <span style="color:#d14">&#39;tpl&#39;</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">template</span>(tpl, <span style="color:#000;font-weight:bold">**</span>kwargs):
+</span></span><span style="display:flex;"><span>    template <span style="color:#000;font-weight:bold">=</span> env<span style="color:#000;font-weight:bold">.</span>get_template(tpl)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> html(template<span style="color:#000;font-weight:bold">.</span>render(kwargs))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@bp.route</span>(<span style="color:#d14">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">index</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> template(<span style="color:#d14">&#39;index.html&#39;</span>, title<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;index&#39;</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>这样，就实现了jinja2 的引入。</p>
 <p>=========05-02===========
 在官方文档发现了已经加入了如何引入jinja2，具体见：https://github.com/channelcat/sanic/blob/master/examples/jinja_example/jinja_example.py</p>
 <h3 id="session">session</h3>
 <p>sanic对此有一个第三方插件<a href="https://github.com/subyraman/sanic_session"><code>sanic_session</code></a>，用法非常简单，见官方例子如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio_redis</span>
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> text
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_session</span> <span style="color:#000;font-weight:bold">import</span> RedisSessionInterface
-
-app <span style="color:#000;font-weight:bold">=</span> Sanic()
-
-
-<span style="color:#998;font-style:italic"># Token from https://github.com/subyraman/sanic_session</span>
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Redis</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    A simple wrapper class that allows you to share a connection
-</span><span style="color:#d14">    pool across your application.
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    _pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
-
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_redis_pool</span>(<span style="color:#999">self</span>):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> asyncio_redis<span style="color:#000;font-weight:bold">.</span>Pool<span style="color:#000;font-weight:bold">.</span>create(
-                host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;localhost&#39;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">6379</span>, poolsize<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>
-            )
-
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool
-
-
-redis <span style="color:#000;font-weight:bold">=</span> Redis()
-
-<span style="color:#998;font-style:italic"># pass the getter method for the connection pool into the session</span>
-session_interface <span style="color:#000;font-weight:bold">=</span> RedisSessionInterface(redis<span style="color:#000;font-weight:bold">.</span>get_redis_pool, expiry<span style="color:#000;font-weight:bold">=</span><span style="color:#099">604800</span>)
-
-
-<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>middleware(<span style="color:#d14">&#39;request&#39;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">add_session_to_request</span>(request):
-    <span style="color:#998;font-style:italic"># before each request initialize a session</span>
-    <span style="color:#998;font-style:italic"># using the client&#39;s request</span>
-    <span style="color:#000;font-weight:bold">await</span> session_interface<span style="color:#000;font-weight:bold">.</span>open(request)
-
-
-<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>middleware(<span style="color:#d14">&#39;response&#39;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">save_session</span>(request, response):
-    <span style="color:#998;font-style:italic"># after each request save the session,</span>
-    <span style="color:#998;font-style:italic"># pass the response to set client cookies</span>
-    <span style="color:#000;font-weight:bold">await</span> session_interface<span style="color:#000;font-weight:bold">.</span>save(request, response)
-
-
-<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/&#34;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
-    <span style="color:#998;font-style:italic"># interact with the session like a normal dict</span>
-    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> request[<span style="color:#d14">&#39;session&#39;</span>]<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;foo&#39;</span>):
-        request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>
-
-    request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
-
-    response <span style="color:#000;font-weight:bold">=</span> text(request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>])
-
-    <span style="color:#000;font-weight:bold">return</span> response
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
-    app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8888</span>, debug<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio_redis</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic</span> <span style="color:#000;font-weight:bold">import</span> Sanic
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> text
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic_session</span> <span style="color:#000;font-weight:bold">import</span> RedisSessionInterface
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#000;font-weight:bold">=</span> Sanic()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Token from https://github.com/subyraman/sanic_session</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Redis</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    A simple wrapper class that allows you to share a connection
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    pool across your application.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    _pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_redis_pool</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> asyncio_redis<span style="color:#000;font-weight:bold">.</span>Pool<span style="color:#000;font-weight:bold">.</span>create(
+</span></span><span style="display:flex;"><span>                host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;localhost&#39;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">6379</span>, poolsize<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>redis <span style="color:#000;font-weight:bold">=</span> Redis()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># pass the getter method for the connection pool into the session</span>
+</span></span><span style="display:flex;"><span>session_interface <span style="color:#000;font-weight:bold">=</span> RedisSessionInterface(redis<span style="color:#000;font-weight:bold">.</span>get_redis_pool, expiry<span style="color:#000;font-weight:bold">=</span><span style="color:#099">604800</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@app.middleware</span>(<span style="color:#d14">&#39;request&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">add_session_to_request</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># before each request initialize a session</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># using the client&#39;s request</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">await</span> session_interface<span style="color:#000;font-weight:bold">.</span>open(request)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@app.middleware</span>(<span style="color:#d14">&#39;response&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">save_session</span>(request, response):
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># after each request save the session,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># pass the response to set client cookies</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">await</span> session_interface<span style="color:#000;font-weight:bold">.</span>save(request, response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@app.route</span>(<span style="color:#d14">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">test</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># interact with the session like a normal dict</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> request[<span style="color:#d14">&#39;session&#39;</span>]<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;foo&#39;</span>):
+</span></span><span style="display:flex;"><span>        request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#000;font-weight:bold">=</span> text(request[<span style="color:#d14">&#39;session&#39;</span>][<span style="color:#d14">&#39;foo&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> response
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    app<span style="color:#000;font-weight:bold">.</span>run(host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;0.0.0.0&#34;</span>, port<span style="color:#000;font-weight:bold">=</span><span style="color:#099">8888</span>, debug<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="缓存">缓存</h3>
 <p>我在项目中主要使用redis作为缓存，使用<a href="https://github.com/argaen/aiocache">aiocache</a>很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#3c5d5d;font-weight:bold">@cached</span>(ttl<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1800</span>, cache<span style="color:#000;font-weight:bold">=</span>RedisCache, key_from_attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;url&#39;</span>, serializer<span style="color:#000;font-weight:bold">=</span>PickleSerializer(),
-        endpoint<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#000;font-weight:bold">None</span>), port<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#000;font-weight:bold">None</span>), namespace<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;main&#34;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">cache_owllook_novels_chapter</span>(url, netloc):
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> aiohttp<span style="color:#000;font-weight:bold">.</span>ClientSession() <span style="color:#000;font-weight:bold">as</span> client:
-        html <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> target_fetch(client<span style="color:#000;font-weight:bold">=</span>client, url<span style="color:#000;font-weight:bold">=</span>url)
-        <span style="color:#000;font-weight:bold">if</span> html:
-            soup <span style="color:#000;font-weight:bold">=</span> BeautifulSoup(html, <span style="color:#d14">&#39;html5lib&#39;</span>)
-            selector <span style="color:#000;font-weight:bold">=</span> RULES[netloc]<span style="color:#000;font-weight:bold">.</span>chapter_selector
-            <span style="color:#000;font-weight:bold">if</span> selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;id&#39;</span>, <span style="color:#000;font-weight:bold">None</span>):
-                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(<span style="color:#0086b3">id</span><span style="color:#000;font-weight:bold">=</span>selector[<span style="color:#d14">&#39;id&#39;</span>])
-            <span style="color:#000;font-weight:bold">elif</span> selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;class&#39;</span>, <span style="color:#000;font-weight:bold">None</span>):
-                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(class_<span style="color:#000;font-weight:bold">=</span>selector[<span style="color:#d14">&#39;class&#39;</span>])
-            <span style="color:#000;font-weight:bold">else</span>:
-                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;tag&#39;</span>))
-            <span style="color:#000;font-weight:bold">return</span> <span style="color:#0086b3">str</span>(content) <span style="color:#000;font-weight:bold">if</span> content <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">None</span>
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@cached</span>(ttl<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1800</span>, cache<span style="color:#000;font-weight:bold">=</span>RedisCache, key_from_attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;url&#39;</span>, serializer<span style="color:#000;font-weight:bold">=</span>PickleSerializer(),
+</span></span><span style="display:flex;"><span>        endpoint<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#000;font-weight:bold">None</span>), port<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#000;font-weight:bold">None</span>), namespace<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;main&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">cache_owllook_novels_chapter</span>(url, netloc):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> aiohttp<span style="color:#000;font-weight:bold">.</span>ClientSession() <span style="color:#000;font-weight:bold">as</span> client:
+</span></span><span style="display:flex;"><span>        html <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> target_fetch(client<span style="color:#000;font-weight:bold">=</span>client, url<span style="color:#000;font-weight:bold">=</span>url)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> html:
+</span></span><span style="display:flex;"><span>            soup <span style="color:#000;font-weight:bold">=</span> BeautifulSoup(html, <span style="color:#d14">&#39;html5lib&#39;</span>)
+</span></span><span style="display:flex;"><span>            selector <span style="color:#000;font-weight:bold">=</span> RULES[netloc]<span style="color:#000;font-weight:bold">.</span>chapter_selector
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;id&#39;</span>, <span style="color:#000;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(<span style="color:#0086b3">id</span><span style="color:#000;font-weight:bold">=</span>selector[<span style="color:#d14">&#39;id&#39;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">elif</span> selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;class&#39;</span>, <span style="color:#000;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(class_<span style="color:#000;font-weight:bold">=</span>selector[<span style="color:#d14">&#39;class&#39;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                content <span style="color:#000;font-weight:bold">=</span> soup<span style="color:#000;font-weight:bold">.</span>find_all(selector<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;tag&#39;</span>))
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> <span style="color:#0086b3">str</span>(content) <span style="color:#000;font-weight:bold">if</span> content <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">None</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>带上装饰器，什么都解决了。</p>
 <h3 id="api接口验证">api接口验证</h3>
 <p>在编写接口的时候，有些接口可能需要在headers中加个验证头或者token，sanic官方貌似并没有提供，解决起来很简单，可以在request时候进行验证，代码如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> wraps
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> json
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">novels_search.config</span> <span style="color:#000;font-weight:bold">import</span> AUTH
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">authenticator</span>(key):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    
-</span><span style="color:#d14">    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
-</span><span style="color:#d14">    :return: 返回值
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">wrapper</span>(func):
-        <span style="color:#3c5d5d;font-weight:bold">@wraps</span>(func)
-        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">authenticate</span>(request, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs):
-            value <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(key, <span style="color:#000;font-weight:bold">None</span>)
-            <span style="color:#000;font-weight:bold">if</span> value <span style="color:#000;font-weight:bold">and</span> AUTH[key] <span style="color:#000;font-weight:bold">==</span> value:
-                response <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> func(request, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs)
-                <span style="color:#000;font-weight:bold">return</span> response
-            <span style="color:#000;font-weight:bold">else</span>:
-                <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;not_authorized&#39;</span>, <span style="color:#d14">&#39;status&#39;</span>: <span style="color:#099">403</span>})
-
-        <span style="color:#000;font-weight:bold">return</span> authenticate
-
-    <span style="color:#000;font-weight:bold">return</span> wrapper
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 比如想验证一个请求的 Owllook-Api-Key值是否跟自己约定的值一样，这里写个装饰器就好</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> wraps
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">sanic.response</span> <span style="color:#000;font-weight:bold">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">novels_search.config</span> <span style="color:#000;font-weight:bold">import</span> AUTH
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">authenticator</span>(key):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :param keys: 验证方式 Owllook-Api-Key : Maginc Key,  Authorization : Token
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :return: 返回值
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">wrapper</span>(func):
+</span></span><span style="display:flex;"><span>        <span style="color:#3c5d5d;font-weight:bold">@wraps</span>(func)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">authenticate</span>(request, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs):
+</span></span><span style="display:flex;"><span>            value <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(key, <span style="color:#000;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> value <span style="color:#000;font-weight:bold">and</span> AUTH[key] <span style="color:#000;font-weight:bold">==</span> value:
+</span></span><span style="display:flex;"><span>                response <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> func(request, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs)
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">return</span> response
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">return</span> json({<span style="color:#d14">&#39;msg&#39;</span>: <span style="color:#d14">&#39;not_authorized&#39;</span>, <span style="color:#d14">&#39;status&#39;</span>: <span style="color:#099">403</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> authenticate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> wrapper
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>至于使用</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#3c5d5d;font-weight:bold">@api_bp</span><span style="color:#000;font-weight:bold">.</span>route(<span style="color:#d14">&#34;/bd_novels/&lt;name&gt;&#34;</span>)
-<span style="color:#3c5d5d;font-weight:bold">@authenticator</span>(<span style="color:#d14">&#39;Owllook-Api-Key&#39;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">bd_novels</span>(request, name):
-    <span style="color:#000;font-weight:bold">pass</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@api_bp.route</span>(<span style="color:#d14">&#34;/bd_novels/&lt;name&gt;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@authenticator</span>(<span style="color:#d14">&#39;Owllook-Api-Key&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">bd_novels</span>(request, name):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">pass</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>具体见<a href="https://github.com/howie6879/novels-search/blob/master/novels_search/views/api_blueprint.py">例子</a></p>
 <h3 id="恶意将其他域名绑定到你的网站独立ip">恶意将其他域名绑定到你的网站独立ip</h3>
 <p>前两天突然发现别人没经过我的同意就将自己的域名绑定到我的网站，不能忍，解决办法有不少，web服务器写配置解决，或者代码层面解决，我说下第二种。</p>
 <p>首先，定义你允许访问的HOST，再获取访问时获取的host，比如：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># config.py</span>
-HOST <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#39;127.0.0.1:8001&#39;</span>]
-
-<span style="color:#998;font-style:italic"># sanic获取host</span>
-host <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;host&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># config.py</span>
+</span></span><span style="display:flex;"><span>HOST <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#39;127.0.0.1:8001&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># sanic获取host</span>
+</span></span><span style="display:flex;"><span>host <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;host&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>那么就可以在sanic中间件中定义：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 当host不满足条件就调到baidu</span>
-<span style="color:#3c5d5d;font-weight:bold">@app</span><span style="color:#000;font-weight:bold">.</span>middleware(<span style="color:#d14">&#39;request&#39;</span>)
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">add_session_to_request</span>(request):
-    host <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;host&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
-    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> host <span style="color:#000;font-weight:bold">or</span> host <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> HOST:
-        <span style="color:#000;font-weight:bold">return</span> redirect(<span style="color:#d14">&#39;http://www.baidu.com&#39;</span>)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 当host不满足条件就调到baidu</span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@app.middleware</span>(<span style="color:#d14">&#39;request&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">add_session_to_request</span>(request):
+</span></span><span style="display:flex;"><span>    host <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span>headers<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;host&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> host <span style="color:#000;font-weight:bold">or</span> host <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> HOST:
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> redirect(<span style="color:#d14">&#39;http://www.baidu.com&#39;</span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="注意">注意</h3>
 <p>sanic最好使用0.5.1+，因为在之前的版本被发现了一个安全漏洞，是关于之前引入static部分的，具体见https://github.com/channelcat/sanic/issues/633。
@@ -827,8 +824,6 @@ sanic更新换代还是很快的。</p>
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -890,6 +885,10 @@ sanic更新换代还是很快的。</p>
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -925,10 +924,6 @@ sanic更新换代还是很快的。</p>
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -948,9 +943,9 @@ sanic更新换代还是很快的。</p>
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

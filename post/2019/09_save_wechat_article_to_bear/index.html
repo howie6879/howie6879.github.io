@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>利用微信同步文章到Bear | 老胡的储物柜</title>
   <meta property="og:title" content="利用微信同步文章到Bear - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -214,11 +218,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="clear" style="display: none">
             <div class="toc-article">
@@ -257,13 +256,13 @@
 <h2 id="方案调研">方案调研</h2>
 <p>上面的解决方案看起来还是挺好实现，第一步不用多说，这年头谁没个小号，第二点的话，我印象中Python是有个第三方库可以直接监听微信对应账号的消息。</p>
 <p>因为这些第三方库都是基于<code>Web</code>版的微信，所以在使用之前我想验证下此方案是否可行，刚准备登录网页版微信，就直接提示：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#000080">error</span>&gt;&lt;<span style="color:#000080">ret</span>&gt;1203&lt;/<span style="color:#000080">ret</span>&gt;&lt;<span style="color:#000080">message</span>&gt;To protect your account, logging in to WeChat via the web has been suspended. Use WeChat for Windows or WeChat for Mac to log in on a computer. Download WeChat for Windows or Mac at http://wechat.com.&lt;/<span style="color:#000080">message</span>&gt;&lt;/<span style="color:#000080">error</span>&gt;
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#000080">error</span>&gt;&lt;<span style="color:#000080">ret</span>&gt;1203&lt;/<span style="color:#000080">ret</span>&gt;&lt;<span style="color:#000080">message</span>&gt;To protect your account, logging in to WeChat via the web has been suspended. Use WeChat for Windows or WeChat for Mac to log in on a computer. Download WeChat for Windows or Mac at http://wechat.com.&lt;/<span style="color:#000080">message</span>&gt;&lt;/<span style="color:#000080">error</span>&gt;
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/ArhyCYUg1d925qz.png" />   
@@ -273,134 +272,134 @@
 <p>能不能依靠客户端？</p>
 <p>我们知道，微信数据是有同步功能的，开发过客户端的都知道，这就意味着微信的数据必然保存一份在客户端本地系统上。</p>
 <p>所以对于第二点的解决思路就转换成了如何获取微信保存在客户端本地的数据，找到某个软件的数据文件夹自然是很简单的事情，比如微信客户端的数据就存放在：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># howie6879是我的用户名，请自行替换</span>
-/Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># howie6879是我的用户名，请自行替换</span>
+</span></span><span style="display:flex;"><span>/Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>具体有如下目录：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── 988eebd1078a0d794bff2b6f5c8d5176
-├── Avatar
-├── CGI
-├── CrashReport
-├── KeyValue
-├── MMResourceMgr
-├── checkVersionFile
-├── d41d8cd93400b204e9800998ecf8427e
-├── f965739b566114f907dc394322e1e826
-├── topinfo.data
-├── upgradeHistoryFile
-├── whatsNewVersionFile
-└── wx.dat
-
-<span style="color:#099">8</span> directories, <span style="color:#099">5</span> files
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── 988eebd1078a0d794bff2b6f5c8d5176
+</span></span><span style="display:flex;"><span>├── Avatar
+</span></span><span style="display:flex;"><span>├── CGI
+</span></span><span style="display:flex;"><span>├── CrashReport
+</span></span><span style="display:flex;"><span>├── KeyValue
+</span></span><span style="display:flex;"><span>├── MMResourceMgr
+</span></span><span style="display:flex;"><span>├── checkVersionFile
+</span></span><span style="display:flex;"><span>├── d41d8cd93400b204e9800998ecf8427e
+</span></span><span style="display:flex;"><span>├── f965739b566114f907dc394322e1e826
+</span></span><span style="display:flex;"><span>├── topinfo.data
+</span></span><span style="display:flex;"><span>├── upgradeHistoryFile
+</span></span><span style="display:flex;"><span>├── whatsNewVersionFile
+</span></span><span style="display:flex;"><span>└── wx.dat
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#099">8</span> directories, <span style="color:#099">5</span> files
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>不知道上面那三个32位的字符串大家看起来熟悉不熟悉：</p>
 <p>
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/bqu2sUkc6VwxLIR.png" />   
     </p>
 <p>一想到<code>32</code>，就是<code>md5</code>加密，我第一反应就是对于每个登录账号的id加密值，我们先不管，直接进去看更深一层的文件夹：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── Account
-├── Avatar
-├── Contact
-├── Favorites
-├── FileStateSync
-├── FunctionMsg
-├── Group
-├── Message
-├── RevokeMsg
-├── Session
-├── Stickers
-├── Sync
-├── complexSearch
-├── mmexpt
-└── newabtest
-
-<span style="color:#099">15</span> directories, <span style="color:#099">0</span> files
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── Account
+</span></span><span style="display:flex;"><span>├── Avatar
+</span></span><span style="display:flex;"><span>├── Contact
+</span></span><span style="display:flex;"><span>├── Favorites
+</span></span><span style="display:flex;"><span>├── FileStateSync
+</span></span><span style="display:flex;"><span>├── FunctionMsg
+</span></span><span style="display:flex;"><span>├── Group
+</span></span><span style="display:flex;"><span>├── Message
+</span></span><span style="display:flex;"><span>├── RevokeMsg
+</span></span><span style="display:flex;"><span>├── Session
+</span></span><span style="display:flex;"><span>├── Stickers
+</span></span><span style="display:flex;"><span>├── Sync
+</span></span><span style="display:flex;"><span>├── complexSearch
+</span></span><span style="display:flex;"><span>├── mmexpt
+</span></span><span style="display:flex;"><span>└── newabtest
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#099">15</span> directories, <span style="color:#099">0</span> files
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>Message</code>出来了，这是不是我们想要的呢？再往下看里面的目录：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── MessageTemp
-├── fts
-├── msg_0.db
-├── msg_0.db-backup
-├── msg_0.db-shm
-├── msg_0.db-wal
-├── msg_1.db
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── MessageTemp
+</span></span><span style="display:flex;"><span>├── fts
+</span></span><span style="display:flex;"><span>├── msg_0.db
+</span></span><span style="display:flex;"><span>├── msg_0.db-backup
+</span></span><span style="display:flex;"><span>├── msg_0.db-shm
+</span></span><span style="display:flex;"><span>├── msg_0.db-wal
+</span></span><span style="display:flex;"><span>├── msg_1.db
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>如果你登录过该台电脑并同步过信息，那么不出意外会有挺多<code>*.db</code>后缀的文件。大胆地猜测一下，这是不是我们想要的聊天数据存放路径呢？</p>
 <p>不要管太多，先看看总不会错，一般本地存储的数据库，咱们程序员第一反应应该就是<code>SQLite</code>，要不要试试？</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sqlite3 Message/msg_0.db
-sqlite&gt; .schema
-Error: file is not a database
-sqlite&gt;
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sqlite3 Message/msg_0.db
+</span></span><span style="display:flex;"><span>sqlite&gt; .schema
+</span></span><span style="display:flex;"><span>Error: file is not a database
+</span></span><span style="display:flex;"><span>sqlite&gt;
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>？？提示不是数据库，此时陷入了瓶颈，怎么就不是数据库了呢。反思一下，是不是打开的姿势不对。</p>
 <p><strong>会不会是加密了</strong>？依照这个思路，我了解到有一款基于<code>SQLite</code>的扩展数据库[SQLCipher](<a href="https://github.com/sqlcipher/sqlcipher">https://github.com/sqlcipher/sqlcipher</a>，<code>SQLCipher</code>是一个在<code>SQLite</code>基础之上进行扩展的开源数据库，它主要是在<code>SQLite</code>的基础之上增加了数据加密功能。</p>
@@ -415,39 +414,39 @@ sqlite&gt;
 <li>然后回到<code>lldb</code>中，输入<code>memory read --size 1 --format x --count 32 $rsi</code></li>
 </ul>
 <p>此时就会得到以下类似的输出：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">0x600003888340: 0xd1 0x05 0x29 0x04 0x75 0xc5 0x45 0x05
-0x600003888348: 0x92 0x26 0xa1 0x65 0x95 0xe5 0x15 0x3f
-0x600003888350: 0xf3 0xc7 0x43 0x85 0x05 0x35 0x45 0x3d
-0x600003888358: 0x84 0xc8 0x64 0xe5 0x35 0x65 0x45 0xe2
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>0x600003888340: 0xd1 0x05 0x29 0x04 0x75 0xc5 0x45 0x05
+</span></span><span style="display:flex;"><span>0x600003888348: 0x92 0x26 0xa1 0x65 0x95 0xe5 0x15 0x3f
+</span></span><span style="display:flex;"><span>0x600003888350: 0xf3 0xc7 0x43 0x85 0x05 0x35 0x45 0x3d
+</span></span><span style="display:flex;"><span>0x600003888358: 0x84 0xc8 0x64 0xe5 0x35 0x65 0x45 0xe2
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>去掉冒号前面的那一串，后面是四行八列的数据，再去除掉<code>0x</code>、<code>空格</code>、<code>\n</code>等，就会得到一串64位的字符串，举个例子：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">df012f587cc546000025a56599e81530f9cc49800329423d8ec460e1386549e2
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>df012f587cc546000025a56599e81530f9cc49800329423d8ec460e1386549e2
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>这就是我们进入数据库的钥匙，接下来，请安装sqlcipher的相关软件，如：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">brew install sqlcipher
-brew cask install db-browser-for-sqlite
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>brew install sqlcipher
+</span></span><span style="display:flex;"><span>brew cask install db-browser-for-sqlite
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>让我们用<code>db-browser-for-sqlite</code>打开<code>db</code>后缀的文件看看有什么不一样吧：</p>
 <p>
@@ -466,36 +465,36 @@ brew cask install db-browser-for-sqlite
     </p>
 <p>很显然，我们成功获取了本地的聊天记录，总算将第二步流程打通了，如今我们可以监控发送收藏文章的微信账户的聊天记录，只要收到此账号发来的推文消息，此时监控服务可以立马反应过来并解析发送到Bear。</p>
 <p>有个小问题，怎么知道发推文的账号在哪个库哪个表呢？可以这样看，在电脑上登录发推文的账号，打开文件<code>userinfo.data</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#0086b3">cd</span> /Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/988eebd1023a0d794bff2b6f5c8d5176/Account
-cat userinfo.data
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#0086b3">cd</span> /Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/988eebd1023a0d794bff2b6f5c8d5176/Account
+</span></span><span style="display:flex;"><span>cat userinfo.data
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>大概输出如下：</p>
-<pre tabindex="0"><code class="language-textile" data-lang="textile">&quot;:BHPpx��127417592694754732��wxid_epXXXXXXXfj12�    Howie6879�老胡的储物柜�
+<pre tabindex="0"><code class="language-textile" data-lang="textile">&#34;:BHPpx��127417592694754732��wxid_epXXXXXXXfj12�    Howie6879�老胡的储物柜�
 </code></pre><p>这里很明显我的<code>wxid</code>就是：<code>wxid_epXXXXXXXfj12</code>，那么对应需要监控的表名就是：<code>Chat_md5(wxid_epXXXXXXXfj12)</code>，形式如同这样</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">Chat_f965739xxxx114fxxxxc394322exxxx
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Chat_f965739xxxx114fxxxxc394322exxxx
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>随后实现在库里面找到对应的表即可，我本机发现对应账户的表存在于库 <code>msg_5.db</code>中。</p>
 <p>接下来要做的事情就很简单了，就是将提取后的内容发送到Bear，这里可以利用<a href="https://bear.app/faq/X-callback-url%20Scheme%20documentation/">X callback url Scheme documentation</a>，比如你在终端输入：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">open <span style="color:#d14">&#39;bear://x-callback-url/create?title=Test%20Bear&amp;text=Hello%20Bear&#39;</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>open <span style="color:#d14">&#39;bear://x-callback-url/create?title=Test%20Bear&amp;text=Hello%20Bear&#39;</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>立马就可以看到Bear自动建立了一篇笔记</p>
 <h2 id="编码实现">编码实现</h2>
@@ -511,36 +510,36 @@ cat userinfo.data
 <li>DB_PATH_TEM：定义的是消息DB路径，比如：&quot;/Users/howie6879/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/{0}/Message/&quot;</li>
 </ul>
 <p>定义这四个常量，接下来的事情就一帆风顺了哈，我将项目开源在<code>Github</code>，地址见<a href="https://github.com/howie6879/w2b">w2b</a>，接下来我直接说说怎么用：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone https://github.com/howie6879/w2b
-<span style="color:#0086b3">cd</span> w2b
-<span style="color:#998;font-style:italic"># 推荐使用pipenv 你也可以使用自己中意的环境构建方式</span>
-pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
-<span style="color:#998;font-style:italic"># 运行前需要填好配置文件</span>
-pipenv run python w2b/run.py
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/howie6879/w2b
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">cd</span> w2b
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 推荐使用pipenv 你也可以使用自己中意的环境构建方式</span>
+</span></span><span style="display:flex;"><span>pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 运行前需要填好配置文件</span>
+</span></span><span style="display:flex;"><span>pipenv run python w2b/run.py
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>随后，会有日志输出：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>w2b<span style="color:#000;font-weight:bold">]</span> pipenv run python w2b/run.py                                                                                                
-Loading .env environment variables…
-<span style="color:#000;font-weight:bold">[</span>2019:09:13 09:16:35<span style="color:#000;font-weight:bold">]</span> INFO  w2b  目标表 Chat_f965739b676114fxxxxc394322e1e826 存在于库 msg_5.db
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>w2b<span style="color:#000;font-weight:bold">]</span> pipenv run python w2b/run.py                                                                                                
+</span></span><span style="display:flex;"><span>Loading .env environment variables…
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:09:13 09:16:35<span style="color:#000;font-weight:bold">]</span> INFO  w2b  目标表 Chat_f965739b676114fxxxxc394322e1e826 存在于库 msg_5.db
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>好，代码跑起来后，接下来电脑上登录你的小号（也就是接收微信文章的微信号），然后在手机上登录发送文章的微信号，最终成功就和文章一开始的动图一样了~</p>
 <p>搞定收工，有兴趣欢迎关注我的公众号：</p>
@@ -646,8 +645,6 @@ Loading .env environment variables…
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -709,6 +706,10 @@ Loading .env environment variables…
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -744,10 +745,6 @@ Loading .env environment variables…
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -767,9 +764,9 @@ Loading .env environment variables…
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

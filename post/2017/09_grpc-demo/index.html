@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>gRPC使用初试 | 老胡的储物柜</title>
   <meta property="og:title" content="gRPC使用初试 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -212,11 +216,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="clear" style="display: none">
             <div class="toc-article">
@@ -232,260 +231,254 @@
 <!-- raw HTML omitted -->
 <h2 id="２实践">２.实践</h2>
 <p>假设有这样一个需求，将客户端传来的某个字符串转化为小写，那么，首先从定义数据结构开始，暂时先新建如下结构的项目：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">demo
-└── proto
-    └── lower.proto
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>demo
+</span></span><span style="display:flex;"><span>└── proto
+</span></span><span style="display:flex;"><span>    └── lower.proto
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>接下来将编写<code>proto</code>文件，本例使用<code>proto3</code>语法进行编写，<code>protobuf</code>定义的语法请看<a href="https://developers.google.com/protocol-buffers/docs/proto3">这里</a></p>
 <p><code>lower.proto</code>文件内容如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-proto" data-lang="proto">syntax <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;proto3&#34;</span>;<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">lower</span>;<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">service</span> Lower {<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#000;font-weight:bold">rpc</span> Lower (LowerRequest) <span style="color:#000;font-weight:bold">returns</span> (LowerResult) {<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>    }<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">message</span> <span style="color:#458;font-weight:bold">LowerRequest</span> {<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#458;font-weight:bold">string</span> <span style="color:#000;font-weight:bold">message</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">message</span> <span style="color:#458;font-weight:bold">LowerResult</span> {<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#458;font-weight:bold">string</span> lower_message <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;<span style="color:#a61717;background-color:#e3d2d2">
-</span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-proto" data-lang="proto"><span style="display:flex;"><span>syntax <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;proto3&#34;</span>;<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">lower</span>;<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">service</span> Lower {<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#000;font-weight:bold">rpc</span> Lower (LowerRequest) <span style="color:#000;font-weight:bold">returns</span> (LowerResult) {<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>    }<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">message</span> <span style="color:#458;font-weight:bold">LowerRequest</span> {<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#458;font-weight:bold">string</span> <span style="color:#000;font-weight:bold">message</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#000;font-weight:bold">message</span> <span style="color:#458;font-weight:bold">LowerResult</span> {<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>    <span style="color:#458;font-weight:bold">string</span> lower_message <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span><span style="display:flex;"><span><span style="color:#a61717;background-color:#e3d2d2"></span>}<span style="color:#a61717;background-color:#e3d2d2">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>定义一个服务<code>Lower</code>，其接受一个字符串消息并返回小写的字符串消息，编写完毕，下面进行编译，创建文件<code>proto_compile.py</code>，并安装相关的包：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install grpcio
-pip install grpcio-tools
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install grpcio
+</span></span><span style="display:flex;"><span>pip install grpcio-tools
+</span></span></code></pre></td></tr></table>
 </div>
-</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># script proto_compile.py</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">grpc_tools</span> <span style="color:#000;font-weight:bold">import</span> protoc
-
-<span style="color:#998;font-style:italic"># 或者在项目根目录运行：</span>
-<span style="color:#998;font-style:italic"># python -m grpc_tools.protoc -I. --python_out=../ --grpc_python_out=../ ./cal.proto</span>
-protoc<span style="color:#000;font-weight:bold">.</span>main(
-    (
-        <span style="color:#d14">&#39;&#39;</span>,
-        <span style="color:#d14">&#39;-Iproto&#39;</span>,
-        <span style="color:#d14">&#39;--python_out=.&#39;</span>,
-        <span style="color:#d14">&#39;--grpc_python_out=.&#39;</span>,
-        <span style="color:#d14">&#39;proto/lower.proto&#39;</span>,
-    )
-)
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># script proto_compile.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">grpc_tools</span> <span style="color:#000;font-weight:bold">import</span> protoc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 或者在项目根目录运行：</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># python -m grpc_tools.protoc -I. --python_out=../ --grpc_python_out=../ ./cal.proto</span>
+</span></span><span style="display:flex;"><span>protoc<span style="color:#000;font-weight:bold">.</span>main(
+</span></span><span style="display:flex;"><span>    (
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;-Iproto&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;--python_out=.&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;--grpc_python_out=.&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;proto/lower.proto&#39;</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>运行后，项目结构如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">demo
-├── lower_pb2_grpc.py     <span style="color:#998;font-style:italic"># 编译生成的文件</span>
-├── lower_pb2.py          <span style="color:#998;font-style:italic"># 编译生成的文件</span>
-├── proto
-│   └── lower.proto
-└── proto_compile.py
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>demo
+</span></span><span style="display:flex;"><span>├── lower_pb2_grpc.py     <span style="color:#998;font-style:italic"># 编译生成的文件</span>
+</span></span><span style="display:flex;"><span>├── lower_pb2.py          <span style="color:#998;font-style:italic"># 编译生成的文件</span>
+</span></span><span style="display:flex;"><span>├── proto
+</span></span><span style="display:flex;"><span>│   └── lower.proto
+</span></span><span style="display:flex;"><span>└── proto_compile.py
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>最后编写客户端以及服务端脚本<code>lower_client.py</code>、<code>lower_server.py</code>，内容分别如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># lower_server.py</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">time</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">grpc</span>
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">concurrent</span> <span style="color:#000;font-weight:bold">import</span> futures
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">lower_pb2</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">lower_pb2_grpc</span>
-
-_TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">10</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Lower</span>(lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>LowerServicer):
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">Lower</span>(<span style="color:#999">self</span>, request, context):
-        <span style="color:#000;font-weight:bold">return</span> lower_pb2<span style="color:#000;font-weight:bold">.</span>LowerResult(lower_message<span style="color:#000;font-weight:bold">=</span>request<span style="color:#000;font-weight:bold">.</span>message<span style="color:#000;font-weight:bold">.</span>lower())
-
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">serve</span>():
-    server <span style="color:#000;font-weight:bold">=</span> grpc<span style="color:#000;font-weight:bold">.</span>server(futures<span style="color:#000;font-weight:bold">.</span>ThreadPoolExecutor(max_workers<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>))
-    lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>add_LowerServicer_to_server(Lower(), server)
-    server<span style="color:#000;font-weight:bold">.</span>add_insecure_port(<span style="color:#d14">&#39;[::]:50052&#39;</span>)
-    server<span style="color:#000;font-weight:bold">.</span>start()
-    <span style="color:#000;font-weight:bold">try</span>:
-        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">True</span>:
-            time<span style="color:#000;font-weight:bold">.</span>sleep(_TIME_WAIT)
-    <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">KeyboardInterrupt</span>:
-        server<span style="color:#000;font-weight:bold">.</span>stop(<span style="color:#099">0</span>)
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    serve()
-
-<span style="color:#998;font-style:italic"># lower_client.py</span>
-
-<span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#998;font-style:italic"># -*- coding: utf-8 -*-</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">grpc</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">lower_pb2</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">lower_pb2_grpc</span>
-
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">run</span>():
-    channel <span style="color:#000;font-weight:bold">=</span> grpc<span style="color:#000;font-weight:bold">.</span>insecure_channel(<span style="color:#d14">&#34;localhost:50052&#34;</span>)
-    stub <span style="color:#000;font-weight:bold">=</span> lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>LowerStub(channel)
-    response <span style="color:#000;font-weight:bold">=</span> stub<span style="color:#000;font-weight:bold">.</span>Lower(lower_pb2<span style="color:#000;font-weight:bold">.</span>LowerRequest(message<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;HELLO WORLD!&#34;</span>))
-    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Message result received:  </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> response<span style="color:#000;font-weight:bold">.</span>lower_message)
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    run()
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># lower_server.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">time</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">grpc</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">concurrent</span> <span style="color:#000;font-weight:bold">import</span> futures
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">lower_pb2</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">lower_pb2_grpc</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Lower</span>(lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>LowerServicer):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">Lower</span>(<span style="color:#999">self</span>, request, context):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> lower_pb2<span style="color:#000;font-weight:bold">.</span>LowerResult(lower_message<span style="color:#000;font-weight:bold">=</span>request<span style="color:#000;font-weight:bold">.</span>message<span style="color:#000;font-weight:bold">.</span>lower())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">serve</span>():
+</span></span><span style="display:flex;"><span>    server <span style="color:#000;font-weight:bold">=</span> grpc<span style="color:#000;font-weight:bold">.</span>server(futures<span style="color:#000;font-weight:bold">.</span>ThreadPoolExecutor(max_workers<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>))
+</span></span><span style="display:flex;"><span>    lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>add_LowerServicer_to_server(Lower(), server)
+</span></span><span style="display:flex;"><span>    server<span style="color:#000;font-weight:bold">.</span>add_insecure_port(<span style="color:#d14">&#39;[::]:50052&#39;</span>)
+</span></span><span style="display:flex;"><span>    server<span style="color:#000;font-weight:bold">.</span>start()
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span>            time<span style="color:#000;font-weight:bold">.</span>sleep(_TIME_WAIT)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">KeyboardInterrupt</span>:
+</span></span><span style="display:flex;"><span>        server<span style="color:#000;font-weight:bold">.</span>stop(<span style="color:#099">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    serve()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># lower_client.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># -*- coding: utf-8 -*-</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">grpc</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">lower_pb2</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">lower_pb2_grpc</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">run</span>():
+</span></span><span style="display:flex;"><span>    channel <span style="color:#000;font-weight:bold">=</span> grpc<span style="color:#000;font-weight:bold">.</span>insecure_channel(<span style="color:#d14">&#34;localhost:50052&#34;</span>)
+</span></span><span style="display:flex;"><span>    stub <span style="color:#000;font-weight:bold">=</span> lower_pb2_grpc<span style="color:#000;font-weight:bold">.</span>LowerStub(channel)
+</span></span><span style="display:flex;"><span>    response <span style="color:#000;font-weight:bold">=</span> stub<span style="color:#000;font-weight:bold">.</span>Lower(lower_pb2<span style="color:#000;font-weight:bold">.</span>LowerRequest(message<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;HELLO WORLD!&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;Message result received:  </span><span style="color:#d14">%s</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">%</span> response<span style="color:#000;font-weight:bold">.</span>lower_message)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    run()
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>此时文件目录结构如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">demo
-├── lower_client.py
-├── lower_pb2_grpc.py
-├── lower_pb2.py
-├── lower_server.py
-├── proto
-│   └── lower.proto
-├── proto_compile.py
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>demo
+</span></span><span style="display:flex;"><span>├── lower_client.py
+</span></span><span style="display:flex;"><span>├── lower_pb2_grpc.py
+</span></span><span style="display:flex;"><span>├── lower_pb2.py
+</span></span><span style="display:flex;"><span>├── lower_server.py
+</span></span><span style="display:flex;"><span>├── proto
+</span></span><span style="display:flex;"><span>│   └── lower.proto
+</span></span><span style="display:flex;"><span>├── proto_compile.py
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>先运行<code>lower_server.py</code>，再运行<code>lower_client.py</code>，就会看到终端有结果输出：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">Message result received:  hello world!
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Message result received:  hello world!
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，返回小写字符，<code>demo</code>演示完毕</p>
 <h2 id="3最后">3.最后</h2>
@@ -602,8 +595,6 @@ _TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -665,6 +656,10 @@ _TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -700,10 +695,6 @@ _TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -723,9 +714,9 @@ _TIME_WAIT <span style="color:#000;font-weight:bold">=</span> <span style="color
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

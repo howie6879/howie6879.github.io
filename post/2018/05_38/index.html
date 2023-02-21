@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>统计学习方法笔记：2.感知机 | 老胡的储物柜</title>
   <meta property="og:title" content="统计学习方法笔记：2.感知机 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -222,11 +226,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="post-content">
             <p>这是我参加<a href="https://www.mlhub123.com/">mlhub123</a>组织的书籍共读计划的读书笔记，活动见<a href="https://www.mlhub123.com/read_plan/20180913.html">mlhub第一期读书计划</a></p>
@@ -303,142 +302,142 @@
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/88041E63-ADBF-4472-8031-C71436DCAA18.png" />   
     </p>
 <p>借用<code>Linus Torvalds</code>大佬的一句话：<strong>Talk less, show me your code</strong>，所以直接看代码吧：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14"> Created by howie.hu at 2018/9/20.
-</span><span style="color:#d14">&#34;&#34;&#34;</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.1代码实现
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, input_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>):
-        <span style="color:#998;font-style:italic"># 权重 已经确定只会有两个二进制输入</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(input_nums)
-        <span style="color:#998;font-style:italic"># 偏置项</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, rate<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        训练出合适的 w 和 b
-</span><span style="color:#d14">        :param input_vectors: 样本训练数据集
-</span><span style="color:#d14">        :param labels: 标记值
-</span><span style="color:#d14">        :param learn_nums: 学习多少次
-</span><span style="color:#d14">        :param rate: 学习率
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
-            <span style="color:#000;font-weight:bold">for</span> index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
-                label <span style="color:#000;font-weight:bold">=</span> labels[index]
-                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> (<span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b)
-                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
-                    <span style="color:#998;font-style:italic"># 计算方法由梯度下降算法推导出来</span>
-                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">+=</span> label <span style="color:#000;font-weight:bold">*</span> input_vector <span style="color:#000;font-weight:bold">*</span> rate
-                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> rate <span style="color:#000;font-weight:bold">*</span> label
-                    <span style="color:#000;font-weight:bold">break</span>
-        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        跃迁函数作为激活函数，感知器
-</span><span style="color:#d14">        :param input_vector:
-</span><span style="color:#d14">        :return:
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
-            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
-        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
-    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
-    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
-    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"> Created by howie.hu at 2018/9/20.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.1代码实现
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, input_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">2</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># 权重 已经确定只会有两个二进制输入</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(input_nums)
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># 偏置项</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>, rate<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        训练出合适的 w 和 b
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param input_vectors: 样本训练数据集
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param labels: 标记值
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param learn_nums: 学习多少次
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param rate: 学习率
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">for</span> index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
+</span></span><span style="display:flex;"><span>                label <span style="color:#000;font-weight:bold">=</span> labels[index]
+</span></span><span style="display:flex;"><span>                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> (<span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b)
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#998;font-style:italic"># 计算方法由梯度下降算法推导出来</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">+=</span> label <span style="color:#000;font-weight:bold">*</span> input_vector <span style="color:#000;font-weight:bold">*</span> rate
+</span></span><span style="display:flex;"><span>                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> rate <span style="color:#000;font-weight:bold">*</span> label
+</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        跃迁函数作为激活函数，感知器
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param input_vector:
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :return:
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
+</span></span><span style="display:flex;"><span>            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
+</span></span><span style="display:flex;"><span>        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
+</span></span><span style="display:flex;"><span>    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
+</span></span><span style="display:flex;"><span>    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
+</span></span><span style="display:flex;"><span>    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>输出如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
-<span style="color:#099">1</span>
-<span style="color:#099">1</span>
--1
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
+</span></span><span style="display:flex;"><span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>-1
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>代码写完了，再看看推导过程：</p>
 <p>
@@ -459,145 +458,145 @@
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/AC1F9A5E-B472-4E0C-8A15-680A8CAA1D65.png" />   
     </p>
 <p>代码实现如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14"> Created by howie.hu at 2018/9/21.
-</span><span style="color:#d14">&#34;&#34;&#34;</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, alpha_length<span style="color:#000;font-weight:bold">=</span><span style="color:#099">3</span>):
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(alpha_length)
-        <span style="color:#998;font-style:italic"># 权重</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(<span style="color:#099">2</span>)
-        <span style="color:#998;font-style:italic"># 偏置项</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">7</span>):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        训练出合适的 w 和 b
-</span><span style="color:#d14">        :param input_vectors: 样本训练数据集
-</span><span style="color:#d14">        :param labels: 标记值
-</span><span style="color:#d14">        :param learn_nums: 学习多少次
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        gram <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>matmul(input_vectors, input_vectors<span style="color:#000;font-weight:bold">.</span>T)
-
-        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
-
-            <span style="color:#000;font-weight:bold">for</span> input_vector_index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
-                label <span style="color:#000;font-weight:bold">=</span> labels[input_vector_index]
-                delta <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
-                <span style="color:#000;font-weight:bold">for</span> alpha_index, a <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha):
-                    delta <span style="color:#000;font-weight:bold">+=</span> a <span style="color:#000;font-weight:bold">*</span> labels[alpha_index] <span style="color:#000;font-weight:bold">*</span> gram[input_vector_index][alpha_index]
-                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> delta <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
-                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
-                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha[input_vector_index] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
-                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> label
-                    <span style="color:#000;font-weight:bold">break</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>([j <span style="color:#000;font-weight:bold">*</span> input_vectors[i] <span style="color:#000;font-weight:bold">*</span> labels[i] <span style="color:#000;font-weight:bold">for</span> i, j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha)])
-        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
-            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
-        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
-    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
-    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
-    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
-    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"> Created by howie.hu at 2018/9/21.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">numpy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">np</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Perceptron</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    李航老师统计学习方法第二章感知机例2.2对偶形式代码实现
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, alpha_length<span style="color:#000;font-weight:bold">=</span><span style="color:#099">3</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(alpha_length)
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># 权重</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>zeros(<span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># 偏置项</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fit</span>(<span style="color:#999">self</span>, input_vectors, labels, learn_nums<span style="color:#000;font-weight:bold">=</span><span style="color:#099">7</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        训练出合适的 w 和 b
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param input_vectors: 样本训练数据集
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param labels: 标记值
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param learn_nums: 学习多少次
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        gram <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>matmul(input_vectors, input_vectors<span style="color:#000;font-weight:bold">.</span>T)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(learn_nums):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">for</span> input_vector_index, input_vector <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(input_vectors):
+</span></span><span style="display:flex;"><span>                label <span style="color:#000;font-weight:bold">=</span> labels[input_vector_index]
+</span></span><span style="display:flex;"><span>                delta <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0.0</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">for</span> alpha_index, a <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha):
+</span></span><span style="display:flex;"><span>                    delta <span style="color:#000;font-weight:bold">+=</span> a <span style="color:#000;font-weight:bold">*</span> labels[alpha_index] <span style="color:#000;font-weight:bold">*</span> gram[input_vector_index][alpha_index]
+</span></span><span style="display:flex;"><span>                delta <span style="color:#000;font-weight:bold">=</span> label <span style="color:#000;font-weight:bold">*</span> delta <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> delta <span style="color:#000;font-weight:bold">&lt;=</span> <span style="color:#099">0</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha[input_vector_index] <span style="color:#000;font-weight:bold">+=</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b <span style="color:#000;font-weight:bold">+=</span> label
+</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>([j <span style="color:#000;font-weight:bold">*</span> input_vectors[i] <span style="color:#000;font-weight:bold">*</span> labels[i] <span style="color:#000;font-weight:bold">for</span> i, j <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">enumerate</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>alpha)])
+</span></span><span style="display:flex;"><span>        <span style="color:#0086b3">print</span>(<span style="color:#d14">&#34;最终结果：此时感知器权重为</span><span style="color:#d14">{0}</span><span style="color:#d14">，偏置项为</span><span style="color:#d14">{1}</span><span style="color:#d14">&#34;</span><span style="color:#000;font-weight:bold">.</span>format(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w, <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b))
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">predict</span>(<span style="color:#999">self</span>, input_vector):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(input_vector, <span style="color:#0086b3">list</span>):
+</span></span><span style="display:flex;"><span>            input_vector <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array(input_vector)
+</span></span><span style="display:flex;"><span>        y <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">sum</span>(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>w <span style="color:#000;font-weight:bold">*</span> input_vector) <span style="color:#000;font-weight:bold">+</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>b
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">if</span> y <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    input_vectors <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([[<span style="color:#099">3</span>, <span style="color:#099">3</span>], [<span style="color:#099">4</span>, <span style="color:#099">3</span>], [<span style="color:#099">1</span>, <span style="color:#099">1</span>]])
+</span></span><span style="display:flex;"><span>    labels <span style="color:#000;font-weight:bold">=</span> np<span style="color:#000;font-weight:bold">.</span>array([<span style="color:#099">1</span>, <span style="color:#099">1</span>, <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>])
+</span></span><span style="display:flex;"><span>    p <span style="color:#000;font-weight:bold">=</span> Perceptron()
+</span></span><span style="display:flex;"><span>    model <span style="color:#000;font-weight:bold">=</span> p<span style="color:#000;font-weight:bold">.</span>fit(input_vectors, labels)
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">3</span>, <span style="color:#099">3</span>]))
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">4</span>, <span style="color:#099">3</span>]))
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(model<span style="color:#000;font-weight:bold">.</span>predict([<span style="color:#099">1</span>, <span style="color:#099">1</span>]))
+</span></span></code></pre></td></tr></table>
 </div>
-</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
-<span style="color:#099">1</span>
-<span style="color:#099">1</span>
--1
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>最终结果：此时感知器权重为<span style="color:#000;font-weight:bold">[</span> 1.  1.<span style="color:#000;font-weight:bold">]</span>，偏置项为-3.0
+</span></span><span style="display:flex;"><span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>-1
+</span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="说明">说明</h2>
 <p>一些概念的详细解释：</p>
@@ -709,8 +708,6 @@
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -772,6 +769,10 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -807,10 +808,6 @@
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -830,9 +827,9 @@
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

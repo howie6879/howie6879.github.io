@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>以Ruia为例：如何实现一个Python爬虫框架 | 老胡的储物柜</title>
   <meta property="og:title" content="以Ruia为例：如何实现一个Python爬虫框架 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -113,11 +117,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="post-content">
             <p>
@@ -168,23 +167,23 @@
 <li>Spider：爬虫程序的控制中心，将请求、响应、解析、存储结合起来</li>
 </ul>
 <p>这四个部分我们可以简单地使用五个类来实现，在开始讲解之前，请先克隆<code>Ruia</code>框架到本地：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic"># 请确保本地Python环境是3.6+</span>
-git clone https://github.com/howie6879/ruia.git
-<span style="color:#998;font-style:italic"># 安装pipenv</span>
-pip install pipenv 
-<span style="color:#998;font-style:italic"># 安装依赖包</span>
-pipenv install --dev
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 请确保本地Python环境是3.6+</span>
+</span></span><span style="display:flex;"><span>git clone https://github.com/howie6879/ruia.git
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 安装pipenv</span>
+</span></span><span style="display:flex;"><span>pip install pipenv 
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 安装依赖包</span>
+</span></span><span style="display:flex;"><span>pipenv install --dev
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>然后用<code>PyCharm</code>打开<code>Ruia</code>项目：</p>
 <p>
@@ -210,186 +209,180 @@ pipenv install --dev
 <li>将返回的一系列数据封装成<code>Response</code>类返回</li>
 </ul>
 <p>接下来就简单了，不过就是实现上述需求，首先，需要实现一个函数来抓取目标<code>url</code>，比如命名为<code>fetch</code>:</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">aiohttp</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">async_timeout</span>
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">typing</span> <span style="color:#000;font-weight:bold">import</span> Coroutine
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Request</span>:
-    <span style="color:#998;font-style:italic"># Default config</span>
-    REQUEST_CONFIG <span style="color:#000;font-weight:bold">=</span> {
-        <span style="color:#d14">&#39;RETRIES&#39;</span>: <span style="color:#099">3</span>,
-        <span style="color:#d14">&#39;DELAY&#39;</span>: <span style="color:#099">0</span>,
-        <span style="color:#d14">&#39;TIMEOUT&#39;</span>: <span style="color:#099">10</span>,
-        <span style="color:#d14">&#39;RETRY_FUNC&#39;</span>: Coroutine,
-        <span style="color:#d14">&#39;VALID&#39;</span>: Coroutine
-    }
-
-    METHOD <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#39;GET&#39;</span>, <span style="color:#d14">&#39;POST&#39;</span>]
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, url, method<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;GET&#39;</span>, request_config<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>, request_session<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>):
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url <span style="color:#000;font-weight:bold">=</span> url
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">=</span> method<span style="color:#000;font-weight:bold">.</span>upper()
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config <span style="color:#000;font-weight:bold">=</span> request_config <span style="color:#000;font-weight:bold">or</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>REQUEST_CONFIG
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> request_session
-
-    <span style="color:#3c5d5d;font-weight:bold">@property</span>
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">current_request_session</span>(<span style="color:#999">self</span>):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> aiohttp<span style="color:#000;font-weight:bold">.</span>ClientSession()
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>close_request_session <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">True</span>
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session
-
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fetch</span>(<span style="color:#999">self</span>):
-        <span style="color:#d14">&#34;&#34;&#34;Fetch all the information by using aiohttp&#34;&#34;&#34;</span>
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DELAY&#39;</span>, <span style="color:#099">0</span>) <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
-            <span style="color:#000;font-weight:bold">await</span> asyncio<span style="color:#000;font-weight:bold">.</span>sleep(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config[<span style="color:#d14">&#39;DELAY&#39;</span>])
-
-        timeout <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;TIMEOUT&#39;</span>, <span style="color:#099">10</span>)
-        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> async_timeout<span style="color:#000;font-weight:bold">.</span>timeout(timeout):
-            resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_make_request()
-        <span style="color:#000;font-weight:bold">try</span>:
-            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>text()
-        <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">UnicodeDecodeError</span>:
-            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>read()
-        resp_dict <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
-            rl<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url,
-            method<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method,
-            encoding<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>get_encoding(),
-            html<span style="color:#000;font-weight:bold">=</span>resp_data,
-            cookies<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>cookies,
-            headers<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>headers,
-            status<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>status,
-            history<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>history
-        )
-        <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session<span style="color:#000;font-weight:bold">.</span>close()
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#0086b3">type</span>(<span style="color:#d14">&#39;Response&#39;</span>, (), resp_dict)
-
-
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_make_request</span>(<span style="color:#999">self</span>):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;GET&#39;</span>:
-            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
-        <span style="color:#000;font-weight:bold">else</span>:
-            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>post(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
-        resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> request_func
-        <span style="color:#000;font-weight:bold">return</span> resp
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
-    resp <span style="color:#000;font-weight:bold">=</span> loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(Request(<span style="color:#d14">&#39;https://docs.python-ruia.org/&#39;</span>)<span style="color:#000;font-weight:bold">.</span>fetch())
-    <span style="color:#0086b3">print</span>(resp<span style="color:#000;font-weight:bold">.</span>status)
-
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">aiohttp</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">async_timeout</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">typing</span> <span style="color:#000;font-weight:bold">import</span> Coroutine
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Request</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># Default config</span>
+</span></span><span style="display:flex;"><span>    REQUEST_CONFIG <span style="color:#000;font-weight:bold">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;RETRIES&#39;</span>: <span style="color:#099">3</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;DELAY&#39;</span>: <span style="color:#099">0</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;TIMEOUT&#39;</span>: <span style="color:#099">10</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;RETRY_FUNC&#39;</span>: Coroutine,
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#39;VALID&#39;</span>: Coroutine
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    METHOD <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#39;GET&#39;</span>, <span style="color:#d14">&#39;POST&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, url, method<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;GET&#39;</span>, request_config<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>, request_session<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url <span style="color:#000;font-weight:bold">=</span> url
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">=</span> method<span style="color:#000;font-weight:bold">.</span>upper()
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config <span style="color:#000;font-weight:bold">=</span> request_config <span style="color:#000;font-weight:bold">or</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>REQUEST_CONFIG
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> request_session
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#3c5d5d;font-weight:bold">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">current_request_session</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session <span style="color:#000;font-weight:bold">=</span> aiohttp<span style="color:#000;font-weight:bold">.</span>ClientSession()
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>close_request_session <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">fetch</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;Fetch all the information by using aiohttp&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DELAY&#39;</span>, <span style="color:#099">0</span>) <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">await</span> asyncio<span style="color:#000;font-weight:bold">.</span>sleep(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config[<span style="color:#d14">&#39;DELAY&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        timeout <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;TIMEOUT&#39;</span>, <span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> async_timeout<span style="color:#000;font-weight:bold">.</span>timeout(timeout):
+</span></span><span style="display:flex;"><span>            resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_make_request()
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>text()
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">except</span> <span style="color:#900;font-weight:bold">UnicodeDecodeError</span>:
+</span></span><span style="display:flex;"><span>            resp_data <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> resp<span style="color:#000;font-weight:bold">.</span>read()
+</span></span><span style="display:flex;"><span>        resp_dict <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+</span></span><span style="display:flex;"><span>            rl<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url,
+</span></span><span style="display:flex;"><span>            method<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method,
+</span></span><span style="display:flex;"><span>            encoding<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>get_encoding(),
+</span></span><span style="display:flex;"><span>            html<span style="color:#000;font-weight:bold">=</span>resp_data,
+</span></span><span style="display:flex;"><span>            cookies<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>cookies,
+</span></span><span style="display:flex;"><span>            headers<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>headers,
+</span></span><span style="display:flex;"><span>            status<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>status,
+</span></span><span style="display:flex;"><span>            history<span style="color:#000;font-weight:bold">=</span>resp<span style="color:#000;font-weight:bold">.</span>history
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_session<span style="color:#000;font-weight:bold">.</span>close()
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#0086b3">type</span>(<span style="color:#d14">&#39;Response&#39;</span>, (), resp_dict)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_make_request</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>method <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;GET&#39;</span>:
+</span></span><span style="display:flex;"><span>            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>            request_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>current_request_session<span style="color:#000;font-weight:bold">.</span>post(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>url)
+</span></span><span style="display:flex;"><span>        resp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> request_func
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> resp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
+</span></span><span style="display:flex;"><span>    resp <span style="color:#000;font-weight:bold">=</span> loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(Request(<span style="color:#d14">&#39;https://docs.python-ruia.org/&#39;</span>)<span style="color:#000;font-weight:bold">.</span>fetch())
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">print</span>(resp<span style="color:#000;font-weight:bold">.</span>status)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>实际运行一下，会输出请求状态<code>200</code>，就这样简单封装一下，我们已经有了自己的请求类<code>Request</code>，接下来只需要再完善一下重试机制以及将返回的属性封装一下就基本完成了：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># 重试函数</span>
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_retry</span>(<span style="color:#999">self</span>):
-    <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
-        retry_times <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRIES&#39;</span>, <span style="color:#099">3</span>) <span style="color:#000;font-weight:bold">-</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">-=</span> <span style="color:#099">1</span>
-        retry_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRY_FUNC&#39;</span>)
-        <span style="color:#000;font-weight:bold">if</span> retry_func <span style="color:#000;font-weight:bold">and</span> iscoroutinefunction(retry_func):
-            request_ins <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> retry_func(weakref<span style="color:#000;font-weight:bold">.</span>proxy(<span style="color:#999">self</span>))
-            <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(request_ins, Request):
-                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> request_ins<span style="color:#000;font-weight:bold">.</span>fetch()
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>fetch()
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 重试函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">_retry</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>:
+</span></span><span style="display:flex;"><span>        retry_times <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRIES&#39;</span>, <span style="color:#099">3</span>) <span style="color:#000;font-weight:bold">-</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>retry_times <span style="color:#000;font-weight:bold">-=</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>        retry_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>request_config<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;RETRY_FUNC&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> retry_func <span style="color:#000;font-weight:bold">and</span> iscoroutinefunction(retry_func):
+</span></span><span style="display:flex;"><span>            request_ins <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> retry_func(weakref<span style="color:#000;font-weight:bold">.</span>proxy(<span style="color:#999">self</span>))
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(request_ins, Request):
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> request_ins<span style="color:#000;font-weight:bold">.</span>fetch()
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">await</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>fetch()
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>最终代码见<code>ruia/request.py</code>即可，接下来就可以利用<code>Request</code>来实际请求一个目标网页，如下：</p>
 <p>
@@ -404,43 +397,43 @@ pipenv install --dev
 </blockquote>
 <p>实现了对目标网页的请求，接下来就是对目标网页进行字段提取，我觉得<code>ORM</code>的思想很适合用在这里，我们只需要定义一个<code>Item</code>类，类里面每个属性都可以用<code>Field</code>类来定义，然后只需要传入<code>url</code>或者<code>html</code>，执行过后<code>Item</code>类里面 定义的属性会自动被提取出来变成目标字段值</p>
 <p>可能说起来比较拗口，下面直接演示一下可能你就明白这样写的好，假设你的需求是获取<code>HackerNews</code>网页的<code>title</code>和<code>url</code>，可以这样实现：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
-    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
-    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
-    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
-
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">main</span>():
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(url<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://news.ycombinator.com/&#34;</span>):
-        <span style="color:#0086b3">print</span>(item<span style="color:#000;font-weight:bold">.</span>title, item<span style="color:#000;font-weight:bold">.</span>url)
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-     items <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>run(main())
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">main</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(url<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://news.ycombinator.com/&#34;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#0086b3">print</span>(item<span style="color:#000;font-weight:bold">.</span>title, item<span style="color:#000;font-weight:bold">.</span>url)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>     items <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>run(main())
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/20190314094841.png" />   
@@ -453,165 +446,163 @@ pipenv install --dev
 <li>RE</li>
 </ul>
 <p>所以我们只需要根据需求，定义父类然后再利用不同的提取方式实现子类即可，代码如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">BaseField</span>(<span style="color:#0086b3">object</span>):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    BaseField class
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, default: <span style="color:#0086b3">str</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>, many: <span style="color:#0086b3">bool</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        Init BaseField class
-</span><span style="color:#d14">        url: http://lxml.de/index.html
-</span><span style="color:#d14">        :param default: default value
-</span><span style="color:#d14">        :param many: if there are many fields in one page
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>default <span style="color:#000;font-weight:bold">=</span> default
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>many <span style="color:#000;font-weight:bold">=</span> many
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">extract</span>(<span style="color:#999">self</span>, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs):
-        <span style="color:#000;font-weight:bold">raise</span> <span style="color:#900;font-weight:bold">NotImplementedError</span>(<span style="color:#d14">&#39;extract is not implemented.&#39;</span>)
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">_LxmlElementField</span>(BaseField):
-    <span style="color:#000;font-weight:bold">pass</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AttrField</span>(_LxmlElementField):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    This field is used to get  attribute.
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-	  <span style="color:#000;font-weight:bold">pass</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HtmlField</span>(_LxmlElementField):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    This field is used to get raw html data.
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    <span style="color:#000;font-weight:bold">pass</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">TextField</span>(_LxmlElementField):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    This field is used to get text.
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-	  <span style="color:#000;font-weight:bold">pass</span>
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RegexField</span>(BaseField):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    This field is used to get raw html code by regular expression.
-</span><span style="color:#d14">    RegexField uses standard library `re` inner, that is to say it has a better performance than _LxmlElementField.
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    <span style="color:#000;font-weight:bold">pass</span>
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">BaseField</span>(<span style="color:#0086b3">object</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    BaseField class
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>, default: <span style="color:#0086b3">str</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>, many: <span style="color:#0086b3">bool</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        Init BaseField class
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        url: http://lxml.de/index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param default: default value
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param many: if there are many fields in one page
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>default <span style="color:#000;font-weight:bold">=</span> default
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>many <span style="color:#000;font-weight:bold">=</span> many
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">extract</span>(<span style="color:#999">self</span>, <span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">raise</span> <span style="color:#900;font-weight:bold">NotImplementedError</span>(<span style="color:#d14">&#39;extract is not implemented.&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">_LxmlElementField</span>(BaseField):
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AttrField</span>(_LxmlElementField):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    This field is used to get  attribute.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>	  <span style="color:#000;font-weight:bold">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HtmlField</span>(_LxmlElementField):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    This field is used to get raw html data.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">TextField</span>(_LxmlElementField):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    This field is used to get text.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>	  <span style="color:#000;font-weight:bold">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RegexField</span>(BaseField):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    This field is used to get raw html code by regular expression.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    RegexField uses standard library `re` inner, that is to say it has a better performance than _LxmlElementField.
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">pass</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>核心类就是上面的代码，具体实现请看<code>ruia/field.py</code></p>
 <p>接下来继续说<code>Item</code>部分，这部分实际上是对<code>ORM</code>那块的实现，用到的知识点是<code>元类</code>，因为我们需要控制类的创建行为：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ItemMeta</span>(<span style="color:#0086b3">type</span>):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    Metaclass for an item
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> __new__(<span style="color:#999">cls</span>, name, bases, attrs):
-        __fields <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>({(field_name, attrs<span style="color:#000;font-weight:bold">.</span>pop(field_name))
-                         <span style="color:#000;font-weight:bold">for</span> field_name, <span style="color:#0086b3">object</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">list</span>(attrs<span style="color:#000;font-weight:bold">.</span>items())
-                         <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(<span style="color:#0086b3">object</span>, BaseField)})
-        attrs[<span style="color:#d14">&#39;__fields&#39;</span>] <span style="color:#000;font-weight:bold">=</span> __fields
-        new_class <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">type</span><span style="color:#000;font-weight:bold">.</span>__new__(<span style="color:#999">cls</span>, name, bases, attrs)
-        <span style="color:#000;font-weight:bold">return</span> new_class
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Item</span>(metaclass<span style="color:#000;font-weight:bold">=</span>ItemMeta):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    Item class for each item
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>ignore_item <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>results <span style="color:#000;font-weight:bold">=</span> {}
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ItemMeta</span>(<span style="color:#0086b3">type</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    Metaclass for an item
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __new__(<span style="color:#999">cls</span>, name, bases, attrs):
+</span></span><span style="display:flex;"><span>        __fields <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>({(field_name, attrs<span style="color:#000;font-weight:bold">.</span>pop(field_name))
+</span></span><span style="display:flex;"><span>                         <span style="color:#000;font-weight:bold">for</span> field_name, <span style="color:#0086b3">object</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">list</span>(attrs<span style="color:#000;font-weight:bold">.</span>items())
+</span></span><span style="display:flex;"><span>                         <span style="color:#000;font-weight:bold">if</span> <span style="color:#0086b3">isinstance</span>(<span style="color:#0086b3">object</span>, BaseField)})
+</span></span><span style="display:flex;"><span>        attrs[<span style="color:#d14">&#39;__fields&#39;</span>] <span style="color:#000;font-weight:bold">=</span> __fields
+</span></span><span style="display:flex;"><span>        new_class <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">type</span><span style="color:#000;font-weight:bold">.</span>__new__(<span style="color:#999">cls</span>, name, bases, attrs)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> new_class
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Item</span>(metaclass<span style="color:#000;font-weight:bold">=</span>ItemMeta):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    Item class for each item
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>ignore_item <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>results <span style="color:#000;font-weight:bold">=</span> {}
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>这一层弄明白接下来就很简单了，还记得上一篇文章《谈谈对Python爬虫的理解》里面说的四个类型的目标网页么：</p>
 <ul>
@@ -636,74 +627,74 @@ pipenv install --dev
 <li>自由地定制插件</li>
 </ul>
 <p>接下来说说代码实现，<code>Ruia</code>框架的<code>API</code>写法我有参考<code>Scrapy</code>，各个函数之间的联结也是使用回调，但是你也可以直接使用<code>await</code>，可以直接看代码示例：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item, Spider
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
-    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
-    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
-    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsSpider</span>(Spider):
-    start_urls <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">f</span><span style="color:#d14">&#39;https://news.ycombinator.com/news?p=</span><span style="color:#d14">{</span>index<span style="color:#d14">}</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">for</span> index <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">1</span>, <span style="color:#099">3</span>)]
-
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse</span>(<span style="color:#999">self</span>, response):
-        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(html<span style="color:#000;font-weight:bold">=</span>response<span style="color:#000;font-weight:bold">.</span>html):
-            <span style="color:#000;font-weight:bold">yield</span> item
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
-    HackerNewsSpider<span style="color:#000;font-weight:bold">.</span>start()
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">ruia</span> <span style="color:#000;font-weight:bold">import</span> AttrField, TextField, Item, Spider
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#000;font-weight:bold">=</span> TextField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#000;font-weight:bold">=</span> AttrField(css_select<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;a.storylink&#39;</span>, attr<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;href&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">f</span><span style="color:#d14">&#39;https://news.ycombinator.com/news?p=</span><span style="color:#d14">{</span>index<span style="color:#d14">}</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">for</span> index <span style="color:#000;font-weight:bold">in</span> <span style="color:#0086b3">range</span>(<span style="color:#099">1</span>, <span style="color:#099">3</span>)]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">parse</span>(<span style="color:#999">self</span>, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> item <span style="color:#000;font-weight:bold">in</span> HackerNewsItem<span style="color:#000;font-weight:bold">.</span>get_items(html<span style="color:#000;font-weight:bold">=</span>response<span style="color:#000;font-weight:bold">.</span>html):
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">yield</span> item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    HackerNewsSpider<span style="color:#000;font-weight:bold">.</span>start()
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>使用起来还是挺简洁的，输出如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider started!
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380434912</span>
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380435048</span>
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>1&gt;
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>2&gt;
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Stopping spider: Ruia
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Total requests: <span style="color:#099">2</span>
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Time usage: 0:00:03.426335
-<span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider finished!
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider started!
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380434912</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Worker started: <span style="color:#099">4380435048</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>1&gt;
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:04<span style="color:#000;font-weight:bold">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#000;font-weight:bold">=</span>2&gt;
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Stopping spider: Ruia
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Total requests: <span style="color:#099">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Time usage: 0:00:03.426335
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">[</span>2019:03:14 10:29:08<span style="color:#000;font-weight:bold">]</span> INFO  Spider  Spider finished!
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>Spider</code>的核心部分在于对请求<code>URL</code>的请求控制，目前采用的是生产消费者模式来处理，具体函数如下：</p>
 <p>
@@ -825,8 +816,6 @@ pipenv install --dev
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -888,6 +877,10 @@ pipenv install --dev
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -923,10 +916,6 @@ pipenv install --dev
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -946,9 +935,9 @@ pipenv install --dev
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

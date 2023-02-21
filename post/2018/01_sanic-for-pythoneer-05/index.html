@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>Sanic 使用教程 - 5.数据库使用 | 老胡的储物柜</title>
   <meta property="og:title" content="Sanic 使用教程 - 5.数据库使用 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -213,11 +217,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="clear" style="display: none">
             <div class="toc-article">
@@ -229,15 +228,15 @@
             <p>介绍中说的很明白，<code>Sanic</code> 是一个可以使用 <code>async/await</code> 语法编写项目的<strong>异步</strong>非阻塞框架，既然是异步框架，那么在使用过程中用到的第三方包也最好是异步的，比如http请求，最好就使用<code>aihttp</code>而非<code>requests</code>，对于数据库的连接，也是同样如此，下面我将用代码的形式来说明下如何在Sanic中连接数据库。</p>
 <h2 id="操作mysql">操作Mysql</h2>
 <p>对于mysql数据库的异步操作，我只在一些脚本中用过，用的是<a href="https://github.com/aio-libs/aiomysql">aiomysql</a>，其中官方文档中讲得很清楚，也支持结合<code>sqlalchemy</code>编写<code>ORM</code>，然后aiomysql提供了自己编写的异步引擎。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
-<span style="color:#998;font-style:italic"># 这个才是关键</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 这个才是关键</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>下面我编写一个具体的例子来用异步语句操作下数据库，首先建立如下目录：</p>
 <pre tabindex="0"><code class="language-shel" data-lang="shel">aio_mysql
@@ -245,454 +244,448 @@
 ├── model.py
 └── requirements.txt
 </code></pre><p>建立表：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>test_mysql;<span style="color:#bbb">
-</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">TABLE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">user</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>(<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>id<span style="color:#bbb">        </span><span style="color:#458;font-weight:bold">INT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">AUTO_INCREMENT</span><span style="color:#bbb">
-</span><span style="color:#bbb">    </span><span style="color:#000;font-weight:bold">PRIMARY</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">KEY</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>user_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">16</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>pwd<span style="color:#bbb">       </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">32</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">  </span>real_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">6</span>)<span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>);<span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-mysql" data-lang="mysql"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">database</span><span style="color:#bbb"> </span>test_mysql;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">TABLE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">user</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>id<span style="color:#bbb">        </span><span style="color:#458;font-weight:bold">INT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">AUTO_INCREMENT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000;font-weight:bold">PRIMARY</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">KEY</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>user_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">16</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>pwd<span style="color:#bbb">       </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">32</span>)<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>real_name<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>(<span style="color:#099">6</span>)<span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#008080">NULL</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>一切准备就绪，下面编写代码：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic"># script: model.py</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">sqlalchemy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">sa</span>
-
-metadata <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>MetaData()
-
-user <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>Table(
-    <span style="color:#d14">&#39;user&#39;</span>,
-    metadata,
-    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;id&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>Integer, autoincrement<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>, primary_key<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>),
-    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;user_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">16</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
-    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;pwd&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">32</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
-    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;real_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">6</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
-)
-
-<span style="color:#998;font-style:italic"># script: demo.py</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">model</span> <span style="color:#000;font-weight:bold">import</span> user,metadata
-
-
-<span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">go</span>(loop):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    aiomysql项目地址：https://github.com/aio-libs/aiomysql
-</span><span style="color:#d14">    :param loop:
-</span><span style="color:#d14">    :return:
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    engine <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> create_engine(user<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;root&#39;</span>, db<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mysql&#39;</span>,
-                                 host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;127.0.0.1&#39;</span>, password<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, loop<span style="color:#000;font-weight:bold">=</span>loop)
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> engine<span style="color:#000;font-weight:bold">.</span>acquire() <span style="color:#000;font-weight:bold">as</span> conn:
-        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>insert()<span style="color:#000;font-weight:bold">.</span>values(user_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;user_name01&#39;</span>, pwd<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, real_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;real_name01&#39;</span>))
-        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(<span style="color:#d14">&#39;commit&#39;</span>)
-
-        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> row <span style="color:#000;font-weight:bold">in</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>select()):
-            <span style="color:#0086b3">print</span>(row<span style="color:#000;font-weight:bold">.</span>user_name, row<span style="color:#000;font-weight:bold">.</span>pwd)
-
-    engine<span style="color:#000;font-weight:bold">.</span>close()
-    <span style="color:#000;font-weight:bold">await</span> engine<span style="color:#000;font-weight:bold">.</span>wait_closed()
-
-
-loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
-loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(go(loop))
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># script: model.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">sqlalchemy</span> <span style="color:#000;font-weight:bold">as</span> <span style="color:#555">sa</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>metadata <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>MetaData()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user <span style="color:#000;font-weight:bold">=</span> sa<span style="color:#000;font-weight:bold">.</span>Table(
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#39;user&#39;</span>,
+</span></span><span style="display:flex;"><span>    metadata,
+</span></span><span style="display:flex;"><span>    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;id&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>Integer, autoincrement<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>, primary_key<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>),
+</span></span><span style="display:flex;"><span>    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;user_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">16</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+</span></span><span style="display:flex;"><span>    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;pwd&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">32</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+</span></span><span style="display:flex;"><span>    sa<span style="color:#000;font-weight:bold">.</span>Column(<span style="color:#d14">&#39;real_name&#39;</span>, sa<span style="color:#000;font-weight:bold">.</span>String(<span style="color:#099">6</span>), nullable<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">False</span>),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># script: demo.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">aiomysql.sa</span> <span style="color:#000;font-weight:bold">import</span> create_engine
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">model</span> <span style="color:#000;font-weight:bold">import</span> user,metadata
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">go</span>(loop):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    aiomysql项目地址：https://github.com/aio-libs/aiomysql
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :param loop:
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :return:
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    engine <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> create_engine(user<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;root&#39;</span>, db<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mysql&#39;</span>,
+</span></span><span style="display:flex;"><span>                                 host<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;127.0.0.1&#39;</span>, password<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, loop<span style="color:#000;font-weight:bold">=</span>loop)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">with</span> engine<span style="color:#000;font-weight:bold">.</span>acquire() <span style="color:#000;font-weight:bold">as</span> conn:
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>insert()<span style="color:#000;font-weight:bold">.</span>values(user_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;user_name01&#39;</span>, pwd<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;123456&#39;</span>, real_name<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;real_name01&#39;</span>))
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">await</span> conn<span style="color:#000;font-weight:bold">.</span>execute(<span style="color:#d14">&#39;commit&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">for</span> row <span style="color:#000;font-weight:bold">in</span> conn<span style="color:#000;font-weight:bold">.</span>execute(user<span style="color:#000;font-weight:bold">.</span>select()):
+</span></span><span style="display:flex;"><span>            <span style="color:#0086b3">print</span>(row<span style="color:#000;font-weight:bold">.</span>user_name, row<span style="color:#000;font-weight:bold">.</span>pwd)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    engine<span style="color:#000;font-weight:bold">.</span>close()
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">await</span> engine<span style="color:#000;font-weight:bold">.</span>wait_closed()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>loop <span style="color:#000;font-weight:bold">=</span> asyncio<span style="color:#000;font-weight:bold">.</span>get_event_loop()
+</span></span><span style="display:flex;"><span>loop<span style="color:#000;font-weight:bold">.</span>run_until_complete(go(loop))
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>运行 python demo.py，会看到如下输出：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">user_name01 <span style="color:#099">123456</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>user_name01 <span style="color:#099">123456</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>很简单吧，具体示例见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mysql">aio_mysql</a></p>
 <h2 id="操作mongodb">操作MongoDB</h2>
 <p>我业余写的一个项目，基本用的就是<code>MongoDB</code>来储存数据，对于异步操作<code>MongoDB</code>，目前Python主要用的是<a href="https://motor.readthedocs.io/en/stable/index.html">motor</a>，使用起来依旧很简单，但是结合具体功能，就有不同的的需求，最后就会形成各种各样的连接方案，这里我主要分享下自己是如何使用的，目录如下所示：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">aio_mongo
-├── demo.py
-└── requirements.txt
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>aio_mongo
+</span></span><span style="display:flex;"><span>├── demo.py
+</span></span><span style="display:flex;"><span>└── requirements.txt
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>MongoDB</code>是一个基于分布式文件存储的数据库，它介于关系数据库和非关系数据库之间，所以它使用起来也是比较灵活的，打开<code>demo.py</code>：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> wraps
-
-<span style="color:#000;font-weight:bold">from</span> <span style="color:#555">motor.motor_asyncio</span> <span style="color:#000;font-weight:bold">import</span> AsyncIOMotorClient
-
-MONGODB <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
-    MONGO_HOST<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_HOST&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
-    MONGO_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PORT&#39;</span>, <span style="color:#099">27017</span>),
-    MONGO_USERNAME<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
-    MONGO_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
-    DATABASE<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mongodb&#39;</span>,
-)
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBaseOld</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    默认实现了一个db只创建一次，缺点是更换集合麻烦
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    _db <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
-    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
-        <span style="color:#998;font-style:italic"># motor</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
-            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
-                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
-                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
-            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
-            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
-            database<span style="color:#000;font-weight:bold">=</span>db)
-        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
-
-    <span style="color:#3c5d5d;font-weight:bold">@property</span>
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">db</span>(<span style="color:#999">self</span>):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>])[<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]]
-
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">functools</span> <span style="color:#000;font-weight:bold">import</span> wraps
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">motor.motor_asyncio</span> <span style="color:#000;font-weight:bold">import</span> AsyncIOMotorClient
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>MONGODB <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+</span></span><span style="display:flex;"><span>    MONGO_HOST<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_HOST&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+</span></span><span style="display:flex;"><span>    MONGO_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PORT&#39;</span>, <span style="color:#099">27017</span>),
+</span></span><span style="display:flex;"><span>    MONGO_USERNAME<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+</span></span><span style="display:flex;"><span>    MONGO_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#d14">&#34;&#34;</span>),
+</span></span><span style="display:flex;"><span>    DATABASE<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;test_mongodb&#39;</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBaseOld</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    默认实现了一个db只创建一次，缺点是更换集合麻烦
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    _db <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># motor</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+</span></span><span style="display:flex;"><span>            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+</span></span><span style="display:flex;"><span>                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
+</span></span><span style="display:flex;"><span>                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
+</span></span><span style="display:flex;"><span>            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
+</span></span><span style="display:flex;"><span>            database<span style="color:#000;font-weight:bold">=</span>db)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#3c5d5d;font-weight:bold">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">db</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">is</span> <span style="color:#000;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>])[<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>我最开始，使用的是这样种方式来连接<code>MongoDB</code>，上面代码保证了集合中的db被_db维护，保证只会创建一次，如果你项目中不会随意更改集合的话，也没什么大问题，如果不是，我推荐使用下面这样的连接方式，可以自由地更换集合与db：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">singleton</span>(<span style="color:#999">cls</span>):
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/</span><span style="color:#d14">%E</span><span style="color:#d14">9</span><span style="color:#d14">%99%</span><span style="color:#d14">84</span><span style="color:#d14">%E</span><span style="color:#d14">5%BD</span><span style="color:#d14">%95%</span><span style="color:#d14">EF%BC%9A</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%85%</span><span style="color:#d14">B3</span><span style="color:#d14">%E</span><span style="color:#d14">4%BA</span><span style="color:#d14">%8E%E</span><span style="color:#d14">8%A3</span><span style="color:#d14">%85%</span><span style="color:#d14">E9%A5%B0</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%99%</span><span style="color:#d14">A8.md
-</span><span style="color:#d14">    :param cls: cls
-</span><span style="color:#d14">    :return: instance
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    _instances <span style="color:#000;font-weight:bold">=</span> {}
-
-    <span style="color:#3c5d5d;font-weight:bold">@wraps</span>(<span style="color:#999">cls</span>)
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">instance</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">cls</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> _instances:
-            _instances[<span style="color:#999">cls</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">cls</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw)
-        <span style="color:#000;font-weight:bold">return</span> _instances[<span style="color:#999">cls</span>]
-
-    <span style="color:#000;font-weight:bold">return</span> instance
-
-<span style="color:#3c5d5d;font-weight:bold">@singleton</span>
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBase</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    更改mongodb连接方式 单例模式下支持多库操作
-</span><span style="color:#d14">    About motor&#39;s doc: https://github.com/mongodb/motor
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    _db <span style="color:#000;font-weight:bold">=</span> {}
-    _collection <span style="color:#000;font-weight:bold">=</span> {}
-    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
-
-    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
-        <span style="color:#998;font-style:italic"># motor</span>
-        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
-            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
-                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
-                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
-            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
-            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
-            database<span style="color:#000;font-weight:bold">=</span>db)
-        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_db</span>(<span style="color:#999">self</span>, db<span style="color:#000;font-weight:bold">=</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        获取一个db实例
-</span><span style="color:#d14">        :param db: database name
-</span><span style="color:#d14">        :return: the motor db instance
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        <span style="color:#000;font-weight:bold">if</span> db <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(db)[db]
-
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db]
-
-    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_collection</span>(<span style="color:#999">self</span>, db_name, collection):
-        <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">        获取一个集合实例
-</span><span style="color:#d14">        :param db_name: database name
-</span><span style="color:#d14">        :param collection: collection name
-</span><span style="color:#d14">        :return: the motor collection instance
-</span><span style="color:#d14">        &#34;&#34;&#34;</span>
-        collection_key <span style="color:#000;font-weight:bold">=</span> db_name <span style="color:#000;font-weight:bold">+</span> collection
-        <span style="color:#000;font-weight:bold">if</span> collection_key <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_db(db_name)[collection]
-
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key]
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">singleton</span>(<span style="color:#999">cls</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    用装饰器实现的实例 不明白装饰器可见附录 装饰器：https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/docs/part2/</span><span style="color:#d14">%E</span><span style="color:#d14">9</span><span style="color:#d14">%99%</span><span style="color:#d14">84</span><span style="color:#d14">%E</span><span style="color:#d14">5%BD</span><span style="color:#d14">%95%</span><span style="color:#d14">EF%BC%9A</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%85%</span><span style="color:#d14">B3</span><span style="color:#d14">%E</span><span style="color:#d14">4%BA</span><span style="color:#d14">%8E%E</span><span style="color:#d14">8%A3</span><span style="color:#d14">%85%</span><span style="color:#d14">E9%A5%B0</span><span style="color:#d14">%E</span><span style="color:#d14">5</span><span style="color:#d14">%99%</span><span style="color:#d14">A8.md
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :param cls: cls
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    :return: instance
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    _instances <span style="color:#000;font-weight:bold">=</span> {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#3c5d5d;font-weight:bold">@wraps</span>(<span style="color:#999">cls</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">instance</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">cls</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> _instances:
+</span></span><span style="display:flex;"><span>            _instances[<span style="color:#999">cls</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">cls</span>(<span style="color:#000;font-weight:bold">*</span>args, <span style="color:#000;font-weight:bold">**</span>kw)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> _instances[<span style="color:#999">cls</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> instance
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#3c5d5d;font-weight:bold">@singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MotorBase</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    更改mongodb连接方式 单例模式下支持多库操作
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    About motor&#39;s doc: https://github.com/mongodb/motor
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    _db <span style="color:#000;font-weight:bold">=</span> {}
+</span></span><span style="display:flex;"><span>    _collection <span style="color:#000;font-weight:bold">=</span> {}
+</span></span><span style="display:flex;"><span>    MONGODB <span style="color:#000;font-weight:bold">=</span> MONGODB
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> __init__(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">client</span>(<span style="color:#999">self</span>, db):
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># motor</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;mongodb://</span><span style="color:#d14">{account}{host}</span><span style="color:#d14">:</span><span style="color:#d14">{port}</span><span style="color:#d14">/</span><span style="color:#d14">{database}</span><span style="color:#d14">&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+</span></span><span style="display:flex;"><span>            account<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;</span><span style="color:#d14">{username}</span><span style="color:#d14">:</span><span style="color:#d14">{password}</span><span style="color:#d14">@&#39;</span><span style="color:#000;font-weight:bold">.</span>format(
+</span></span><span style="display:flex;"><span>                username<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>],
+</span></span><span style="display:flex;"><span>                password<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PASSWORD&#39;</span>]) <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_USERNAME&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>            host<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_HOST&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#d14">&#39;localhost&#39;</span>,
+</span></span><span style="display:flex;"><span>            port<span style="color:#000;font-weight:bold">=</span><span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">if</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>MONGODB[<span style="color:#d14">&#39;MONGO_PORT&#39;</span>] <span style="color:#000;font-weight:bold">else</span> <span style="color:#099">27017</span>,
+</span></span><span style="display:flex;"><span>            database<span style="color:#000;font-weight:bold">=</span>db)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> AsyncIOMotorClient(<span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>motor_uri)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_db</span>(<span style="color:#999">self</span>, db<span style="color:#000;font-weight:bold">=</span>MONGODB[<span style="color:#d14">&#39;DATABASE&#39;</span>]):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        获取一个db实例
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param db: database name
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :return: the motor db instance
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> db <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>client(db)[db]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_db[db]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_collection</span>(<span style="color:#999">self</span>, db_name, collection):
+</span></span><span style="display:flex;"><span>        <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        获取一个集合实例
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param db_name: database name
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :param collection: collection name
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        :return: the motor collection instance
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        collection_key <span style="color:#000;font-weight:bold">=</span> db_name <span style="color:#000;font-weight:bold">+</span> collection
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> collection_key <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key] <span style="color:#000;font-weight:bold">=</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>get_db(db_name)[collection]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_collection[collection_key]
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>为了避免重复创建MotorBase实例，可以实现一个单例模式来保证资源的有效利用，具体代码以及运行demo见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo05/aio_mongo">aio_mongo</a></p>
 <h2 id="操作redis">操作Redis</h2>
 <p>对于Redis的异步操作，我选用的是<code>asyncio_redis</code>，你大可不必非要使用这个，或许其他的库实现地更好，我只是用这个举个例子，建立如下目录：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">aio_redis
-├── demo.py
-└── requirements.txt
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>aio_redis
+</span></span><span style="display:flex;"><span>├── demo.py
+</span></span><span style="display:flex;"><span>└── requirements.txt
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>建立一个redis连接池：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio_redis</span>
-
-REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
-    IS_CACHE<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>,
-    REDIS_ENDPOINT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>),
-    REDIS_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>),
-    REDIS_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
-    DB<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>,
-    POOLSIZE<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>,
-)
-
-
-<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RedisSession</span>:
-    <span style="color:#d14">&#34;&#34;&#34;
-</span><span style="color:#d14">    建立redis连接池
-</span><span style="color:#d14">    &#34;&#34;&#34;</span>
-    _pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
-
-    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_redis_pool</span>(<span style="color:#999">self</span>):
-        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool:
-            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> asyncio_redis<span style="color:#000;font-weight:bold">.</span>Pool<span style="color:#000;font-weight:bold">.</span>create(
-                host<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">str</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>)), port<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>)),
-                poolsize<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;POOLSIZE&#39;</span>, <span style="color:#099">10</span>)), password<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
-                db<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DB&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
-            )
-
-        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool
-
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">os</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">asyncio_redis</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">dict</span>(
+</span></span><span style="display:flex;"><span>    IS_CACHE<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>,
+</span></span><span style="display:flex;"><span>    REDIS_ENDPOINT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>),
+</span></span><span style="display:flex;"><span>    REDIS_PORT<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>),
+</span></span><span style="display:flex;"><span>    REDIS_PASSWORD<span style="color:#000;font-weight:bold">=</span>os<span style="color:#000;font-weight:bold">.</span>getenv(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
+</span></span><span style="display:flex;"><span>    DB<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0</span>,
+</span></span><span style="display:flex;"><span>    POOLSIZE<span style="color:#000;font-weight:bold">=</span><span style="color:#099">10</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RedisSession</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    建立redis连接池
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    _pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_redis_pool</span>(<span style="color:#999">self</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool:
+</span></span><span style="display:flex;"><span>            <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> asyncio_redis<span style="color:#000;font-weight:bold">.</span>Pool<span style="color:#000;font-weight:bold">.</span>create(
+</span></span><span style="display:flex;"><span>                host<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">str</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_ENDPOINT&#39;</span>, <span style="color:#d14">&#34;localhost&#34;</span>)), port<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PORT&#39;</span>, <span style="color:#099">6379</span>)),
+</span></span><span style="display:flex;"><span>                poolsize<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">int</span>(REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;POOLSIZE&#39;</span>, <span style="color:#099">10</span>)), password<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;REDIS_PASSWORD&#39;</span>, <span style="color:#000;font-weight:bold">None</span>),
+</span></span><span style="display:flex;"><span>                db<span style="color:#000;font-weight:bold">=</span>REDIS_DICT<span style="color:#000;font-weight:bold">.</span>get(<span style="color:#d14">&#39;DB&#39;</span>, <span style="color:#000;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#999">self</span><span style="color:#000;font-weight:bold">.</span>_pool
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>具体见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/blob/master/examples/demo05/aio_redis/demo.py">aio_redis</a>，使用起来很简单，不做多叙述。</p>
 <h2 id="说明">说明</h2>
@@ -799,8 +792,6 @@ REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -862,6 +853,10 @@ REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -897,10 +892,6 @@ REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -920,9 +911,9 @@ REDIS_DICT <span style="color:#000;font-weight:bold">=</span> <span style="color
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     

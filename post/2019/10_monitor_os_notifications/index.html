@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <meta name="referrer" content="no-referrer-when-downgrade" />
    <title>不论微信钉钉，我写了个通用消息监控处理机器人 | 老胡的储物柜</title>
   <meta property="og:title" content="不论微信钉钉，我写了个通用消息监控处理机器人 - 老胡的储物柜" />
   <meta property="og:type" content="article" />
@@ -48,6 +46,8 @@
 
   
   
+  <link rel="stylesheet" href='/css/howie.css' />
+  
 
   <script>
     var _hmt = _hmt || [];
@@ -58,6 +58,10 @@
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
 </head>
 
 
@@ -214,11 +218,6 @@
         </div>
         
         
-        <div class="post-meta">
-            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
-                    阅读</span></span>
-        </div>
-        
         
         <div class="clear" style="display: none">
             <div class="toc-article">
@@ -268,17 +267,17 @@
 <h2 id="实践">实践</h2>
 <p>解决方案确立了，接下来无非就是验证加实现，这里还是以<code>Mac</code>为例。</p>
 <p>来来来，看看苹果的系统中心好不好攻占，首先，咋们来确立系统中心数据的存储方式，进入终端：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#0086b3">cd</span> <span style="color:#d14">`</span>getconf DARWIN_USER_DIR<span style="color:#d14">`</span>/com.apple.notificationcenter/db2
-ls
-db     db-shm db-wal
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#0086b3">cd</span> <span style="color:#d14">`</span>getconf DARWIN_USER_DIR<span style="color:#d14">`</span>/com.apple.notificationcenter/db2
+</span></span><span style="display:flex;"><span>ls
+</span></span><span style="display:flex;"><span>db     db-shm db-wal
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，有三个文件，哎，好熟悉，<code>SQLite</code>呗。</p>
 <p>打开：</p>
@@ -302,75 +301,75 @@ db     db-shm db-wal
 <li>record：监控的应用消息</li>
 </ul>
 <p>建表语句分别如下：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">app</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>(<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>app_id<span style="color:#bbb">     </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
-</span><span style="color:#bbb">        </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>identifier<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>badge<span style="color:#bbb">      </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>);<span style="color:#bbb">
-</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">record</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>(<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>rec_id<span style="color:#bbb">            </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
-</span><span style="color:#bbb">        </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>app_id<span style="color:#bbb">            </span><span style="color:#458;font-weight:bold">INTEGER</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>uuid<span style="color:#bbb">              </span><span style="color:#458;font-weight:bold">BLOB</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>data<span style="color:#bbb">              </span><span style="color:#458;font-weight:bold">BLOB</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>request_date<span style="color:#bbb">      </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>request_last_date<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>delivered_date<span style="color:#bbb">    </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>presented<span style="color:#bbb">         </span><span style="color:#458;font-weight:bold">Bool</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>style<span style="color:#bbb">             </span><span style="color:#458;font-weight:bold">INTEGER</span>,<span style="color:#bbb">
-</span><span style="color:#bbb">    </span>snooze_fire_date<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">REAL</span><span style="color:#bbb">
-</span><span style="color:#bbb"></span>);<span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-mysql" data-lang="mysql"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">app</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>app_id<span style="color:#bbb">     </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>identifier<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">VARCHAR</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>badge<span style="color:#bbb">      </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000;font-weight:bold">create</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">table</span><span style="color:#bbb"> </span><span style="color:#900;font-weight:bold">record</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>rec_id<span style="color:#bbb">            </span><span style="color:#458;font-weight:bold">INTEGER</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000;font-weight:bold">primary</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">key</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>app_id<span style="color:#bbb">            </span><span style="color:#458;font-weight:bold">INTEGER</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>uuid<span style="color:#bbb">              </span><span style="color:#458;font-weight:bold">BLOB</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>data<span style="color:#bbb">              </span><span style="color:#458;font-weight:bold">BLOB</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>request_date<span style="color:#bbb">      </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>request_last_date<span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>delivered_date<span style="color:#bbb">    </span><span style="color:#458;font-weight:bold">REAL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>presented<span style="color:#bbb">         </span><span style="color:#458;font-weight:bold">Bool</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>style<span style="color:#bbb">             </span><span style="color:#458;font-weight:bold">INTEGER</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>snooze_fire_date<span style="color:#bbb">  </span><span style="color:#458;font-weight:bold">REAL</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>在app表的这行，可以看到微信应用的<code>id</code>是<code>35</code>。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">app_id	identifier
-35			com.tencent.xinwechat	
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>app_id	identifier
+</span></span><span style="display:flex;"><span>35			com.tencent.xinwechat	
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>知道应用<code>id</code>后就可以直接在<code>record</code>表里面直接找到通知消息：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>app_id,data,<span style="color:#bbb"> </span>presented,<span style="color:#bbb"> </span>delivered_date<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">FROM</span><span style="color:#bbb"> </span>record<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">WHERE</span><span style="color:#bbb"> </span>app_id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">IN</span><span style="color:#bbb"> </span>(<span style="color:#099">35</span>)<span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">ORDER</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">BY</span><span style="color:#bbb"> </span>delivered_date<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">DESC</span>;<span style="color:#bbb">
-</span></code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-mysql" data-lang="mysql"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>app_id,data,<span style="color:#bbb"> </span>presented,<span style="color:#bbb"> </span>delivered_date<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">FROM</span><span style="color:#bbb"> </span>record<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">WHERE</span><span style="color:#bbb"> </span>app_id<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">IN</span><span style="color:#bbb"> </span>(<span style="color:#099">35</span>)<span style="color:#bbb">  </span><span style="color:#000;font-weight:bold">ORDER</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">BY</span><span style="color:#bbb"> </span>delivered_date<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">DESC</span>;<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>得到结果如下：</p>
 <p>
@@ -378,74 +377,74 @@ db     db-shm db-wal
     </p>
 <p>一切顺利，但定睛一看，中间那一大串是什么？不要慌，里面<code>bplist</code>，给了很大的提示。</p>
 <p>在Python的世界里，没有什么问题是引入一个第三方包解决不了的，如果有，那么引入两个第三方包就可以了。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install biplist
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install biplist
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>利用<code>biplist</code>会将那一串加载成我们人类可以看懂的语言。</p>
 <p>好像没有一点阻碍，那就可以直接编码实现了。</p>
 <h2 id="编码">编码</h2>
 <p>算了，不多说，多了我也说不出来，直接开源吧，见 <a href="https://github.com/howie6879/examiner">https://github.com/howie6879/examiner</a> ，不要吝啬你的<strong>Star</strong>（可点击阅读原文）。</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone https://github.com/howie6879/examiner
-<span style="color:#0086b3">cd</span> examiner
-<span style="color:#998;font-style:italic"># 推荐使用pipenv 你也可以使用自己中意的环境构建方式</span>
-pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/howie6879/examiner
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">cd</span> examiner
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 推荐使用pipenv 你也可以使用自己中意的环境构建方式</span>
+</span></span><span style="display:flex;"><span>pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/howie6879/anaconda3/envs/python36/bin/python3.6  --skip-lock
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>接下来只需要在根目录构建自己的监控脚本就行，比如监控微信，监理文件命名为 <em><code>wechat_app.py</code></em>:</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">examiner.notification</span> <span style="color:#000;font-weight:bold">import</span> notification_factory
-
-<span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_data</span>(app_names: <span style="color:#0086b3">list</span>):
-    os_notification <span style="color:#000;font-weight:bold">=</span> notification_factory(app_names)
-    info_list <span style="color:#000;font-weight:bold">=</span> os_notification<span style="color:#000;font-weight:bold">.</span>get_target_notification()
-    <span style="color:#000;font-weight:bold">for</span> each <span style="color:#000;font-weight:bold">in</span> info_list:
-        <span style="color:#998;font-style:italic"># 自行实现监控逻辑以及处理方案</span>
-        <span style="color:#0086b3">print</span>(each)
-
-
-<span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
-    app_names <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#34;WeChat&#34;</span>]
-    get_data(app_names)
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">examiner.notification</span> <span style="color:#000;font-weight:bold">import</span> notification_factory
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">def</span> <span style="color:#900;font-weight:bold">get_data</span>(app_names: <span style="color:#0086b3">list</span>):
+</span></span><span style="display:flex;"><span>    os_notification <span style="color:#000;font-weight:bold">=</span> notification_factory(app_names)
+</span></span><span style="display:flex;"><span>    info_list <span style="color:#000;font-weight:bold">=</span> os_notification<span style="color:#000;font-weight:bold">.</span>get_target_notification()
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> each <span style="color:#000;font-weight:bold">in</span> info_list:
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic"># 自行实现监控逻辑以及处理方案</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0086b3">print</span>(each)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">if</span> __name__ <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    app_names <span style="color:#000;font-weight:bold">=</span> [<span style="color:#d14">&#34;WeChat&#34;</span>]
+</span></span><span style="display:flex;"><span>    get_data(app_names)
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>和上一篇比起来，这代码，不需要配置、不需要提前准备什么，只需要在列表里面填上你想监控的目标应用即可（我顺便支持了多应用），你可以同时监控钉钉和微信等等</p>
 <p>自己可以慢慢玩，一般会这样输出：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#39;title&#39;</span>: <span style="color:#d14">&#39;老胡的储物柜&#39;</span>, <span style="color:#d14">&#39;subtitle&#39;</span>: <span style="color:#d14">&#39;&#39;</span>, <span style="color:#d14">&#39;body&#39;</span>: <span style="color:#d14">&#39;测试消息监控，任何应用都行&#39;</span>, <span style="color:#d14">&#39;delivered_date&#39;</span>: datetime.datetime<span style="color:#000;font-weight:bold">(</span>2019, 10, 20, 21, 40, 26, 428654<span style="color:#000;font-weight:bold">)</span>, <span style="color:#d14">&#39;presented&#39;</span>: 1, <span style="color:#d14">&#39;app_identifier&#39;</span>: <span style="color:#d14">&#39;com.tencent.xinwechat&#39;</span>, <span style="color:#d14">&#39;app_name&#39;</span>: <span style="color:#d14">&#39;WeChat&#39;</span>, <span style="color:#d14">&#39;md5&#39;</span>: <span style="color:#d14">&#39;75e24e2ccc502f01c101fcbd3637950b&#39;</span><span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#39;title&#39;</span>: <span style="color:#d14">&#39;老胡的储物柜&#39;</span>, <span style="color:#d14">&#39;subtitle&#39;</span>: <span style="color:#d14">&#39;&#39;</span>, <span style="color:#d14">&#39;body&#39;</span>: <span style="color:#d14">&#39;测试消息监控，任何应用都行&#39;</span>, <span style="color:#d14">&#39;delivered_date&#39;</span>: datetime.datetime<span style="color:#000;font-weight:bold">(</span>2019, 10, 20, 21, 40, 26, 428654<span style="color:#000;font-weight:bold">)</span>, <span style="color:#d14">&#39;presented&#39;</span>: 1, <span style="color:#d14">&#39;app_identifier&#39;</span>: <span style="color:#d14">&#39;com.tencent.xinwechat&#39;</span>, <span style="color:#d14">&#39;app_name&#39;</span>: <span style="color:#d14">&#39;WeChat&#39;</span>, <span style="color:#d14">&#39;md5&#39;</span>: <span style="color:#d14">&#39;75e24e2ccc502f01c101fcbd3637950b&#39;</span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>搞定收工，有兴趣欢迎关注我的公众号：</p>
 <!-- raw HTML omitted -->
@@ -550,8 +549,6 @@ pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/
 
 
 
-    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-
 
 
 
@@ -613,6 +610,10 @@ pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/
 <ul class="widget-list">
     
     <li>
+        <a href="https://www.howie6879.cn/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
         <a href="https://www.howie6879.cn/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
     </li>
     
@@ -648,10 +649,6 @@ pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/
         <a href="https://www.howie6879.cn/post/2022/01_2021_weekly_all/" title="老胡的周刊2021年度汇总|附PDF下载">老胡的周刊2021年度汇总|附PDF下载</a>
     </li>
     
-    <li>
-        <a href="https://www.howie6879.cn/post/2021/27_whoogle_search/" title="基于Whoogle自建无广告、无追踪的搜索引擎">基于Whoogle自建无广告、无追踪的搜索引擎</a>
-    </li>
-    
 </ul>
     </section>
 
@@ -671,9 +668,9 @@ pipenv install --python<span style="color:#000;font-weight:bold">=</span>/Users/
     
     <li><a href="https://www.howie6879.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (20)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E5%B7%A5%E5%85%B7/">工具 (21)</a></li>
     
-    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (25)</a></li>
+    <li><a href="https://www.howie6879.cn/categories/%E6%95%99%E7%A8%8B/">教程 (26)</a></li>
     
     <li><a href="https://www.howie6879.cn/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
     
