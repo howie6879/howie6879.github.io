@@ -161,7 +161,7 @@ docker run --name chatgpt-web --rm -it -p 127.0.0.1:3002:3002 --env OPENAI_API_K
 
 ![howie_chatgpt](https://images-1252557999.file.myqcloud.com/uPic/yTPBlU.png)
 
-发文前我在一些群发了下看看一键，十分钟不到就一百多人了，看样子大家还是很感兴趣，欢迎加入，如果二维码过期欢迎加我好友进群。
+发文前我在一些群发了下看看意见，十分钟不到就一百多人了，看样子大家还是很感兴趣，欢迎加入，如果二维码过期欢迎加我好友进群。
 
 各位，祝好！
 
