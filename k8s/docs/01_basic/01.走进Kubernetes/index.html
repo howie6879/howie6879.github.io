@@ -2,44 +2,47 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="走进Kubernetes #  什么是Kubernetes #  随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下同时还做到以下几点：
-  让资源利用率更高
-  让硬件成本相对更低
-  于是就自然而然地就产生了基于容器自动化部署微服务的需求，在容器编排这块的纷争，各大巨头参与，战况惨烈，但最终胜出的是谷歌的Kubernetes1，其提供的特性有：
- 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
- Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
- Kubernetes控制节点主要由以下几个核心组件组成：
- etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
- kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 #  单机安装 #  关于单机安装k8s，我使用的相关环境如下（于2022-08-13更新）：
- macOS：Monterey 12.4 Docker Desktop Vesion：4.11.1 Kubernetes：v1.24.2  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+<meta name="description" content="走进Kubernetes # 什么是Kubernetes # 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下同时还做到以下几点：
+让资源利用率更高
+让硬件成本相对更低
+于是就自然而然地就产生了基于容器自动化部署微服务的需求，在容器编排这块的纷争，各大巨头参与，战况惨烈，但最终胜出的是谷歌的Kubernetes1，其提供的特性有：
+服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理 通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+Kubernetes控制节点主要由以下几个核心组件组成：
+etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上 对于计算节点：
+kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡 安装 # 单机安装 # 关于单机安装k8s，我使用的相关环境如下（于2022-08-13更新）：
+macOS：Monterey 12.4 Docker Desktop Vesion：4.11.1 Kubernetes：v1.24.2 由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
 k8s.gcr.io/kube-proxy:v1.24.2=gotok8s/kube-proxy:v1.24.2 k8s.gcr.io/kube-controller-manager:v1.24.2=gotok8s/kube-controller-manager:v1.24.2 k8s.gcr.io/kube-scheduler:v1.24.2=gotok8s/kube-scheduler:v1.24.2 k8s.gcr.io/kube-apiserver:v1.24.2=gotok8s/kube-apiserver:v1.24.2 k8s.gcr.io/pause:3.7=gotok8s/pause:3.7 k8s.gcr.io/coredns/coredns:v1.8.6=gotok8s/coredns:v1.8.6 k8s.gcr.io/etcd:3.5.3-0=gotok8s/etcd:3.5.3-0 然后执行./load_images.sh 即可下载k8s依赖的镜像，随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
-不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。">
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+每个人的 Docker 版本都有差别，不同版本如何查找各个依赖容器对应的版本呢？参考一下命令：
+KUBERNETES_VERSION=v1.24.2 # Linux 下执行 curl -O -L https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubeadm chmod &#43;x kubeadm ./kubeadm config images list --kubernetes-version=${KUBERNETES_VERSION} 版本号那里填写你自己的当前版本即可，不出意外可以得到如下输出：">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="走进Kubernetes #  什么是Kubernetes #  随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下同时还做到以下几点：
-  让资源利用率更高
-  让硬件成本相对更低
-  于是就自然而然地就产生了基于容器自动化部署微服务的需求，在容器编排这块的纷争，各大巨头参与，战况惨烈，但最终胜出的是谷歌的Kubernetes1，其提供的特性有：
- 服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理  通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
- Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
- Kubernetes控制节点主要由以下几个核心组件组成：
- etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上  对于计算节点：
- kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡  安装 #  单机安装 #  关于单机安装k8s，我使用的相关环境如下（于2022-08-13更新）：
- macOS：Monterey 12.4 Docker Desktop Vesion：4.11.1 Kubernetes：v1.24.2  由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
+<meta property="og:description" content="走进Kubernetes # 什么是Kubernetes # 随着微服务架构被越来越多的公司使用，大部分单体应用正逐步被拆解成小的、独立运行的微服务。微服务的优势这里不做探讨，但是其带来的服务维护问题大大增加，若想要在管理大量微服务的情况下同时还做到以下几点：
+让资源利用率更高
+让硬件成本相对更低
+于是就自然而然地就产生了基于容器自动化部署微服务的需求，在容器编排这块的纷争，各大巨头参与，战况惨烈，但最终胜出的是谷歌的Kubernetes1，其提供的特性有：
+服务发现和负载均衡 存储编排 自动发布和回滚 自愈 密钥及配置管理 通过下面架构图可以看到其有上下两部分对应的Master&amp;Node节点构成，这两种角色分别对应着控制节点和计算节点。
+Master控制节点主要出发点在于如何编排、管理、调度用户提交的作业
+Kubernetes控制节点主要由以下几个核心组件组成：
+etcd保存了整个集群的状态 apiserver提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制 controller manager负责维护集群的状态，比如故障检测、自动扩展、滚动更新等 scheduler负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上 对于计算节点：
+kubelet负责维护容器的生命周期，同时也负责Volume（CSI）和网络（CNI）的管理 Container runtime负责镜像管理以及Pod和容器的真正运行（CRI） kube-proxy负责为Service提供cluster内部的服务发现和负载均衡 安装 # 单机安装 # 关于单机安装k8s，我使用的相关环境如下（于2022-08-13更新）：
+macOS：Monterey 12.4 Docker Desktop Vesion：4.11.1 Kubernetes：v1.24.2 由于镜像的下载涉及到网络原因，因此这里使用了开源项目k8s-docker-desktop-for-mac来解决这个问题，需要注意的是要修改images的相关镜像的版本，要和此时Kubernetes配对上才行，比如我设置的是：
 k8s.gcr.io/kube-proxy:v1.24.2=gotok8s/kube-proxy:v1.24.2 k8s.gcr.io/kube-controller-manager:v1.24.2=gotok8s/kube-controller-manager:v1.24.2 k8s.gcr.io/kube-scheduler:v1.24.2=gotok8s/kube-scheduler:v1.24.2 k8s.gcr.io/kube-apiserver:v1.24.2=gotok8s/kube-apiserver:v1.24.2 k8s.gcr.io/pause:3.7=gotok8s/pause:3.7 k8s.gcr.io/coredns/coredns:v1.8.6=gotok8s/coredns:v1.8.6 k8s.gcr.io/etcd:3.5.3-0=gotok8s/etcd:3.5.3-0 然后执行./load_images.sh 即可下载k8s依赖的镜像，随后打开Docker，进入设置界面，勾选Enable Kubernetes即可：
-不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。" />
+不出意外，界面左下角会出现Kubernetes running的提示，这样就安装成功了。
+每个人的 Docker 版本都有差别，不同版本如何查找各个依赖容器对应的版本呢？参考一下命令：
+KUBERNETES_VERSION=v1.24.2 # Linux 下执行 curl -O -L https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubeadm chmod &#43;x kubeadm ./kubeadm config images list --kubernetes-version=${KUBERNETES_VERSION} 版本号那里填写你自己的当前版本即可，不出意外可以得到如下输出：" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" /><meta property="article:section" content="docs" />
 
 
 <title>01.走进 Kubernetes | Kubernetes 学习之路</title>
 <link rel="manifest" href="/k8s/manifest.json">
 <link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/k8s/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/k8s/en.search.min.f5d2943d0cf1ecf8cf4d5d5306d7d831bf9bfb6f77da58303954836506c4f7a7.js" integrity="sha256-9dKUPQzx7PjPTV1TBtfYMb&#43;b&#43;2932lgwOVSDZQbE96c="></script>
+<script defer src="/k8s/en.search.min.b9aae25582d87e3b0dd85dcd01ee35a875f71121f2988846411f14e0d66addc2.js" integrity="sha256-uariVYLYfjsN2F3NAe41qHX3ESHymIhGQR8U4NZq3cI="></script>
 <style>
 
 img[src$='#center']
@@ -153,7 +156,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" class=" active">01.走进 Kubernetes</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" class=" active">01.走进 Kubernetes</a>
   
 
         </li>
@@ -166,7 +169,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
   
 
         </li>
@@ -179,7 +182,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class="">03.容器持久化存储</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class="">03.容器持久化存储</a>
   
 
         </li>
@@ -192,7 +195,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
   
 
         </li>
@@ -205,7 +208,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
   
 
         </li>
@@ -256,7 +259,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
+    <a href="https://www.howie6879.com/k8s/docs/03_appendix/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
   
 
         </li>
@@ -269,7 +272,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" class="">01.图解 Osi七层网络模型</a>
+    <a href="https://www.howie6879.com/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" class="">01.图解 Osi七层网络模型</a>
   
 
         </li>
@@ -301,7 +304,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -419,47 +422,45 @@ https://github.com/alex-shpak/hugo-book
 <li>Kubernetes：v1.24.2</li>
 </ul>
 <p>由于镜像的下载涉及到网络原因，因此这里使用了开源项目<a href="https://github.com/gotok8s/k8s-docker-desktop-for-mac">k8s-docker-desktop-for-mac</a>来解决这个问题，需要注意的是要修改<code>images</code>的相关镜像的版本，要和此时<code>Kubernetes</code>配对上才行，比如我设置的是：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">k8s.gcr.io/kube-proxy:v1.24.2=gotok8s/kube-proxy:v1.24.2
-k8s.gcr.io/kube-controller-manager:v1.24.2=gotok8s/kube-controller-manager:v1.24.2
-k8s.gcr.io/kube-scheduler:v1.24.2=gotok8s/kube-scheduler:v1.24.2
-k8s.gcr.io/kube-apiserver:v1.24.2=gotok8s/kube-apiserver:v1.24.2
-k8s.gcr.io/pause:3.7=gotok8s/pause:3.7
-k8s.gcr.io/coredns/coredns:v1.8.6=gotok8s/coredns:v1.8.6
-k8s.gcr.io/etcd:3.5.3-0=gotok8s/etcd:3.5.3-0
-</code></pre></div><p>然后执行<code>./load_images.sh </code>即可下载k8s依赖的镜像，随后打开<code>Docker</code>，进入设置界面，勾选<code>Enable Kubernetes</code>即可：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>k8s.gcr.io/kube-proxy:v1.24.2=gotok8s/kube-proxy:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-controller-manager:v1.24.2=gotok8s/kube-controller-manager:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-scheduler:v1.24.2=gotok8s/kube-scheduler:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-apiserver:v1.24.2=gotok8s/kube-apiserver:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/pause:3.7=gotok8s/pause:3.7
+</span></span><span style="display:flex;"><span>k8s.gcr.io/coredns/coredns:v1.8.6=gotok8s/coredns:v1.8.6
+</span></span><span style="display:flex;"><span>k8s.gcr.io/etcd:3.5.3-0=gotok8s/etcd:3.5.3-0
+</span></span></code></pre></div><p>然后执行<code>./load_images.sh </code>即可下载k8s依赖的镜像，随后打开<code>Docker</code>，进入设置界面，勾选<code>Enable Kubernetes</code>即可：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/fS12Nk.png" alt="fS12Nk" /></p>
 <p>不出意外，界面左下角会出现<code>Kubernetes running</code>的提示，这样就安装成功了。</p>
 <p>每个人的 <code>Docker</code> 版本都有差别，不同版本如何查找各个依赖容器对应的版本呢？参考一下命令：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">KUBERNETES_VERSION<span style="color:#f92672">=</span>v1.24.2
-<span style="color:#75715e"># Linux 下执行</span>
-curl -O -L https://storage.googleapis.com/kubernetes-release/release/<span style="color:#e6db74">${</span>KUBERNETES_VERSION<span style="color:#e6db74">}</span>/bin/linux/amd64/kubeadm
-chmod +x kubeadm
-./kubeadm config images list --kubernetes-version<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>KUBERNETES_VERSION<span style="color:#e6db74">}</span>
-</code></pre></div><p>版本号那里填写你自己的当前版本即可，不出意外可以得到如下输出：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">k8s.gcr.io/kube-apiserver:v1.24.2
-k8s.gcr.io/kube-controller-manager:v1.24.2
-k8s.gcr.io/kube-scheduler:v1.24.2
-k8s.gcr.io/kube-proxy:v1.24.2
-k8s.gcr.io/pause:3.7
-k8s.gcr.io/etcd:3.5.3-0
-k8s.gcr.io/coredns/coredns:v1.8.6
-</code></pre></div><p>查看集群信息：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl cluster-info
-</code></pre></div><p>输出：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">Kubernetes control plane is running at https://kubernetes.docker.internal:6443
-CoreDNS is running at https://kubernetes.docker.internal:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use <span style="color:#e6db74">&#39;kubectl cluster-info dump&#39;</span>.
-
-
-</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get nodes
-</code></pre></div><p>输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>KUBERNETES_VERSION<span style="color:#f92672">=</span>v1.24.2
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Linux 下执行</span>
+</span></span><span style="display:flex;"><span>curl -O -L https://storage.googleapis.com/kubernetes-release/release/<span style="color:#e6db74">${</span>KUBERNETES_VERSION<span style="color:#e6db74">}</span>/bin/linux/amd64/kubeadm
+</span></span><span style="display:flex;"><span>chmod +x kubeadm
+</span></span><span style="display:flex;"><span>./kubeadm config images list --kubernetes-version<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>KUBERNETES_VERSION<span style="color:#e6db74">}</span>
+</span></span></code></pre></div><p>版本号那里填写你自己的当前版本即可，不出意外可以得到如下输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>k8s.gcr.io/kube-apiserver:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-controller-manager:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-scheduler:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/kube-proxy:v1.24.2
+</span></span><span style="display:flex;"><span>k8s.gcr.io/pause:3.7
+</span></span><span style="display:flex;"><span>k8s.gcr.io/etcd:3.5.3-0
+</span></span><span style="display:flex;"><span>k8s.gcr.io/coredns/coredns:v1.8.6
+</span></span></code></pre></div><p>查看集群信息：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl cluster-info
+</span></span></code></pre></div><p>输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Kubernetes control plane is running at https://kubernetes.docker.internal:6443
+</span></span><span style="display:flex;"><span>CoreDNS is running at https://kubernetes.docker.internal:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>To further debug and diagnose cluster problems, use <span style="color:#e6db74">&#39;kubectl cluster-info dump&#39;</span>.
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get nodes
+</span></span></code></pre></div><p>输出：</p>
 <p>查看节点信息：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get nodes
-</code></pre></div><p>输出：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">NAME             STATUS   ROLES           AGE   VERSION
-docker-desktop   Ready    control-plane   11m   v1.24.2
-</code></pre></div><p>单机版本的<code>k8s</code>安装成功！接下来介绍集群安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get nodes
+</span></span></code></pre></div><p>输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>NAME             STATUS   ROLES           AGE   VERSION
+</span></span><span style="display:flex;"><span>docker-desktop   Ready    control-plane   11m   v1.24.2
+</span></span></code></pre></div><p>单机版本的<code>k8s</code>安装成功！接下来介绍集群安装。</p>
 <h3 id="集群安装">
   集群安装
   <a class="anchor" href="#%e9%9b%86%e7%be%a4%e5%ae%89%e8%a3%85">#</a>
@@ -519,119 +520,119 @@ docker-desktop   Ready    control-plane   11m   v1.24.2
 <li>关闭<strong>swap</strong>：<code>swapoff -a</code></li>
 </ul>
 <p>配置国内kubernetes源：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cat &gt; /etc/yum.repos.d/kubernetes.repo <span style="color:#e6db74">&lt;&lt;EOF
-</span><span style="color:#e6db74">[kubernetes]
-</span><span style="color:#e6db74">name=Kubernetes
-</span><span style="color:#e6db74">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-</span><span style="color:#e6db74">enabled=1
-</span><span style="color:#e6db74">gpgcheck=1
-</span><span style="color:#e6db74">repo_gpgcheck=1
-</span><span style="color:#e6db74">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-</span><span style="color:#e6db74">EOF</span>
-</code></pre></div><p>安装相关依赖工具：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum install -y kubelet-1.19.3 kubeadm-1.19.3 kubectl-1.19.3
-<span style="color:#75715e"># 设置开机启动</span>
-systemctl enable kubelet.service <span style="color:#f92672">&amp;&amp;</span> systemctl start kubelet.service
-<span style="color:#75715e"># 查看状态</span>
-systemctl status kubelet.service
-</code></pre></div><h4 id="初始化master">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat &gt; /etc/yum.repos.d/kubernetes.repo <span style="color:#e6db74">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">[kubernetes]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">name=Kubernetes
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">enabled=1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">gpgcheck=1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">repo_gpgcheck=1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><p>安装相关依赖工具：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum install -y kubelet-1.19.3 kubeadm-1.19.3 kubectl-1.19.3
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置开机启动</span>
+</span></span><span style="display:flex;"><span>systemctl enable kubelet.service <span style="color:#f92672">&amp;&amp;</span> systemctl start kubelet.service
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看状态</span>
+</span></span><span style="display:flex;"><span>systemctl status kubelet.service
+</span></span></code></pre></div><h4 id="初始化master">
   初始化Master
   <a class="anchor" href="#%e5%88%9d%e5%a7%8b%e5%8c%96master">#</a>
 </h4>
 <p>在主节点（<code>192.168.5.91</code>）执行以下命令：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
-export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
-export POD_SUBNET<span style="color:#f92672">=</span>10.100.0.1/16
-echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
-</code></pre></div><p>新建脚本<code>init_master.sh</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vim init_master.sh
-</code></pre></div><p>添加：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e"># 只在 master 节点执行</span>
-
-<span style="color:#75715e"># 脚本出错时终止执行</span>
-set -e
-
-<span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>POD_SUBNET<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>APISERVER_NAME<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
-  echo -e <span style="color:#e6db74">&#34;\033[31;1m请确保您已经设置了环境变量 POD_SUBNET 和 APISERVER_NAME \033[0m&#34;</span>
-  echo 当前POD_SUBNET<span style="color:#f92672">=</span>$POD_SUBNET
-  echo 当前APISERVER_NAME<span style="color:#f92672">=</span>$APISERVER_NAME
-  exit <span style="color:#ae81ff">1</span>
-<span style="color:#66d9ef">fi</span>
-
-
-<span style="color:#75715e"># 查看完整配置选项 https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2</span>
-rm -f ./kubeadm-config.yaml
-cat <span style="color:#e6db74">&lt;&lt;EOF &gt; ./kubeadm-config.yaml
-</span><span style="color:#e6db74">apiVersion: kubeadm.k8s.io/v1beta2
-</span><span style="color:#e6db74">kind: ClusterConfiguration
-</span><span style="color:#e6db74"># k8s 版本
-</span><span style="color:#e6db74">kubernetesVersion: v1.19.3
-</span><span style="color:#e6db74">imageRepository: registry.aliyuncs.com/k8sxio
-</span><span style="color:#e6db74">controlPlaneEndpoint: &#34;${APISERVER_NAME}:6443&#34;
-</span><span style="color:#e6db74">networking:
-</span><span style="color:#e6db74">  serviceSubnet: &#34;10.96.0.0/16&#34;
-</span><span style="color:#e6db74">  podSubnet: &#34;${POD_SUBNET}&#34;
-</span><span style="color:#e6db74">  dnsDomain: &#34;cluster.local&#34;
-</span><span style="color:#e6db74">EOF</span>
-
-<span style="color:#75715e"># kubeadm init</span>
-<span style="color:#75715e"># 根据您服务器网速的情况，您需要等候 3 - 10 分钟</span>
-kubeadm config images pull --config<span style="color:#f92672">=</span>kubeadm-config.yaml
-kubeadm init --config<span style="color:#f92672">=</span>kubeadm-config.yaml --upload-certs
-
-<span style="color:#75715e"># 配置 kubectl</span>
-rm -rf /root/.kube/
-mkdir /root/.kube/
-cp -i /etc/kubernetes/admin.conf /root/.kube/config
-
-<span style="color:#75715e"># 安装 calico 网络插件</span>
-<span style="color:#75715e"># 参考文档 https://docs.projectcalico.org/v3.13/getting-started/kubernetes/self-managed-onprem/onpremises</span>
-echo <span style="color:#e6db74">&#34;安装calico-3.13.1&#34;</span>
-rm -f calico-3.13.1.yaml
-wget https://kuboard.cn/install-script/calico/calico-3.13.1.yaml
-kubectl apply -f calico-3.13.1.yaml
-</code></pre></div><p>如果出错：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># issue 01</span>
-<span style="color:#75715e"># [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1</span>
-<span style="color:#75715e"># 所有机器执行</span>
-echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-iptables
-echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-ip6tables
-</code></pre></div><p>检查<code>master</code>初始化结果：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 直到所有的容器组处于 Running 状态</span>
-watch kubectl get pod -n kube-system -o wide
-<span style="color:#75715e"># 查看 master 节点初始化结果</span>
-kubectl get nodes -o wide
-</code></pre></div><p>如下图：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
+</span></span><span style="display:flex;"><span>export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
+</span></span><span style="display:flex;"><span>export POD_SUBNET<span style="color:#f92672">=</span>10.100.0.1/16
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
+</span></span></code></pre></div><p>新建脚本<code>init_master.sh</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vim init_master.sh
+</span></span></code></pre></div><p>添加：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只在 master 节点执行</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 脚本出错时终止执行</span>
+</span></span><span style="display:flex;"><span>set -e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>POD_SUBNET<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">${#</span>APISERVER_NAME<span style="color:#e6db74">}</span> -eq <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo -e <span style="color:#e6db74">&#34;\033[31;1m请确保您已经设置了环境变量 POD_SUBNET 和 APISERVER_NAME \033[0m&#34;</span>
+</span></span><span style="display:flex;"><span>  echo 当前POD_SUBNET<span style="color:#f92672">=</span>$POD_SUBNET
+</span></span><span style="display:flex;"><span>  echo 当前APISERVER_NAME<span style="color:#f92672">=</span>$APISERVER_NAME
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看完整配置选项 https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2</span>
+</span></span><span style="display:flex;"><span>rm -f ./kubeadm-config.yaml
+</span></span><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt;EOF &gt; ./kubeadm-config.yaml
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">apiVersion: kubeadm.k8s.io/v1beta2
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kind: ClusterConfiguration
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># k8s 版本
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kubernetesVersion: v1.19.3
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">imageRepository: registry.aliyuncs.com/k8sxio
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">controlPlaneEndpoint: &#34;${APISERVER_NAME}:6443&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">networking:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  serviceSubnet: &#34;10.96.0.0/16&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  podSubnet: &#34;${POD_SUBNET}&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  dnsDomain: &#34;cluster.local&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># kubeadm init</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 根据您服务器网速的情况，您需要等候 3 - 10 分钟</span>
+</span></span><span style="display:flex;"><span>kubeadm config images pull --config<span style="color:#f92672">=</span>kubeadm-config.yaml
+</span></span><span style="display:flex;"><span>kubeadm init --config<span style="color:#f92672">=</span>kubeadm-config.yaml --upload-certs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 配置 kubectl</span>
+</span></span><span style="display:flex;"><span>rm -rf /root/.kube/
+</span></span><span style="display:flex;"><span>mkdir /root/.kube/
+</span></span><span style="display:flex;"><span>cp -i /etc/kubernetes/admin.conf /root/.kube/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安装 calico 网络插件</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 参考文档 https://docs.projectcalico.org/v3.13/getting-started/kubernetes/self-managed-onprem/onpremises</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;安装calico-3.13.1&#34;</span>
+</span></span><span style="display:flex;"><span>rm -f calico-3.13.1.yaml
+</span></span><span style="display:flex;"><span>wget https://kuboard.cn/install-script/calico/calico-3.13.1.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f calico-3.13.1.yaml
+</span></span></code></pre></div><p>如果出错：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># issue 01</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 所有机器执行</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-iptables
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1</span> &gt; /proc/sys/net/bridge/bridge-nf-call-ip6tables
+</span></span></code></pre></div><p>检查<code>master</code>初始化结果：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 直到所有的容器组处于 Running 状态</span>
+</span></span><span style="display:flex;"><span>watch kubectl get pod -n kube-system -o wide
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看 master 节点初始化结果</span>
+</span></span><span style="display:flex;"><span>kubectl get nodes -o wide
+</span></span></code></pre></div><p>如下图：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20201221165311482.png" alt="image-20201221165311482" /></p>
 <h4 id="获得join命令参数">
   获得join命令参数
   <a class="anchor" href="#%e8%8e%b7%e5%be%97join%e5%91%bd%e4%bb%a4%e5%8f%82%e6%95%b0">#</a>
 </h4>
 <p>直接在<code>master</code>执行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubeadm token create --print-join-command
-</code></pre></div><p>比如此时输出：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 有效期两小时</span>
-kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
-</code></pre></div><h4 id="初始化node">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubeadm token create --print-join-command
+</span></span></code></pre></div><p>比如此时输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 有效期两小时</span>
+</span></span><span style="display:flex;"><span>kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
+</span></span></code></pre></div><h4 id="初始化node">
   初始化Node
   <a class="anchor" href="#%e5%88%9d%e5%a7%8b%e5%8c%96node">#</a>
 </h4>
 <p>在所有<code>node</code>执行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
-export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
-echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
-
-<span style="color:#75715e"># 替换为 master 节点上 kubeadm token create 命令的输出</span>
-kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
-</code></pre></div><h4 id="检查初始化结果">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>export MASTER_IP<span style="color:#f92672">=</span>192.168.5.91
+</span></span><span style="display:flex;"><span>export APISERVER_NAME<span style="color:#f92672">=</span>apiserver.demo
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>MASTER_IP<span style="color:#e6db74">}</span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>APISERVER_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /etc/hosts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 替换为 master 节点上 kubeadm token create 命令的输出</span>
+</span></span><span style="display:flex;"><span>kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery-token-ca-cert-hash sha256:6970397fdc6de5020df76de950c9df96349ca119f127551d109430c114b06f40
+</span></span></code></pre></div><h4 id="检查初始化结果">
   检查初始化结果
   <a class="anchor" href="#%e6%a3%80%e6%9f%a5%e5%88%9d%e5%a7%8b%e5%8c%96%e7%bb%93%e6%9e%9c">#</a>
 </h4>
 <p>在<code>master</code>节点执行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get nodes -o wide
-</code></pre></div><p>输出结果如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get nodes -o wide
+</span></span></code></pre></div><p>输出结果如下：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20201221181016264.png" alt="image-20201221181016264" /></p>
 <h3 id="sealos-快速安装">
   sealos 快速安装
@@ -652,22 +653,22 @@ kubeadm join apiserver.demo:6443 --token vh5hl9.9fccw1mzfsmsp4gh     --discovery
 <li>kubernetes1.19及以下 使用docker作为cri。 也不需要用户安装docker。 sealos会安装1.19.03版本docker</li>
 </ul>
 <p>依赖包：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum install socat -y
-yum remove docker-ce containerd.io -y
-rm /etc/containerd/config.toml
-</code></pre></div><h4 id="安装-1">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum install socat -y
+</span></span><span style="display:flex;"><span>yum remove docker-ce containerd.io -y
+</span></span><span style="display:flex;"><span>rm /etc/containerd/config.toml
+</span></span></code></pre></div><h4 id="安装-1">
   安装
   <a class="anchor" href="#%e5%ae%89%e8%a3%85-1">#</a>
 </h4>
 <p>选一台服务器，我选择安装<code>v1.22.0</code>版本，执行命令即可：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sealos init --passwd <span style="color:#e6db74">&#39;pwd&#39;</span> --master 192.168.5.91  --node 192.168.5.92  --node 192.168.5.93 --pkg-url /root/kube1.22.0.tar.gz --version v1.22.0
-</code></pre></div><h4 id="检查初始化结果-1">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sealos init --passwd <span style="color:#e6db74">&#39;pwd&#39;</span> --master 192.168.5.91  --node 192.168.5.92  --node 192.168.5.93 --pkg-url /root/kube1.22.0.tar.gz --version v1.22.0
+</span></span></code></pre></div><h4 id="检查初始化结果-1">
   检查初始化结果
   <a class="anchor" href="#%e6%a3%80%e6%9f%a5%e5%88%9d%e5%a7%8b%e5%8c%96%e7%bb%93%e6%9e%9c-1">#</a>
 </h4>
 <p>在<code>master</code>节点执行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get nodes -o wide
-</code></pre></div><p>输出结果如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get nodes -o wide
+</span></span></code></pre></div><p>输出结果如下：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/IE2ZfQ.png" alt="IE2ZfQ" /></p>
 <h2 id="ui">
   UI
@@ -683,66 +684,66 @@ rm /etc/containerd/config.toml
   <a class="anchor" href="#%e5%ae%89%e8%a3%85-2">#</a>
 </h4>
 <p>安装命令如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.1/aio/deploy/recommended.yaml -O dashboard.yaml
-
-kubectl apply -f dashboard.yaml
-kubectl -n kubernetes-dashboard get pods -o wide
-</code></pre></div><p>查看是否成功：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">NAME                                        READY   STATUS    RESTARTS   AGE   IP         NODE             NOMINATED NODE   READINESS GATES
-dashboard-metrics-scraper-8c47d4b5d-mfb6d   1/1     Running   <span style="color:#ae81ff">0</span>          83s   10.1.0.7   docker-desktop   &lt;none&gt;           &lt;none&gt;
-kubernetes-dashboard-6c75475678-bdwtn       1/1     Running   <span style="color:#ae81ff">0</span>          83s   10.1.0.6   docker-desktop   &lt;none&gt;           &lt;none&gt;
-</code></pre></div><p>如果执行完发现<code>STATUS</code>有<code>ContainerCreating</code>，可以查看日志找找原因（注意NAME）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl describe pod dashboard-metrics-scraper-8c47d4b5d-mfb6d --namespace<span style="color:#f92672">=</span>kubernetes-dashboard
-</code></pre></div><p>一般都是因为<code>metrics-scraper:v1.0.8</code>镜像下载不下来，可以手动执行下载：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker pull kubernetesui/metrics-scraper:v1.0.8
-</code></pre></div><p>拉下来之后就妥了，还有一个问题就是选用的服务类型是<code>ClusterIP</code>（默认类型，服务只能够在集群内部可以访问），所以我们需要将访问形式改为<code>NodePort</code>（通过每个 Node 上的 IP 和静态端口访问）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard edit service kubernetes-dashboard
-<span style="color:#75715e"># 将里面的 type: ClusterIP 改为 type: NodePort</span>
-</code></pre></div><p>保存后，执行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard get service kubernetes-dashboard
-</code></pre></div><p>终端输出：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">NAME                   TYPE       CLUSTER-IP       EXTERNAL-IP   PORT<span style="color:#f92672">(</span>S<span style="color:#f92672">)</span>         AGE
-kubernetes-dashboard   NodePort   10.110.197.167   &lt;none&gt;        443:32171/TCP   7m32s
-</code></pre></div><h4 id="token">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.1/aio/deploy/recommended.yaml -O dashboard.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl apply -f dashboard.yaml
+</span></span><span style="display:flex;"><span>kubectl -n kubernetes-dashboard get pods -o wide
+</span></span></code></pre></div><p>查看是否成功：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>NAME                                        READY   STATUS    RESTARTS   AGE   IP         NODE             NOMINATED NODE   READINESS GATES
+</span></span><span style="display:flex;"><span>dashboard-metrics-scraper-8c47d4b5d-mfb6d   1/1     Running   <span style="color:#ae81ff">0</span>          83s   10.1.0.7   docker-desktop   &lt;none&gt;           &lt;none&gt;
+</span></span><span style="display:flex;"><span>kubernetes-dashboard-6c75475678-bdwtn       1/1     Running   <span style="color:#ae81ff">0</span>          83s   10.1.0.6   docker-desktop   &lt;none&gt;           &lt;none&gt;
+</span></span></code></pre></div><p>如果执行完发现<code>STATUS</code>有<code>ContainerCreating</code>，可以查看日志找找原因（注意NAME）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl describe pod dashboard-metrics-scraper-8c47d4b5d-mfb6d --namespace<span style="color:#f92672">=</span>kubernetes-dashboard
+</span></span></code></pre></div><p>一般都是因为<code>metrics-scraper:v1.0.8</code>镜像下载不下来，可以手动执行下载：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull kubernetesui/metrics-scraper:v1.0.8
+</span></span></code></pre></div><p>拉下来之后就妥了，还有一个问题就是选用的服务类型是<code>ClusterIP</code>（默认类型，服务只能够在集群内部可以访问），所以我们需要将访问形式改为<code>NodePort</code>（通过每个 Node 上的 IP 和静态端口访问）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard edit service kubernetes-dashboard
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 将里面的 type: ClusterIP 改为 type: NodePort</span>
+</span></span></code></pre></div><p>保存后，执行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl --namespace<span style="color:#f92672">=</span>kubernetes-dashboard get service kubernetes-dashboard
+</span></span></code></pre></div><p>终端输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>NAME                   TYPE       CLUSTER-IP       EXTERNAL-IP   PORT<span style="color:#f92672">(</span>S<span style="color:#f92672">)</span>         AGE
+</span></span><span style="display:flex;"><span>kubernetes-dashboard   NodePort   10.110.197.167   &lt;none&gt;        443:32171/TCP   7m32s
+</span></span></code></pre></div><h4 id="token">
   Token
   <a class="anchor" href="#token">#</a>
 </h4>
 <p>在浏览器访问<a href="https://0.0.0.0:32171/">https://0.0.0.0:32171/</a>:</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20201220201125802.png" alt="image-20201220201125802" /></p>
 <p>看界面需要生成<code>Token</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vim admin-user.yaml
-<span style="color:#75715e"># 输入</span>
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: admin-user
-  namespace: kubernetes-dashboard
-<span style="color:#75715e"># 保存退出</span>
-vim admin-user-role-binding.yaml
-<span style="color:#75715e"># 输入</span>
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: admin-user
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: admin-user
-  namespace: kubernetes-dashboard
-<span style="color:#75715e"># 保存退出</span>
-
-<span style="color:#75715e"># 执行命令加载配置</span>
-kubectl -n kubernetes-dashboard create -f admin-user.yaml
-kubectl -n kubernetes-dashboard create -f admin-user-role-binding.yaml
-
-<span style="color:#75715e"># 若出现已存在</span>
-<span style="color:#75715e"># 执行：kubectl -n kubernetes-dashboard delete -f xxx.yaml 即可</span>
-</code></pre></div><p>获取令牌：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl -n kubernetes-dashboard create token admin-user
-</code></pre></div><p>复制<code>token</code>到刚才的界面登录即可，登录后界面如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vim admin-user.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输入</span>
+</span></span><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: ServiceAccount
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: admin-user
+</span></span><span style="display:flex;"><span>  namespace: kubernetes-dashboard
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 保存退出</span>
+</span></span><span style="display:flex;"><span>vim admin-user-role-binding.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输入</span>
+</span></span><span style="display:flex;"><span>apiVersion: rbac.authorization.k8s.io/v1
+</span></span><span style="display:flex;"><span>kind: ClusterRoleBinding
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: admin-user
+</span></span><span style="display:flex;"><span>roleRef:
+</span></span><span style="display:flex;"><span>  apiGroup: rbac.authorization.k8s.io
+</span></span><span style="display:flex;"><span>  kind: ClusterRole
+</span></span><span style="display:flex;"><span>  name: cluster-admin
+</span></span><span style="display:flex;"><span>subjects:
+</span></span><span style="display:flex;"><span>- kind: ServiceAccount
+</span></span><span style="display:flex;"><span>  name: admin-user
+</span></span><span style="display:flex;"><span>  namespace: kubernetes-dashboard
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 保存退出</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 执行命令加载配置</span>
+</span></span><span style="display:flex;"><span>kubectl -n kubernetes-dashboard create -f admin-user.yaml
+</span></span><span style="display:flex;"><span>kubectl -n kubernetes-dashboard create -f admin-user-role-binding.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 若出现已存在</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 执行：kubectl -n kubernetes-dashboard delete -f xxx.yaml 即可</span>
+</span></span></code></pre></div><p>获取令牌：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl -n kubernetes-dashboard create token admin-user
+</span></span></code></pre></div><p>复制<code>token</code>到刚才的界面登录即可，登录后界面如下：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20201220201512486.png" alt="image-20201220201512486" /></p>
 <p>如果想延长<code>Token</code>的有效时间：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20201221204143993.png" alt="image-20201221204143993" /></p>
@@ -757,28 +758,28 @@ kubectl -n kubernetes-dashboard create -f admin-user-role-binding.yaml
 <p>KubePi 是一个现代化的 K8s 面板，其允许管理员导入多个 Kubernetes 集群，并且通过权限控制，将不同 Cluster、Namespace 的权限分配给指定用户。</p>
 </blockquote>
 <p>使用<code>Docker</code>安装如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run --privileged -d --restart always -v <span style="color:#e6db74">&#34;`pwd`:/var/lib/kubepi&#34;</span> --name<span style="color:#f92672">=</span>kubepi --restart<span style="color:#f92672">=</span>unless-stopped -p 8080:80 kubeoperator/kubepi-server
-</code></pre></div><p>然后打开<a href="http://localhost:8080/">KubePi地址</a>，输入用户名@密码<code>admin@kubepi</code>登录，登陆成功后设置<code>k8s</code>配置（集群列表-&gt;导入）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run --privileged -d --restart always -v <span style="color:#e6db74">&#34;`pwd`:/var/lib/kubepi&#34;</span> --name<span style="color:#f92672">=</span>kubepi --restart<span style="color:#f92672">=</span>unless-stopped -p 8080:80 kubeoperator/kubepi-server
+</span></span></code></pre></div><p>然后打开<a href="http://localhost:8080/">KubePi地址</a>，输入用户名@密码<code>admin@kubepi</code>登录，登陆成功后设置<code>k8s</code>配置（集群列表-&gt;导入）：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/13071660388227_.pic.jpg" alt="13071660388227_.pic" /></p>
 <p>其中配置获取方式如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cat ~/.kube/config
-</code></pre></div><p>确认后，进入集群就可以开始进行管理：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat ~/.kube/config
+</span></span></code></pre></div><p>确认后，进入集群就可以开始进行管理：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/kubepi.jpg" alt="kubepi" /></p>
 <h2 id="部署镜像">
   部署镜像
   <a class="anchor" href="#%e9%83%a8%e7%bd%b2%e9%95%9c%e5%83%8f">#</a>
 </h2>
 <p>下拉一个你自己想部署的镜像，具体命令如下（主节点执行）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 部署</span>
-kubectl run hello --image<span style="color:#f92672">=</span>xxx/hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span>
-<span style="color:#75715e"># 列出 pod</span>
-kubectl get pods
-<span style="color:#75715e"># 创建一个服务对象</span>
-<span style="color:#75715e"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
-kubectl expose po hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --target-port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --type<span style="color:#f92672">=</span>NodePort  --name hello-http
-<span style="color:#75715e"># 列出服务</span>
-kubectl get services
-</code></pre></div><h2 id="参考">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 部署</span>
+</span></span><span style="display:flex;"><span>kubectl run hello --image<span style="color:#f92672">=</span>xxx/hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 列出 pod</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建一个服务对象</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># NodePort 在所有节点（虚拟机）上开放一个特定端口，任何发送到该端口的流量都被转发到对应服务</span>
+</span></span><span style="display:flex;"><span>kubectl expose po hello --port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --target-port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span> --type<span style="color:#f92672">=</span>NodePort  --name hello-http
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 列出服务</span>
+</span></span><span style="display:flex;"><span>kubectl get services
+</span></span></code></pre></div><h2 id="参考">
   参考
   <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
 </h2>
@@ -796,14 +797,14 @@ kubectl get services
 <li><a href="https://github.com/fanux/sealos">sealos</a>：一条命令离线安装高可用kubernetes，3min装完，700M，100年证书，生产环境稳如老狗</li>
 <li><a href="https://github.com/opsnull/follow-me-install-kubernetes-cluster">follow-me-install-kubernetes-cluster</a>：和我一步步部署 kubernetes 集群</li>
 </ul>
-<section class="footnotes" role="doc-endnotes">
+<div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
-<li id="fn:1" role="doc-endnote">
+<li id="fn:1">
 <p>k8s项目的基础特性是 Google 公司在容器化基础设施领域多年来实践经验的沉淀与升华，<code>k8s</code>和<code>Swarm&amp;Mesos</code>的竞争有兴趣可自行查询详细看看。&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
-</section>
+</div>
 </article>
  
       

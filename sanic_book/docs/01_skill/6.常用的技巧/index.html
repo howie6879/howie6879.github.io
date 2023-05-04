@@ -2,32 +2,31 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="常用的技巧 #  结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍：
- Async Python 3.5&#43; web server that&rsquo;s written to go fast
- 大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上。
+<meta name="description" content="常用的技巧 # 结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍：
+Async Python 3.5&#43; web server that&rsquo;s written to go fast
+大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上。
 此篇我会将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
- api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
-src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.">
+api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;templates编写 cache 热加载 session 对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.py │ ├── hello_pb2_grpc.">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="常用的技巧 #  结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍：
- Async Python 3.5&#43; web server that&rsquo;s written to go fast
- 大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上。
+<meta property="og:description" content="常用的技巧 # 结合前面讲的配置、项目结构、页面渲染、数据库连接，构造一个优雅的Sanic应用对你来说估计没什么大问题了，但是在实际使用过程中，可能你会碰到各种各样的需求，与之对应，你也会遇到千奇百怪的问题，除了在官方pro提issue，你大部分问题都需要自己去面对，看官方的介绍：
+Async Python 3.5&#43; web server that&rsquo;s written to go fast
+大概就可以明白Sanic框架的重心不会放在诸如session cache reload authorized这些问题上。
 此篇我会将我遇到的一些问题以及解决方案一一记录下来，估计会持续更新，因为问题是不断的哈哈，可能有些问题与前面讲的有些重复，你大可略过，我将其总结成一些小技巧，供大家参考，具体如下：
- api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;templates编写 cache 热加载 session  对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
-src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc." />
+api请求json参数以及api接口验证 gRPC的异步调用方式 Blueprint html&amp;templates编写 cache 热加载 session 对于一些问题，我将编写一个小服务来演示这些技巧，具体见demo06，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：
+src ├── config │ ├── __init__.py │ ├── config.py │ ├── dev_config.py │ └── pro_config.py ├── database │ ├── __init__.py │ └── redis_base ├── grpc_service │ ├── __init__.py │ ├── grpc_asyncio_client.py │ ├── grpc_client.py │ ├── grpc_server.py │ ├── hello_grpc.py │ ├── hello_pb2.py │ ├── hello_pb2_grpc." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" /><meta property="article:section" content="docs" />
 
 
 <title>6.常用的技巧 | Sanic-For-Pythoneer</title>
 <link rel="manifest" href="/sanic_book/manifest.json">
 <link rel="icon" href="/sanic_book/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/sanic_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/sanic_book/en.search.min.6d7549c099dca5309fba7d4b35d3cb52dc5f25880339f30b6e69fc306636523e.js" integrity="sha256-bXVJwJncpTCfun1LNdPLUtxfJYgDOfMLbmn8MGY2Uj4="></script>
+<script defer src="/sanic_book/en.search.min.af51d5596772464e8ed56a7194e27e848205a400b2523c4b4018f5772af80a04.js" integrity="sha256-r1HVWWdyRk6O1WpxlOJ&#43;hIIFpACyUjxLQBj1dyr4CgQ="></script>
 <style>
 
   img[src$='#center']
@@ -141,7 +140,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/1.%E5%88%9D%E4%BD%BF%E7%94%A8/" class="">1.初使用</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/1.%E5%88%9D%E4%BD%BF%E7%94%A8/" class="">1.初使用</a>
   
 
         </li>
@@ -154,7 +153,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/2.%E9%85%8D%E7%BD%AE/" class="">2.配置</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/2.%E9%85%8D%E7%BD%AE/" class="">2.配置</a>
   
 
         </li>
@@ -167,7 +166,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/" class="">3.项目结构</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/3.%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/" class="">3.项目结构</a>
   
 
         </li>
@@ -180,7 +179,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/" class="">4.展示一个页面</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/4.%E5%B1%95%E7%A4%BA%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2/" class="">4.展示一个页面</a>
   
 
         </li>
@@ -193,7 +192,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/" class="">5.数据库使用</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/5.%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BD%BF%E7%94%A8/" class="">5.数据库使用</a>
   
 
         </li>
@@ -206,7 +205,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" class=" active">6.常用的技巧</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/6.%E5%B8%B8%E7%94%A8%E7%9A%84%E6%8A%80%E5%B7%A7/" class=" active">6.常用的技巧</a>
   
 
         </li>
@@ -219,7 +218,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/7.%E5%8F%AF%E9%9D%A0%E7%9A%84%E6%89%A9%E5%B1%95/" class="">7.可靠的扩展</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/7.%E5%8F%AF%E9%9D%A0%E7%9A%84%E6%89%A9%E5%B1%95/" class="">7.可靠的扩展</a>
   
 
         </li>
@@ -232,7 +231,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/01_skill/8.%E6%B5%8B%E8%AF%95%E4%B8%8E%E9%83%A8%E7%BD%B2/" class="">8.测试与部署</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/01_skill/8.%E6%B5%8B%E8%AF%95%E4%B8%8E%E9%83%A8%E7%BD%B2/" class="">8.测试与部署</a>
   
 
         </li>
@@ -263,7 +262,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%9F%BA%E4%BA%8E0.1.2/" class="">Sanic源码阅读：基于0.1.2</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/02_appendix/Sanic%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%9F%BA%E4%BA%8E0.1.2/" class="">Sanic源码阅读：基于0.1.2</a>
   
 
         </li>
@@ -276,7 +275,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/sanic_book/docs/02_appendix/%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8/" class="">关于装饰器</a>
+    <a href="https://www.howie6879.com/sanic_book/docs/02_appendix/%E5%85%B3%E4%BA%8E%E8%A3%85%E9%A5%B0%E5%99%A8/" class="">关于装饰器</a>
   
 
         </li>
@@ -308,7 +307,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -382,142 +381,142 @@ https://github.com/alex-shpak/hugo-book
 <li>session</li>
 </ul>
 <p>对于一些问题，我将编写一个小服务来演示这些技巧，具体见<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06">demo06</a>，依旧使用前面rss的那个例子，经过修改一番后的rss例子现在目录变成这样子了，里面加了我遇到的各种问题的解决方案，或许你只需要关注你想要了解的就好，如果你有其他的问题，欢迎issue提问，目录大概如下所示：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">src
-├── config
-│   ├── __init__.py
-│   ├── config.py
-│   ├── dev_config.py
-│   └── pro_config.py
-├── database
-│   ├── __init__.py
-│   └── redis_base
-├── grpc_service
-│   ├── __init__.py
-│   ├── grpc_asyncio_client.py
-│   ├── grpc_client.py
-│   ├── grpc_server.py
-│   ├── hello_grpc.py
-│   ├── hello_pb2.py
-│   ├── hello_pb2_grpc.py
-│   └── proto
-├── statics
-│   ├── rss_html
-│   │   ├── css
-│   │   └── js
-│   └── rss_json
-│       ├── css
-│       └── js
-├── templates
-│   ├── rss_html
-│   └── rss_json
-├── tools
-│   ├── __init__.py
-│   └── mid_decorator.py
-├── views
-│   ├── __init__.py
-│   ├── rss_api.py
-│   ├── rss_html.py
-│   └── rss_json.py
-└── run.py
-</code></pre></div><p>和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的<code>database</code>，以及关于gRPC的<code>grpc_service</code>，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>src
+</span></span><span style="display:flex;"><span>├── config
+</span></span><span style="display:flex;"><span>│   ├── __init__.py
+</span></span><span style="display:flex;"><span>│   ├── config.py
+</span></span><span style="display:flex;"><span>│   ├── dev_config.py
+</span></span><span style="display:flex;"><span>│   └── pro_config.py
+</span></span><span style="display:flex;"><span>├── database
+</span></span><span style="display:flex;"><span>│   ├── __init__.py
+</span></span><span style="display:flex;"><span>│   └── redis_base
+</span></span><span style="display:flex;"><span>├── grpc_service
+</span></span><span style="display:flex;"><span>│   ├── __init__.py
+</span></span><span style="display:flex;"><span>│   ├── grpc_asyncio_client.py
+</span></span><span style="display:flex;"><span>│   ├── grpc_client.py
+</span></span><span style="display:flex;"><span>│   ├── grpc_server.py
+</span></span><span style="display:flex;"><span>│   ├── hello_grpc.py
+</span></span><span style="display:flex;"><span>│   ├── hello_pb2.py
+</span></span><span style="display:flex;"><span>│   ├── hello_pb2_grpc.py
+</span></span><span style="display:flex;"><span>│   └── proto
+</span></span><span style="display:flex;"><span>├── statics
+</span></span><span style="display:flex;"><span>│   ├── rss_html
+</span></span><span style="display:flex;"><span>│   │   ├── css
+</span></span><span style="display:flex;"><span>│   │   └── js
+</span></span><span style="display:flex;"><span>│   └── rss_json
+</span></span><span style="display:flex;"><span>│       ├── css
+</span></span><span style="display:flex;"><span>│       └── js
+</span></span><span style="display:flex;"><span>├── templates
+</span></span><span style="display:flex;"><span>│   ├── rss_html
+</span></span><span style="display:flex;"><span>│   └── rss_json
+</span></span><span style="display:flex;"><span>├── tools
+</span></span><span style="display:flex;"><span>│   ├── __init__.py
+</span></span><span style="display:flex;"><span>│   └── mid_decorator.py
+</span></span><span style="display:flex;"><span>├── views
+</span></span><span style="display:flex;"><span>│   ├── __init__.py
+</span></span><span style="display:flex;"><span>│   ├── rss_api.py
+</span></span><span style="display:flex;"><span>│   ├── rss_html.py
+</span></span><span style="display:flex;"><span>│   └── rss_json.py
+</span></span><span style="display:flex;"><span>└── run.py
+</span></span></code></pre></div><p>和前面相比，可以看到目录里面增加了几个目录和文件，一个是关于数据库的<code>database</code>，以及关于gRPC的<code>grpc_service</code>，其实主要是为了演示而已，如果想了解，就可以看关于gRPC的部分，不喜欢就看其他的。</p>
 <p>增加的文件是<code>rss_json.py</code>，假设这是个接口文件吧，将会根据你的请求参数返回一串json，具体还是建议直接去看代码吧，点这里<a href="https://github.com/howie6879/Sanic-For-Pythoneer/tree/master/examples/demo06/sample">sample</a>。</p>
 <h3 id="验证问题">
   验证问题
   <a class="anchor" href="#%e9%aa%8c%e8%af%81%e9%97%ae%e9%a2%98">#</a>
 </h3>
 <p>假设你正在编写一个api服务，比如根据传的blog名字返回其rss数据，比如<code>rss_json.py</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
-<span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
-<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
-<span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json
-
-api_bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;rss_api&#39;</span>, url_prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;v1&#39;</span>)
-
-
-<span style="color:#a6e22e">@api_bp</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/get/rss/&lt;param&gt;&#34;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss_json</span>(request, param):
-    <span style="color:#66d9ef">if</span> param <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
-        url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
-        feed <span style="color:#f92672">=</span> parse(url)
-        articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
-        data <span style="color:#f92672">=</span> []
-        <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
-            data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
-        <span style="color:#66d9ef">return</span> json(data)
-    <span style="color:#66d9ef">else</span>:
-        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;</span>})
-</code></pre></div><p>启动服务后，此时用<code>GET</code>方式访问<code>http://0.0.0.0:8000/v1/get/rss/howie6879</code>，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie6879&#34;</span>
-}
-</code></pre></div><p>在<code>rss_json.py</code>中加入一个新的视图函数：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a6e22e">@api_bp</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/post/rss/&#34;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;POST&#39;</span>])
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_rss_json</span>(request, <span style="color:#f92672">**</span>kwargs):
-    post_data <span style="color:#f92672">=</span> json_loads(str(request<span style="color:#f92672">.</span>body, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>))
-    name <span style="color:#f92672">=</span> post_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;name&#39;</span>)
-    <span style="color:#66d9ef">if</span> name <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
-        url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
-        feed <span style="color:#f92672">=</span> parse(url)
-        articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
-        data <span style="color:#f92672">=</span> []
-        <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
-            data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
-        <span style="color:#66d9ef">return</span> json(data)
-    <span style="color:#66d9ef">else</span>:
-        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;参数错误&#39;</span>})
-</code></pre></div><p>发送post请求到<code>http://0.0.0.0:8000/v1/post/rss/</code>，依旧和上面的结果一样，代码里面有个问题，我们需要判断<code>name</code>参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>api_bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;rss_api&#39;</span>, url_prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;v1&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_bp.route</span>(<span style="color:#e6db74">&#34;/get/rss/&lt;param&gt;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss_json</span>(request, param):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> param <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
+</span></span><span style="display:flex;"><span>        url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+</span></span><span style="display:flex;"><span>        feed <span style="color:#f92672">=</span> parse(url)
+</span></span><span style="display:flex;"><span>        articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+</span></span><span style="display:flex;"><span>            data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json(data)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;</span>})
+</span></span></code></pre></div><p>启动服务后，此时用<code>GET</code>方式访问<code>http://0.0.0.0:8000/v1/get/rss/howie6879</code>，就会返回一串你需要的json，这样使用，没什么问题，好，下面改成post请求，其中请求的参数如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie6879&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在<code>rss_json.py</code>中加入一个新的视图函数：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a6e22e">@api_bp.route</span>(<span style="color:#e6db74">&#34;/post/rss/&#34;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;POST&#39;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_rss_json</span>(request, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>    post_data <span style="color:#f92672">=</span> json_loads(str(request<span style="color:#f92672">.</span>body, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>))
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> post_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;name&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> name <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
+</span></span><span style="display:flex;"><span>        url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+</span></span><span style="display:flex;"><span>        feed <span style="color:#f92672">=</span> parse(url)
+</span></span><span style="display:flex;"><span>        articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+</span></span><span style="display:flex;"><span>            data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json(data)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;参数错误&#39;</span>})
+</span></span></code></pre></div><p>发送post请求到<code>http://0.0.0.0:8000/v1/post/rss/</code>，依旧和上面的结果一样，代码里面有个问题，我们需要判断<code>name</code>参数是不是存在于post过来的data中，解决方案很简单，加一个判断就好了，可这个是最佳方案么？</p>
 <p>显然并不是的，如果有十个参数呢？然后再增加十几个路由呢？每个路由里有十个参数需要判断，想象一下，这样实施下来，难道要在代码里面堆积满屏幕的判断语句么？这样实在是太可怕了，我们需要更好更通用的解决方案，是时候写个装饰器来验证参数了，打开<code>mid_decorator.py</code>文件，添加一个验证的装饰器函数：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">auth_params</span>(<span style="color:#f92672">*</span>keys):
-    <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">    api请求参数验证
-</span><span style="color:#e6db74">    :param keys: params
-</span><span style="color:#e6db74">    :return:
-</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-
-    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(func):
-        <span style="color:#a6e22e">@wraps</span>(func)
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">auth_param</span>(request<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, rpc_data<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
-            request_params, params <span style="color:#f92672">=</span> {}, []
-            <span style="color:#66d9ef">if</span> isinstance(request, Request):
-                <span style="color:#75715e"># sanic request</span>
-                <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-                    <span style="color:#66d9ef">try</span>:
-                        post_data <span style="color:#f92672">=</span> json_loads(str(request<span style="color:#f92672">.</span>body, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>))
-                    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
-                        <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
-                    <span style="color:#66d9ef">else</span>:
-                        request_params<span style="color:#f92672">.</span>update(post_data)
-                        params <span style="color:#f92672">=</span> [key <span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> post_data<span style="color:#f92672">.</span>items() <span style="color:#66d9ef">if</span> value]
-                <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
-                    request_params<span style="color:#f92672">.</span>update(request<span style="color:#f92672">.</span>args)
-                    params <span style="color:#f92672">=</span> [key <span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> request<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>items() <span style="color:#66d9ef">if</span> value]
-                <span style="color:#66d9ef">else</span>:
-                    <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
-            <span style="color:#66d9ef">else</span>:
-                <span style="color:#66d9ef">pass</span>
-
-            <span style="color:#66d9ef">if</span> set(keys)<span style="color:#f92672">.</span>issubset(set(params)):
-                kwargs[<span style="color:#e6db74">&#39;request_params&#39;</span>] <span style="color:#f92672">=</span> request_params
-                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">await</span> dec_func(func, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
-            <span style="color:#66d9ef">else</span>:
-                <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
-
-        <span style="color:#66d9ef">return</span> auth_param
-
-    <span style="color:#66d9ef">return</span> wrapper
-
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec_func</span>(func, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
-    <span style="color:#66d9ef">try</span>:
-        response <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> func(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
-        <span style="color:#66d9ef">return</span> response
-    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
-        <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
-</code></pre></div><p>注意，上面增加的路由函数改为这样：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a6e22e">@api_bp</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/post/rss/&#34;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;POST&#39;</span>])
-<span style="color:#a6e22e">@auth_params</span>(<span style="color:#e6db74">&#39;name&#39;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_rss_json</span>(request, <span style="color:#f92672">**</span>kwargs):
-</code></pre></div><p>这样一个请求进来，就会验证参数<code>name</code>是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">auth_params</span>(<span style="color:#f92672">*</span>keys):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    api请求参数验证
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param keys: params
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(func):
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">@wraps</span>(func)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">auth_param</span>(request<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, rpc_data<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>            request_params, params <span style="color:#f92672">=</span> {}, []
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> isinstance(request, Request):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># sanic request</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                        post_data <span style="color:#f92672">=</span> json_loads(str(request<span style="color:#f92672">.</span>body, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>))
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                        request_params<span style="color:#f92672">.</span>update(post_data)
+</span></span><span style="display:flex;"><span>                        params <span style="color:#f92672">=</span> [key <span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> post_data<span style="color:#f92672">.</span>items() <span style="color:#66d9ef">if</span> value]
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
+</span></span><span style="display:flex;"><span>                    request_params<span style="color:#f92672">.</span>update(request<span style="color:#f92672">.</span>args)
+</span></span><span style="display:flex;"><span>                    params <span style="color:#f92672">=</span> [key <span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> request<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>items() <span style="color:#66d9ef">if</span> value]
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> set(keys)<span style="color:#f92672">.</span>issubset(set(params)):
+</span></span><span style="display:flex;"><span>                kwargs[<span style="color:#e6db74">&#39;request_params&#39;</span>] <span style="color:#f92672">=</span> request_params
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">await</span> dec_func(func, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> auth_param
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> wrapper
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec_func</span>(func, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> func(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> response
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> response_handle(request, {<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;error&#39;</span>})
+</span></span></code></pre></div><p>注意，上面增加的路由函数改为这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a6e22e">@api_bp.route</span>(<span style="color:#e6db74">&#34;/post/rss/&#34;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;POST&#39;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@auth_params</span>(<span style="color:#e6db74">&#39;name&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_rss_json</span>(request, <span style="color:#f92672">**</span>kwargs):
+</span></span></code></pre></div><p>这样一个请求进来，就会验证参数<code>name</code>是否存在，而在视图函数里面，就可以放心大胆地使用传进来的参数了，而且对于其他不同的参数验证，只要按照这个写法，直接增加验证参数就好，十分灵活方便。</p>
 <p>对于请求验证的问题，解决方法也是类似，就是利用装饰器来实现，我自己也实现过，在上面的代码链接里面可以找到，不过现在的<code>Sanic</code>官方已经提供了<code>demo</code>，见<a href="https://github.com/channelcat/sanic/blob/master/examples/authorized_sanic.py">这里</a></p>
 <h3 id="grpc的异步调用方式">
   gRPC的异步调用方式
@@ -529,122 +528,122 @@ api_bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74
   <a class="anchor" href="#blueprint">#</a>
 </h3>
 <p>Blueprint前面的章节有仔细聊过，这里不多说，借用官方文档的例子，一个简单的sanic服务就搭好了：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># main.py</span>
-<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Sanic
-<span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json
-
-app <span style="color:#f92672">=</span> Sanic()
-
-<span style="color:#a6e22e">@app</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/&#34;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test</span>(request):
-    <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#34;hello&#34;</span>: <span style="color:#e6db74">&#34;world&#34;</span>})
-
-<span style="color:#75715e">#访问http://0.0.0.0:8000/即可</span>
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
-    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">8000</span>)
-</code></pre></div><p>上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># main.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Sanic
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#f92672">=</span> Sanic()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@app.route</span>(<span style="color:#e6db74">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#34;hello&#34;</span>: <span style="color:#e6db74">&#34;world&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#访问http://0.0.0.0:8000/即可</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">8000</span>)
+</span></span></code></pre></div><p>上面的例子可以当做一个完整的小应用，关于Blueprint的概念，可以这么理解，一个蓝图可以独立完成某一个任务，包括模板文件，静态文件，路由都是独立的，而一个应用可以通过注册许多蓝图来进行构建。
 比如我现在编写的项目，我使用的是功能式架构，具体如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">├── server.py
-├── static
-│   └── novels
-│       ├── css
-│       │   └── result.css
-│       ├── img
-│       │   └── read_content.png
-│       └── js
-│           └── main.js
-├── template
-│   └── novels
-│       └── index.html
-└── views
-    └── novels_blueprint.py
-</code></pre></div><p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── server.py
+</span></span><span style="display:flex;"><span>├── static
+</span></span><span style="display:flex;"><span>│   └── novels
+</span></span><span style="display:flex;"><span>│       ├── css
+</span></span><span style="display:flex;"><span>│       │   └── result.css
+</span></span><span style="display:flex;"><span>│       ├── img
+</span></span><span style="display:flex;"><span>│       │   └── read_content.png
+</span></span><span style="display:flex;"><span>│       └── js
+</span></span><span style="display:flex;"><span>│           └── main.js
+</span></span><span style="display:flex;"><span>├── template
+</span></span><span style="display:flex;"><span>│   └── novels
+</span></span><span style="display:flex;"><span>│       └── index.html
+</span></span><span style="display:flex;"><span>└── views
+</span></span><span style="display:flex;"><span>    └── novels_blueprint.py
+</span></span></code></pre></div><p>可以看到，总的templates以及静态文件还是放在一起，但是不同的blueprint则放在对应的文件夹中，还有一种分区式架构，则是将不同的templats以及static等文件夹全都放在不同的的blueprint中。
 最后只要将每个单独的blueprint在主启动文件进行注册就好，上面的目录树是我以前的一个项目<a href="https://github.com/howie6879/owllook">owllook</a>的，也是用<code>Sanic</code>编写的，有兴趣可以看看，不过现在结构改变挺大。</p>
 <h3 id="htmltemplates编写">
   html&amp;templates编写
   <a class="anchor" href="#htmltemplates%e7%bc%96%e5%86%99">#</a>
 </h3>
 <p>编写web服务，自然会涉及到html，sanic自带有html函数，但这并不能满足有些需求，故引入jinja2迫在眉睫，使用方法也很简单：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 适用python3.5+</span>
-<span style="color:#75715e"># 代码片段，明白意思就好</span>
-<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
-<span style="color:#f92672">from</span> jinja2 <span style="color:#f92672">import</span> Environment, PackageLoader, select_autoescape
-
-<span style="color:#75715e"># 初始化blueprint并定义静态文件夹路径</span>
-bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;novels_blueprint&#39;</span>)
-bp<span style="color:#f92672">.</span>static(<span style="color:#e6db74">&#39;/static&#39;</span>, <span style="color:#e6db74">&#39;./static/novels&#39;</span>)
-
-<span style="color:#75715e"># jinjia2 config</span>
-env <span style="color:#f92672">=</span> Environment(
-    loader<span style="color:#f92672">=</span>PackageLoader(<span style="color:#e6db74">&#39;views.novels_blueprint&#39;</span>, <span style="color:#e6db74">&#39;../templates/novels&#39;</span>),
-    autoescape<span style="color:#f92672">=</span>select_autoescape([<span style="color:#e6db74">&#39;html&#39;</span>, <span style="color:#e6db74">&#39;xml&#39;</span>, <span style="color:#e6db74">&#39;tpl&#39;</span>]))
-
-<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">template</span>(tpl, <span style="color:#f92672">**</span>kwargs):
-    template <span style="color:#f92672">=</span> env<span style="color:#f92672">.</span>get_template(tpl)
-    <span style="color:#66d9ef">return</span> html(template<span style="color:#f92672">.</span>render(kwargs))
-    
-<span style="color:#a6e22e">@bp</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/&#34;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">index</span>(request):
-    <span style="color:#66d9ef">return</span> template(<span style="color:#e6db74">&#39;index.html&#39;</span>, title<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;index&#39;</span>)
-</code></pre></div><p>如果是<code>python3.6</code>，可以试试下面的写法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 适用python3.5+</span>
-<span style="color:#75715e"># 代码片段，明白意思就好</span>
-<span style="color:#75715e">#!/usr/bin/env python</span>
-<span style="color:#f92672">import</span> sys
-
-<span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
-<span style="color:#f92672">from</span> jinja2 <span style="color:#f92672">import</span> Environment, PackageLoader, select_autoescape
-<span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
-<span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> html
-
-<span style="color:#f92672">from</span> src.config <span style="color:#f92672">import</span> CONFIG
-
-<span style="color:#75715e"># https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py</span>
-<span style="color:#75715e"># 开启异步特性  要求3.6+</span>
-enable_async <span style="color:#f92672">=</span> sys<span style="color:#f92672">.</span>version_info <span style="color:#f92672">&gt;=</span> (<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">6</span>)
-
-html_bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;rss_html&#39;</span>, url_prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;html&#39;</span>)
-html_bp<span style="color:#f92672">.</span>static(<span style="color:#e6db74">&#39;/statics/rss_html&#39;</span>, CONFIG<span style="color:#f92672">.</span>BASE_DIR <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/statics/rss_html&#39;</span>)
-
-<span style="color:#75715e"># jinjia2 config</span>
-env <span style="color:#f92672">=</span> Environment(
-    loader<span style="color:#f92672">=</span>PackageLoader(<span style="color:#e6db74">&#39;views.rss_html&#39;</span>, <span style="color:#e6db74">&#39;../templates/rss_html&#39;</span>),
-    autoescape<span style="color:#f92672">=</span>select_autoescape([<span style="color:#e6db74">&#39;html&#39;</span>, <span style="color:#e6db74">&#39;xml&#39;</span>, <span style="color:#e6db74">&#39;tpl&#39;</span>]),
-    enable_async<span style="color:#f92672">=</span>enable_async)
-
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">template</span>(tpl, <span style="color:#f92672">**</span>kwargs):
-    template <span style="color:#f92672">=</span> env<span style="color:#f92672">.</span>get_template(tpl)
-    rendered_template <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> template<span style="color:#f92672">.</span>render_async(<span style="color:#f92672">**</span>kwargs)
-    <span style="color:#66d9ef">return</span> html(rendered_template)
-</code></pre></div><h3 id="cache">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 适用python3.5+</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 代码片段，明白意思就好</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> jinja2 <span style="color:#f92672">import</span> Environment, PackageLoader, select_autoescape
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化blueprint并定义静态文件夹路径</span>
+</span></span><span style="display:flex;"><span>bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;novels_blueprint&#39;</span>)
+</span></span><span style="display:flex;"><span>bp<span style="color:#f92672">.</span>static(<span style="color:#e6db74">&#39;/static&#39;</span>, <span style="color:#e6db74">&#39;./static/novels&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># jinjia2 config</span>
+</span></span><span style="display:flex;"><span>env <span style="color:#f92672">=</span> Environment(
+</span></span><span style="display:flex;"><span>    loader<span style="color:#f92672">=</span>PackageLoader(<span style="color:#e6db74">&#39;views.novels_blueprint&#39;</span>, <span style="color:#e6db74">&#39;../templates/novels&#39;</span>),
+</span></span><span style="display:flex;"><span>    autoescape<span style="color:#f92672">=</span>select_autoescape([<span style="color:#e6db74">&#39;html&#39;</span>, <span style="color:#e6db74">&#39;xml&#39;</span>, <span style="color:#e6db74">&#39;tpl&#39;</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">template</span>(tpl, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>    template <span style="color:#f92672">=</span> env<span style="color:#f92672">.</span>get_template(tpl)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> html(template<span style="color:#f92672">.</span>render(kwargs))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@bp.route</span>(<span style="color:#e6db74">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">index</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> template(<span style="color:#e6db74">&#39;index.html&#39;</span>, title<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;index&#39;</span>)
+</span></span></code></pre></div><p>如果是<code>python3.6</code>，可以试试下面的写法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 适用python3.5+</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 代码片段，明白意思就好</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> feedparser <span style="color:#f92672">import</span> parse
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> jinja2 <span style="color:#f92672">import</span> Environment, PackageLoader, select_autoescape
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic <span style="color:#f92672">import</span> Blueprint
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sanic.response <span style="color:#f92672">import</span> html
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> src.config <span style="color:#f92672">import</span> CONFIG
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># https://github.com/channelcat/sanic/blob/5bb640ca1706a42a012109dc3d811925d7453217/examples/jinja_example/jinja_example.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 开启异步特性  要求3.6+</span>
+</span></span><span style="display:flex;"><span>enable_async <span style="color:#f92672">=</span> sys<span style="color:#f92672">.</span>version_info <span style="color:#f92672">&gt;=</span> (<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">6</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>html_bp <span style="color:#f92672">=</span> Blueprint(<span style="color:#e6db74">&#39;rss_html&#39;</span>, url_prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;html&#39;</span>)
+</span></span><span style="display:flex;"><span>html_bp<span style="color:#f92672">.</span>static(<span style="color:#e6db74">&#39;/statics/rss_html&#39;</span>, CONFIG<span style="color:#f92672">.</span>BASE_DIR <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/statics/rss_html&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># jinjia2 config</span>
+</span></span><span style="display:flex;"><span>env <span style="color:#f92672">=</span> Environment(
+</span></span><span style="display:flex;"><span>    loader<span style="color:#f92672">=</span>PackageLoader(<span style="color:#e6db74">&#39;views.rss_html&#39;</span>, <span style="color:#e6db74">&#39;../templates/rss_html&#39;</span>),
+</span></span><span style="display:flex;"><span>    autoescape<span style="color:#f92672">=</span>select_autoescape([<span style="color:#e6db74">&#39;html&#39;</span>, <span style="color:#e6db74">&#39;xml&#39;</span>, <span style="color:#e6db74">&#39;tpl&#39;</span>]),
+</span></span><span style="display:flex;"><span>    enable_async<span style="color:#f92672">=</span>enable_async)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">template</span>(tpl, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>    template <span style="color:#f92672">=</span> env<span style="color:#f92672">.</span>get_template(tpl)
+</span></span><span style="display:flex;"><span>    rendered_template <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> template<span style="color:#f92672">.</span>render_async(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> html(rendered_template)
+</span></span></code></pre></div><h3 id="cache">
   cache
   <a class="anchor" href="#cache">#</a>
 </h3>
 <p>我在项目中主要使用redis作为缓存，使用<a href="https://github.com/argaen/aiocache">aiocache</a>很方便就完成了我需要的功能，当然自己利用aioredis编写也不会复杂到哪里去。</p>
 <p>比如上面的例子，每次访问<code>http://0.0.0.0:8000/v1/get/rss/howie6879</code>，都要请求一次对应的rss资源，如果做个缓存那岂不是简单很多？</p>
 <p>改写成这样：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a6e22e">@cached</span>(ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>, cache<span style="color:#f92672">=</span>RedisCache, key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rss&#34;</span>, serializer<span style="color:#f92672">=</span>PickleSerializer(), port<span style="color:#f92672">=</span><span style="color:#ae81ff">6379</span>, namespace<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;main&#34;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss</span>():
-    print(<span style="color:#e6db74">&#34;第一次请求休眠3秒...&#34;</span>)
-    <span style="color:#66d9ef">await</span> asyncio<span style="color:#f92672">.</span>sleep(<span style="color:#ae81ff">3</span>)
-    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
-    feed <span style="color:#f92672">=</span> parse(url)
-    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
-    data <span style="color:#f92672">=</span> []
-    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
-        data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
-    <span style="color:#66d9ef">return</span> data
-
-
-<span style="color:#a6e22e">@api_bp</span><span style="color:#f92672">.</span>route(<span style="color:#e6db74">&#34;/get/rss/&lt;name&gt;&#34;</span>)
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss_json</span>(request, name):
-    <span style="color:#66d9ef">if</span> name <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
-        data <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> get_rss()
-        <span style="color:#66d9ef">return</span> json(data)
-    <span style="color:#66d9ef">else</span>:
-        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;</span>})
-</code></pre></div><p>为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a6e22e">@cached</span>(ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>, cache<span style="color:#f92672">=</span>RedisCache, key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rss&#34;</span>, serializer<span style="color:#f92672">=</span>PickleSerializer(), port<span style="color:#f92672">=</span><span style="color:#ae81ff">6379</span>, namespace<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;main&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss</span>():
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;第一次请求休眠3秒...&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> asyncio<span style="color:#f92672">.</span>sleep(<span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://blog.howie6879.cn/atom.xml&#34;</span>
+</span></span><span style="display:flex;"><span>    feed <span style="color:#f92672">=</span> parse(url)
+</span></span><span style="display:flex;"><span>    articles <span style="color:#f92672">=</span> feed[<span style="color:#e6db74">&#39;entries&#39;</span>]
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> article <span style="color:#f92672">in</span> articles:
+</span></span><span style="display:flex;"><span>        data<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: article[<span style="color:#e6db74">&#34;title_detail&#34;</span>][<span style="color:#e6db74">&#34;value&#34;</span>], <span style="color:#e6db74">&#34;link&#34;</span>: article[<span style="color:#e6db74">&#34;link&#34;</span>]})
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_bp.route</span>(<span style="color:#e6db74">&#34;/get/rss/&lt;name&gt;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rss_json</span>(request, name):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> name <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;howie6879&#39;</span>:
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> get_rss()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json(data)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json({<span style="color:#e6db74">&#39;info&#39;</span>: <span style="color:#e6db74">&#39;请访问 http://0.0.0.0:8000/v1/get/rss/howie6879&#39;</span>})
+</span></span></code></pre></div><p>为了体现缓存的速度，首次请求休眠3秒，请求过后，redis中就会将此次json数据缓存进去了，下次去请求就会直接冲redis读取数据。</p>
 <p>带上装饰器，什么都解决了。</p>
 <h3 id="热加载">
   热加载

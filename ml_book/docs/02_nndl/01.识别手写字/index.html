@@ -2,48 +2,57 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="识别手写字 #  Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
+<meta name="description" content="识别手写字 # Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
 神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？
- 人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准  本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
- 两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法  感知器 #  1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
- 感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
- 感知器的工作方式如下所示：
+人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准 本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
+两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法 感知器 # 1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
+感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
+感知器的工作方式如下所示：
 $x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。
 对于$x_{1},x_{2},&hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：
 假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：
- $x=(x_{1},x_{2},&hellip;,x_{j})$ $w=(w_{1},w_{2},&hellip;,w_{j})$  那么感知器的规则可以重写为:
+$x=(x_{1},x_{2},&hellip;,x_{j})$ $w=(w_{1},w_{2},&hellip;,w_{j})$ 那么感知器的规则可以重写为:
 这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
 它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用python写的一个感知器自动学习实现与非门，代码在nndl_chapter01。
 说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
-   $x$ $y$ $output$     0 0 0   0 1 1   1 0 1   1 1 0    可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。">
+$x$ $y$ $output$ 0 0 0 0 1 1 1 0 1 1 1 0 可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。
+可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。
+遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。
+感知器，终于可以多层了。
+S型神经元 # 前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？
+以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="识别手写字 #  Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
+<meta property="og:description" content="识别手写字 # Neural Networks and Deep Learning 是由 Michael Nielsen 编写的开源书籍，这本书主要讲的是如何掌握神经网络的核心概念，包括现代技术的深度学习，为你将来使⽤神经网络和深度学习打下基础，以下是我的读书笔记。
 神经网络是一门重要的机器学习技术，它通过模拟人脑的神经网络来实现人工智能的目的，所以其也是深度学习的基础，了解它之后自然会受益颇多，本章主要是以识别手写字这个问题来贯穿整篇，那么，人类的视觉系统和神经网络到底在识别一个目标的时候，主要区别在哪？
- 人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准  本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
- 两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法  感知器 #  1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
- 感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
- 感知器的工作方式如下所示：
+人类视觉系统：通过数十亿年不断地进化与学习，最终能够极好地适应理解视觉世界的任务，从而无意识地就可以对目标进行判断识别 神经网络：通过提供的样本来推断出识别某种目标的规则，作为判断标准 本章的主要内容是介绍神经网络的基本概念以及引入一个识别手写数字的例子来加深我们的理解，你将了解到：
+两个重要的人工神经元：感知器和S型神经元 神经⽹络的架构 ⼀个简单的分类⼿写数字的⽹络 标准的神经网络学习算法：随机梯度下降算法 感知器 # 1943年，心理学家McCulloch和数学家Pitts发表了《A logical calculus of the ideas immanent in nervous activity》，其中提出了抽象的神经元模型MP，但是在这个模型中权重都是要求提前设置好才可以输出目标值，所以很遗憾，它不可以学习，但这不影响此模型给后来者带来的影响，比如感知器：
+感知器是Frank Rosenblatt提出的一个由两层神经元组成的人工神经网络，它的出现在当时可是引起了轰动，因为感知器是首个可以学习的神经网络
+感知器的工作方式如下所示：
 $x_{1},x_{2},x_{3}$ 分别表示三个不同的二进制输入，output则是一个二进制输出，对于多种输入，可能有的输入成立有的不成立，在这么多输入的影响下，该如何判断输出output呢？Rosenblatt引入了权重来表示相应输入的重要性。
 对于$x_{1},x_{2},&hellip;,x_{j}$个输入，每个输入都有对应的权重$w_{1},w_{2},&hellip;,w_{j}$，最后的输出output由每个输入与其对应的权重相乘之和与阈值之差$\sum _{j} w{_j}x{_j}$来决定，如下：
 假设$b=-threshold$且$w$和$x$对应权重和输⼊的向量，即：
- $x=(x_{1},x_{2},&hellip;,x_{j})$ $w=(w_{1},w_{2},&hellip;,w_{j})$  那么感知器的规则可以重写为:
+$x=(x_{1},x_{2},&hellip;,x_{j})$ $w=(w_{1},w_{2},&hellip;,w_{j})$ 那么感知器的规则可以重写为:
 这就是感知器的数学模型，是不是就像一个逻辑回归模型？只要将感知器输出规则替换为($f(x)=x$)，后面我们会知道这称之为激活函数，其实这种感知器叫做线性单元。
 它的出现让我们可以设计学习算法，从而实现自动调整人工神经元的权重和偏置，与此同时output也会随之改变，这就是学习！如果你有兴趣可以看我用python写的一个感知器自动学习实现与非门，代码在nndl_chapter01。
 说句题外话，由于感知器是单层神经网络，它只能实现简单的线性分类任务，所以它无法对异或问题进行分类，异或的真值表如下：
-   $x$ $y$ $output$     0 0 0   0 1 1   1 0 1   1 1 0    可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。" />
+$x$ $y$ $output$ 0 0 0 0 1 1 1 0 1 1 1 0 可以看出来，异或问题是线性不可分的，不信你画个坐标轴试试看，那么问题来了？怎么解决，大部分都能很快地想出解决方案，既然感知器可以实现线性分类，也就是说实现与非门是没有问题的，逻辑上来说我们可以实现任何逻辑功能（比如四个与非门实现异或），但前提是为感知器加入一个隐藏层，意思就是多了一个隐藏层的神经网络之后，就可以解决异或问题。
+可是在当时是没办法对多层神经网络（包括异或逻辑）进行训练的，因为计算量太大了，Minsky在1969年出版了一本叫《Perceptron》的书详细说明了这个问题。
+遇到问题，就解决问题，两层神经网络的作用，是可以对非线性进行分类的，我们的先人并未止步，直到反向传播（Backpropagation，BP）算法的出现解决了计算量太大的问题。
+感知器，终于可以多层了。
+S型神经元 # 前面提到，神经网络可以通过样本的学习来调整人工神经元的权重和偏置，从而使输出的结果更加准确，那么怎样给⼀个神经⽹络设计这样的算法呢？
+以数字识别为例，假设⽹络错误地把⼀个9的图像分类为8，我们可以让权重和偏置做些⼩的改动，从而达到我们需要的结果9，这就是学习。对于感知器，我们知道，其返还的结果不是0就是1，很可能出现这样一个情况，我们好不容易将一个目标，比如把9的图像分类为8调整回原来正确的分类，可此时的阈值和偏置会造成其他样本的判断失误，这样的调整不是一个好的方案。" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" /><meta property="article:section" content="docs" />
 
 
 <title>01.识别手写字 | 机器学习之路</title>
 <link rel="manifest" href="/ml_book/manifest.json">
 <link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<script defer src="/ml_book/en.search.min.19d3256ef629b9d338498eaad77ab929c8e76a2eb7f9ea70d3c15a8202fff30b.js" integrity="sha256-GdMlbvYpudM4SY6q13q5Kcjnai63&#43;epw08FaggL/8ws="></script>
 <style>
 
 img[src$='#center']
@@ -157,7 +166,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+    <a href="https://www.howie6879.com/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
   
 
         </li>
@@ -188,7 +197,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class=" active">01.识别手写字</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class=" active">01.识别手写字</a>
   
 
         </li>
@@ -201,7 +210,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
   
 
         </li>
@@ -214,7 +223,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class="">03.改进神经 络的学习 法</a>
   
 
         </li>
@@ -227,7 +236,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
   
 
         </li>
@@ -240,7 +249,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
   
 
         </li>
@@ -253,7 +262,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
   
 
         </li>
@@ -284,7 +293,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+    <a href="https://www.howie6879.com/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
   
 
         </li>
@@ -297,7 +306,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+    <a href="https://www.howie6879.com/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
   
 
         </li>
@@ -328,7 +337,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
   
 
         </li>
@@ -341,7 +350,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
   
 
         </li>
@@ -354,7 +363,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
   
 
         </li>
@@ -386,7 +395,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -580,43 +589,42 @@ $$</p>
   <a class="anchor" href="#%e9%9a%8f%e6%9c%ba%e6%a2%af%e5%ba%a6%e4%b8%8b%e9%99%8d%e7%ae%97%e6%b3%95">#</a>
 </h2>
 <p>分类方案已经确定了，接下来第一步就是获取样本，我们将使⽤<a href="http://yann.lecun.com/exdb/mnist/">MNIST</a>数据集，其包含有数以万计的连带着正确分类器的⼿写数字的扫描图像，下载好建立这样的目录结构，使用<code>jupyter notebook</code>开始吧，如果没有，请自行检索教程安装，代码目录如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pylab
-└── datasets
-    └── MNIST_data
-        ├── t10k-images-idx3-ubyte.gz
-        ├── t10k-labels-idx1-ubyte.gz
-        ├── train-images-idx3-ubyte.gz
-        └── train-labels-idx1-ubyte.gz
-</code></pre></div><p>然后使用<code> TensorFlow</code>来读取数据，看看下载的数据集到底是什么样子，可以在<code>mnist_data.ipynb</code>中添加如下代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> matplotlib <span style="color:#f92672">import</span> pyplot <span style="color:#66d9ef">as</span> plt
-<span style="color:#f92672">from</span> tensorflow.examples.tutorials.mnist.input_data <span style="color:#f92672">import</span> read_data_sets
-
-mnist <span style="color:#f92672">=</span> read_data_sets(<span style="color:#e6db74">&#34;../datasets/MNIST_data/&#34;</span>, one_hot<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-
-</code></pre></div><p>查看一些基本信息：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">print(<span style="color:#e6db74">&#34;Training data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>num_examples)
-print(<span style="color:#e6db74">&#34;Validating data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>validation<span style="color:#f92672">.</span>num_examples)
-print(<span style="color:#e6db74">&#34;Testing data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>test<span style="color:#f92672">.</span>num_examples)
-
-<span style="color:#75715e"># 每张图片是长度为784的一维数组</span>
-print(len(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>images[<span style="color:#ae81ff">0</span>]))
-
-<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">display_digit</span>(image):
-    image <span style="color:#f92672">=</span> image<span style="color:#f92672">.</span>reshape([<span style="color:#ae81ff">28</span>,<span style="color:#ae81ff">28</span>])
-    plt<span style="color:#f92672">.</span>imshow(image, cmap<span style="color:#f92672">=</span>plt<span style="color:#f92672">.</span>get_cmap(<span style="color:#e6db74">&#39;gray_r&#39;</span>))
-    plt<span style="color:#f92672">.</span>show()
-
-print(<span style="color:#e6db74">&#34;样本真实数字为：</span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> list(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>labels[<span style="color:#ae81ff">1</span>])<span style="color:#f92672">.</span>index(<span style="color:#ae81ff">1</span>))
-<span style="color:#75715e"># 显示图像</span>
-display_digit(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>images[<span style="color:#ae81ff">1</span>])
-
-<span style="color:#75715e"># Output</span>
-<span style="color:#75715e"># Training data size: 55000</span>
-<span style="color:#75715e"># Validating data size: 5000</span>
-<span style="color:#75715e"># Testing data size: 10000</span>
-<span style="color:#75715e"># 784</span>
-<span style="color:#75715e"># 样本真实数字为：3</span>
-</code></pre></div><p>可以看到显示如下图像：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pylab
+</span></span><span style="display:flex;"><span>└── datasets
+</span></span><span style="display:flex;"><span>    └── MNIST_data
+</span></span><span style="display:flex;"><span>        ├── t10k-images-idx3-ubyte.gz
+</span></span><span style="display:flex;"><span>        ├── t10k-labels-idx1-ubyte.gz
+</span></span><span style="display:flex;"><span>        ├── train-images-idx3-ubyte.gz
+</span></span><span style="display:flex;"><span>        └── train-labels-idx1-ubyte.gz
+</span></span></code></pre></div><p>然后使用<code> TensorFlow</code>来读取数据，看看下载的数据集到底是什么样子，可以在<code>mnist_data.ipynb</code>中添加如下代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> matplotlib <span style="color:#f92672">import</span> pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> tensorflow.examples.tutorials.mnist.input_data <span style="color:#f92672">import</span> read_data_sets
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mnist <span style="color:#f92672">=</span> read_data_sets(<span style="color:#e6db74">&#34;../datasets/MNIST_data/&#34;</span>, one_hot<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>查看一些基本信息：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Training data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>num_examples)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Validating data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>validation<span style="color:#f92672">.</span>num_examples)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Testing data size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> mnist<span style="color:#f92672">.</span>test<span style="color:#f92672">.</span>num_examples)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 每张图片是长度为784的一维数组</span>
+</span></span><span style="display:flex;"><span>print(len(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>images[<span style="color:#ae81ff">0</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">display_digit</span>(image):
+</span></span><span style="display:flex;"><span>    image <span style="color:#f92672">=</span> image<span style="color:#f92672">.</span>reshape([<span style="color:#ae81ff">28</span>,<span style="color:#ae81ff">28</span>])
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>imshow(image, cmap<span style="color:#f92672">=</span>plt<span style="color:#f92672">.</span>get_cmap(<span style="color:#e6db74">&#39;gray_r&#39;</span>))
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;样本真实数字为：</span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> list(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>labels[<span style="color:#ae81ff">1</span>])<span style="color:#f92672">.</span>index(<span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 显示图像</span>
+</span></span><span style="display:flex;"><span>display_digit(mnist<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>images[<span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Training data size: 55000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Validating data size: 5000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Testing data size: 10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 784</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 样本真实数字为：3</span>
+</span></span></code></pre></div><p>可以看到显示如下图像：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/images/Crfu35.jpg" alt="Crfu35" /></p>
 <p>通过代码，我们知道，每个图像被分割成784个值存于一维数组中，看作⼀个$28 \times 28 = 784$维的向量，每个向量就代表图像中单个像素的灰度值，假设我们用$y$表示output，也就是当我们输入一组样本数据x，那么y就是我们需要的结果，怎么从x得到y呢，我们需要一个函数$y= y(x)$。</p>
 <p>感知器为什么可以学习，因为它可以调整$b$和$w$来实现output的改变，这里，我们同样需要一个算法来让我们找到权重和偏置，从而使得$y= y(x)$可以拟合样本输入的x，为了量化我们如何实现这个⽬标，我们定义⼀个<strong>代价函数</strong>（有时被称为损失或⽬标函数）：</p>
@@ -640,51 +648,50 @@ $$</p>
 <p>终于，掌握了基本的概念，我们可以通过实战来实现一个数字分类模型，来看看，前面我们掌握的知识是怎么运用于实际的。</p>
 <p>书籍作者很贴心地实现了模型代码，仓库见<a href="https://github.com/mnielsen/neural-networks-and-deep-learning">neural-networks-and-deep-learning 官方git仓库</a>，接下来我们一起来看看具体的实现代码吧。</p>
 <p>首先是实现一个<code>Network</code>类，</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
-
-<span style="color:#f92672">import</span> random
-
-<span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Network</span>(object):
-
-    <span style="color:#66d9ef">def</span> __init__(self, sizes):
-        <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">        初始化
-</span><span style="color:#e6db74">        :param sizes:
-</span><span style="color:#e6db74">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
-</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
-        self<span style="color:#f92672">.</span>num_layers <span style="color:#f92672">=</span> len(sizes)
-        self<span style="color:#f92672">.</span>sizes <span style="color:#f92672">=</span> sizes
-        self<span style="color:#f92672">.</span>biases <span style="color:#f92672">=</span> [np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randn(y, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> sizes[<span style="color:#ae81ff">1</span>:]]
-        self<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> [np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randn(y, x)
-                        <span style="color:#66d9ef">for</span> x, y <span style="color:#f92672">in</span> zip(sizes[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], sizes[<span style="color:#ae81ff">1</span>:])]
-
-</code></pre></div><p>前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考<a href="https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py">network.py</a>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid</span>(z):
-    <span style="color:#e6db74">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
-    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">/</span>(<span style="color:#ae81ff">1.0</span><span style="color:#f92672">+</span>np<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>z))
-</code></pre></div><p>代码已经准备就绪，下面可以开始进行模型训练：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> mnist_loader<span style="color:#f92672">,</span> network
-
-training_data, validation_data, test_data <span style="color:#f92672">=</span> mnist_loader<span style="color:#f92672">.</span>load_data_wrapper()
-
-net <span style="color:#f92672">=</span> network<span style="color:#f92672">.</span>Network([<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>])
-net<span style="color:#f92672">.</span>SGD(list(training_data), <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">3.0</span>, test_data<span style="color:#f92672">=</span>list(test_data))
-
-<span style="color:#75715e"># Output</span>
-Epoch <span style="color:#ae81ff">0</span>: <span style="color:#ae81ff">9023</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">1</span>: <span style="color:#ae81ff">9222</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">2</span>: <span style="color:#ae81ff">9312</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">3</span>: <span style="color:#ae81ff">9312</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">4</span>: <span style="color:#ae81ff">9383</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">5</span>: <span style="color:#ae81ff">9421</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">6</span>: <span style="color:#ae81ff">9432</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">7</span>: <span style="color:#ae81ff">9421</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">8</span>: <span style="color:#ae81ff">9454</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-Epoch <span style="color:#ae81ff">9</span>: <span style="color:#ae81ff">9447</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
-</code></pre></div><p>看结果，十次迭代后，轻轻松松突破94%</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> random
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Network</span>(object):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, sizes):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        初始化
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param sizes:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            如果想要初始化一个层数为3，里面神经元数量分别为：2,3,1 的神经网络，那么 sizes = [2，3，1]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>num_layers <span style="color:#f92672">=</span> len(sizes)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>sizes <span style="color:#f92672">=</span> sizes
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>biases <span style="color:#f92672">=</span> [np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randn(y, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> sizes[<span style="color:#ae81ff">1</span>:]]
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> [np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randn(y, x)
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">for</span> x, y <span style="color:#f92672">in</span> zip(sizes[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], sizes[<span style="color:#ae81ff">1</span>:])]
+</span></span></code></pre></div><p>前面已经说了S型神经元，那么此时激活函数实现如下，更加具体的代码请参考<a href="https://github.com/mnielsen/neural-networks-and-deep-learning/blob/master/src/network.py">network.py</a>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid</span>(z):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;The sigmoid function.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">/</span>(<span style="color:#ae81ff">1.0</span><span style="color:#f92672">+</span>np<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>z))
+</span></span></code></pre></div><p>代码已经准备就绪，下面可以开始进行模型训练：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> mnist_loader<span style="color:#f92672">,</span> network
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>training_data, validation_data, test_data <span style="color:#f92672">=</span> mnist_loader<span style="color:#f92672">.</span>load_data_wrapper()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> network<span style="color:#f92672">.</span>Network([<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>])
+</span></span><span style="display:flex;"><span>net<span style="color:#f92672">.</span>SGD(list(training_data), <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">3.0</span>, test_data<span style="color:#f92672">=</span>list(test_data))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Output</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">0</span>: <span style="color:#ae81ff">9023</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">1</span>: <span style="color:#ae81ff">9222</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">2</span>: <span style="color:#ae81ff">9312</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">3</span>: <span style="color:#ae81ff">9312</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">4</span>: <span style="color:#ae81ff">9383</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">5</span>: <span style="color:#ae81ff">9421</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">6</span>: <span style="color:#ae81ff">9432</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">7</span>: <span style="color:#ae81ff">9421</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">8</span>: <span style="color:#ae81ff">9454</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>Epoch <span style="color:#ae81ff">9</span>: <span style="color:#ae81ff">9447</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">10000</span>
+</span></span></code></pre></div><p>看结果，十次迭代后，轻轻松松突破94%</p>
 <h2 id="参考">
   参考
   <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>

@@ -2,12 +2,12 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="改进神经⽹络的学习⽅法 #   万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
- 前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
- 交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数  交叉熵代价函数 #  通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
+<meta name="description" content="改进神经⽹络的学习⽅法 # 万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
+前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
+交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数 交叉熵代价函数 # 通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
 对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：
 假设有这样一个神经元，我们希望当输入为1的时候，输出为0，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为0.6 和 0.9，前面我们说过，S型神经元的输出计算方式为：
 输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：
@@ -16,17 +16,22 @@ $$ \frac{1}{1&#43;\exp(-\sum_j w_j x_j-b)} $$
 可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于0.5我们都可以归为0，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：
 这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。
 这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单
- 权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
- 让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
- $x=1$ $y=0$  再结合前面第一章讲的代价函数的定义：
+权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
+让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
+$x=1$ $y=0$ 再结合前面第一章讲的代价函数的定义：
 $$ C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2 $$
- w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output  类比一下，此时的代价函数为：
+w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output 类比一下，此时的代价函数为：
 $$ C=\frac{(y-a)^{2}}{2} $$
-接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：">
+接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：
+$x=1$ $y=0$ $a=\sigma(z)$ $z=wx&#43;b$ 推导过程如下：
+从推导结果可以看到偏导数的值和$\sigma^{\prime}\left(z\right)$成正比，回顾下前面讲的S型神经元中激活函数的图像：
+我们可以从这幅图看出，当神经元的输出接近1的时候，曲线变得相当平，所以$\sigma^{\prime}\left(z\right)$就很小，同时也可以得出代价函数C权重和偏置的偏导数也很小，这就是训练速度缓慢的原因
+再看上面代价函数值和迭代次数的图，中间部分非常陡峭，前后非常平缓，是不是非常契合$\sigma^{\prime}\left(z\right)$的变化的？类似其他的神经网络，也是这样的原因造成训练缓慢，使用均方误差作为代价函数还有个缺点就是容易陷入局部最优解的沼泽中
+引⼊交叉熵代价函数 # 我们已经抛出了神经网络训练缓慢的原因，接下来就是考虑如何解决这个问题">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="改进神经⽹络的学习⽅法 #   万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
- 前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
- 交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数  交叉熵代价函数 #  通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
+<meta property="og:description" content="改进神经⽹络的学习⽅法 # 万丈高楼平地起，反向传播是深度学习这栋大厦的基石，所以在这块花多少时间都是值得的
+前面一章，我们深入理解了反向传播算法如何工作，本章的主要目的是改进神经网络的学习方法，本章涉及的技术包括：
+交叉熵代价函数 四种称为规范化的⽅法（L1 和 L2 规范化，弃权和训练数据的⼈为扩展） 更好的权重初始化⽅法 如何选择神经网络的超参数 交叉熵代价函数 # 通过前面的学习，我们知道，神经网络一直在努力地让代价函数变小，现在我们抛出一个问题，代价函数从初始值到我们理想状态的值，这个过程所消耗的时间是怎样的情况呢？
 对于人类来说，我们犯比较明显的错误的时候，改正的效果也很明显，神经网络也是这样的么？让我们通过下面的一个小例子来详细看看：
 假设有这样一个神经元，我们希望当输入为1的时候，输出为0，让我们通过梯度下降的方式来训练权重和偏置，⾸先将权重和偏置初始化为0.6 和 0.9，前面我们说过，S型神经元的输出计算方式为：
 输⼊$x_{1},x_{2},&hellip;,x_{j}$，权重为$w_{1},w_{2},&hellip;,w_{j}$，和偏置b的S型神经元的输出是：
@@ -35,23 +40,27 @@ $$ \frac{1}{1&#43;\exp(-\sum_j w_j x_j-b)} $$
 可以看到，200次迭代后，输出已经满足我们的需求了，毕竟只要小于0.5我们都可以归为0，接下来再将初始权重和偏置都设置为2.0，此时初始输出为0.98，这是和⽬标值的差距相当⼤的，现在看看神经元学习的过程：
 这次可以明显地看到迭代150次左右没有很明显的变化，随后速度就快了起来。
 这个例子引出了一个问题，包括在其他一般的神经网络中也会出现，为何会学习缓慢呢？我们在训练中应该怎么避免这个情况？思考一下，问题的原因其实很简单
- 权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
- 让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
- $x=1$ $y=0$  再结合前面第一章讲的代价函数的定义：
+权重和偏置是根据梯度下降的形式来更新其对应的值，学习缓慢就意味着代价函数的偏导数很小
+让我们从数学公式的角度来理解这句话和上面的图，对于目前提供的单个样例的输入和输出：
+$x=1$ $y=0$ 再结合前面第一章讲的代价函数的定义：
 $$ C(w,b) \equiv \frac{1}{2n} \sum_x | y(x) - a|^2 $$
- w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output  类比一下，此时的代价函数为：
+w 表⽰所有的⽹络中权重的集合 b 是所有的偏置 n 是训练输⼊数据的个数 a 是表⽰当输⼊为x时输出的向量，可以理解为output 类比一下，此时的代价函数为：
 $$ C=\frac{(y-a)^{2}}{2} $$
-接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：" />
+接下来就是求权重和偏置的偏导数，推导之前说明一下前面的公式：
+$x=1$ $y=0$ $a=\sigma(z)$ $z=wx&#43;b$ 推导过程如下：
+从推导结果可以看到偏导数的值和$\sigma^{\prime}\left(z\right)$成正比，回顾下前面讲的S型神经元中激活函数的图像：
+我们可以从这幅图看出，当神经元的输出接近1的时候，曲线变得相当平，所以$\sigma^{\prime}\left(z\right)$就很小，同时也可以得出代价函数C权重和偏置的偏导数也很小，这就是训练速度缓慢的原因
+再看上面代价函数值和迭代次数的图，中间部分非常陡峭，前后非常平缓，是不是非常契合$\sigma^{\prime}\left(z\right)$的变化的？类似其他的神经网络，也是这样的原因造成训练缓慢，使用均方误差作为代价函数还有个缺点就是容易陷入局部最优解的沼泽中
+引⼊交叉熵代价函数 # 我们已经抛出了神经网络训练缓慢的原因，接下来就是考虑如何解决这个问题" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" /><meta property="article:section" content="docs" />
 
 
 <title>03.改进神经 络的学习 法 | 机器学习之路</title>
 <link rel="manifest" href="/ml_book/manifest.json">
 <link rel="icon" href="/ml_book/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/ml_book/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/ml_book/en.search.min.a8a5fa00b257a439744f5e2ded1501ccf866eb4708141aeb82d9953b30346981.js" integrity="sha256-qKX6ALJXpDl0T14t7RUBzPhm60cIFBrrgtmVOzA0aYE="></script>
+<script defer src="/ml_book/en.search.min.19d3256ef629b9d338498eaad77ab929c8e76a2eb7f9ea70d3c15a8202fff30b.js" integrity="sha256-GdMlbvYpudM4SY6q13q5Kcjnai63&#43;epw08FaggL/8ws="></script>
 <style>
 
 img[src$='#center']
@@ -165,7 +174,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
+    <a href="https://www.howie6879.com/ml_book/docs/01_basic/01.%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" class="">01.神经网络基础</a>
   
 
         </li>
@@ -196,7 +205,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/01.%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E5%AD%97/" class="">01.识别手写字</a>
   
 
         </li>
@@ -209,7 +218,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/02.%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/" class="">02.反向传播算法如何工作</a>
   
 
         </li>
@@ -222,7 +231,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class=" active">03.改进神经 络的学习 法</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/03.%E6%94%B9%E8%BF%9B%E7%A5%9E%E7%BB%8F%E7%BB%9C%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%B3%95/" class=" active">03.改进神经 络的学习 法</a>
   
 
         </li>
@@ -235,7 +244,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/04.%E7%A5%9E%E7%BB%8F%E7%BB%9C%E5%8F%AF%E4%BB%A5%E8%AE%A1%E7%AE%97%E4%BB%BB%E4%BD%95%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AF%81%E6%98%8E/" class="">04.神经 络可以计算任何函数的可视化证明</a>
   
 
         </li>
@@ -248,7 +257,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/05.%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BB%9C%E4%B8%BA%E4%BD%95%E5%BE%88%E9%9A%BE%E8%AE%AD%E7%BB%83/" class="">05.深度神经 络为何很难训练</a>
   
 
         </li>
@@ -261,7 +270,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
+    <a href="https://www.howie6879.com/ml_book/docs/02_nndl/06.%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" class="">06.深度学习</a>
   
 
         </li>
@@ -292,7 +301,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
+    <a href="https://www.howie6879.com/ml_book/docs/03_lihang/01.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="">01.统计学习方法概论</a>
   
 
         </li>
@@ -305,7 +314,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
+    <a href="https://www.howie6879.com/ml_book/docs/03_lihang/02.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="">02.感知机</a>
   
 
         </li>
@@ -336,7 +345,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/00.%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BA%91%E7%A0%94%E5%8F%91%E5%B9%B3%E5%8F%B0/" class="">00.一站式机器学习云研发平台</a>
   
 
         </li>
@@ -349,7 +358,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/01.%E8%AF%91%E5%A6%82%E4%BD%95%E7%94%A8python%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="">01.[译]如何用 Python创建一个简单的神经网络</a>
   
 
         </li>
@@ -362,7 +371,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
+    <a href="https://www.howie6879.com/ml_book/docs/04_appendix/02.%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" class="">02.梯度下降数学推导</a>
   
 
         </li>
@@ -394,7 +403,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  

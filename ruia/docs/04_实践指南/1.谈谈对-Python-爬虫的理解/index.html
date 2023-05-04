@@ -2,40 +2,39 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="谈谈对Python爬虫的理解 #   爬虫也可以称为Python爬虫
- 不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
+<meta name="description" content="谈谈对Python爬虫的理解 # 爬虫也可以称为Python爬虫
+不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
 所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：
- Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）  任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
-什么是爬虫 #  爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
+Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大） 任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
+什么是爬虫 # 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
 看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
 爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：
- 通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面  不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
- 模拟请求网页资源 从HTML提取目标元素 数据持久化  什么是爬虫，这就是爬虫：
-&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34; import requests from bs4 import BeautifulSoup target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &#34;lxml&#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&#39;title.">
+通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面 不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
+模拟请求网页资源 从HTML提取目标元素 数据持久化 什么是爬虫，这就是爬虫：
+&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34; import requests from bs4 import BeautifulSoup target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &#34;lxml&#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&#39;title.txt&#39;, &#39;w&#39;) as fp: fp.">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="谈谈对Python爬虫的理解 #   爬虫也可以称为Python爬虫
- 不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
+<meta property="og:description" content="谈谈对Python爬虫的理解 # 爬虫也可以称为Python爬虫
+不知从何时起，Python这门语言和爬虫就像一对恋人，二者如胶似漆 ，形影不离，你中有我、我中有你，一提起爬虫，就会想到Python，一说起Python，就会想到人工智能……和爬虫
 所以，一般说爬虫的时候，大部分程序员潜意识里都会联想为Python爬虫，为什么会这样，我觉得有两个原因：
- Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大）  任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
-什么是爬虫 #  爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
+Python生态极其丰富，诸如Request、Beautiful Soup、Scrapy、PySpider等第三方库实在强大 Python语法简洁易上手，分分钟就能写出一个爬虫（有人吐槽Python慢，但是爬虫的瓶颈和语言关系不大） 任何一个学习Python的程序员，应该都或多或少地见过甚至研究过爬虫，我当时写Python的目的就非常纯粹——为了写爬虫。所以本文的目的很简单，就是说说我个人对Python爬虫的理解与实践，作为一名程序员，我觉得了解一下爬虫的相关知识对你只有好处，所以读完这篇文章后，如果能对你有帮助，那便再好不过
+什么是爬虫 # 爬虫是一个程序，这个程序的目的就是为了抓取万维网信息资源，比如你日常使用的谷歌等搜索引擎，搜索结果就全都依赖爬虫来定时获取
 看上述搜索结果，除了wiki相关介绍外，爬虫有关的搜索结果全都带上了Python，前人说Python爬虫，现在看来果然诚不欺我～
 爬虫的目标对象也很丰富，不论是文字、图片、视频，任何结构化非结构化的数据爬虫都可以爬取，爬虫经过发展，也衍生出了各种爬虫类型：
- 通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面  不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
- 模拟请求网页资源 从HTML提取目标元素 数据持久化  什么是爬虫，这就是爬虫：
-&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34; import requests from bs4 import BeautifulSoup target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &#34;lxml&#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&#39;title." />
+通用网络爬虫：爬取对象从一些种子 URL 扩充到整个 Web，搜索引擎干的就是这些事 垂直网络爬虫：针对特定领域主题进行爬取，比如专门爬取小说目录以及章节的垂直爬虫 增量网络爬虫：对已经抓取的网页进行实时更新 深层网络爬虫：爬取一些需要用户提交关键词才能获得的 Web 页面 不想说这些大方向的概念，让我们以一个获取网页内容为例，从爬虫技术本身出发，来说说网页爬虫，步骤如下：
+模拟请求网页资源 从HTML提取目标元素 数据持久化 什么是爬虫，这就是爬虫：
+&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34; import requests from bs4 import BeautifulSoup target_url = &#39;http://www.baidu.com/s?wd=爬虫&#39; # 第一步 发起一个GET请求 res = requests.get(target_url) # 第二步 提取HTML并解析想获取的数据 比如获取 title soup = BeautifulSoup(res.text, &#34;lxml&#34;) # 输出 soup.title.text title = soup.title.text # 第三步 持久化 比如保存到本地 with open(&#39;title.txt&#39;, &#39;w&#39;) as fp: fp." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" /><meta property="article:section" content="docs" />
 
 
 <title>1.谈谈对 Python 爬虫的理解 | Ruia</title>
 <link rel="manifest" href="/ruia/manifest.json">
 <link rel="icon" href="/ruia/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/ruia/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/ruia/en.search.min.101897924ddfa2441ef62c0731fab334d40d8f0f26f09d00b54369ad9ee6a30d.js" integrity="sha256-EBiXkk3fokQe9iwHMfqzNNQNjw8m8J0AtUNprZ7mow0="></script>
+<script defer src="/ruia/en.search.min.cbd4438ef3bc67cb69f87a7b4947c525bd79fc069b1975bd097ef90c12743d56.js" integrity="sha256-y9RDjvO8Z8tp&#43;Hp7SUfFJb15/AabGXW9CX75DBJ0PVY="></script>
 <style>
 
 img[src$='#center']
@@ -136,7 +135,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class="">❤️ 快速开始</a>
+    <a href="https://www.howie6879.com/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class="">❤️ 快速开始</a>
   
 
           
@@ -167,7 +166,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
   
 
         </li>
@@ -180,7 +179,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
   
 
         </li>
@@ -193,7 +192,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
   
 
         </li>
@@ -206,7 +205,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
   
 
         </li>
@@ -219,7 +218,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
   
 
         </li>
@@ -232,7 +231,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
   
 
         </li>
@@ -245,7 +244,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
   
 
         </li>
@@ -276,7 +275,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class="">1. Request</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class="">1. Request</a>
   
 
         </li>
@@ -289,7 +288,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
   
 
         </li>
@@ -302,7 +301,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
   
 
         </li>
@@ -315,7 +314,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class="">4. Field</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class="">4. Field</a>
   
 
         </li>
@@ -328,7 +327,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
   
 
         </li>
@@ -341,7 +340,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
   
 
         </li>
@@ -372,7 +371,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
   
 
         </li>
@@ -385,7 +384,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
   
 
         </li>
@@ -398,7 +397,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
   
 
         </li>
@@ -411,7 +410,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
   
 
         </li>
@@ -442,7 +441,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class=" active">1.谈谈对 Python 爬虫的理解</a>
+    <a href="https://www.howie6879.com/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class=" active">1.谈谈对 Python 爬虫的理解</a>
   
 
         </li>
@@ -474,7 +473,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -557,25 +556,25 @@ https://github.com/alex-shpak/hugo-book
 <li>数据持久化</li>
 </ul>
 <p>什么是爬虫，这就是爬虫：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#e6db74">&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34;</span>
-<span style="color:#f92672">import</span> requests
-
-<span style="color:#f92672">from</span> bs4 <span style="color:#f92672">import</span> BeautifulSoup
-
-target_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;http://www.baidu.com/s?wd=爬虫&#39;</span>
-
-<span style="color:#75715e"># 第一步 发起一个GET请求</span>
-res <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>get(target_url)
-
-<span style="color:#75715e"># 第二步 提取HTML并解析想获取的数据 比如获取 title</span>
-soup <span style="color:#f92672">=</span> BeautifulSoup(res<span style="color:#f92672">.</span>text, <span style="color:#e6db74">&#34;lxml&#34;</span>)
-<span style="color:#75715e"># 输出 soup.title.text</span>
-title <span style="color:#f92672">=</span> soup<span style="color:#f92672">.</span>title<span style="color:#f92672">.</span>text
-
-<span style="color:#75715e"># 第三步 持久化 比如保存到本地</span>
-<span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;title.txt&#39;</span>, <span style="color:#e6db74">&#39;w&#39;</span>) <span style="color:#66d9ef">as</span> fp:
-    fp<span style="color:#f92672">.</span>write(title)
-</code></pre></div><p>加上注释不到20行代码，你就完成了一个爬虫，简单吧</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;让我们根据上面说的步骤来完成一个简单的爬虫程序&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> bs4 <span style="color:#f92672">import</span> BeautifulSoup
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;http://www.baidu.com/s?wd=爬虫&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第一步 发起一个GET请求</span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>get(target_url)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第二步 提取HTML并解析想获取的数据 比如获取 title</span>
+</span></span><span style="display:flex;"><span>soup <span style="color:#f92672">=</span> BeautifulSoup(res<span style="color:#f92672">.</span>text, <span style="color:#e6db74">&#34;lxml&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出 soup.title.text</span>
+</span></span><span style="display:flex;"><span>title <span style="color:#f92672">=</span> soup<span style="color:#f92672">.</span>title<span style="color:#f92672">.</span>text
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第三步 持久化 比如保存到本地</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;title.txt&#39;</span>, <span style="color:#e6db74">&#39;w&#39;</span>) <span style="color:#66d9ef">as</span> fp:
+</span></span><span style="display:flex;"><span>    fp<span style="color:#f92672">.</span>write(title)
+</span></span></code></pre></div><p>加上注释不到20行代码，你就完成了一个爬虫，简单吧</p>
 <h2 id="怎么写爬虫">
   怎么写爬虫
   <a class="anchor" href="#%e6%80%8e%e4%b9%88%e5%86%99%e7%88%ac%e8%99%ab">#</a>
@@ -615,22 +614,22 @@ title <span style="color:#f92672">=</span> soup<span style="color:#f92672">.</sp
 <p>通俗来说，就是在这个网页里面，我们的目标就只有一个，假设我们的需求是抓取这部 <a href="https://movie.douban.com/subject/1292052/">电影-肖申克的救赎</a> 的名称，首先打开网页右键审查元素，找到电影名称对应的元素位置，如下图所示：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/O2l4f1.jpg" alt="O2l4f1" /></p>
 <p>在某个单一页面内，看目标是不是只有一个，一眼就能看出标题的CSS Selector规则为：<code>#content &gt; h1 &gt; span:nth-child(1)</code>，然后用我自己写的常用库，我用不到十行代码就能写完抓取这个页面电影名称的爬虫：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> asyncio
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
-    <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">    定义爬虫的目标字段
-</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;#content &gt; h1 &gt; span:nth-child(1)&#39;</span>)
-
-
-async_func <span style="color:#f92672">=</span> DoubanItem<span style="color:#f92672">.</span>get_item(url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://movie.douban.com/subject/1292052/&#34;</span>)
-item <span style="color:#f92672">=</span> asyncio<span style="color:#f92672">.</span>get_event_loop()<span style="color:#f92672">.</span>run_until_complete(async_func)
-print(item)
-</code></pre></div><p>多页面多目标就是此情况下多个url的衍生情况</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    定义爬虫的目标字段
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;#content &gt; h1 &gt; span:nth-child(1)&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>async_func <span style="color:#f92672">=</span> DoubanItem<span style="color:#f92672">.</span>get_item(url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://movie.douban.com/subject/1292052/&#34;</span>)
+</span></span><span style="display:flex;"><span>item <span style="color:#f92672">=</span> asyncio<span style="color:#f92672">.</span>get_event_loop()<span style="color:#f92672">.</span>run_until_complete(async_func)
+</span></span><span style="display:flex;"><span>print(item)
+</span></span></code></pre></div><p>多页面多目标就是此情况下多个url的衍生情况</p>
 <blockquote>
 <p>单页面多目标</p>
 </blockquote>
@@ -657,92 +656,91 @@ print(item)
 </tbody>
 </table>
 <p>代码实现如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> asyncio
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
-    <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">    定义爬虫的目标字段
-</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;div.item&#34;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;span.title&#34;</span>)
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_title</span>(self, title):
-        <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">        对提取的目标数据进行清洗 可选
-</span><span style="color:#e6db74">        :param title: 初步提取的目标数据
-</span><span style="color:#e6db74">        :return:
-</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
-        <span style="color:#66d9ef">if</span> isinstance(title, str):
-            <span style="color:#66d9ef">return</span> title
-        <span style="color:#66d9ef">else</span>:
-            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i<span style="color:#f92672">.</span>text<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>replace(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xa0</span><span style="color:#e6db74">&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> title])
-
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run_item</span>(url: str):
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> DoubanItem<span style="color:#f92672">.</span>get_items(url<span style="color:#f92672">=</span>url):
-        print(item)
-
-
-items <span style="color:#f92672">=</span> asyncio<span style="color:#f92672">.</span>get_event_loop()<span style="color:#f92672">.</span>run_until_complete(
-    run_item(<span style="color:#e6db74">&#34;https://movie.douban.com/top250&#34;</span>)
-)
-</code></pre></div><blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    定义爬虫的目标字段
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;div.item&#34;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;span.title&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_title</span>(self, title):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        对提取的目标数据进行清洗 可选
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param title: 初步提取的目标数据
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :return:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> isinstance(title, str):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> title
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i<span style="color:#f92672">.</span>text<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>replace(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xa0</span><span style="color:#e6db74">&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> title])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run_item</span>(url: str):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> DoubanItem<span style="color:#f92672">.</span>get_items(url<span style="color:#f92672">=</span>url):
+</span></span><span style="display:flex;"><span>        print(item)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>items <span style="color:#f92672">=</span> asyncio<span style="color:#f92672">.</span>get_event_loop()<span style="color:#f92672">.</span>run_until_complete(
+</span></span><span style="display:flex;"><span>    run_item(<span style="color:#e6db74">&#34;https://movie.douban.com/top250&#34;</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><blockquote>
 <p>多页面多目标</p>
 </blockquote>
 <p>多页面多目标是上述单页面多目标情况的衍生，在这个问题上来看，此时就是获取所有分页的电影名称</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/QrGkFX.jpg" alt="QrGkFX" /></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, Request, Spider, TextField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
-    <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">    定义爬虫的目标字段
-</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;div.item&#34;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;span.title&#34;</span>)
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_title</span>(self, title):
-        <span style="color:#66d9ef">if</span> isinstance(title, str):
-            <span style="color:#66d9ef">return</span> title
-        <span style="color:#66d9ef">else</span>:
-            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i<span style="color:#f92672">.</span>text<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>replace(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xa0</span><span style="color:#e6db74">&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> title])
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanSpider</span>(Spider):
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;https://movie.douban.com/top250&#34;</span>]
-    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, res):
-        etree <span style="color:#f92672">=</span> res<span style="color:#f92672">.</span>html_etree(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> res<span style="color:#f92672">.</span>text())
-        pages <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;?start=0&amp;filter=&#34;</span>] <span style="color:#f92672">+</span> [
-            i<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;href&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> etree<span style="color:#f92672">.</span>cssselect(<span style="color:#e6db74">&#34;.paginator&gt;a&#34;</span>)
-        ]
-
-        <span style="color:#66d9ef">for</span> index, page <span style="color:#f92672">in</span> enumerate(pages):
-            url <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>start_urls[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">+</span> page
-            <span style="color:#66d9ef">yield</span> Request(
-                url,
-                callback<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>parse_item,
-                metadata<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;index&#34;</span>: index},
-                request_config<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>request_config,
-            )
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse_item</span>(self, res):
-        res_list <span style="color:#f92672">=</span> []
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> DoubanItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> res<span style="color:#f92672">.</span>text()):
-            res_list<span style="color:#f92672">.</span>append(item<span style="color:#f92672">.</span>title)
-        <span style="color:#66d9ef">return</span> res_list
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
-    DoubanSpider<span style="color:#f92672">.</span>start()
-
-</code></pre></div><p>如果网络没问题的话，会得到如下输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, Request, Spider, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanItem</span>(Item):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    定义爬虫的目标字段
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;div.item&#34;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;span.title&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_title</span>(self, title):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> isinstance(title, str):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> title
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i<span style="color:#f92672">.</span>text<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>replace(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xa0</span><span style="color:#e6db74">&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> title])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DoubanSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;https://movie.douban.com/top250&#34;</span>]
+</span></span><span style="display:flex;"><span>    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, res):
+</span></span><span style="display:flex;"><span>        etree <span style="color:#f92672">=</span> res<span style="color:#f92672">.</span>html_etree(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> res<span style="color:#f92672">.</span>text())
+</span></span><span style="display:flex;"><span>        pages <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;?start=0&amp;filter=&#34;</span>] <span style="color:#f92672">+</span> [
+</span></span><span style="display:flex;"><span>            i<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;href&#34;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> etree<span style="color:#f92672">.</span>cssselect(<span style="color:#e6db74">&#34;.paginator&gt;a&#34;</span>)
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> index, page <span style="color:#f92672">in</span> enumerate(pages):
+</span></span><span style="display:flex;"><span>            url <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>start_urls[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">+</span> page
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">yield</span> Request(
+</span></span><span style="display:flex;"><span>                url,
+</span></span><span style="display:flex;"><span>                callback<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>parse_item,
+</span></span><span style="display:flex;"><span>                metadata<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;index&#34;</span>: index},
+</span></span><span style="display:flex;"><span>                request_config<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>request_config,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse_item</span>(self, res):
+</span></span><span style="display:flex;"><span>        res_list <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> DoubanItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> res<span style="color:#f92672">.</span>text()):
+</span></span><span style="display:flex;"><span>            res_list<span style="color:#f92672">.</span>append(item<span style="color:#f92672">.</span>title)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> res_list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    DoubanSpider<span style="color:#f92672">.</span>start()
+</span></span></code></pre></div><p>如果网络没问题的话，会得到如下输出：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/20191125085229.png" alt="" /></p>
 <p>注意爬虫运行时间，1s不到，这就是异步的魅力</p>
 <p>用Python写爬虫，就是这么简单优雅，诸位，看着网页就思考下：</p>

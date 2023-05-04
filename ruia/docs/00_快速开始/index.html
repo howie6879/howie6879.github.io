@@ -2,29 +2,30 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="快速开始 #   基于Ruia快速实现一个以Hacker News为目标的爬虫
- 本文主要通过对Hacker News的爬取示例来展示如何使用Ruia，下图红框中的数据就是爬虫脚本需要爬取的目标：
+<meta name="description" content="快速开始 # 基于Ruia快速实现一个以Hacker News为目标的爬虫
+本文主要通过对Hacker News的爬取示例来展示如何使用Ruia，下图红框中的数据就是爬虫脚本需要爬取的目标：
 开始前的准备工作：
- 确定已经安装Ruia：pip install ruia -U 确定可以访问Hacker News  第一步：定义 Item #  Item的目的是定义目标网站中你需要爬取的数据，此时，爬虫的目标数据就是页面中的Title和Url，怎么提取数据，Ruia的Field类提供了以下三种方式提取目标数据：
- XPath Re CSS Selector  这里我们使用CSS Selector来提取目标数据，用浏览器打开Hacker News，右键审查元素：
- Notice: 本教程爬虫例子都默认使用CSS Selector的规则来提取目标数据
- 显而易见，每页包含30条资讯，那么目标数据的规则可以总结为：
-   Param Rule Description     target_item tr.athing 表示每条资讯   title a.storylink 表示每条资讯里的标题   url a.storylink-&gt;href 表示每条资讯里标题的链接    规则明确之后，就可以用Item来实现一个针对于目标数据的ORM，创建文件items.py，复制下面代码：
-from ruia import AttrField, TextField, Item class HackerNewsItem(Item): target_item = TextField(css_select=&#39;tr.">
+确定已经安装Ruia：pip install ruia -U 确定可以访问Hacker News 第一步：定义 Item # Item的目的是定义目标网站中你需要爬取的数据，此时，爬虫的目标数据就是页面中的Title和Url，怎么提取数据，Ruia的Field类提供了以下三种方式提取目标数据：
+XPath Re CSS Selector 这里我们使用CSS Selector来提取目标数据，用浏览器打开Hacker News，右键审查元素：
+Notice: 本教程爬虫例子都默认使用CSS Selector的规则来提取目标数据
+显而易见，每页包含30条资讯，那么目标数据的规则可以总结为：
+Param Rule Description target_item tr.athing 表示每条资讯 title a.storylink 表示每条资讯里的标题 url a.storylink-&gt;href 表示每条资讯里标题的链接 规则明确之后，就可以用Item来实现一个针对于目标数据的ORM，创建文件items.py，复制下面代码：
+from ruia import AttrField, TextField, Item class HackerNewsItem(Item): target_item = TextField(css_select=&#39;tr.athing&#39;) title = TextField(css_select=&#39;a.storylink&#39;) url = AttrField(css_select=&#39;a.storylink&#39;, attr=&#39;href&#39;) 这段代码含义是：针对我们提取的目标HTML，我们定义了一个HackerNewsItem类，其包含了两个field：
+title：直接从文本提取 url：从属性提取 等等！target_item是什么？对于一个Item类来说，当其定义好网页目标数据后，Ruia提供两种方式进行获取Item：
+get_item：获取网页的单目标，比如目标网页的标题，此时无需定义target_item； get_items：获取网页的多目标，比如当前目标网页Hacker News中的title和url一共有30个，这时就必须定义target_item来寻找多个目标块；target_item的作用就是针对这样的工作而诞生的，开发者只要定义好这个属性（此时Ruia会自动获取网页中30个target_item），然后每个target_item里面包含的title和url就会被提取出来。 第二步：测试 Item # Ruia为了方便扩展以及自由地组合使用，本身各个模块之间耦合度是极低的，每个模块都可以在你的项目中单独使用；你甚至只使用ruia.">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="❤️ 快速开始" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" />
-
+<meta property="og:url" content="https://www.howie6879.com/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" />
 <title>❤️ 快速开始 | Ruia</title>
 <link rel="manifest" href="/ruia/manifest.json">
 <link rel="icon" href="/ruia/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/ruia/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/ruia/en.search.min.101897924ddfa2441ef62c0731fab334d40d8f0f26f09d00b54369ad9ee6a30d.js" integrity="sha256-EBiXkk3fokQe9iwHMfqzNNQNjw8m8J0AtUNprZ7mow0="></script>
-<link rel="alternate" type="application/rss+xml" href="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/index.xml" title="Ruia" />
+<script defer src="/ruia/en.search.min.cbd4438ef3bc67cb69f87a7b4947c525bd79fc069b1975bd097ef90c12743d56.js" integrity="sha256-y9RDjvO8Z8tp&#43;Hp7SUfFJb15/AabGXW9CX75DBJ0PVY="></script>
+<link rel="alternate" type="application/rss+xml" href="https://www.howie6879.com/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/index.xml" title="Ruia" />
 <style>
 
 img[src$='#center']
@@ -125,7 +126,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class=" active">❤️ 快速开始</a>
+    <a href="https://www.howie6879.com/ruia/docs/00_%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" class=" active">❤️ 快速开始</a>
   
 
           
@@ -156,7 +157,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/1.%E6%A6%82%E8%A7%88/" class="">1.概览</a>
   
 
         </li>
@@ -169,7 +170,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/2.%E5%AE%89%E8%A3%85/" class="">2.安装</a>
   
 
         </li>
@@ -182,7 +183,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/3.%E5%AE%9A%E4%B9%89-Item/" class="">3.定义 Item</a>
   
 
         </li>
@@ -195,7 +196,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/4.%E8%BF%90%E8%A1%8C-Spider/" class="">4.运行 Spider</a>
   
 
         </li>
@@ -208,7 +209,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/5.%E4%B8%AA%E6%80%A7%E5%8C%96/" class="">5.个性化</a>
   
 
         </li>
@@ -221,7 +222,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/6.%E6%8F%92%E4%BB%B6/" class="">6.插件</a>
   
 
         </li>
@@ -234,7 +235,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
+    <a href="https://www.howie6879.com/ruia/docs/01_%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/7.%E5%B8%AE%E5%8A%A9/" class="">7.帮助</a>
   
 
         </li>
@@ -265,7 +266,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class="">1. Request</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/1.Request/" class="">1. Request</a>
   
 
         </li>
@@ -278,7 +279,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2.Response/" class="">2. Response</a>
   
 
         </li>
@@ -291,7 +292,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/3.Item/" class="">3. Item</a>
   
 
         </li>
@@ -304,7 +305,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class="">4. Field</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/4.Field/" class="">4. Field</a>
   
 
         </li>
@@ -317,7 +318,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/5.Spider/" class="">5. Spider</a>
   
 
         </li>
@@ -330,7 +331,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
+    <a href="https://www.howie6879.com/ruia/docs/02_%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/6.Middleware/" class="">6. Middleware</a>
   
 
         </li>
@@ -361,7 +362,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/1.%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="">1.搭建开发环境</a>
   
 
         </li>
@@ -374,7 +375,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/2.%E6%B5%85%E8%B0%88-Ruia-%E6%9E%B6%E6%9E%84/" class="">2.浅谈 Ruia 架构</a>
   
 
         </li>
@@ -387,7 +388,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/3.%E4%B8%BA-Ruia-%E7%BC%96%E5%86%99%E6%8F%92%E4%BB%B6/" class="">3.为 Ruia 编写插件</a>
   
 
         </li>
@@ -400,7 +401,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
+    <a href="https://www.howie6879.com/ruia/docs/03_%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/4.%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81/" class="">4.贡献代码</a>
   
 
         </li>
@@ -431,7 +432,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class="">1.谈谈对 Python 爬虫的理解</a>
+    <a href="https://www.howie6879.com/ruia/docs/04_%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/1.%E8%B0%88%E8%B0%88%E5%AF%B9-Python-%E7%88%AC%E8%99%AB%E7%9A%84%E7%90%86%E8%A7%A3/" class="">1.谈谈对 Python 爬虫的理解</a>
   
 
         </li>
@@ -463,7 +464,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -579,14 +580,14 @@ https://github.com/alex-shpak/hugo-book
 </tbody>
 </table>
 <p>规则明确之后，就可以用<code>Item</code>来实现一个针对于目标数据的ORM，创建文件<code>items.py</code>，复制下面代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, TextField, Item
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
-</code></pre></div><p>这段代码含义是：针对我们提取的目标<code>HTML</code>，我们定义了一个<code>HackerNewsItem</code>类，其包含了两个<code>field</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, TextField, Item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
+</span></span></code></pre></div><p>这段代码含义是：针对我们提取的目标<code>HTML</code>，我们定义了一个<code>HackerNewsItem</code>类，其包含了两个<code>field</code>：</p>
 <ul>
 <li><code>title</code>：直接从文本提取</li>
 <li><code>url</code>：从属性提取</li>
@@ -606,68 +607,68 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#%e8%84%9a%e6%9c%ac%e8%b0%83%e8%af%95">#</a>
 </h3>
 <p>基于这个特性，我们可以直接在脚本里面测试<code>HackerNewsItem</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> asyncio
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField, AttrField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
-
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_item</span>():
-    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=1&#39;</span>
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(url<span style="color:#f92672">=</span>url):
-        print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(item<span style="color:#f92672">.</span>title, item<span style="color:#f92672">.</span>url))
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
-    <span style="color:#75715e"># Python 3.7 Required.</span>
-    asyncio<span style="color:#f92672">.</span>run(test_item()) 
-
-    <span style="color:#75715e"># For Python 3.6</span>
-    <span style="color:#75715e"># loop = asyncio.get_event_loop()</span>
-    <span style="color:#75715e"># loop.run_until_complete(test_item())</span>
-</code></pre></div><p>接下来，终端会输出以下日志：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>2021:04:04 21:37:23<span style="color:#f92672">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#f92672">=</span>1&gt;
-How to bypass Cloudflare bot protection: https://jychp.medium.com/how-to-bypass-cloudflare-bot-protection-1f2c6c0c36fb
-The EU has archived all of the “Euromyths” printed in UK media: https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/
-Laser: Learning a Latent Action Space <span style="color:#66d9ef">for</span> Efficient Reinforcement Learning: https://arxiv.org/abs/2103.15793
-StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery: https://github.com/orpatashnik/StyleCLIP
-</code></pre></div><h3 id="命令行调试">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField, AttrField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_item</span>():
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=1&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(url<span style="color:#f92672">=</span>url):
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(item<span style="color:#f92672">.</span>title, item<span style="color:#f92672">.</span>url))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Python 3.7 Required.</span>
+</span></span><span style="display:flex;"><span>    asyncio<span style="color:#f92672">.</span>run(test_item()) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># For Python 3.6</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># loop = asyncio.get_event_loop()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># loop.run_until_complete(test_item())</span>
+</span></span></code></pre></div><p>接下来，终端会输出以下日志：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>2021:04:04 21:37:23<span style="color:#f92672">]</span> INFO  Request &lt;GET: https://news.ycombinator.com/news?p<span style="color:#f92672">=</span>1&gt;
+</span></span><span style="display:flex;"><span>How to bypass Cloudflare bot protection: https://jychp.medium.com/how-to-bypass-cloudflare-bot-protection-1f2c6c0c36fb
+</span></span><span style="display:flex;"><span>The EU has archived all of the “Euromyths” printed in UK media: https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/
+</span></span><span style="display:flex;"><span>Laser: Learning a Latent Action Space <span style="color:#66d9ef">for</span> Efficient Reinforcement Learning: https://arxiv.org/abs/2103.15793
+</span></span><span style="display:flex;"><span>StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery: https://github.com/orpatashnik/StyleCLIP
+</span></span></code></pre></div><h3 id="命令行调试">
   命令行调试
   <a class="anchor" href="#%e5%91%bd%e4%bb%a4%e8%a1%8c%e8%b0%83%e8%af%95">#</a>
 </h3>
 <p>为了使<a href="https://github.com/howie6879/ruia/"><strong>Ruia</strong></a>的脚本调试过程更加方便优雅，开发者还可以直接使用<a href="https://github.com/python-ruia/ruia-shell">ruia-shell</a>插件进行调试，首先进行安装：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install -U ruia-shell
-pip install ipython
-</code></pre></div><p>具体使用如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">➜  ~  ruia_shell https://news.ycombinator.com/news<span style="color:#ae81ff">\?</span>p<span style="color:#ae81ff">\=</span><span style="color:#ae81ff">1</span>
-            ✨ Write less, run faster<span style="color:#f92672">(</span>0.8.2<span style="color:#f92672">)</span>.
-__________      .__                .__           .__  .__
-<span style="color:#ae81ff">\_</span>_____   <span style="color:#ae81ff">\_</span>_ __|__|____      _____|  |__   ____ |  | |  |
- |       _/  |  <span style="color:#ae81ff">\ </span> <span style="color:#ae81ff">\_</span>_  <span style="color:#ae81ff">\ </span>   /  ___/  |  <span style="color:#ae81ff">\_</span>/ __ <span style="color:#ae81ff">\|</span>  | |  |
- |    |   <span style="color:#ae81ff">\ </span> |  /  |/ __ <span style="color:#ae81ff">\_</span>  <span style="color:#ae81ff">\_</span>__ <span style="color:#ae81ff">\|</span>   Y  <span style="color:#ae81ff">\ </span> ___/|  |_|  |__
- |____|_  /____/|__<span style="color:#f92672">(</span>____  / /____  &gt;___|  /<span style="color:#ae81ff">\_</span>__  &gt;____/____/
-        <span style="color:#ae81ff">\/</span>              <span style="color:#ae81ff">\/</span>       <span style="color:#ae81ff">\/</span>     <span style="color:#ae81ff">\/</span>     <span style="color:#ae81ff">\/</span>
-Available Objects   :
-    response            :   ruia.Response
-    request             :   ruia.Request
-Available Functions :
-    attr_field          :   Extract attribute elements by using css selector or xpath
-    text_field          :   Extract text elements by using css selector or xpath
-    fetch               :   Fetch a URL or ruia.Request
-In <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: request
-Out<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: &lt;GET https://news.ycombinator.com/news?p<span style="color:#f92672">=</span>1&gt;
-In <span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>: response
-Out<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>: &lt;Response url<span style="color:#f92672">[</span>GET<span style="color:#f92672">]</span>: https://news.ycombinator.com/news?p<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> status:200&gt;
-In <span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>: text_field<span style="color:#f92672">(</span>css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span><span style="color:#f92672">)</span>
-Out<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>: <span style="color:#e6db74">&#39;The EU has archived all of the “Euromyths” printed in UK media&#39;</span>
-In <span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: attr_field<span style="color:#f92672">(</span>css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span><span style="color:#f92672">)</span>
-Out<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: <span style="color:#e6db74">&#39;https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/&#39;</span>
-</code></pre></div><p>如果文字不清楚，可看下图：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install -U ruia-shell
+</span></span><span style="display:flex;"><span>pip install ipython
+</span></span></code></pre></div><p>具体使用如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>➜  ~  ruia_shell https://news.ycombinator.com/news<span style="color:#ae81ff">\?</span>p<span style="color:#ae81ff">\=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            ✨ Write less, run faster<span style="color:#f92672">(</span>0.8.2<span style="color:#f92672">)</span>.
+</span></span><span style="display:flex;"><span>__________      .__                .__           .__  .__
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\_</span>_____   <span style="color:#ae81ff">\_</span>_ __|__|____      _____|  |__   ____ |  | |  |
+</span></span><span style="display:flex;"><span> |       _/  |  <span style="color:#ae81ff">\ </span> <span style="color:#ae81ff">\_</span>_  <span style="color:#ae81ff">\ </span>   /  ___/  |  <span style="color:#ae81ff">\_</span>/ __ <span style="color:#ae81ff">\|</span>  | |  |
+</span></span><span style="display:flex;"><span> |    |   <span style="color:#ae81ff">\ </span> |  /  |/ __ <span style="color:#ae81ff">\_</span>  <span style="color:#ae81ff">\_</span>__ <span style="color:#ae81ff">\|</span>   Y  <span style="color:#ae81ff">\ </span> ___/|  |_|  |__
+</span></span><span style="display:flex;"><span> |____|_  /____/|__<span style="color:#f92672">(</span>____  / /____  &gt;___|  /<span style="color:#ae81ff">\_</span>__  &gt;____/____/
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">\/</span>              <span style="color:#ae81ff">\/</span>       <span style="color:#ae81ff">\/</span>     <span style="color:#ae81ff">\/</span>     <span style="color:#ae81ff">\/</span>
+</span></span><span style="display:flex;"><span>Available Objects   :
+</span></span><span style="display:flex;"><span>    response            :   ruia.Response
+</span></span><span style="display:flex;"><span>    request             :   ruia.Request
+</span></span><span style="display:flex;"><span>Available Functions :
+</span></span><span style="display:flex;"><span>    attr_field          :   Extract attribute elements by using css selector or xpath
+</span></span><span style="display:flex;"><span>    text_field          :   Extract text elements by using css selector or xpath
+</span></span><span style="display:flex;"><span>    fetch               :   Fetch a URL or ruia.Request
+</span></span><span style="display:flex;"><span>In <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: request
+</span></span><span style="display:flex;"><span>Out<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: &lt;GET https://news.ycombinator.com/news?p<span style="color:#f92672">=</span>1&gt;
+</span></span><span style="display:flex;"><span>In <span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>: response
+</span></span><span style="display:flex;"><span>Out<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>: &lt;Response url<span style="color:#f92672">[</span>GET<span style="color:#f92672">]</span>: https://news.ycombinator.com/news?p<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> status:200&gt;
+</span></span><span style="display:flex;"><span>In <span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>: text_field<span style="color:#f92672">(</span>css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Out<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>: <span style="color:#e6db74">&#39;The EU has archived all of the “Euromyths” printed in UK media&#39;</span>
+</span></span><span style="display:flex;"><span>In <span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: attr_field<span style="color:#f92672">(</span>css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Out<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: <span style="color:#e6db74">&#39;https://www.thelondoneconomic.com/news/the-eu-have-archived-all-of-the-euromyths-printed-in-uk-media-and-it-makes-for-some-disturbing-reading-108942/&#39;</span>
+</span></span></code></pre></div><p>如果文字不清楚，可看下图：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/hHjQsh.png" alt="hHjQsh" /></p>
 <h2 id="第三步编写-spider">
   第三步：编写 Spider
@@ -679,37 +680,37 @@ Out<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: <s
 <li>可加载自定义钩子、插件、以及相关配置等，让开发效率更高</li>
 </ul>
 <p>接下来会基于前面的<code>Item</code>脚本继续开发，具体代码如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74"> Target: https://news.ycombinator.com/
-</span><span style="color:#e6db74"> pip install aiofiles
-</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
-<span style="color:#f92672">import</span> aiofiles
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField, AttrField, Spider
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
-    
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
-    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
-    <span style="color:#75715e"># 设置代理</span>
-    <span style="color:#75715e"># aiohttp_kwargs = {&#34;proxy&#34;: &#34;http://0.0.0.0:8765&#34;}</span>
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
-            <span style="color:#66d9ef">yield</span> item
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_item</span>(self, item: HackerNewsItem):
-        <span style="color:#e6db74">&#34;&#34;&#34;Ruia build-in method&#34;&#34;&#34;</span>
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">with</span> aiofiles<span style="color:#f92672">.</span>open(<span style="color:#e6db74">&#39;./hacker_news.txt&#39;</span>, <span style="color:#e6db74">&#39;a&#39;</span>) <span style="color:#66d9ef">as</span> f:
-            <span style="color:#66d9ef">await</span> f<span style="color:#f92672">.</span>write(str(item<span style="color:#f92672">.</span>title) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span>)
-</code></pre></div><p>本段代码的作用是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"> Target: https://news.ycombinator.com/
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"> pip install aiofiles
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> aiofiles
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> Item, TextField, AttrField, Spider
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
+</span></span><span style="display:flex;"><span>    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 设置代理</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># aiohttp_kwargs = {&#34;proxy&#34;: &#34;http://0.0.0.0:8765&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">yield</span> item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_item</span>(self, item: HackerNewsItem):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Ruia build-in method&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">with</span> aiofiles<span style="color:#f92672">.</span>open(<span style="color:#e6db74">&#39;./hacker_news.txt&#39;</span>, <span style="color:#e6db74">&#39;a&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> f<span style="color:#f92672">.</span>write(str(item<span style="color:#f92672">.</span>title) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span></code></pre></div><p>本段代码的作用是：</p>
 <blockquote>
 <p>爬取<a href="https://news.ycombinator.com/news">Hacker News</a>的前三页内容，设置并发数为<code>3</code>，然后全部持久化到文件<code>hacker_news.txt</code></p>
 </blockquote>
@@ -723,35 +724,35 @@ Out<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: <s
   <a class="anchor" href="#%e7%ac%ac%e5%9b%9b%e6%ad%a5%e8%bf%90%e8%a1%8c-start">#</a>
 </h2>
 <p>一切准备就绪，启动你的爬虫脚本吧！</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> aiofiles
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Spider, TextField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
-
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
-    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
-            <span style="color:#66d9ef">yield</span> item
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_item</span>(self, item: HackerNewsItem):
-        <span style="color:#e6db74">&#34;&#34;&#34;Ruia build-in method&#34;&#34;&#34;</span>
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">with</span> aiofiles<span style="color:#f92672">.</span>open(<span style="color:#e6db74">&#34;./hacker_news.txt&#34;</span>, <span style="color:#e6db74">&#34;a&#34;</span>) <span style="color:#66d9ef">as</span> f:
-            <span style="color:#66d9ef">await</span> f<span style="color:#f92672">.</span>write(str(item<span style="color:#f92672">.</span>title) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
-    HackerNewsSpider<span style="color:#f92672">.</span>start()
-</code></pre></div><blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> aiofiles
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Spider, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
+</span></span><span style="display:flex;"><span>    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">yield</span> item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_item</span>(self, item: HackerNewsItem):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Ruia build-in method&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">with</span> aiofiles<span style="color:#f92672">.</span>open(<span style="color:#e6db74">&#34;./hacker_news.txt&#34;</span>, <span style="color:#e6db74">&#34;a&#34;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> f<span style="color:#f92672">.</span>write(str(item<span style="color:#f92672">.</span>title) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    HackerNewsSpider<span style="color:#f92672">.</span>start()
+</span></span></code></pre></div><blockquote>
 <p>Tips：如果你想在异步函数里面调用，执行<code>await HackerNewsSpider.start() </code>即可</p>
 </blockquote>
 <p>不到<code>30</code>行代码，你就实现了对<a href="https://news.ycombinator.com/news">Hacker News</a>的爬虫脚本，并且脚本带有自动重试、并发控制、语法简单等特性。</p>
@@ -770,94 +771,94 @@ Out<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>: <s
 <li>在每次请求后做一些事</li>
 </ul>
 <p>比如此时爬取<a href="https://news.ycombinator.com/news">Hacker News</a>，若希望在每次请求时候自动添加<code>Headers</code>的<code>User-Agent</code>，可以添加以下代码引入中间件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Middleware, Spider, TextField
-
-middleware <span style="color:#f92672">=</span> Middleware()
-
-
-<span style="color:#a6e22e">@middleware</span><span style="color:#f92672">.</span>request
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">print_on_request</span>(spider_ins, request):
-    ua <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ruia user-agent&#34;</span>
-    request<span style="color:#f92672">.</span>headers<span style="color:#f92672">.</span>update({<span style="color:#e6db74">&#34;User-Agent&#34;</span>: ua})
-    print(request<span style="color:#f92672">.</span>headers)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
-
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
-    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
-            <span style="color:#66d9ef">yield</span> item
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
-    HackerNewsSpider<span style="color:#f92672">.</span>start(middleware<span style="color:#f92672">=</span>middleware)
-</code></pre></div><p>这样，程序会在爬虫请求网页资源之前自动加上<code>User-Agent</code>，针对自动<code>UA</code>的功能点，<a href="https://github.com/howie6879/ruia/">Ruia</a>已经专门编写了一个名为<a href="https://github.com/python-ruia/ruia-ua">ruia-ua</a>的插件来为开发者提升效率，使用非常简单，代码示例如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, TextField, Item, Spider
-<span style="color:#f92672">from</span> ruia_ua <span style="color:#f92672">import</span> middleware
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=1&#39;</span>, <span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=2&#39;</span>]
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
-        <span style="color:#75715e"># Do something...</span>
-        print(response<span style="color:#f92672">.</span>url)
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
-    HackerNewsSpider<span style="color:#f92672">.</span>start(middleware<span style="color:#f92672">=</span>middleware)
-</code></pre></div><h3 id="mongodb">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Middleware, Spider, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>middleware <span style="color:#f92672">=</span> Middleware()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@middleware.request</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">print_on_request</span>(spider_ins, request):
+</span></span><span style="display:flex;"><span>    ua <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ruia user-agent&#34;</span>
+</span></span><span style="display:flex;"><span>    request<span style="color:#f92672">.</span>headers<span style="color:#f92672">.</span>update({<span style="color:#e6db74">&#34;User-Agent&#34;</span>: ua})
+</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>headers)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
+</span></span><span style="display:flex;"><span>    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">yield</span> item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    HackerNewsSpider<span style="color:#f92672">.</span>start(middleware<span style="color:#f92672">=</span>middleware)
+</span></span></code></pre></div><p>这样，程序会在爬虫请求网页资源之前自动加上<code>User-Agent</code>，针对自动<code>UA</code>的功能点，<a href="https://github.com/howie6879/ruia/">Ruia</a>已经专门编写了一个名为<a href="https://github.com/python-ruia/ruia-ua">ruia-ua</a>的插件来为开发者提升效率，使用非常简单，代码示例如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, TextField, Item, Spider
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia_ua <span style="color:#f92672">import</span> middleware
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tr.athing&#39;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;a.storylink&#39;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;href&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=1&#39;</span>, <span style="color:#e6db74">&#39;https://news.ycombinator.com/news?p=2&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Do something...</span>
+</span></span><span style="display:flex;"><span>        print(response<span style="color:#f92672">.</span>url)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    HackerNewsSpider<span style="color:#f92672">.</span>start(middleware<span style="color:#f92672">=</span>middleware)
+</span></span></code></pre></div><h3 id="mongodb">
   MongoDB
   <a class="anchor" href="#mongodb">#</a>
 </h3>
 <p>对于数据持久化，你可以按照自己喜欢的方式去做，前面实例中介绍了如何将目标<code>Item</code>持久化到文件中。</p>
 <p>如果想将数据持久化到数据库（MongoDB）中，该怎么做？此时就到了凸显<a href="https://github.com/howie6879/ruia/">Ruia</a>插件优势的时候了，你只需要安装<a href="https://github.com/python-ruia/ruia-motor">ruia-motor</a>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pip install -U ruia-motor
-</code></pre></div><p>然后再代码中引入<code>ruia-motor</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> ruia_motor <span style="color:#f92672">import</span> RuiaMotorInsert, init_spider
-
-<span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Spider, TextField
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
-    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
-    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
-    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
-
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
-    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
-    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
-    <span style="color:#75715e"># aiohttp_kwargs = {&#34;proxy&#34;: &#34;http://0.0.0.0:1087&#34;}</span>
-
-    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
-            <span style="color:#66d9ef">yield</span> RuiaMotorInsert(collection<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;news&#34;</span>, data<span style="color:#f92672">=</span>item<span style="color:#f92672">.</span>results)
-
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_plugins_after_start</span>(spider_ins):
-    spider_ins<span style="color:#f92672">.</span>mongodb_config <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;host&#34;</span>: <span style="color:#e6db74">&#34;127.0.0.1&#34;</span>, <span style="color:#e6db74">&#34;port&#34;</span>: <span style="color:#ae81ff">27017</span>, <span style="color:#e6db74">&#34;db&#34;</span>: <span style="color:#e6db74">&#34;ruia_motor&#34;</span>}
-    init_spider(spider_ins<span style="color:#f92672">=</span>spider_ins)
-
-
-<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
-    HackerNewsSpider<span style="color:#f92672">.</span>start(after_start<span style="color:#f92672">=</span>init_plugins_after_start)
-</code></pre></div><p>数据库中可以看到目标字段：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install -U ruia-motor
+</span></span></code></pre></div><p>然后再代码中引入<code>ruia-motor</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia_motor <span style="color:#f92672">import</span> RuiaMotorInsert, init_spider
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> ruia <span style="color:#f92672">import</span> AttrField, Item, Spider, TextField
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsItem</span>(Item):
+</span></span><span style="display:flex;"><span>    target_item <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tr.athing&#34;</span>)
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> TextField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>)
+</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> AttrField(css_select<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;a.storylink&#34;</span>, attr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;href&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HackerNewsSpider</span>(Spider):
+</span></span><span style="display:flex;"><span>    start_urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://news.ycombinator.com/news?p=</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>)]
+</span></span><span style="display:flex;"><span>    concurrency <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># aiohttp_kwargs = {&#34;proxy&#34;: &#34;http://0.0.0.0:1087&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse</span>(self, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> HackerNewsItem<span style="color:#f92672">.</span>get_items(html<span style="color:#f92672">=</span><span style="color:#66d9ef">await</span> response<span style="color:#f92672">.</span>text()):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">yield</span> RuiaMotorInsert(collection<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;news&#34;</span>, data<span style="color:#f92672">=</span>item<span style="color:#f92672">.</span>results)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_plugins_after_start</span>(spider_ins):
+</span></span><span style="display:flex;"><span>    spider_ins<span style="color:#f92672">.</span>mongodb_config <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;host&#34;</span>: <span style="color:#e6db74">&#34;127.0.0.1&#34;</span>, <span style="color:#e6db74">&#34;port&#34;</span>: <span style="color:#ae81ff">27017</span>, <span style="color:#e6db74">&#34;db&#34;</span>: <span style="color:#e6db74">&#34;ruia_motor&#34;</span>}
+</span></span><span style="display:flex;"><span>    init_spider(spider_ins<span style="color:#f92672">=</span>spider_ins)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    HackerNewsSpider<span style="color:#f92672">.</span>start(after_start<span style="color:#f92672">=</span>init_plugins_after_start)
+</span></span></code></pre></div><p>数据库中可以看到目标字段：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/howie6879/oss/uPic/ipuxKH.jpg" alt="ipuxKH" /></p>
 <p>是不是更简单了呢？</p>
 <h2 id="第六步深入了解ruia">

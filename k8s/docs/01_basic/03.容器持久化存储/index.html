@@ -2,38 +2,39 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.110.0">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="容器持久化存储 #  容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
+<meta name="description" content="容器持久化存储 # 容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
 有了Pod后，我们的应用程序需要被创建和管理，这就引出了ReplicaSet和Deployment；然后需要将部署好的应用暴露给外部进行访问，Service可以提供一个固定的ip和端口让外部访问。
 对于有状态的应用，可以使用StatefulSet来进行状态的恢复，在上一节概念介绍里面有提到，有状态的应用是离不开持久化存储的。
-引子 #  在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
+引子 # 在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
 对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在k8s里面可以通过定义存储卷来满足这个需求，它们不像Pod这样的顶级资源，而是被定义为Pod的一部分，并和Pod共享相同的生命周期。因此在Pod里面容器重新启动期间，卷的内容是不变的，
-卷 #  emptyDir #  在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
+卷 # emptyDir # 在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
 让我们实际操作一下，vim fortune-pod.yaml:
 apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 说明一下上述配置文件的含义：fortune镜像是k8s in action书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为html的容器挂载在var/htdocs中；而nginx也挂载了相同的html卷，不过位置在/usr/share/nginx/html，上面两个容器共用的卷就是emptyDir: {}。
-启动来感受一下：">
+启动来感受一下：
+kubectl create -f fortune-pod.">
 <meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="" />
-<meta property="og:description" content="容器持久化存储 #  容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
+<meta property="og:description" content="容器持久化存储 # 容器的本质是进程，对于进程，Linux系统有进程组的概念来将其组织在一起。在k8s里面，使用Pod这个逻辑概念来维护容器间的关系。
 有了Pod后，我们的应用程序需要被创建和管理，这就引出了ReplicaSet和Deployment；然后需要将部署好的应用暴露给外部进行访问，Service可以提供一个固定的ip和端口让外部访问。
 对于有状态的应用，可以使用StatefulSet来进行状态的恢复，在上一节概念介绍里面有提到，有状态的应用是离不开持久化存储的。
-引子 #  在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
+引子 # 在Docker中，如果一个容器在运行过程中会产生数据并写入到文件系统，当关闭这个容器，用镜像再启动一个容器的时候，你就会意识到新容器并不会识别前一个容器写入文件系统内的任何内容。
 对于有状态的应用，我们希望下次启动的应用可以保持住上次的状态；在k8s里面可以通过定义存储卷来满足这个需求，它们不像Pod这样的顶级资源，而是被定义为Pod的一部分，并和Pod共享相同的生命周期。因此在Pod里面容器重新启动期间，卷的内容是不变的，
-卷 #  emptyDir #  在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
+卷 # emptyDir # 在Pod中如何定义卷？让我们从emptyDir开始。设想一个这样的例子，一个Pod应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。
 让我们实际操作一下，vim fortune-pod.yaml:
 apiVersion: v1 kind: Pod metadata: name: fortune spec: containers: - image: luksa/fortune name: html-generator volumeMounts: - name: html mountPath: /var/htdocs - image: nginx:alpine name: web-server volumeMounts: - name: html mountPath: /usr/share/nginx/html readOnly: true ports: - containerPort: 80 protocol: TCP volumes: - name: html emptyDir: {} 说明一下上述配置文件的含义：fortune镜像是k8s in action书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为html的容器挂载在var/htdocs中；而nginx也挂载了相同的html卷，不过位置在/usr/share/nginx/html，上面两个容器共用的卷就是emptyDir: {}。
-启动来感受一下：" />
+启动来感受一下：
+kubectl create -f fortune-pod." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" /><meta property="article:section" content="docs" />
-
+<meta property="og:url" content="https://www.howie6879.com/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" /><meta property="article:section" content="docs" />
 
 
 <title>03.容器持久化存储 | Kubernetes 学习之路</title>
 <link rel="manifest" href="/k8s/manifest.json">
 <link rel="icon" href="/k8s/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/k8s/book.min.e935e20bd0d469378cb482f0958edf258c731a4f895dccd55799c6fbc8043f23.css" integrity="sha256-6TXiC9DUaTeMtILwlY7fJYxzGk&#43;JXczVV5nG&#43;8gEPyM=">
-<script defer src="/k8s/en.search.min.f5d2943d0cf1ecf8cf4d5d5306d7d831bf9bfb6f77da58303954836506c4f7a7.js" integrity="sha256-9dKUPQzx7PjPTV1TBtfYMb&#43;b&#43;2932lgwOVSDZQbE96c="></script>
+<script defer src="/k8s/en.search.min.b9aae25582d87e3b0dd85dcd01ee35a875f71121f2988846411f14e0d66addc2.js" integrity="sha256-uariVYLYfjsN2F3NAe41qHX3ESHymIhGQR8U4NZq3cI="></script>
 <style>
 
 img[src$='#center']
@@ -147,7 +148,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" class="">01.走进 Kubernetes</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/01.%E8%B5%B0%E8%BF%9BKubernetes/" class="">01.走进 Kubernetes</a>
   
 
         </li>
@@ -160,7 +161,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/02.%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" class="">02.概念介绍</a>
   
 
         </li>
@@ -173,7 +174,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class=" active">03.容器持久化存储</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/03.%E5%AE%B9%E5%99%A8%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8/" class=" active">03.容器持久化存储</a>
   
 
         </li>
@@ -186,7 +187,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/04.%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" class="">04.配置应用程序</a>
   
 
         </li>
@@ -199,7 +200,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
+    <a href="https://www.howie6879.com/k8s/docs/01_basic/05.%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="">05.容器网络</a>
   
 
         </li>
@@ -250,7 +251,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
+    <a href="https://www.howie6879.com/k8s/docs/03_appendix/00.%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E4%BA%8E%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="">00.设计模式——基于容器的分布式系统</a>
   
 
         </li>
@@ -263,7 +264,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://www.howie6879.cn/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" class="">01.图解 Osi七层网络模型</a>
+    <a href="https://www.howie6879.com/k8s/docs/03_appendix/01.%E5%9B%BE%E8%A7%A3OSI%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/" class="">01.图解 Osi七层网络模型</a>
   
 
         </li>
@@ -295,7 +296,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  <script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+  <script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
 
 
  
@@ -379,45 +380,45 @@ https://github.com/alex-shpak/hugo-book
 </h3>
 <p>在<code>Pod</code>中如何定义卷？让我们从<code>emptyDir</code>开始。设想一个这样的例子，一个<code>Pod</code>应用由两个容器，容器A不断产生数据，容器B将A产生的数据作为输出。此时，这两个容器就需要使用同一个卷。</p>
 <p>让我们实际操作一下，<code>vim fortune-pod.yaml</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">
-<span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
-<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
-<span style="color:#f92672">metadata</span>:
-  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">fortune</span>
-<span style="color:#f92672">spec</span>:
-  <span style="color:#f92672">containers</span>:
-  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">luksa/fortune</span>
-    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html-generator</span>
-    <span style="color:#f92672">volumeMounts</span>:
-    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
-      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/htdocs</span>
-  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine</span>
-    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">web-server</span>
-    <span style="color:#f92672">volumeMounts</span>:
-    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
-      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html</span>
-      <span style="color:#f92672">readOnly</span>: <span style="color:#66d9ef">true</span>
-    <span style="color:#f92672">ports</span>:
-    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">80</span>
-      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
-  <span style="color:#f92672">volumes</span>:
-  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
-    <span style="color:#f92672">emptyDir</span>: {}
-</code></pre></div><p>说明一下上述配置文件的含义：<code>fortune</code>镜像是<code>k8s in action</code>书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为<code>html</code>的容器挂载在<code>var/htdocs</code>中；而<code>nginx</code>也挂载了相同的<code>html</code>卷，不过位置在<code>/usr/share/nginx/html</code>，上面两个容器共用的卷就是<code>emptyDir: {}</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">fortune</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">luksa/fortune</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html-generator</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/htdocs</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">web-server</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">readOnly</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">emptyDir</span>: {}
+</span></span></code></pre></div><p>说明一下上述配置文件的含义：<code>fortune</code>镜像是<code>k8s in action</code>书中示例打包的镜像，相当于上面说的不断产生数据的容器A，其中名为<code>html</code>的容器挂载在<code>var/htdocs</code>中；而<code>nginx</code>也挂载了相同的<code>html</code>卷，不过位置在<code>/usr/share/nginx/html</code>，上面两个容器共用的卷就是<code>emptyDir: {}</code>。</p>
 <p>启动来感受一下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f fortune-pod.yaml
-<span style="color:#75715e"># 输出</span>
-pod/fortune created
-
-<span style="color:#75715e"># 查看状态</span>
-kubectl get pods
-<span style="color:#75715e"># 输出</span>
-NAME      READY   STATUS    RESTARTS   AGE
-fortune   2/2     Running   <span style="color:#ae81ff">0</span>          2m27s
-
-<span style="color:#75715e"># 暂时服务化</span>
-kubectl port-forward fortune 8080:80
-</code></pre></div><p>此时服务就处于可用状态了，在终端输入<code>curl http://localhost:8080/</code>，基本上每隔<code>10s</code>，都会返回不同的响应，如下图：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f fortune-pod.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/fortune created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看状态</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME      READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>fortune   2/2     Running   <span style="color:#ae81ff">0</span>          2m27s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 暂时服务化</span>
+</span></span><span style="display:flex;"><span>kubectl port-forward fortune 8080:80
+</span></span></code></pre></div><p>此时服务就处于可用状态了，在终端输入<code>curl http://localhost:8080/</code>，基本上每隔<code>10s</code>，都会返回不同的响应，如下图：</p>
 <p><img src="https://images-1252557999.file.myqcloud.com/uPic/image-20210305144115418.png" alt="image-20210305144115418" /></p>
 <p><code>emptyDir</code>卷是最简单的卷类型，但是其他类型的卷都是在它的基础上构建的，在创建空目录后，相应的容器会将数据写入。</p>
 <h3 id="gitrepo">
@@ -436,65 +437,65 @@ kubectl port-forward fortune 8080:80
   <a class="anchor" href="#nfs">#</a>
 </h3>
 <p>目前相关的云商都会有一套自己的持久化方式，我目前是自己搭建的<code>k8s</code>，所以我只能实践一下<code>NAS</code>方案，新建文件<code>vim mongodb-pod-nfs.yaml</code>，输入以下内容：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
-<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
-<span style="color:#f92672">metadata</span>:
-  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-nfs</span>
-<span style="color:#f92672">spec</span>:
-  <span style="color:#f92672">volumes</span>:
-  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
-    <span style="color:#f92672">nfs</span>:
-      <span style="color:#f92672">server</span>: <span style="color:#ae81ff">1.2.3.4</span>
-      <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/some/path</span>
-  <span style="color:#f92672">containers</span>:
-  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo</span>
-    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
-    <span style="color:#f92672">volumeMounts</span>:
-    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
-      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data/db</span>
-    <span style="color:#f92672">ports</span>:
-    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">27017</span>
-      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
-</code></pre></div><p>启动：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pod-nfs.yaml
-
-<span style="color:#75715e"># 查看状态</span>
-kubectl get pods
-<span style="color:#75715e"># 输出</span>
-NAME          READY   STATUS    RESTARTS   AGE
-mongodb-nfs   1/1     Running   <span style="color:#ae81ff">0</span>          3m13s
-</code></pre></div><p>我们来验证一下数据持久化是否生效，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; use test_data
-switched to db test_data
-
-<span style="color:#75715e"># 插入</span>
-&gt; db.test.insert<span style="color:#f92672">({</span><span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie&#34;</span><span style="color:#f92672">})</span>
-WriteResult<span style="color:#f92672">({</span> <span style="color:#e6db74">&#34;nInserted&#34;</span> : <span style="color:#ae81ff">1</span> <span style="color:#f92672">})</span>
-
-<span style="color:#75715e"># 查询</span>
-&gt; db.test.find<span style="color:#f92672">({})</span>
-<span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
-</code></pre></div><p>接下来重新创建<code>Pod</code>看一下数据是不是还在：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete pod mongodb-nfs
-
-<span style="color:#75715e"># 重新创建</span>
-kubectl create -f mongodb-pod-nfs.yaml
-<span style="color:#75715e"># 输出</span>
-pod/mongodb-nfs created
-
-<span style="color:#75715e"># 查看</span>
-kubectl get pods
-<span style="color:#75715e"># 输出</span>
-NAME          READY   STATUS    RESTARTS   AGE
-mongodb-nfs   1/1     Running   <span style="color:#ae81ff">0</span>          28s
-</code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; use test_data
-switched to db test_data
-
-<span style="color:#75715e"># 查询</span>
-&gt; db.test.find<span style="color:#f92672">({})</span>
-<span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
-</code></pre></div><p>虽然我们成功让多个<code>Pod</code>享用了同一份数据，但这样做法有点问题，让开发人员在配置里面写具体<code>NFS</code>地址是很不友好的事情，我们可以使用<strong>持久卷</strong>来解决此问题。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-nfs</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">server</span>: <span style="color:#ae81ff">1.2.3.4</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/some/path</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data/db</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">27017</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span></code></pre></div><p>启动：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f mongodb-pod-nfs.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看状态</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME          READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>mongodb-nfs   1/1     Running   <span style="color:#ae81ff">0</span>          3m13s
+</span></span></code></pre></div><p>我们来验证一下数据持久化是否生效，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; use test_data
+</span></span><span style="display:flex;"><span>switched to db test_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 插入</span>
+</span></span><span style="display:flex;"><span>&gt; db.test.insert<span style="color:#f92672">({</span><span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;howie&#34;</span><span style="color:#f92672">})</span>
+</span></span><span style="display:flex;"><span>WriteResult<span style="color:#f92672">({</span> <span style="color:#e6db74">&#34;nInserted&#34;</span> : <span style="color:#ae81ff">1</span> <span style="color:#f92672">})</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查询</span>
+</span></span><span style="display:flex;"><span>&gt; db.test.find<span style="color:#f92672">({})</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>接下来重新创建<code>Pod</code>看一下数据是不是还在：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl delete pod mongodb-nfs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 重新创建</span>
+</span></span><span style="display:flex;"><span>kubectl create -f mongodb-pod-nfs.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/mongodb-nfs created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看</span>
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME          READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>mongodb-nfs   1/1     Running   <span style="color:#ae81ff">0</span>          28s
+</span></span></code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb-nfs mongo</code>进入：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; use test_data
+</span></span><span style="display:flex;"><span>switched to db test_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查询</span>
+</span></span><span style="display:flex;"><span>&gt; db.test.find<span style="color:#f92672">({})</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>虽然我们成功让多个<code>Pod</code>享用了同一份数据，但这样做法有点问题，让开发人员在配置里面写具体<code>NFS</code>地址是很不友好的事情，我们可以使用<strong>持久卷</strong>来解决此问题。</p>
 <h2 id="持久卷持久卷声明">
   持久卷&amp;持久卷声明
   <a class="anchor" href="#%e6%8c%81%e4%b9%85%e5%8d%b7%e6%8c%81%e4%b9%85%e5%8d%b7%e5%a3%b0%e6%98%8e">#</a>
@@ -516,102 +517,102 @@ switched to db test_data
   <a class="anchor" href="#%e5%ae%9e%e8%b7%b5">#</a>
 </h3>
 <p>首先建立一个<code>NFS</code>类型的<code>PV</code>（一般是管理员进行创建），在终端输入<code>vim mongodb-pv-nfs.yaml</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
-<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
-<span style="color:#f92672">metadata</span>:
-  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nfs-pv</span>
-<span style="color:#f92672">spec</span>:
-  <span style="color:#f92672">capacity</span>:
-    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">10Mi</span>
-  <span style="color:#f92672">accessModes</span>:
-    - <span style="color:#ae81ff">ReadWriteMany</span>
-  <span style="color:#f92672">nfs</span>:
-    <span style="color:#f92672">server</span>: <span style="color:#ae81ff">1.2.3.4</span>
-    <span style="color:#f92672">path</span>: <span style="color:#e6db74">&#34;/&#34;</span>
-</code></pre></div><p>接下来创建持久卷：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pv-nfs.yaml
-<span style="color:#75715e"># 输出</span>
-persistentvolume/nfs created
-
-<span style="color:#75715e"># 查看</span>
-kubectl get pv
-<span style="color:#75715e"># 输出</span>
-NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
-nfs-pv   10Mi       RWX            Retain           Available                                   6s
-
-<span style="color:#75715e"># 关于删除</span>
-<span style="color:#75715e"># kubectl delete pv nfs-pv</span>
-</code></pre></div><p>可以看到状态已经生效。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nfs-pv</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">10Mi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nfs</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#ae81ff">1.2.3.4</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#e6db74">&#34;/&#34;</span>
+</span></span></code></pre></div><p>接下来创建持久卷：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f mongodb-pv-nfs.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>persistentvolume/nfs created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看</span>
+</span></span><span style="display:flex;"><span>kubectl get pv
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+</span></span><span style="display:flex;"><span>nfs-pv   10Mi       RWX            Retain           Available                                   6s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 关于删除</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># kubectl delete pv nfs-pv</span>
+</span></span></code></pre></div><p>可以看到状态已经生效。</p>
 <p>接下来就轮到使用者随意使用<code>PV</code>了，如果作为使用者，部署的<code>Pod</code>需要持久化存储，那么其需要做的就是创建<code>PVC</code>，在终端输入<code>vim mongodb-pvc-nfs.yaml</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
-<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolumeClaim</span>
-<span style="color:#f92672">metadata</span>:
-  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nfs-pvc</span>
-<span style="color:#f92672">spec</span>:
-  <span style="color:#f92672">accessModes</span>:
-    - <span style="color:#ae81ff">ReadWriteMany</span>
-  <span style="color:#f92672">resources</span>:
-    <span style="color:#f92672">requests</span>:
-      <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">10Mi</span>
-  <span style="color:#f92672">storageClassName</span>: <span style="color:#e6db74">&#34;&#34;</span>
-</code></pre></div><p>然后创建持久化声明：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create -f mongodb-pvc-nfs.yaml
-<span style="color:#75715e"># 输出</span>
-persistentvolumeclaim/nfs created
-
-<span style="color:#75715e"># 查看 pvc</span>
-kubectl get pvc
-<span style="color:#75715e"># 输出，注意状态是绑定</span>
-NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-nfs-pvc   Bound    nfs-pv   10Mi       RWX                           6s
-
-<span style="color:#75715e"># 查看 pv</span>
-kubectl get pv
-<span style="color:#75715e"># 输出，状态是绑定</span>
-NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
-nfs-pv   10Mi       RWX            Retain           Bound    default/nfs-pvc                           3m6s
-<span style="color:#75715e"># 关于删除</span>
-<span style="color:#75715e"># kubectl delete pvc nfs-pvc</span>
-</code></pre></div><p>对于<code>ACCESS MODES</code>，主要分为以下几种：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolumeClaim</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nfs-pvc</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">requests</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">10Mi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#e6db74">&#34;&#34;</span>
+</span></span></code></pre></div><p>然后创建持久化声明：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create -f mongodb-pvc-nfs.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>persistentvolumeclaim/nfs created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看 pvc</span>
+</span></span><span style="display:flex;"><span>kubectl get pvc
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出，注意状态是绑定</span>
+</span></span><span style="display:flex;"><span>NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+</span></span><span style="display:flex;"><span>nfs-pvc   Bound    nfs-pv   10Mi       RWX                           6s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看 pv</span>
+</span></span><span style="display:flex;"><span>kubectl get pv
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出，状态是绑定</span>
+</span></span><span style="display:flex;"><span>NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
+</span></span><span style="display:flex;"><span>nfs-pv   10Mi       RWX            Retain           Bound    default/nfs-pvc                           3m6s
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 关于删除</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># kubectl delete pvc nfs-pvc</span>
+</span></span></code></pre></div><p>对于<code>ACCESS MODES</code>，主要分为以下几种：</p>
 <ul>
 <li>RWO：ReadWriteOnce（仅允许单个节点挂载读写）</li>
 <li>ROX：ReadOnlyMany（允许多个节点挂载只读）</li>
 <li>RWX：ReadWriteMany（允许多个节点挂载读写这个卷）</li>
 </ul>
 <p>现在，准备工作就绪，在<code>Pod</code>中使用持久卷就是引用持久卷名称，在终端输入<code>vim mongo-pod-pvc.yaml</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
-<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
-<span style="color:#f92672">metadata</span>:
-  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
-<span style="color:#f92672">spec</span>:
-  <span style="color:#f92672">containers</span>:
-  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo</span>
-    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
-    <span style="color:#f92672">volumeMounts</span>:
-    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
-      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data/db</span>
-    <span style="color:#f92672">ports</span>:
-    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">27017</span>
-      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
-  <span style="color:#f92672">volumes</span>:
-  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
-    <span style="color:#f92672">persistentVolumeClaim</span>:
-      <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">nfs-pvc</span>
-</code></pre></div><p>创建<code>Pod</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 先删除原先创建的 mongo Pod</span>
-kubectl delete pod mongodb-nfs
-<span style="color:#75715e"># 创建引用持久卷声明的 Pod</span>
-kubectl create -f mongodb-pod-pvc.yaml
-<span style="color:#75715e"># 输出</span>
-pod/mongodb created
-</code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb mongo</code>进入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; use test_data
-switched to db test_data
-
-<span style="color:#75715e"># 查询</span>
-&gt; db.test.find<span style="color:#f92672">({})</span>
-<span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
-</code></pre></div><p>没问题，引用了之前的<code>NFS</code>下的对应目录。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data/db</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">27017</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongodb-data</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">nfs-pvc</span>
+</span></span></code></pre></div><p>创建<code>Pod</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 先删除原先创建的 mongo Pod</span>
+</span></span><span style="display:flex;"><span>kubectl delete pod mongodb-nfs
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建引用持久卷声明的 Pod</span>
+</span></span><span style="display:flex;"><span>kubectl create -f mongodb-pod-pvc.yaml
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 输出</span>
+</span></span><span style="display:flex;"><span>pod/mongodb created
+</span></span></code></pre></div><p>进入<code>Pod</code>内的<code>mongo</code>容器，输入命令<code>kubectl exec -it mongodb mongo</code>进入：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; use test_data
+</span></span><span style="display:flex;"><span>switched to db test_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查询</span>
+</span></span><span style="display:flex;"><span>&gt; db.test.find<span style="color:#f92672">({})</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span> <span style="color:#e6db74">&#34;_id&#34;</span> : ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;6041f5bc0c893dc3bb362e75&#34;</span><span style="color:#f92672">)</span>, <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;howie&#34;</span> <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>没问题，引用了之前的<code>NFS</code>下的对应目录。</p>
 <h2 id="动态卷">
   动态卷
   <a class="anchor" href="#%e5%8a%a8%e6%80%81%e5%8d%b7">#</a>
