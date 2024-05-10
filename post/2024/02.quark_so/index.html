@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <title>写了个夸克网盘免费资源搜索引擎 | 老胡的储物柜</title>
+  <meta property="og:title" content="写了个夸克网盘免费资源搜索引擎 - 老胡的储物柜" />
+  <meta property="og:type" content="article" />
+  
+  <meta
+    property="article:published_time"
+    content='2024-05-09T21:39:47&#43;08:00'
+  />
+   
+  <meta
+    property="article:modified_time"
+    content='2024-05-09T21:39:47&#43;08:00'
+  />
+  
+  <meta
+    name="Keywords"
+    content="[老胡的储物柜 元搜搜索系统 MetaSo 夸克网盘搜索]"
+  />
+  <meta
+    name="description"
+    content="quarkso 最优雅的夸克网盘搜索引擎"
+  />
+  <meta name="author" content="howie.hu" />
+  
+  <meta property="og:url" content="https://www.howie6879.com/post/2024/02.quark_so/" />
+  <link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+  />
+
+  <link rel="stylesheet" href='/css/normalize.css' />
+  <link rel="stylesheet" href='/css/style.css' />
+  <script
+    type="text/javascript"
+    src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"
+  ></script>
+
+   
+
+  
+  
+  <link rel="stylesheet" href='/css/howie.css' />
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?85fd5f2b7de56b508fc9c975e031d01b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+  <link
+    rel="stylesheet"
+    href="https://gw.alipayobjects.com/os/k/font/lxgwwenkaiscreenr.css"
+  />
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://www.howie6879.com/">
+                        老胡的储物柜
+                    </a>
+                
+                <p class="description">编程、兴趣、生活</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://www.howie6879.com/">首页</a>
+                    
+                    <a  href="https://www.howie6879.com/page/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://www.howie6879.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#介绍">介绍</a>
+      <ul>
+        <li><a href="#界面">界面</a></li>
+        <li><a href="#后台">后台</a></li>
+      </ul>
+    </li>
+    <li><a href="#元搜">元搜</a></li>
+    <li><a href="#最后">最后</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">写了个夸克网盘免费资源搜索引擎</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2024年5月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE'>项目</a></span>
+            
+        </div>
+        
+        
+        
+        <div class="post-content">
+            <blockquote>
+<p>夸克搜，免费优雅的网盘资源搜索引擎，资源来自于互联网 👉 <a href="https://www.quark.so/">https://www.quark.so/</a> ，文末可进群。</p>
+</blockquote>
+<p>
+        <img class="mx-auto" alt="quarkso_home" src="https://images-1252557999.file.myqcloud.com/uPic/UEhVvU.png" />   
+    </p>
+<h2 id="介绍">介绍</h2>
+<p>为了方便我老婆做网盘分佣项目创业，业余和朋友整了个网盘搜索引擎方便她操作，接下来简单介绍下这套系统的功能。</p>
+<h3 id="界面">界面</h3>
+<p>首页大家在前面已经看到了，进来直接在输入框搜索功能就行，比如搜索三体网飞版本：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_search" src="https://images-1252557999.file.myqcloud.com/uPic/10SIk7.png" />   
+    </p>
+<p>点进去是详情页，转存即可观看，挺方便：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_d" src="https://images-1252557999.file.myqcloud.com/uPic/UOezWC.png" />   
+    </p>
+<p>想看热门榜单？访问：https://www.quark.so/res/hot/all</p>
+<p>
+        <img class="mx-auto" alt="quarkso_hot" src="https://images-1252557999.file.myqcloud.com/uPic/WaCdJr.png" />   
+    </p>
+<p>各个分类都是后台自定义的，也可以看最新的：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_res" src="https://images-1252557999.file.myqcloud.com/uPic/2YjaVY.png" />   
+    </p>
+<p>功能挺简单，核心就是搜索，当然还有机器人：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_robot" src="https://images-1252557999.file.myqcloud.com/uPic/0y7CSm.png" />   
+    </p>
+<p>欢迎大家进群玩玩，如果二维码过期，加我微信（Howie6879）拉你进群：</p>
+<p>
+        <img class="mx-auto" alt="wechat" src="https://images-1252557999.file.myqcloud.com/uPic/83HkJ5.png" />   
+    </p>
+<h3 id="后台">后台</h3>
+<p>为了方便管理，自然需要有个后台可以让她管理资源：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_admin" src="https://images-1252557999.file.myqcloud.com/uPic/fzeqUz.png" />   
+    </p>
+<p>同时配置有效率插件快速上传分享资源：</p>
+<p>
+        <img class="mx-auto" alt="quarkso_plugin" src="https://images-1252557999.file.myqcloud.com/uPic/p2yPjc.png" />   
+    </p>
+<p>网站信息和广告自然也要能配置：</p>
+<p>
+        <img class="mx-auto" alt="admin_ads" src="https://images-1252557999.file.myqcloud.com/uPic/DJQu1S.png" />   
+    </p>
+<h2 id="元搜">元搜</h2>
+<p>夸克搜就是基于元搜搭建的一个网站，<a href="https://metaso.site/">元搜</a>是老胡业余整的一个项目，我老婆目前就是针对这块在创业，核心目的如下：</p>
+<blockquote>
+<p><strong>一站式构建个性化资源搜索网站，围绕网盘、网站、商品分佣等商业模式打造你的搜索引擎&amp;APP，更有丰富的插件生态帮你提升效率！</strong></p>
+</blockquote>
+<p>老胡简单介绍下这套系统，后面有较大盈利时候，老胡会单独做个分享，让有兴趣的朋友一起飞，前面文章提到，我老婆在整网盘分佣这块的项目，这个项目玩法很简单，如下：</p>
+<ul>
+<li>收集&amp;分享资源</li>
+<li>从公域&amp;私域引流</li>
+<li>好一点的在群里引入机器人做自动化</li>
+<li>用户找资源转存分享拉新赚钱</li>
+</ul>
+<p>这是玩法的简单介绍，流程很简单，她目前每周差不多四五百收入，花的时间是中午和晚上一小时，钱不多，但是做得好的人收入也很牛，有两周一万多的。</p>
+<p>老胡从技术角度介入玩了一波，觉得是大有可为的，就是这个流程完全可以系统化，做了以下工作：</p>
+<ul>
+<li>将网盘批量转存分享脚本化，自我感觉比目前流传的软件更稳定更方便</li>
+<li>提供微信机器人，不多说，标配</li>
+<li>提供 APP，方便使用转化</li>
+<li>提供资源管理后台，方便管理资源</li>
+<li>将之前零散的分享聚合起来弄成搜索引擎，让大家做网盘分佣的同时有一个网站，接收搜索引擎的自然搜索流量，沉淀用户，引流私域，构建自己的网络用户池，也可以多一层广告收入</li>
+<li>公域引流到私域容易断层，效果不好，但是在公域和私域之间加一层网站，会多不少用户（已经过实际验证）</li>
+<li>系统角度聚合各种引流方法，大家共享，比如有的人发现了一个引流玩法，赚钱了，可以内部分享（收费），也是一种新的赚钱方法，同时大家共赢</li>
+<li>有专业的玩法老师在系统里面指导</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="metaso" src="https://images-1252557999.file.myqcloud.com/uPic/RiB3mp.png" />   
+    
+目前已经内测差不多两个月，下周应该会正式推出，主要负责人将会是我老婆哈哈，大家有兴趣可以咨询了解。</p>
+<h2 id="最后">最后</h2>
+<p>欢迎大家进群玩玩，如果二维码过期，加元搜官方微信（metaso88）拉你进群：</p>
+<p>
+        <img class="mx-auto" alt="wechat" src="https://images-1252557999.file.myqcloud.com/uPic/83HkJ5.png" />   
+    </p>
+<p>如果你或者周围有朋友对元搜系统感兴趣，想业余赚点小钱，也欢迎联系，算是对老胡老婆创业的支持（推荐给佣金了～），目前元搜内测将近两个月，上个月初正式让内测用户使用，目前五十位左右元搜会员，两位合作导师，持续推进中，欢迎大家提意见。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author"
+                href="https://www.howie6879.com/">howie.hu</a>
+        </li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://www.howie6879.com/post/2024/02.quark_so/">https://www.howie6879.com/post/2024/02.quark_so/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license"
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+
+<div align=center><img width="50%" src="https://images-1252557999.file.myqcloud.com/uPic/ETIbMe.jpg" /></div>
+<br />
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2024/01.metaso_practrice/">MetaSo 元搜搜索系统实践指南</a></li>
+        
+        <li><a href="/post/2023/07.weekly_qa/">老胡的信息周刊QA微信机器人(基于ChatGPT)</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/metaso'>MetaSo</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    <footer>
+      <div id="gitalk-container"></div>
+      <link rel="stylesheet" href="/css/gitalk.css?v=0.0.0">
+      <script src="/js/gitalk.min.js?v=0.0.0"></script>
+      <script>
+          var gitalk = new Gitalk({
+              clientID: '2c38ed8e7f85da0f1510',
+              clientSecret: '1984f14456cb1a999dde013ec6a3e6123a92d59a',
+              repo: 'howie6879.github.io',
+              owner: 'howie6879',
+              admin: ['howie6879'],
+              id: location.pathname.substr(0, 48), 
+              distractionFreeMode: false 
+          })
+  
+          gitalk.render('gitalk-container')
+      </script>
+  </footer>
+
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2024 <a href="https://www.howie6879.com/">老胡的储物柜 By howie.hu</a>
+        
+    </div>
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://www.howie6879.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://www.howie6879.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="">❤️ 我的专栏</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://weekly.howie6879.com/" title="👀 我的周刊" target="_blank" style="">
+                
+                    👀 我的周刊
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.com/k8s/" title="🕸 k8s学习之路" target="_blank" style="">
+                
+                    🕸 k8s学习之路
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.com/ml_book/" title="🤖 机器学习文集" target="_blank" style="">
+                
+                    🤖 机器学习文集
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.howie6879.com/sanic_book/" title="👾 Sanic-For-Pythoneer" target="_blank" style="">
+                
+                    👾 Sanic-For-Pythoneer
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+    
+    <section class="widget">
+        <h3 class="widget-title">✍️ 最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2024/02.quark_so/" title="写了个夸克网盘免费资源搜索引擎">写了个夸克网盘免费资源搜索引擎</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2024/01.metaso_practrice/" title="MetaSo 元搜搜索系统实践指南">MetaSo 元搜搜索系统实践指南</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/07.weekly_qa/" title="老胡的信息周刊QA微信机器人(基于ChatGPT)">老胡的信息周刊QA微信机器人(基于ChatGPT)</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/06_use_chatgpt_base_on_azure_openai/" title="基于 Azure OpenAI 免费注册使用 ChatGPT 教程">基于 Azure OpenAI 免费注册使用 ChatGPT 教程</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/05_deploy_web_llm/" title="Web LLM👉让你在浏览器中体验基于 LLM 的聊天机器人">Web LLM👉让你在浏览器中体验基于 LLM 的聊天机器人</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/04_chatgpt_month_rank/" title="ChatGPT 开源应用月度排名">ChatGPT 开源应用月度排名</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/03_chatgpt_register_login_tutorial/" title="ChatGPT 从注册到自建应用">ChatGPT 从注册到自建应用</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/02_zlibrary_stable_access_guide/" title="Z-library 稳定访问指南">Z-library 稳定访问指南</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2023/01_my_awesome_mac_soft/" title="我的macOS常用软件清单">我的macOS常用软件清单</a>
+    </li>
+    
+    <li>
+        <a href="https://www.howie6879.com/post/2022/09.weekly_today/" title="周刊的今日推荐功能上线">周刊的今日推荐功能上线</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>👏 分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://www.howie6879.com/categories/chatgpt/">ChatGPT (4)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/cs/">CS (1)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/linux/">Linux (3)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/mldl/">ML&amp;DL (14)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/python/">Python (38)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生 (7)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/%E5%B7%A5%E5%85%B7/">工具 (23)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/%E6%95%99%E7%A8%8B/">教程 (30)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/%E9%9A%8F%E7%AC%94/">随笔 (6)</a></li>
+    
+    <li><a href="https://www.howie6879.com/categories/%E9%A1%B9%E7%9B%AE/">项目 (15)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>😼 标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://www.howie6879.com/tags/centos/">CentOS</a>
+    
+    <a href="https://www.howie6879.com/tags/chatgpt/">ChatGPT</a>
+    
+    <a href="https://www.howie6879.com/tags/docker/">Docker</a>
+    
+    <a href="https://www.howie6879.com/tags/google/">Google</a>
+    
+    <a href="https://www.howie6879.com/tags/jupyterlab/">jupyterlab</a>
+    
+    <a href="https://www.howie6879.com/tags/k8s%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">k8s学习之路</a>
+    
+    <a href="https://www.howie6879.com/tags/liuli/">Liuli</a>
+    
+    <a href="https://www.howie6879.com/tags/mac/">mac</a>
+    
+    <a href="https://www.howie6879.com/tags/markdwon/">markdwon</a>
+    
+    <a href="https://www.howie6879.com/tags/metaso/">MetaSo</a>
+    
+    <a href="https://www.howie6879.com/tags/mlhub123/">mlhub123</a>
+    
+    <a href="https://www.howie6879.com/tags/mysql/">MySQL</a>
+    
+    <a href="https://www.howie6879.com/tags/nndl-book/">nndl-book</a>
+    
+    <a href="https://www.howie6879.com/tags/rpc/">rpc</a>
+    
+    <a href="https://www.howie6879.com/tags/ruia/">Ruia</a>
+    
+    <a href="https://www.howie6879.com/tags/sanic/">Sanic</a>
+    
+    <a href="https://www.howie6879.com/tags/spider/">Spider</a>
+    
+    <a href="https://www.howie6879.com/tags/vscode/">vscode</a>
+    
+    <a href="https://www.howie6879.com/tags/weekly/">weekly</a>
+    
+    <a href="https://www.howie6879.com/tags/%E6%80%9D%E8%80%83/">思考</a>
+    
+    <a href="https://www.howie6879.com/tags/%E6%95%88%E7%8E%87/">效率</a>
+    
+    <a href="https://www.howie6879.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://www.howie6879.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://www.howie6879.com/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">神经网络与深度学习</a>
+    
+    <a href="https://www.howie6879.com/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+    
+    <a href="https://www.howie6879.com/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://www.howie6879.com/tags/%E7%BF%BB%E8%AF%91/">翻译</a>
+    
+    <a href="https://www.howie6879.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    
+    <a href="https://www.howie6879.com/tags/%E8%AF%BB%E8%AE%BA%E6%96%87/">读论文</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">🔗 友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://elfgzp.cn/" title="elfgzp">elfgzp</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://ruterly.com/" title="Ruter">Ruter</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://shidenggui.com/" title="shidenggui">shidenggui</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blognas.hwb0307.com/" title="Bensz">Bensz</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">👀 订阅</h3>
+        <ul class="widget-list">
+            <li><a href="https://www.howie6879.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
